@@ -1,0 +1,107 @@
+{
+  "plugin_id": 0,
+  "name": "FastBlog Cloud Backup",
+  "slug": "cloud-backup",
+  "version": "2.0.0",
+  "description": "增强版云备份服务 - 支持增量备份、文件备份、多策略调度和智能验证",
+  "author": "FastBlog Team",
+  "category": "cloud",
+  "tags": [
+    "backup",
+    "cloud",
+    "incremental",
+    "scheduling"
+  ],
+  "min_version": "1.0.0",
+  "dependencies": [],
+  "settings_schema": {
+    "database_backup": {
+      "title": "数据库备份设置",
+      "fields": [
+        "db_backup_enabled",
+        "db_backup_format",
+        "db_compression",
+        "db_encryption"
+      ]
+    },
+    "file_backup": {
+      "title": "文件备份设置",
+      "fields": [
+        "file_backup_enabled",
+        "file_backup_targets",
+        "file_compression",
+        "exclude_patterns"
+      ]
+    },
+    "policies": {
+      "title": "备份策略",
+      "fields": [
+        "policies.daily",
+        "policies.weekly",
+        "policies.monthly"
+      ]
+    },
+    "cloud_storage": {
+      "title": "云存储配置",
+      "fields": [
+        "cloud_storage.enabled",
+        "cloud_storage.primary_provider",
+        "cloud_storage.providers"
+      ]
+    },
+    "verification": {
+      "title": "验证设置",
+      "fields": [
+        "auto_verify",
+        "verify_after_backup",
+        "test_restore_periodically"
+      ]
+    },
+    "notifications": {
+      "title": "通知设置",
+      "fields": [
+        "notifications.on_success",
+        "notifications.on_failure",
+        "notifications.channels",
+        "notifications.webhook_url"
+      ]
+    }
+  },
+  "features": [
+    "增量备份支持 (基于 WAL/CDC)",
+    "文件和资源备份 (媒体/主题/插件)",
+    "多策略调度 (每日/每周/每月)",
+    "备份验证和完整性检查",
+    "多云存储支持 (S3/OSS/COS)",
+    "跨地域备份复制",
+    "Webhook 通知",
+    "自动清理过期备份"
+  ],
+  "api_endpoints": [
+    {
+      "path": "/api/v2/cloud/backup/create",
+      "method": "POST",
+      "description": "创建备份"
+    },
+    {
+      "path": "/api/v2/cloud/backup/list",
+      "method": "GET",
+      "description": "列出备份"
+    },
+    {
+      "path": "/api/v2/cloud/backup/{id}/restore",
+      "method": "POST",
+      "description": "恢复备份"
+    },
+    {
+      "path": "/api/v2/cloud/backup/{id}/verify",
+      "method": "POST",
+      "description": "验证备份"
+    },
+    {
+      "path": "/api/v2/cloud/backup/policy",
+      "method": "PUT",
+      "description": "更新备份策略"
+    }
+  ]
+}

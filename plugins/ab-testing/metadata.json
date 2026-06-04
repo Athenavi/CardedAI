@@ -1,0 +1,13 @@
+{
+  "name": "A/B Testing",
+  "slug": "ab-testing",
+  "version": "1.0.0",
+  "description": "A/B 测试插件，支持页面元素、标题、按钮等多维度测试",
+  "author": "FastBlog Team",
+  "category": "marketing",
+  "tags": ["ab-test", "optimization", "conversion"],
+  "requires": ">=0.0.2.0",
+  "tested_up_to": "0.0.2.0",
+  "icon": "🧪",
+  "price": "free"
+}

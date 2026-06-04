@@ -1,0 +1,13 @@
+{
+  "name": "User Follow System",
+  "slug": "user-follow",
+  "version": "1.0.0",
+  "description": "用户关注系统，支持关注/取消关注、关注者列表、动态时间线",
+  "author": "FastBlog Team",
+  "category": "social",
+  "tags": ["follow", "social", "users"],
+  "requires": ">=0.0.2.0",
+  "tested_up_to": "0.0.2.0",
+  "icon": "👥",
+  "price": "free"
+}

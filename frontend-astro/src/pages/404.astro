@@ -1,0 +1,755 @@
+---
+// 404 页面 — 沉浸式设计，带动画效果和有用导航
+import Layout from '@/layouts/Layout.astro';
+
+const suggestions = [
+    {icon: '🏠', title: '返回首页', desc: '探索最新内容', href: '/'},
+    {icon: '📝', title: '浏览文章', desc: '发现精彩内容', href: '/articles'},
+    {icon: '📂', title: '文章分类', desc: '按主题浏览', href: '/categories'},
+    {icon: 'ℹ️', title: '关于我们', desc: '了解 FastBlog', href: '/about'},
+];
+---
+
+<Layout title="404 - 页面走丢了 | FastBlog" description="您访问的页面不存在">
+    <div class="error-page">
+        <!-- Animated Background -->
+        <div class="bg-animation">
+            <div class="stars">
+                {Array.from({length: 50}).map((_, i) => (
+                        <div class="star"
+                             style={`--delay: ${Math.random() * 3}s; --x: ${Math.random() * 100}%; --y: ${Math.random() * 100}%; --size: ${Math.random() * 3 + 1}px;`}/>
+                ))}
+            </div>
+            <div class="floating-shapes">
+                <div class="shape shape-1"/>
+                <div class="shape shape-2"/>
+                <div class="shape shape-3"/>
+                <div class="shape shape-4"/>
+                <div class="shape shape-5"/>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-wrapper">
+            <!-- Glitch 404 Text -->
+            <div class="glitch-container">
+                <h1 class="glitch-text" data-text="404">404</h1>
+                <div class="glitch-subtitle">PAGE NOT FOUND</div>
+            </div>
+
+            <!-- Astronaut Illustration -->
+            <div class="astronaut-container">
+                <svg class="astronaut" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Helmet -->
+                    <circle cx="100" cy="70" r="40" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+                    <circle cx="100" cy="70" r="30" fill="#1e293b" opacity="0.8"/>
+                    <!-- Visor reflection -->
+                    <ellipse cx="90" cy="63" rx="8" ry="12" fill="#3b82f6" opacity="0.3"/>
+                    <!-- Body -->
+                    <rect x="70" y="105" width="60" height="50" rx="10" fill="#e2e8f0" stroke="#94a3b8"
+                          stroke-width="2"/>
+                    <!-- Backpack -->
+                    <rect x="125" y="108" width="15" height="40" rx="4" fill="#94a3b8"/>
+                    <!-- Left arm -->
+                    <path d="M70 115 L45 135" stroke="#e2e8f0" stroke-width="12" stroke-linecap="round"/>
+                    <circle cx="42" cy="138" r="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+                    <!-- Right arm waving -->
+                    <path d="M130 115 L155 95" stroke="#e2e8f0" stroke-width="12" stroke-linecap="round"/>
+                    <circle cx="158" cy="92" r="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+                    <!-- Left leg -->
+                    <path d="M85 155 L80 175" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
+                    <rect x="72" y="175" width="16" height="10" rx="3" fill="#94a3b8"/>
+                    <!-- Right leg -->
+                    <path d="M115 155 L120 175" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
+                    <rect x="112" y="175" width="16" height="10" rx="3" fill="#94a3b8"/>
+                    <!-- Antenna -->
+                    <line x1="100" y1="30" x2="100" y2="15" stroke="#94a3b8" stroke-width="2"/>
+                    <circle cx="100" cy="12" r="4" fill="#f59e0b"/>
+                    <!-- Eyes -->
+                    <circle cx="90" cy="68" r="3" fill="#3b82f6"/>
+                    <circle cx="110" cy="68" r="3" fill="#3b82f6"/>
+                    <!-- Smile -->
+                    <path d="M93 78 Q100 84 107 78" stroke="#3b82f6" stroke-width="2" fill="none"
+                          stroke-linecap="round"/>
+                    <!-- Oxygen tube -->
+                    <path d="M125 108 Q140 105 140 90" stroke="#94a3b8" stroke-width="3" fill="none"
+                          stroke-linecap="round"/>
+                </svg>
+            </div>
+
+            <!-- Message Card -->
+            <div class="message-card glass">
+                <h2 class="card-title">哎呀！页面走丢了 🚀</h2>
+                <p class="card-description">
+                    看起来这个页面已经飞向太空了。<br/>
+                    也许是链接过期，或者页面被移动到了其他地方。
+                </p>
+
+                <!-- Search Box -->
+                <div class="search-box">
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                  d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        <input
+                                type="text"
+                                id="search-404"
+                                placeholder="搜索文章..."
+                                class="search-input"
+                        />
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="actions">
+                    <button onclick="window.history.back()" class="btn-action btn-back">
+                        <svg viewBox="0 0 20 20" fill="currentColor" class="btn-icon">
+                            <path fill-rule="evenodd"
+                                  d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        返回上一页
+                    </button>
+                    <a href="/" class="btn-action btn-home">
+                        <svg viewBox="0 0 20 20" fill="currentColor" class="btn-icon">
+                            <path fill-rule="evenodd"
+                                  d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z"
+                                  clip-rule="evenodd"/>
+                        </svg>
+                        回到首页
+                    </a>
+                </div>
+            </div>
+
+            <!-- Suggestion Cards -->
+            <div class="suggestions-section">
+                <p class="suggestions-label">你可能在找</p>
+                <div class="suggestions-grid">
+                    {suggestions.map((item, i) => (
+                            <a href={item.href} class="suggestion-card glass" style={`--delay: ${i * 0.1}s`}>
+                                <span class="suggestion-icon">{item.icon}</span>
+                                <div class="suggestion-info">
+                                    <span class="suggestion-title">{item.title}</span>
+                                    <span class="suggestion-desc">{item.desc}</span>
+                                </div>
+                                <svg class="suggestion-arrow" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                          d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z"
+                                          clip-rule="evenodd"/>
+                                </svg>
+                            </a>
+                    ))}
+                </div>
+            </div>
+
+            <!-- Fun Stats -->
+            <div class="fun-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="stat-counter">0</span>
+                    <span class="stat-label">位用户也迷路过</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .error-page {
+            position: relative;
+            min-height: calc(100vh - 4rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            overflow: hidden;
+        }
+
+        /* Background Animation */
+        .bg-animation {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .stars {
+            position: absolute;
+            inset: 0;
+        }
+
+        .star {
+            position: absolute;
+            left: var(--x);
+            top: var(--y);
+            width: var(--size);
+            height: var(--size);
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite var(--delay);
+        }
+
+        :global(.dark) .star {
+            opacity: 0.8;
+        }
+
+        :global(html:not(.dark)) .star {
+            background: #94a3b8;
+            opacity: 0.3;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.5);
+            }
+        }
+
+        .floating-shapes .shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+        }
+
+        :global(.dark) .shape {
+            opacity: 0.08;
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            top: -100px;
+            right: -100px;
+            animation: float-shape 20s ease-in-out infinite;
+        }
+
+        .shape-2 {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            bottom: -50px;
+            left: -50px;
+            animation: float-shape 15s ease-in-out infinite reverse;
+        }
+
+        .shape-3 {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, #10b981, #06b6d4);
+            top: 50%;
+            left: 10%;
+            animation: float-shape 18s ease-in-out infinite 2s;
+        }
+
+        .shape-4 {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #ec4899, #f43f5e);
+            top: 30%;
+            right: 15%;
+            animation: float-shape 12s ease-in-out infinite 1s;
+        }
+
+        .shape-5 {
+            width: 180px;
+            height: 180px;
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            bottom: 20%;
+            right: 5%;
+            animation: float-shape 22s ease-in-out infinite 3s;
+        }
+
+        @keyframes float-shape {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(30px, -30px) rotate(5deg);
+            }
+            50% {
+                transform: translate(-20px, 20px) rotate(-3deg);
+            }
+            75% {
+                transform: translate(15px, -15px) rotate(2deg);
+            }
+        }
+
+        /* Content */
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 640px;
+            width: 100%;
+        }
+
+        /* Glitch Effect */
+        .glitch-container {
+            text-align: center;
+            margin-bottom: -1rem;
+        }
+
+        .glitch-text {
+            font-size: clamp(6rem, 15vw, 10rem);
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            animation: glitch-main 3s infinite;
+        }
+
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .glitch-text::before {
+            animation: glitch-1 2s infinite linear alternate-reverse;
+            clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+        }
+
+        .glitch-text::after {
+            animation: glitch-2 2s infinite linear alternate-reverse;
+            clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+        }
+
+        @keyframes glitch-main {
+            0%, 95%, 100% {
+                transform: none;
+            }
+            96% {
+                transform: translate(-2px, 2px);
+            }
+            97% {
+                transform: translate(2px, -2px);
+            }
+            98% {
+                transform: translate(-1px, -1px);
+            }
+        }
+
+        @keyframes glitch-1 {
+            0%, 90%, 100% {
+                transform: translate(0);
+            }
+            92% {
+                transform: translate(4px, -2px);
+            }
+            94% {
+                transform: translate(-4px, 2px);
+            }
+            96% {
+                transform: translate(2px, 0);
+            }
+        }
+
+        @keyframes glitch-2 {
+            0%, 88%, 100% {
+                transform: translate(0);
+            }
+            90% {
+                transform: translate(-4px, 2px);
+            }
+            92% {
+                transform: translate(4px, -2px);
+            }
+            94% {
+                transform: translate(-2px, 0);
+            }
+        }
+
+        .glitch-subtitle {
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.5em;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+            animation: fade-in 1s ease-out;
+        }
+
+        /* Astronaut */
+        .astronaut-container {
+            width: 140px;
+            height: 140px;
+            margin: -1rem 0 1.5rem;
+            animation: astronaut-float 6s ease-in-out infinite;
+        }
+
+        .astronaut {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.15));
+        }
+
+        @keyframes astronaut-float {
+            0%, 100% {
+                transform: translateY(0) rotate(-3deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(3deg);
+            }
+        }
+
+        /* Message Card */
+        .message-card {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            margin-bottom: 2rem;
+            width: 100%;
+            animation: slide-up 0.6s ease-out;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        :global(.dark) .glass {
+            background: rgba(17, 24, 39, 0.8);
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        :global(.dark) .card-title {
+            color: #f1f5f9;
+        }
+
+        .card-description {
+            font-size: 0.938rem;
+            color: #64748b;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        :global(.dark) .card-description {
+            color: #94a3b8;
+        }
+
+        /* Search */
+        .search-box {
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.25rem;
+            height: 1.25rem;
+            color: #94a3b8;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border-radius: 1rem;
+            border: 2px solid #e2e8f0;
+            background: white;
+            font-size: 0.938rem;
+            color: #1e293b;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+
+        .search-input::placeholder {
+            color: #94a3b8;
+        }
+
+        :global(.dark) .search-input {
+            background: #1e293b;
+            border-color: #334155;
+            color: #f1f5f9;
+        }
+
+        :global(.dark) .search-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+
+        :global(.dark) .search-input::placeholder {
+            color: #64748b;
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.875rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-icon {
+            width: 1.125rem;
+            height: 1.125rem;
+        }
+
+        .btn-back {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-back:hover {
+            background: #e2e8f0;
+            transform: translateX(-2px);
+        }
+
+        :global(.dark) .btn-back {
+            background: #1e293b;
+            color: #94a3b8;
+        }
+
+        :global(.dark) .btn-back:hover {
+            background: #334155;
+        }
+
+        .btn-home {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: white;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Suggestions */
+        .suggestions-section {
+            width: 100%;
+            animation: slide-up 0.6s ease-out 0.2s backwards;
+        }
+
+        .suggestions-label {
+            font-size: 0.813rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        @media (max-width: 480px) {
+            .suggestions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .suggestion-card {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border-radius: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            animation: slide-up 0.5s ease-out var(--delay) backwards;
+        }
+
+        .suggestion-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+        }
+
+        .suggestion-icon {
+            font-size: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #eff6ff, #eef2ff);
+            border-radius: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        :global(.dark) .suggestion-icon {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.15));
+        }
+
+        .suggestion-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .suggestion-title {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        :global(.dark) .suggestion-title {
+            color: #f1f5f9;
+        }
+
+        .suggestion-desc {
+            display: block;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.125rem;
+        }
+
+        :global(.dark) .suggestion-desc {
+            color: #94a3b8;
+        }
+
+        .suggestion-arrow {
+            width: 1.125rem;
+            height: 1.125rem;
+            color: #94a3b8;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .suggestion-card:hover .suggestion-arrow {
+            transform: translateX(3px);
+            color: #3b82f6;
+        }
+
+        /* Fun Stats */
+        .fun-stats {
+            margin-top: 2rem;
+            animation: fade-in 1s ease-out 0.6s backwards;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 2rem;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+        }
+
+        :global(.dark) .stat-item {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .stat-number {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 0.813rem;
+            color: #64748b;
+        }
+
+        :global(.dark) .stat-label {
+            color: #94a3b8;
+        }
+
+        /* Animations */
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fade-in {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <script is:inline>
+        // Search functionality
+        document.getElementById('search-404')?.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && this.value.trim()) {
+                window.location.href = '/articles?search=' + encodeURIComponent(this.value.trim());
+            }
+        });
+
+        // Animated counter
+        (function () {
+            const el = document.getElementById('stat-counter');
+            if (!el) return;
+            const target = Math.floor(Math.random() * 500) + 1000;
+            let current = 0;
+            const step = target / 60;
+            const interval = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(interval);
+                }
+                el.textContent = Math.floor(current).toLocaleString();
+            }, 16);
+        })();
+    </script>
+</Layout>

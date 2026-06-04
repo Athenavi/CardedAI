@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output (rebuilt in Docker)
+dist/
+
+# Testing
+coverage/
+e2e/
+test-results/
+playwright-report/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Environment files (sensitive - use docker env instead)
+.env
+.env.*
+!.env.example
+
+# Docker files (no need inside build context)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+*.md
+LICENSE
+
+# Build artifacts
+.astro/
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# Lock files alternative (keep package-lock.json)
+yarn.lock
+pnpm-lock.yaml
+
+# Development/testing config only
+playwright.config.ts
+vitest.config.ts

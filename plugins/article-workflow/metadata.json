@@ -1,0 +1,55 @@
+{
+  "id": 4,
+  "name": "文章审批工作流",
+  "slug": "article-workflow",
+  "version": "1.0.0",
+  "description": "完整的文章审批流程管理系统，支持多级审批、角色权限、版本对比和批注功能，适合团队协作",
+  "author": "FastBlog Team",
+  "author_url": "https://athenavi.github.io",
+  "plugin_url": "https://athenavi.github.io/plugins/article-workflow",
+  "icon": "✅",
+  "category": "utility",
+  "rating": 4.5,
+  "installs": 7654,
+  "requires": {
+    "fastblog": ">=0.0.3.6",
+    "python": ">=3.14.4"
+  },
+  "dependencies": [],
+  "settings_schema": {
+    "enable_workflow": {
+      "type": "boolean",
+      "label": "启用审批流程",
+      "default": true
+    },
+    "approval_levels": {
+      "type": "number",
+      "label": "审批层级数",
+      "default": 2,
+      "min": 1,
+      "max": 5,
+      "help": "设置需要几级审批才能发布"
+    },
+    "auto_approve_editors": {
+      "type": "boolean",
+      "label": "编辑自动通过",
+      "default": false,
+      "help": "编辑角色的提交自动通过审批"
+    },
+    "notify_on_submission": {
+      "type": "boolean",
+      "label": "提交时通知审批人",
+      "default": true
+    },
+    "notify_on_approval": {
+      "type": "boolean",
+      "label": "审批通过时通知作者",
+      "default": true
+    }
+  },
+  "changelog": "初始版本发布",
+  "download_url": "https://athenavi.github.io/plugins/downloads/article-workflow-1.0.0.zip",
+  "screenshots": [
+    "https://athenavi.github.io/plugins/screenshots/article-workflow-1.png"
+  ]
+}

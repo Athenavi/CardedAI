@@ -1,0 +1,158 @@
+/**
+ * RTL (Right-to-Left) 支持样式
+ */
+
+/* RTL 基础样式 */
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.ltr {
+    direction: ltr;
+    text-align: left;
+}
+
+/* RTL 感知的位置工具类 */
+.rtl .rtl-left-auto {
+    left: auto;
+    right: 0;
+}
+
+.rtl .rtl-right-auto {
+    right: auto;
+    left: 0;
+}
+
+/* RTL 感知的边距 */
+.rtl .rtl-ml-auto {
+  margin-left: 0;
+    margin-right: auto;
+}
+
+.rtl .rtl-mr-auto {
+    margin-right: 0;
+    margin-left: auto;
+}
+
+/* RTL 感知的浮动 */
+.rtl .rtl-float-left {
+    float: right;
+}
+
+.rtl .rtl-float-right {
+    float: left;
+}
+
+/* RTL 感知的文本对齐 */
+.rtl .rtl-text-left {
+    text-align: right;
+}
+
+.rtl .rtl-text-right {
+    text-align: left;
+}
+
+/* RTL 感知的边框半径 */
+.rtl .rtl-rounded-tl {
+    border-top-left-radius: 0;
+    border-top-right-radius: inherit;
+}
+
+.rtl .rtl-rounded-tr {
+    border-top-right-radius: 0;
+    border-top-left-radius: inherit;
+}
+
+.rtl .rtl-rounded-bl {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: inherit;
+}
+
+.rtl .rtl-rounded-br {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: inherit;
+}
+
+/* RTL 感知的动画 */
+@keyframes slide-in-rtl {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slide-out-rtl {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+.rtl .rtl-slide-in {
+    animation: slide-in-rtl 0.3s ease-out;
+}
+
+.rtl .rtl-slide-out {
+    animation: slide-out-rtl 0.3s ease-out;
+}
+
+/* RTL 感知的表格 */
+.rtl table {
+    direction: rtl;
+}
+
+.rtl th:first-child,
+.rtl td:first-child {
+    border-right: none;
+    border-left: inherit;
+}
+
+.rtl th:last-child,
+.rtl td:last-child {
+    border-left: none;
+    border-right: inherit;
+}
+
+/* RTL 感知的列表 */
+.rtl ul,
+.rtl ol {
+    padding-right: 1.5rem;
+    padding-left: 0;
+}
+
+/* RTL 感知的引用 */
+.rtl blockquote {
+    border-right: 4px solid var(--border);
+  border-left: none;
+  padding-right: 1rem;
+  padding-left: 0;
+}
+
+/* RTL 感知的图标旋转 */
+.rtl .rtl-icon-flip {
+    transform: scaleX(-1);
+}
+
+/* RTL 感知的 Flexbox */
+.rtl .flex-row-reverse-rtl {
+    flex-direction: row;
+}
+
+.rtl .flex-row-rtl {
+    flex-direction: row-reverse;
+}
+
+/* RTL 感知的代码块（代码保持 LTR） */
+.rtl pre {
+    direction: ltr;
+    text-align: left;
+}
+
+.rtl code {
+    direction: ltr;
+}

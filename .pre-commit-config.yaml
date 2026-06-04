@@ -1,0 +1,123 @@
+# FastBlog Pre-commit Hooks Configuration
+# Install: pip install pre-commit && pre-commit install
+# Run all: pre-commit run --all-files
+# Update:  pre-commit autoupdate
+
+repos:
+  # ── General file checks ──
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [ --markdown-linebreak-ext=md ]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [ --unsafe ]  # Allow custom YAML tags
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [ --maxkb=1000 ]
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: [ --fix=lf ]
+
+  # ── EditorConfig consistency ──
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: "3.0.3"
+    hooks:
+      - id: editorconfig-checker
+        alias: ec
+
+  # ── Python: Ruff (linting + formatting) ──
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.10
+    hooks:
+      - id: ruff
+        args: [ --fix, --exit-non-zero-on-fix ]
+        files: ^(src|shared|scripts|tests|plugins)/
+      - id: ruff-format
+        files: ^(src|shared|scripts|tests|plugins)/
+
+  # ── Python: mypy type checking ──
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.15.0
+    hooks:
+      - id: mypy
+        files: ^src/
+        args: [ --ignore-missing-imports, --no-error-summary ]
+        additional_dependencies: [ types-requests, types-redis ]
+        pass_filenames: false
+        entry: mypy src/
+        language: system
+
+  # ── Frontend: ESLint ──
+  - repo: local
+    hooks:
+      - id: eslint
+        name: ESLint (frontend)
+        entry: npx eslint --fix --max-warnings=0
+        language: system
+        files: \.(ts|tsx|js|jsx|astro)$
+        types: [ file ]
+        working_directory: frontend-astro
+        pass_filenames: true
+
+  # ── Frontend: Prettier ──
+  - repo: local
+    hooks:
+      - id: prettier
+        name: Prettier (frontend)
+        entry: npx prettier --write --ignore-unknown
+        language: system
+        files: \.(ts|tsx|js|jsx|json|css|html|astro|md)$
+        types: [ file ]
+        working_directory: frontend-astro
+        pass_filenames: true
+        exclude: (node_modules|dist|\.astro|package-lock\.json)
+
+  # ── Frontend: TypeScript type check ──
+  - repo: local
+    hooks:
+      - id: tsc
+        name: TypeScript Check (frontend)
+        entry: npx astro check
+        language: system
+        files: \.(ts|tsx)$
+        types: [ file ]
+        working_directory: frontend-astro
+        pass_filenames: false
+        stages: [ pre-push ]
+
+  # ── Model lifecycle check ──
+  - repo: local
+    hooks:
+      - id: model-lifecycle
+        name: Model Lifecycle Check
+        entry: python scripts/model_lifecycle_check.py check
+        language: system
+        files: ^config/models\.yaml$
+        pass_filenames: false
+
+  # ── Security: detect secrets ──
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: [ --baseline, .secrets.baseline ]
+        exclude: (\.env|\.env\.|\.example|package-lock\.json|\.secrets\.baseline)
+
+# ── Global excludes ──
+exclude: |
+  (?x)(
+    ^node_modules/|
+    ^\.venv/|
+    ^venv/|
+    ^__pycache__/|
+    \.pyc$|
+    ^static_generated/|
+    ^dist/|
+    ^\.astro/|
+    ^alembic_migrations/versions/|
+    ^plugins_data/
+  )

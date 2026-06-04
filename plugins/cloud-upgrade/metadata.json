@@ -1,0 +1,102 @@
+{
+  "plugin_id": 0,
+  "name": "FastBlog Cloud Upgrade",
+  "slug": "cloud-upgrade",
+  "version": "1.0.0",
+  "description": "一键升级系统 - 版本检测、安全更新、自动回滚和兼容性检查",
+  "author": "FastBlog Team",
+  "category": "cloud",
+  "tags": [
+    "upgrade",
+    "update",
+    "rollback",
+    "version"
+  ],
+  "min_version": "1.0.0",
+  "dependencies": [],
+  "settings_schema": {
+    "update_sources": {
+      "title": "更新源配置",
+      "fields": [
+        "update_sources.github",
+        "update_sources.local",
+        "update_sources.custom_server"
+      ]
+    },
+    "upgrade_policy": {
+      "title": "升级策略",
+      "fields": [
+        "upgrade_policy.auto_check",
+        "upgrade_policy.backup_before_upgrade",
+        "upgrade_policy.auto_rollback_on_failure",
+        "upgrade_policy.require_confirmation"
+      ]
+    },
+    "compatibility_check": {
+      "title": "兼容性检查",
+      "fields": [
+        "compatibility_check.check_python_version",
+        "compatibility_check.check_dependencies",
+        "compatibility_check.check_database_schema",
+        "compatibility_check.check_plugins_compatibility"
+      ]
+    },
+    "health_check": {
+      "title": "健康检查",
+      "fields": [
+        "health_check.pre_upgrade",
+        "health_check.post_upgrade",
+        "health_check.check_services",
+        "health_check.min_disk_space_mb"
+      ]
+    },
+    "rollback": {
+      "title": "回滚配置",
+      "fields": [
+        "rollback.enabled",
+        "rollback.max_rollback_versions",
+        "rollback.backup_retention_days"
+      ]
+    }
+  },
+  "features": [
+    "10步升级流程编排",
+    "多更新源支持 (GitHub/本地/自定义)",
+    "升级前健康检查",
+    "自动备份和恢复",
+    "完整性验证",
+    "兼容性检查 (Python/依赖/数据库/插件)",
+    "安全回滚机制",
+    "数据库迁移自动化",
+    "升级后验证测试",
+    "升级历史记录",
+    "多渠道通知"
+  ],
+  "api_endpoints": [
+    {
+      "path": "/api/v2/cloud/upgrade/check",
+      "method": "GET",
+      "description": "检查可用更新"
+    },
+    {
+      "path": "/api/v2/cloud/upgrade/start",
+      "method": "POST",
+      "description": "开始升级"
+    },
+    {
+      "path": "/api/v2/cloud/upgrade/status",
+      "method": "GET",
+      "description": "查询升级状态"
+    },
+    {
+      "path": "/api/v2/cloud/upgrade/rollback",
+      "method": "POST",
+      "description": "回滚升级"
+    },
+    {
+      "path": "/api/v2/cloud/upgrade/history",
+      "method": "GET",
+      "description": "升级历史"
+    }
+  ]
+}

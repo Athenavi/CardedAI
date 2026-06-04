@@ -1,0 +1,40 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="800" height="64" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="400" y="40" font-family="Arial, sans-serif" font-size="24" fill="#1f2937" text-anchor="middle" font-weight="600">Modern Minimal</text>
+  
+  <!-- Content Area -->
+  <rect x="50" y="100" width="500" height="80" rx="8" fill="#f3f4f6"/>
+  <rect x="70" y="120" width="300" height="16" rx="4" fill="#3b82f6"/>
+  <rect x="70" y="145" width="400" height="10" rx="2" fill="#64748b"/>
+  <rect x="70" y="160" width="350" height="10" rx="2" fill="#64748b"/>
+  
+  <rect x="50" y="200" width="500" height="80" rx="8" fill="#f3f4f6"/>
+  <rect x="70" y="220" width="280" height="16" rx="4" fill="#3b82f6"/>
+  <rect x="70" y="245" width="380" height="10" rx="2" fill="#64748b"/>
+  <rect x="70" y="260" width="320" height="10" rx="2" fill="#64748b"/>
+  
+  <rect x="50" y="300" width="500" height="80" rx="8" fill="#f3f4f6"/>
+  <rect x="70" y="320" width="320" height="16" rx="4" fill="#3b82f6"/>
+  <rect x="70" y="345" width="420" height="10" rx="2" fill="#64748b"/>
+  <rect x="70" y="360" width="380" height="10" rx="2" fill="#64748b"/>
+  
+  <!-- Sidebar -->
+  <rect x="580" y="100" width="180" height="120" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+  <rect x="600" y="120" width="100" height="12" rx="3" fill="#1f2937"/>
+  <rect x="600" y="145" width="140" height="8" rx="2" fill="#64748b"/>
+  <rect x="600" y="160" width="130" height="8" rx="2" fill="#64748b"/>
+  <rect x="600" y="175" width="120" height="8" rx="2" fill="#64748b"/>
+  
+  <rect x="580" y="240" width="180" height="100" rx="8" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+  <rect x="600" y="260" width="80" height="12" rx="3" fill="#1f2937"/>
+  <rect x="600" y="285" width="140" height="8" rx="2" fill="#64748b"/>
+  <rect x="600" y="300" width="130" height="8" rx="2" fill="#64748b"/>
+  
+  <!-- Footer -->
+  <rect x="0" y="550" width="800" height="50" fill="#f9fafb" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="400" y="580" font-family="Arial, sans-serif" font-size="14" fill="#64748b" text-anchor="middle">© 2026 Modern Minimal Theme</text>
+</svg>

@@ -1,0 +1,27 @@
+{
+  "name": "性能优化中心",
+  "slug": "opt",
+  "version": "2.0.0",
+  "description": "综合性能优化系统 - 集成页面缓存、性能监控、图片优化、CDN管理、懒加载等功能",
+  "author": "FastBlog Team",
+  "category": "performance",
+  "tags": [
+    "performance",
+    "cache",
+    "cdn",
+    "optimization",
+    "monitor"
+  ],
+  "requires": ">=0.0.2.0",
+  "tested_up_to": "0.0.2.0",
+  "icon": "⚡",
+  "price": "free",
+  "requires_database": true,
+  "capabilities": [
+    "read:settings",
+    "write:settings",
+    "access:filesystem",
+    "access:database",
+    "manage:performance"
+  ]
+}

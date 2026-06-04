@@ -1,0 +1,33 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+    <!-- 背景 -->
+    <rect width="800" height="600" fill="#f8fafc"/>
+
+    <!-- 顶部导航栏 -->
+    <rect x="0" y="0" width="800" height="60" fill="#3b82f6"/>
+    <text x="40" y="38" font-family="Arial" font-size="24" fill="white" font-weight="bold">FastBlog</text>
+
+    <!-- 主内容区 -->
+    <rect x="50" y="100" width="500" height="450" fill="white" rx="8" stroke="#e5e7eb" stroke-width="2"/>
+
+    <!-- 文章标题 -->
+    <rect x="80" y="130" width="300" height="30" fill="#1f2937" rx="4"/>
+    <rect x="80" y="175" width="400" height="15" fill="#64748b" rx="2"/>
+    <rect x="80" y="200" width="380" height="15" fill="#64748b" rx="2"/>
+    <rect x="80" y="225" width="200" height="15" fill="#64748b" rx="2"/>
+
+    <!-- 文章摘要 -->
+    <rect x="80" y="270" width="440" height="10" fill="#94a3b8" rx="2"/>
+    <rect x="80" y="290" width="420" height="10" fill="#94a3b8" rx="2"/>
+    <rect x="80" y="310" width="380" height="10" fill="#94a3b8" rx="2"/>
+
+    <!-- 侧边栏 -->
+    <rect x="590" y="100" width="160" height="450" fill="white" rx="8" stroke="#e5e7eb" stroke-width="2"/>
+    <rect x="610" y="130" width="120" height="20" fill="#3b82f6" rx="4"/>
+    <rect x="610" y="170" width="120" height="10" fill="#cbd5e1" rx="2"/>
+    <rect x="610" y="190" width="120" height="10" fill="#cbd5e1" rx="2"/>
+    <rect x="610" y="210" width="120" height="10" fill="#cbd5e1" rx="2"/>
+
+    <!-- 底部 -->
+    <rect x="0" y="570" width="800" height="30" fill="#1f2937"/>
+    <text x="320" y="590" font-family="Arial" font-size="12" fill="white">© 2026 FastBlog Default Theme</text>
+</svg>

@@ -1,0 +1,47 @@
+# ============================================================================
+# FastBlog 最小化配置文件
+# 由 config_repair.py 自动生成
+# ============================================================================
+
+# 注意：这是一个最小化的配置文件，仅包含基本功能
+# 警告：请在修改前备份原文件
+
+endpoints: [ ]
+models:
+  ApiResponse:
+    description: 通用 API 响应
+    properties:
+      code:
+        type: integer
+        description: 状态码
+      message:
+        type: string
+        description: 消息
+      data:
+        type: object
+        nullable: true
+        description: 响应数据
+  PaginationInfo:
+    description: 分页信息
+    properties:
+      page:
+        type: integer
+        description: 当前页码
+      per_page:
+        type: integer
+        description: 每页数量
+      total:
+        type: integer
+        description: 总数
+generation:
+  django_ninja:
+    output_dir: apps/generated
+    router_file: generated_router.py
+    models_file: auto_orm.py
+  fastapi:
+    output_dir: src/api/v1/generated
+    router_file: generated_router.py
+  typescript:
+    output_dir: frontend-next/types/generated
+    types_file: api-types.ts
+    client_file: api-client.ts

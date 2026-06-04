@@ -1,0 +1,13 @@
+{
+  "name": "代码片段收藏",
+  "slug": "code-snippets",
+  "version": "1.0.0",
+  "description": "允许用户收藏和分享代码片段，支持多种编程语言高亮",
+  "author": "FastBlog Team",
+  "category": "content",
+  "tags": ["code", "snippets", "syntax-highlighting"],
+  "requires": ">=0.0.2.0",
+  "tested_up_to": "0.0.2.0",
+  "icon": "💻",
+  "price": "free"
+}

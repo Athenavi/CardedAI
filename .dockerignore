@@ -1,0 +1,126 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.egg-info
+dist
+build
+.eggs
+*.egg
+.venv
+venv
+env
+.mypy_cache
+.pytest_cache
+htmlcov
+.coverage
+
+# Node.js
+node_modules
+.nuxt
+.next
+.output
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Logs
+logs
+*.log
+
+# Environment files
+.env
+.env.local
+.env.dev
+.env.prod
+
+# Documentation (not needed in container)
+docs
+*.md
+!README.md
+
+# Development files
+tests
+.gitignore
+.editorconfig
+Makefile
+docker-compose*.yml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ============================================================================
+# Docker-specific: Exclude directories NOT needed by the backend at runtime
+# (These are either volume-mounted, separate containers, or not used)
+# ============================================================================
+
+# Frontend source (served by separate nginx container)
+frontend-astro
+
+# User data directories (volume-mounted at runtime)
+media
+uploads
+upload_chunks
+backups
+
+# Nginx config (separate nginx container)
+nginx
+
+# Mobile app source
+mobile-app
+
+# SDK & Tools (not imported by backend)
+# tools/ excluded — ffmpeg tarball loaded via BuildKit additional_contexts (ffmpeg_src)
+sdk
+scripts
+tools
+
+# Advanced adapter (not imported anywhere in src/)
+advanced
+
+# Generated apps (not imported, legacy Django code)
+apps/generated
+
+# Update server/updater (not imported by backend)
+update_server
+updater
+
+# Runtime generated data (not needed in image)
+static_generated
+plugins_data
+custom-patterns
+
+# Build/release directories
+debug
+release
+storage
+
+# CI/CD
+pre-commit-config.yaml
+.qoderignore
+
+# Lock files (not needed for Python backend)
+package-lock.json
+
+# Test plugin system script
+test_plugin_system.py
+
+# Startup scripts (not needed inside container)
+start-meilisearch.bat
+start-meilisearch.sh
+install.bat
+install.sh
+
+# Pyproject/pytest configs (not needed at runtime)
+pyproject.toml
+pytest.ini

@@ -1,0 +1,26 @@
+{
+  "name": "SEO优化中心",
+  "slug": "seo",
+  "version": "2.0.0",
+  "description": "综合SEO优化系统 - 集成元标签管理、Sitemap生成、Robots.txt、重定向管理、404监控、Schema结构化数据等功能",
+  "author": "FastBlog Team",
+  "category": "seo",
+  "tags": [
+    "seo",
+    "sitemap",
+    "meta-tags",
+    "schema",
+    "optimization"
+  ],
+  "requires": ">=0.0.2.0",
+  "tested_up_to": "0.0.2.0",
+  "icon": "🔍",
+  "price": "free",
+  "requires_database": true,
+  "capabilities": [
+    "read:articles",
+    "write:settings",
+    "read:settings",
+    "manage:seo"
+  ]
+}

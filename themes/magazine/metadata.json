@@ -1,0 +1,68 @@
+{
+  "name": "Magazine",
+  "slug": "magazine",
+  "version": "1.0.0",
+  "description": "杂志风格主题 - 网格布局、特色图片展示、多栏目支持，适合新闻和杂志网站",
+  "author": "FastBlog Team",
+  "author_url": "https://athenavi.github.io",
+  "theme_url": "https://athenavi.github.io/themes/magazine",
+  "screenshot": "screenshot.svg",
+  "tags": [
+    "magazine",
+    "news",
+    "grid",
+    "responsive",
+    "featured-image"
+  ],
+  "requires": {
+    "fastblog": ">=1.0.0"
+  },
+  "supports": [
+    "custom-logo",
+    "custom-header",
+    "featured-image",
+    "post-thumbnails",
+    "comments",
+    "widgets",
+    "multi-column",
+    "sticky-posts",
+    "dark-mode"
+  ],
+  "settings_schema": {
+    "colors": {
+      "primary": "#dc2626",
+      "secondary": "#1f2937",
+      "accent": "#f59e0b",
+      "background": "#ffffff",
+      "foreground": "#111827",
+      "muted": "#f9fafb",
+      "border": "#e5e7eb"
+    },
+    "layout": {
+      "sidebar_position": "right",
+      "content_width": "max-w-7xl",
+      "show_sidebar": true,
+      "grid_columns": 3,
+      "header_style": "magazine",
+      "footer_style": "multi-column"
+    },
+    "typography": {
+      "font_family": "Merriweather, Georgia, serif",
+      "heading_font": "Montserrat, sans-serif",
+      "font_size": "16px",
+      "line_height": 1.8,
+      "heading_weight": 800
+    },
+    "features": {
+      "show_featured_posts": true,
+      "featured_posts_count": 3,
+      "show_category_sections": true,
+      "show_reading_time": true,
+      "show_word_count": false,
+      "show_related_posts": true,
+      "show_author_box": true,
+      "sticky_header": true,
+      "breaking_news_bar": true
+    }
+  }
+}

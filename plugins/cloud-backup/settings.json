@@ -1,0 +1,85 @@
+{
+  "db_backup_enabled": true,
+  "db_backup_format": "custom",
+  "db_compression": true,
+  "db_encryption": false,
+  "file_backup_enabled": true,
+  "file_backup_targets": [
+    "media/",
+    "themes/",
+    "plugins/",
+    "uploads/"
+  ],
+  "file_compression": "tar.gz",
+  "exclude_patterns": [
+    "*.tmp",
+    "*.log",
+    "__pycache__/"
+  ],
+  "policies": {
+    "daily": {
+      "enabled": true,
+      "schedule": "0 2 * * *",
+      "type": "incremental",
+      "retention_days": 7,
+      "upload_to_cloud": true
+    },
+    "weekly": {
+      "enabled": true,
+      "schedule": "0 3 * * 0",
+      "type": "full",
+      "retention_days": 30,
+      "upload_to_cloud": true
+    },
+    "monthly": {
+      "enabled": true,
+      "schedule": "0 4 1 * *",
+      "type": "full",
+      "retention_days": 365,
+      "upload_to_cloud": true
+    }
+  },
+  "cloud_storage": {
+    "enabled": false,
+    "primary_provider": "s3",
+    "providers": {
+      "s3": {
+        "bucket": "",
+        "access_key": "",
+        "secret_key": "",
+        "region": "us-east-1",
+        "endpoint_url": null
+      },
+      "oss": {
+        "bucket": "",
+        "access_key": "",
+        "secret_key": "",
+        "region": "oss-cn-hangzhou"
+      },
+      "cos": {
+        "bucket": "",
+        "access_key": "",
+        "secret_key": "",
+        "region": "ap-guangzhou"
+      }
+    },
+    "multi_region_replication": false,
+    "replication_regions": []
+  },
+  "auto_verify": true,
+  "verify_after_backup": true,
+  "test_restore_periodically": true,
+  "test_restore_interval_days": 7,
+  "notifications": {
+    "on_success": false,
+    "on_failure": true,
+    "channels": [
+      "email"
+    ],
+    "webhook_url": ""
+  },
+  "policies.daily.enabled": true,
+  "policies.weekly.enabled": true,
+  "policies.monthly.enabled": true,
+  "cloud_storage.enabled": true
+}

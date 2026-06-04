@@ -1,0 +1,197 @@
+# FastBlog Production Docker Compose Configuration
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+
+services:
+  # ============================================================================
+  # FastBlog Backend
+  # ============================================================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      network: host
+      additional_contexts:
+        ffmpeg_src: ./tools/ffmpeg
+    container_name: fastblog-backend
+    restart: always
+    ports:
+      - "127.0.0.1:9421:9421"
+    environment:
+      # --- 数据库配置（Docker 内部网络，host 使用服务名） ---
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-fastblog_secret}
+      - DB_NAME=${DB_NAME:-fast_blog}
+      # --- Redis 配置 ---
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-fastblog_redis_secret}
+      # --- 应用配置 ---
+      - SECRET_KEY=${SECRET_KEY:-}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-}
+      - ENVIRONMENT=production
+      - DEBUG=False
+    # 不设置 user — entrypoint 默认以 root 运行，初始化后通过 gosu 降权到 appuser
+    volumes:
+      - fastblog-media:/app/media
+      - fastblog-uploads:/app/uploads
+      - fastblog-logs:/app/logs
+      - fastblog-backups:/app/backups
+      - fastblog-plugins-data:/app/plugins_data
+      - fastblog-storage:/app/storage
+      - fastblog-config:/app/config
+      - fastblog-static-generated:/app/static_generated
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fastblog-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9421/api/v2/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================================================
+  # Frontend (Astro static files + Nginx reverse proxy — unified)
+  # ============================================================================
+  # This container serves both the frontend static files AND reverse-proxies
+  # API/media requests to the backend, replacing the standalone nginx container.
+  frontend:
+    build:
+      context: ./frontend-astro
+      dockerfile: Dockerfile
+    container_name: fastblog-frontend
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - fastblog-logs:/var/log/nginx
+    depends_on:
+      - backend
+    networks:
+      - fastblog-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ============================================================================
+  # PostgreSQL
+  # ============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: fastblog-postgres
+    restart: always
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      # 生产环境建议通过 .env 或系统环境变量覆盖以下默认值
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-fastblog_secret}
+      POSTGRES_DB: ${DB_NAME:-fast_blog}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - fastblog-postgres:/var/lib/postgresql/data
+    networks:
+      - fastblog-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================================
+  # Redis
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: fastblog-redis
+    restart: always
+    ports:
+      - "127.0.0.1:6379:6379"
+    command: >
+      redis-server
+        --appendonly yes
+        --maxmemory 512mb
+        --maxmemory-policy allkeys-lru
+        --requirepass ${REDIS_PASSWORD:-fastblog_redis_secret}
+    volumes:
+      - fastblog-redis:/data
+    networks:
+      - fastblog-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli -a ${REDIS_PASSWORD:-fastblog_redis_secret} ping | grep -q PONG" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# ============================================================================
+# Volumes (named volumes for persistence)
+# ============================================================================
+volumes:
+  fastblog-postgres:
+    driver: local
+  fastblog-redis:
+    driver: local
+  fastblog-media:
+    driver: local
+  fastblog-uploads:
+    driver: local
+  fastblog-logs:
+    driver: local
+  fastblog-backups:
+    driver: local
+  fastblog-config:
+    driver: local
+  fastblog-storage:
+    driver: local
+  fastblog-plugins-data:
+    driver: local
+  fastblog-static-generated:
+    driver: local
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  fastblog-network:
+    driver: bridge

@@ -1,0 +1,66 @@
+"""
+FastAPI 路由文件
+由 routes.yaml 自动生成 - 请勿手动修改
+生成时间：{{ now() }}
+"""
+
+from fastapi import APIRouter, Request
+
+from src.api.v1.responses import ApiResponse
+
+{% for import_stmt in imports %}
+{{ import_stmt }}
+{% endfor %}
+
+# 导入依赖
+
+router = APIRouter()
+
+{% for module_name, module_endpoints in endpoints.items() %}
+# ====================
+#
+{{ module_name|title }}   模块 ====================
+
+{% for endpoint in module_endpoints %}
+
+@router.{{ endpoint.method|lower }}("{{ endpoint.path }}", summary="{{ endpoint.summary }}")
+async def {{ endpoint.handler }}_endpoint(
+        {% if endpoint.needs_request %}        request: Request,
+        {% endif %}{% if endpoint.parameters %}{% for param in endpoint.parameters %}
+        {% set param_default = '...' if param.required else (param.default if param.default is defined and param.default != '' and param.default is not none and 'Depends(' not in param.default|string else ('None' if param.type in ['bool', 'int', 'float'] else "None")) -%}
+        {{ param.name }}: {{ param.type }} = {% if param.location == 'form' %}Form(
+        {{ param_default }}){% elif param.location == 'query' %}Query({{ param_default }})
+
+
+{% elif param.location == 'path' %}Path(...){% endif %},
+{% endfor %}{% endif %}{% if (endpoint.django_ninja_auth or endpoint.fastapi_dependencies) and not endpoint.get('skip_current_user', False) %}
+current_user = Depends(jwt_required),
+{% endif %}{% if endpoint.get('needs_db', True) %}
+db: AsyncSession = Depends(get_async_db),
+{% endif %}
+):
+"""{{ endpoint.description|default(endpoint.summary) }}"""
+try:
+    from shared.services import {{ endpoint.handler }}
+    result = await {{ endpoint.handler }}(
+                   {% if endpoint.parameters %}{% for param in endpoint.parameters %}
+                   {{ param.name }}={{ param.name }},
+                   {% endfor %}{% endif %}{% if (endpoint.django_ninja_auth or endpoint.fastapi_dependencies) and not endpoint.get('skip_current_user', False) %}
+                   current_user=current_user,
+                   {% endif %}{% if endpoint.needs_request %}
+                   request=request,
+                   {% endif %}{% if endpoint.get('needs_db', True) %}
+                   db=db
+                   {% endif %}
+                   )
+    return result
+except Exception as e:
+    import traceback
+
+    print(f"Error in {{ endpoint.handler }}: {str(e)}")
+    print(traceback.format_exc())
+    return ApiResponse(success=False, error=str(e))
+
+
+{% endfor %}
+{% endfor %}

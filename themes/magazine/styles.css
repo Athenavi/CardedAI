@@ -1,0 +1,309 @@
+/**
+ * Magazine Theme Styles
+ * 杂志风格主题样式 - 网格布局、多栏目
+ */
+
+:root {
+    /* Colors - Bold & Professional */
+    --color-primary: #dc2626;      /* Red */
+    --color-secondary: #1f2937;    /* Gray 800 */
+    --color-accent: #f59e0b;       /* Amber */
+    --color-background: #ffffff;
+    --color-foreground: #111827;
+    --color-muted: #f9fafb;
+    --color-border: #e5e7eb;
+    
+    /* Typography - Magazine Style */
+    --font-family: 'Merriweather', Georgia, serif;
+    --heading-font: 'Montserrat', sans-serif;
+    --font-size-base: 16px;
+    --line-height: 1.8;
+    --heading-weight: 800;
+    
+    /* Layout */
+    --content-width: max-w-7xl;
+    --grid-columns: 3;
+    --sidebar-width: 320px;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-background: #111827;
+        --color-foreground: #f9fafb;
+        --color-muted: #1f2937;
+        --color-border: #374151;
+    }
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--heading-font);
+    font-weight: var(--heading-weight);
+}
+
+/* Breaking News Bar */
+.breaking-news-bar {
+    background: linear-gradient(90deg, var(--color-primary), #ef4444);
+    color: white;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.breaking-news-label {
+    background: white;
+    color: var(--color-primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Magazine Header */
+.magazine-header {
+    border-bottom: 3px solid var(--color-primary);
+    padding: 2rem 0;
+}
+
+.magazine-logo {
+    font-family: var(--heading-font);
+    font-size: 3rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: var(--color-foreground);
+}
+
+/* Featured Posts Section */
+.featured-posts {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-columns), 1fr);
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.featured-post-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.featured-post-card:hover {
+    transform: translateY(-4px);
+}
+
+.featured-post-card:first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+.featured-post-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.featured-post-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    padding: 2rem;
+    color: white;
+}
+
+.featured-post-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.featured-post-card:first-child .featured-post-title {
+    font-size: 2.5rem;
+}
+
+/* Category Sections */
+.category-section {
+    margin: 3rem 0;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.category-title {
+    font-size: 1.75rem;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Article Grid */
+.article-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.article-card-magazine {
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.article-card-magazine:hover {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.article-card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.article-card-content {
+    padding: 1.5rem;
+}
+
+.article-card-category {
+    display: inline-block;
+    background: var(--color-primary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+}
+
+.article-card-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.article-card-excerpt {
+    color: var(--color-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.article-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+/* Sticky Posts */
+.sticky-post-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--color-accent);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Multi-column Footer */
+.magazine-footer {
+    background: var(--color-secondary);
+    color: white;
+    padding: 3rem 0;
+    margin-top: 4rem;
+}
+
+.footer-columns {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.footer-column h3 {
+    color: white;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+    color: #d1d5db;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .featured-posts {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .featured-post-card:first-child {
+        grid-column: span 2;
+        grid-row: span 1;
+    }
+    
+    .footer-columns {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .featured-posts {
+        grid-template-columns: 1fr;
+    }
+    
+    .featured-post-card:first-child {
+        grid-column: span 1;
+    }
+    
+    .article-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .magazine-logo {
+        font-size: 2rem;
+    }
+    
+    .footer-columns {
+        grid-template-columns: 1fr;
+    }
+}

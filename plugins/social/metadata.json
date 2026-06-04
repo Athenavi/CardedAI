@@ -1,0 +1,24 @@
+{
+  "name": "社交媒体中心",
+  "slug": "social",
+  "version": "2.0.0",
+  "description": "综合社交媒体系统 - 集成社交分享、自动发布、社交登录、社交证明、Instagram Feed等功能",
+  "author": "FastBlog Team",
+  "category": "social",
+  "tags": [
+    "social",
+    "share",
+    "login",
+    "media"
+  ],
+  "requires": ">=0.0.2.0",
+  "tested_up_to": "0.0.2.0",
+  "icon": "🌐",
+  "price": "free",
+  "requires_database": false,
+  "capabilities": [
+    "read:settings",
+    "write:settings",
+    "manage:social"
+  ]
+}

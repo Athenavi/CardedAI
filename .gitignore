@@ -1,0 +1,138 @@
+# ============================================================================
+# FastBlog .gitignore
+# ============================================================================
+
+# Python
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+/lib/
+/lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+*.code-workspace
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Environment files
+.env
+.env.local
+.env.dev
+.env.prod
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Frontend build artifacts
+.vite/
+cache/
+frontend/dist/
+frontend-astro/dist/
+frontend-astro/.astro/
+frontend-astro/*.tsbuildinfo
+frontend-next/.next/
+frontend-next/node_modules/
+
+# Thumbnails and uploads
+thumbnails/
+static/uploads/site_images/
+static/avatar/
+
+# Database
+*.db
+*.db-journal
+*.sqlite3
+
+# Alembic
+alembic/
+alembic.ini
+
+# Backups
+backups/
+
+# Debug
+debug/
+
+# Scheduler
+fastscheduler_state.json
+
+# System
+.DS_Store
+Thumbs.db
+
+# Storage
+storage/
+storage/*
+
+# Docker
+.docker/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# Testing
+.pytest_cache/
+.tox/
+.nox/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Django Migrations (auto-generated)
+apps/*/migrations/*.py
+!apps/*/migrations/.gitkeep
+
+# Release & build artifacts
+/release/
+/upload_chunks/*
+/alembic_migrations/versions/*
+/plugins_data/*
+/mobile-app/node_modules/
+/frontend-astro/node_modules/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/

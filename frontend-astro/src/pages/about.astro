@@ -1,0 +1,27 @@
+---
+// 关于页
+import Layout from '@/layouts/Layout.astro';
+---
+
+<Layout title="关于 - FastBlog">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-8">关于 FastBlog</h1>
+    <div class="prose dark:prose-invert max-w-none">
+      <p class="text-lg text-gray-600 dark:text-gray-400">FastBlog 是一个现代化的博客平台，致力于为创作者和读者提供最佳的内容分享体验。</p>
+      <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">快速</h3>
+          <p class="text-gray-600 dark:text-gray-400">基于 Astro 构建，极致性能，瞬间加载</p>
+        </div>
+        <div class="p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">现代</h3>
+          <p class="text-gray-600 dark:text-gray-400">支持 Markdown、富文本编辑、AI 写作辅助</p>
+        </div>
+        <div class="p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">开放</h3>
+          <p class="text-gray-600 dark:text-gray-400">开源、可定制、丰富的插件系统</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

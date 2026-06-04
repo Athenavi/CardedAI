@@ -1,0 +1,13 @@
+{
+  "name": "文章评分系统",
+  "slug": "article-rating",
+  "version": "1.0.0",
+  "description": "允许用户对文章进行星级评分和评论，显示平均评分",
+  "author": "FastBlog Team",
+  "category": "content",
+  "tags": ["rating", "reviews", "feedback"],
+  "requires": ">=0.0.2.0",
+  "tested_up_to": "0.0.2.0",
+  "icon": "⭐",
+  "price": "free"
+}

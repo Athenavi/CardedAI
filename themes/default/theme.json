@@ -1,0 +1,47 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "name": "FastBlog Default",
+    "slug": "default",
+    "version": "1.0.0",
+    "description": "FastBlog 默认主题 - 简洁、现代、响应式设计",
+    "author": "FastBlog Team"
+  },
+  "settings": {
+    "colors": {
+      "primary": "#3b82f6",
+      "secondary": "#64748b",
+      "accent": "#f59e0b",
+      "background": "#ffffff",
+      "foreground": "#1f2937",
+      "muted": "#f3f4f6",
+      "border": "#e5e7eb"
+    },
+    "layout": {
+      "sidebarPosition": "right",
+      "contentWidth": "max-w-4xl",
+      "showSidebar": true,
+      "showHeader": true,
+      "showFooter": true
+    },
+    "typography": {
+      "fontFamily": "Inter, system-ui, sans-serif",
+      "fontSize": "16px",
+      "lineHeight": 1.6,
+      "headingFontWeight": 700
+    },
+    "components": {
+      "borderRadius": "0.5rem",
+      "shadowStyle": "medium",
+      "buttonStyle": "default"
+    }
+  },
+  "supports": [
+    "custom-logo",
+    "custom-header",
+    "featured-image",
+    "post-thumbnails",
+    "comments",
+    "widgets"
+  ]
+}

@@ -1,0 +1,157 @@
+# FastBlog Development Docker Compose Configuration
+# Usage: docker-compose -f docker-compose.dev.yml up -d
+#
+# This file provides a lightweight development environment with:
+# - PostgreSQL 16 (with dev-friendly settings)
+# - Redis 7 (no password in dev)
+# - Meilisearch (optional, for full-text search)
+#
+# Quick start:
+#   1. cp .env.example .env   (if not already done)
+#   2. docker-compose -f docker-compose.dev.yml up -d
+#   3. python main.py --backend fastapi --env dev
+#   4. cd frontend-astro && npm run dev
+
+version: '3.8'
+
+services:
+  # ============================================================================
+  # PostgreSQL Database (Development)
+  # ============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: fastblog-postgres-dev
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-fastblog_dev}
+      POSTGRES_DB: ${DB_NAME:-fast_blog_dev}
+      # Dev-friendly: allow connections from any host
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+    networks:
+      - fastblog-dev
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    # Lower resource limits for development
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+
+  # ============================================================================
+  # Redis Cache (Development)
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: fastblog-redis-dev
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    # No password in development; reduced memory
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-dev-data:/data
+    networks:
+      - fastblog-dev
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+
+  # ============================================================================
+  # Meilisearch (Optional - Full-text Search)
+  # ============================================================================
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    container_name: fastblog-meilisearch-dev
+    restart: unless-stopped
+    ports:
+      - "${MEILISEARCH_PORT:-7700}:7700"
+    environment:
+      MEILI_MASTER_KEY: ${MEILISEARCH_API_KEY:-fastblog_dev_master_key}
+      MEILI_ENV: development
+      MEILI_NO_ANALYTICS: true
+    volumes:
+      - meilisearch-dev-data:/meili_data
+    networks:
+      - fastblog-dev
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:7700/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    profiles:
+      - search  # Only start with: docker-compose -f docker-compose.dev.yml --profile search up -d
+
+  # ============================================================================
+  # Adminer (Optional - Database GUI)
+  # ============================================================================
+  adminer:
+    image: adminer:latest
+    container_name: fastblog-adminer-dev
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    depends_on:
+      - postgres
+    networks:
+      - fastblog-dev
+    profiles:
+      - tools  # Only start with: docker-compose -f docker-compose.dev.yml --profile tools up -d
+
+  # ============================================================================
+  # Redis Commander (Optional - Redis GUI)
+  # ============================================================================
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: fastblog-redis-commander-dev
+    restart: unless-stopped
+    ports:
+      - "${REDIS_COMMANDER_PORT:-8081}:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    depends_on:
+      - redis
+    networks:
+      - fastblog-dev
+    profiles:
+      - tools
+
+# ============================================================================
+# Volumes
+# ============================================================================
+volumes:
+  postgres-dev-data:
+    driver: local
+  redis-dev-data:
+    driver: local
+  meilisearch-dev-data:
+    driver: local
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  fastblog-dev:
+    driver: bridge

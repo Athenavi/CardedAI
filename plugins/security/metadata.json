@@ -1,0 +1,27 @@
+{
+  "name": "安全防护中心",
+  "slug": "security",
+  "version": "2.0.0",
+  "description": "综合安全防护系统 - 集成恶意代码扫描、文件完整性监控、XSS/SQL注入防护、速率限制、IP黑白名单、登录保护、漏洞扫描等功能",
+  "author": "FastBlog Team",
+  "category": "security",
+  "tags": [
+    "security",
+    "malware",
+    "firewall",
+    "protection",
+    "scanner"
+  ],
+  "requires": ">=0.0.2.0",
+  "tested_up_to": "0.0.2.0",
+  "icon": "🛡️",
+  "price": "free",
+  "requires_database": true,
+  "capabilities": [
+    "read:settings",
+    "write:settings",
+    "access:filesystem",
+    "access:database",
+    "manage:security"
+  ]
+}

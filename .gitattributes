@@ -1,0 +1,50 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Force LF for shell scripts (prevents Docker ENTRYPOINT failures on Windows)
+*.sh text eol=lf
+
+# Force LF for Dockerfiles
+Dockerfile text eol=lf
+Dockerfile.* text eol=lf
+docker-compose*.yml text eol=lf
+
+# Force LF for nginx configs
+*.conf text eol=lf
+
+# Force LF for Python files
+*.py text eol=lf
+
+# Force LF for JavaScript/TypeScript
+*.js text eol=lf
+*.ts text eol=lf
+*.mjs text eol=lf
+
+# Force LF for YAML
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Force LF for JSON
+*.json text eol=lf
+
+# Force LF for HTML/CSS
+*.html text eol=lf
+*.css text eol=lf
+*.astro text eol=lf
+
+# Force LF for Markdown
+*.md text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary

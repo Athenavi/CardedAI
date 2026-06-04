@@ -1,0 +1,23 @@
+{
+  "name": "相关内容推荐",
+  "slug": "related",
+  "version": "2.0.0",
+  "description": "智能相关内容推荐系统 - 集成基于标签、分类、内容相似度的文章推荐功能",
+  "author": "FastBlog Team",
+  "category": "content",
+  "tags": [
+    "related",
+    "recommendation",
+    "content"
+  ],
+  "requires": ">=0.0.2.0",
+  "tested_up_to": "0.0.2.0",
+  "icon": "🔗",
+  "price": "free",
+  "requires_database": false,
+  "capabilities": [
+    "read:articles",
+    "read:settings",
+    "write:settings"
+  ]
+}

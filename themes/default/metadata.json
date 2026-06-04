@@ -1,0 +1,46 @@
+{
+  "name": "FastBlog Default",
+  "slug": "default",
+  "version": "1.0.0",
+  "description": "FastBlog 默认主题 - 简洁、现代、响应式设计",
+  "author": "FastBlog Team",
+  "author_url": "https://athenavi.github.io",
+  "theme_url": "https://athenavi.github.io/themes/default",
+  "screenshot": "screenshot.png",
+  "tags": [
+    "responsive",
+    "modern",
+    "clean",
+    "blog"
+  ],
+  "requires": {
+    "fastblog": ">=1.0.0"
+  },
+  "supports": [
+    "custom-logo",
+    "custom-header",
+    "featured-image",
+    "post-thumbnails",
+    "comments",
+    "widgets"
+  ],
+  "settings_schema": {
+    "colors": {
+      "primary": "#3b82f6",
+      "secondary": "#64748b",
+      "accent": "#f59e0b",
+      "background": "#ffffff",
+      "foreground": "#1f2937"
+    },
+    "layout": {
+      "sidebar_position": "right",
+      "content_width": "max-w-4xl",
+      "show_sidebar": true
+    },
+    "typography": {
+      "font_family": "Inter, system-ui, sans-serif",
+      "font_size": "16px",
+      "line_height": 1.6
+    }
+  }
+}

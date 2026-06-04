@@ -1,0 +1,179 @@
+"""
+Django ORM 抽象基类定义
+由 routes.yaml 自动生成 - 请勿手动修改
+生成时间：{{ generation_time }}
+"""
+
+from django.db import models
+
+# ==================== 表名前缀配置 ====================
+# 注意：如果使用了表名前缀（如 fb_），请在具体模型类的 Meta 中设置 db_table
+# 例如：db_table = "{{ table_prefix }}users" (对于 User 模型)
+TABLE_PREFIX = "{{ table_prefix }}"
+
+
+def get_table_name(base_name: str) -> str:
+    """
+    获取带前缀的表名
+    
+    Args:
+        base_name: 基础表名（不带前缀）
+    
+    Returns:
+        带前缀的完整表名
+    """
+    if TABLE_PREFIX and not base_name.startswith(TABLE_PREFIX):
+        return f"{TABLE_PREFIX}{base_name}"
+    return base_name
+
+
+# ==================== 通用 Mixin 类 ====================
+
+class TimestampMixin(models.Model):
+    """时间戳混合类（包含创建和更新时间）"""
+    created_at = models.DateTimeField('创建时间', auto_now_add=True)
+    updated_at = models.DateTimeField('更新时间', auto_now=True)
+
+    class Meta:
+        abstract = True
+
+
+class SoftDeleteMixin(models.Model):
+    """软删除混合类"""
+    is_deleted = models.BooleanField('是否删除', default=False)
+    deleted_at = models.DateTimeField('删除时间', blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def delete(self, using=None, keep_parents=False):
+        """重写删除方法为软删除"""
+        self.is_deleted = True
+        from django.utils import timezone
+        self.deleted_at = timezone.now()
+        self.save(update_fields=['is_deleted', 'deleted_at'])
+
+# ==================== 自动生成的模型 Mixin ====================
+
+{% for model_name, model_def in models.items() %}
+
+class {{ model_name }}Mixin(models.Model):
+    """{{ model_def.description or model_name }} Mixin"""
+
+    {% for field_name, field_def in model_def.get('fields', {}).items() %}
+    {% if field_name not in ['created_at', 'updated_at'] %}
+    # {{ ((field_def.description or field_name).replace('\n', ' ').replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}
+    {% set field_type = field_def.get('type') %}
+    {% set nullable = field_def.get('nullable', False) %}
+    {% set default = field_def.get('default') %}
+    {% set max_length = field_def.get('max_length') %}
+    {% set foreign_key = field_def.get('foreign_key') %}
+    {% set unique = field_def.get('unique', False) %}
+    {% set primary_key = field_def.get('primary_key', False) %}
+    {% set auto_increment = field_def.get('autoincrement', False) %}
+    {% if foreign_key %}
+    {% set fk_app_label = field_def.get('foreign_key_app', '') %}
+    {% set fk_model_name = foreign_key %}
+    {% if fk_model_name == model_name %}
+    {# 自引用情况 #}
+    {{ field_name }} = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        verbose_name='{{ ((field_def.description or field_name).replace("\n", " ").replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}',
+        {%- if nullable %}null=True, blank=True{%- endif %}{%- if field_def.get('related_name') %}, related_name='{{ field_def.related_name }}'{%- endif %})
+    {% elif fk_app_label %}
+    {# 有明确 app_label 的情况 #}
+    {{ field_name }} = models.ForeignKey(
+        '{{ fk_app_label }}.{{ fk_model_name }}',
+        on_delete=models.CASCADE,
+        verbose_name='{{ ((field_def.description or field_name).replace("\n", " ").replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}',
+        {%- if nullable %}null=True, blank=True{%- endif %})
+    {% else %}
+    {# 检查引用的模型是否存在于所有模型配置中 #}
+    {% set default_fk_map = {'User': 'user', 'Category': 'category', 'Article': 'blog', 'VIPPlan': 'user'} %}
+    {% set inferred_app = default_fk_map.get(fk_model_name, '') %}
+    {% set model_exists = False %}
+    {% for m_name in all_model_names %}
+    {% if m_name == fk_model_name %}
+    {% set model_exists = True %}
+    {% endif %}
+    {% endfor %}
+    {% if model_exists and inferred_app %}
+    {# 模型存在且有明确的 app_label #}
+    {{ field_name }} = models.ForeignKey(
+        '{{ inferred_app }}.{{ fk_model_name }}',
+        on_delete=models.CASCADE,
+        verbose_name='{{ ((field_def.description or field_name).replace("\n", " ").replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}',
+        {%- if nullable %}null=True, blank=True{%- endif %})
+    {% elif not model_exists %}
+    {# 引用的模型不存在，降级为 IntegerField #}
+    {{ field_name }} = models.IntegerField(
+        '{{ ((field_def.description or field_name).replace("\n", " ").replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }} (暂为 IntegerField，等待 {{ fk_model_name }} 模型实现)',
+        {%- if nullable %}null=True, blank=True{%- endif %})
+    {% else %}
+    {# 无法推断 app_label，使用字符串引用 #}
+    {{ field_name }} = models.ForeignKey(
+        '{{ fk_model_name }}',
+        on_delete=models.CASCADE,
+        verbose_name='{{ ((field_def.description or field_name).replace("\n", " ").replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}',
+        {%- if nullable %}null=True, blank=True{%- endif %})
+    {% endif %}
+    {% endif %}
+    {% elif field_type == 'string' %}
+    {{ field_name }} = models.CharField(
+        '{{ ((field_def.description or field_name).replace("\n", " ").replace('，', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}'
+        {%- if max_length %}, max_length={{ max_length }}{%- else %}, max_length=255{%- endif %}{%- if nullable %}, blank=True, null=True{%- endif %}{%- if default is not none %}, default='{{ default }}'{%- endif %}{%- if unique %}, unique=True{%- endif %})
+    {% elif field_type == 'integer' or field_type == 'bigint' %}
+    {% if primary_key and auto_increment %}
+    {{ field_name }} = models.BigAutoField(
+        '{{ ((field_def.description or field_name).replace("\n", " ").replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}'
+        {%- if default is not none %}, default={{ default }}{%- endif %}
+        , primary_key=True)
+    {% elif field_type == 'bigint' %}
+    {{ field_name }} = models.BigIntegerField(
+        '{{ ((field_def.description or field_name).replace("\n", " ").replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}'
+        {%- if nullable %}, blank=True, null=True
+        {%- endif %}{%- if default is not none %}, default={{ default }}{%- endif %}{%- if unique %}, unique=True{%- endif %})
+    {% else %}
+    {{ field_name }} = models.IntegerField(
+        '{{ ((field_def.description or field_name).replace("\n", " ").replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}'
+        {%- if nullable %}, blank=True, null=True
+        {%- endif %}{%- if default is not none %}, default={{ default }}{%- endif %}{%- if unique %}, unique=True{%- endif %})
+    {% endif %}
+    {% elif field_type == 'boolean' %}
+    {{ field_name }} = models.BooleanField(
+        '{{ ((field_def.description or field_name).replace("\n", " ").replace('，', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}',
+        {%- if default is not none %}default={{ default }}{% else %}default = False{% endif %})
+    {% elif field_type == 'number' or field_type == 'float' or field_type == 'decimal' %}
+    {{ field_name }} = models.DecimalField(
+        '{{ ((field_def.description or field_name).replace("\n", " ").replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}'
+        {%- if max_length %}, max_length={{ max_length }}{%- else %}, max_digits=10, decimal_places=2{%- endif %}
+        {%- if nullable %}, blank=True, null=True{%- endif %}
+        {%- if default is not none %}{% if nullable %}, {% else %}, {% endif %}default={{ default }}{%- endif %}
+        {%- if unique %}, unique=True{%- endif %})
+    {% elif field_type == 'text' %}
+    {{ field_name }} = models.TextField(
+        '{{ ((field_def.description or field_name).replace("\n", " ").replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}'
+        {%- if nullable %}, blank=True, null=True{%- endif %}{%- if unique %}, unique=True{%- endif %})
+    {% elif field_type == 'datetime' %}
+    {{ field_name }} = models.DateTimeField(
+        '{{ ((field_def.description or field_name).replace("\n", " ").replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}'
+        {%- if nullable %}, blank=True, null=True{%- endif %}{%- if default is not none %}, default={{ default }}{%- endif %})
+    {% elif field_type == 'array' %}
+    {{ field_name }} = models.JSONField(
+        '{{ ((field_def.description or field_name).replace("\n", " ").replace(',', ',').replace(':', ':').replace('（', '(').replace('）', ')')) }}'
+        {%- if nullable %}null=True, blank=True{%- endif %}{%- if default is not none %}, default={{ default }}{%- endif %})
+    {% endif %}
+    {% endif %}
+{% endfor %}
+
+    class Meta:
+        abstract = True
+        app_label = 'generated'
+        {% if model_def.description %}
+        verbose_name = '{{ model_def.description }}'
+        {% endif %}
+        # 注意：请在具体模型类中设置 db_table = get_table_name("{{ model_def.table or model_name.lower() }}")
+
+
+{% endfor %}

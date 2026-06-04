@@ -1,0 +1,13 @@
+---
+// 文章详情页 - 固定路由，?slug= 参数
+// 注意：Astro 静态模式下无法在构建时读取 query 参数，
+// 因此始终渲染 ArticleDetail 组件，由组件从 window.location.search 读取 slug
+import Layout from '@/layouts/Layout.astro';
+import ArticleDetail from '@/components/pages/ArticleDetail';
+---
+
+<Layout title="文章详情 - FastBlog">
+    <main class="max-w-full py-8 pt-20">
+      <ArticleDetail client:load/>
+  </main>
+</Layout>

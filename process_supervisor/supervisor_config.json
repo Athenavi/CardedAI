@@ -1,0 +1,118 @@
+{
+  "processes": {
+    "main_app": {
+      "command": [
+        "python",
+        "-m",
+        "uvicorn",
+        "src.app:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "9421",
+        "--workers",
+        "9"
+      ],
+      "working_dir": ".",
+      "autostart": true,
+      "autorestart": true,
+      "restart_limit": 3,
+      "restart_delay": 10,
+      "restart_backoff_multiplier": 1.5,
+      "max_restart_delay": 60,
+      "stdout_logfile": "logs/main_app.log",
+      "stderr_logfile": "logs/main_app.err.log",
+      "environment": {
+        "PORT": "9421",
+        "HOST": "0.0.0.0",
+        "UVICORN_WORKERS": "6"
+      },
+      "health_check": {
+        "endpoint": "http://127.0.0.1:9421/health",
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3
+      }
+    },
+    "django_server": {
+      "command": [
+        "python",
+        "django_blog/manage.py",
+        "runserver",
+        "127.0.0.1:8000"
+      ],
+      "working_dir": ".",
+      "autostart": true,
+      "autorestart": true,
+      "restart_limit": 3,
+      "restart_delay": 5,
+      "restart_backoff_multiplier": 1.5,
+      "max_restart_delay": 30,
+      "stdout_logfile": "logs/django_server.log",
+      "stderr_logfile": "logs/django_server.err.log",
+      "environment": {
+        "DJANGO_SETTINGS_MODULE": "django_blog.settings",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "health_check": {
+        "endpoint": "http://127.0.0.1:8000/admin/login/",
+        "interval": 60,
+        "timeout": 5,
+        "retries": 3
+      }
+    },
+    "frontend_dev": {
+      "command": ["npm", "run", "dev"],
+      "working_dir": "frontend-next",
+      "autostart": false,
+      "autorestart": true,
+      "restart_limit": 3,
+      "restart_delay": 5,
+      "restart_backoff_multiplier": 1.5,
+      "max_restart_delay": 30,
+      "stdout_logfile": "logs/frontend_dev.log",
+      "stderr_logfile": "logs/frontend_dev.err.log",
+      "environment": {
+        "NODE_ENV": "development",
+        "PORT": "3000"
+      },
+      "health_check": {
+        "endpoint": "http://127.0.0.1:3000",
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3
+      }
+    },
+    "update_server": {
+      "command": ["python", "-m", "update_server.server"],
+      "working_dir": ".",
+      "autostart": true,
+      "autorestart": true,
+      "restart_limit": 3,
+      "restart_delay": 5,
+      "restart_backoff_multiplier": 1.5,
+      "max_restart_delay": 30,
+      "stdout_logfile": "logs/update_server.log",
+      "stderr_logfile": "logs/update_server.err.log",
+      "environment": {
+        "UPDATE_CHECKER_PORT": "8001",
+        "UPDATE_CHECKER_HOST": "127.0.0.1"
+      },
+      "health_check": {
+        "endpoint": "http://127.0.0.1:8001/api/v1/health",
+        "interval": 60,
+        "timeout": 3,
+        "retries": 3
+      }
+    }
+  },
+  "supervisor": {
+    "monitor_interval": 5,
+    "log_level": "INFO",
+    "log_file": "logs/supervisor.log",
+    "pid_file": "logs/supervisor.pid",
+    "auto_update_config": true,
+    "graceful_shutdown_timeout": 10,
+    "memory_limit_mb": 512
+  }
+}

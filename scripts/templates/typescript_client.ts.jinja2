@@ -1,0 +1,180 @@
+/**
+ * API 客户端
+ * 由 routes.yaml 自动生成 - 请勿手动修改
+ * 生成时间：{{ now() }}
+ */
+
+{% set endpoints_by_module = endpoints | groupby('module') %}
+import {ApiResponse} from './api-types';
+
+// API 基础配置
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:9421';
+const API_PREFIX = '{{ base_path }}';
+
+/**
+ * 获取存储的 token
+ */
+function getToken(): string | null {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('access_token');
+}
+
+/**
+ * 通用请求函数
+ */
+async function request<T>(
+    endpoint: string,
+    method: string,
+    data?: any,
+    params?: URLSearchParams
+): Promise<ApiResponse<T>> {
+    const url = new URL(`${API_BASE_URL}${API_PREFIX}${endpoint}`);
+
+    if (params) {
+        url.search = params.toString();
+    }
+
+    const options: RequestInit = {
+        method,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    };
+
+    // 添加认证 token
+    const token = getToken();
+    if (token) {
+        (options.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+    }
+
+    // 处理请求体
+    if (data) {
+        if (method === 'GET' || method === 'HEAD') {
+            // GET 请求将数据作为查询参数
+            Object.keys(data).forEach(key => {
+                if (data[key] !== undefined && data[key] !== null) {
+                    url.searchParams.append(key, String(data[key]));
+                }
+            });
+        } else {
+            // POST/PUT/PATCH 请求将数据作为 JSON body
+            options.body = JSON.stringify(data);
+        }
+    }
+
+    try {
+        const response = await fetch(url.toString(), options);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        return result as ApiResponse<T>;
+    } catch (error) {
+        console.error('API request failed:', error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+        };
+    }
+}
+
+/**
+ * 表单提交请求函数 (使用 FormData)
+ */
+async function submitForm<T>(
+    endpoint: string,
+    method: string,
+    formData: Record<string, any>
+): Promise<ApiResponse<T>> {
+    const url = `${API_BASE_URL}${API_PREFIX}${endpoint}`;
+
+    const options: RequestInit = {
+        method,
+        body: new URLSearchParams(formData).toString(),
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    };
+
+    // 添加认证 token
+    const token = getToken();
+    if (token) {
+        (options.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+    }
+
+    try {
+        const response = await fetch(url, options);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        return result as ApiResponse<T>;
+    } catch (error) {
+        console.error('API request failed:', error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+        };
+    }
+}
+
+// ==================== API 调用函数 ====================
+
+{% set endpoints_by_module = endpoints | groupby('module') %}
+{% for module_name, module_endpoints in endpoints_by_module %}
+// ========== {{ module_name|title }} 模块 ==========
+
+{% for endpoint in module_endpoints %}
+/**
+ * {{ endpoint.summary }}
+ * {{ endpoint.description|default('') }}
+ */
+export async function {{ endpoint.handler }}(
+    {% if endpoint.parameters and endpoint.parameters|selectattr('location', 'eq', 'path')|list %}
+    {% for param in endpoint.parameters|selectattr('location', 'eq', 'path') %}
+    {{ param.name }}: {{ param.type|map_ts_type(param.name) }},
+    {% endfor %}
+    {% endif %}
+    {% if endpoint.parameters and endpoint.parameters|rejectattr('location', 'eq', 'path')|list %}
+                    params: {
+                        {% for param in endpoint.parameters|rejectattr('location', 'eq', 'path') %}
+                        {{ param.name }}{% if not param.required %}?{% endif %}: {{ param.type|map_ts_type(param.name) }};
+                        {% endfor %}
+                    },
+    {% endif %}
+): Promise<ApiResponse<any>> {
+    {% if endpoint.method in ['POST', 'PUT', 'PATCH'] and endpoint.parameters|selectattr('location', 'eq', 'form')|list %}
+    return submitForm(
+        "{{ endpoint.path }}",
+        "{{ endpoint.method }}",
+        params || {}
+    );
+    {% else %}
+    return request(
+        "{{ endpoint.path }}",
+        "{{ endpoint.method }}",
+        {% if endpoint.parameters and endpoint.parameters|rejectattr('location', 'eq', 'path')|list %}
+        params
+    {% else %}
+    undefined
+    {% endif %}
+)
+
+    {% endif %}
+}
+
+{% endfor %}
+{% endfor %}
+
+// 导出所有 API 函数
+export default {
+    {% for module_name, module_endpoints in endpoints_by_module %}
+    {% for endpoint in module_endpoints %}
+    {{ endpoint.handler }},
+    {% endfor %}
+    {% endfor %}
+};

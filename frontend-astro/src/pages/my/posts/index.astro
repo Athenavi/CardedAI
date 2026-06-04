@@ -1,0 +1,9 @@
+---
+// 我的文章列表
+import Layout from '@/layouts/Layout.astro';
+import MyPostsPage from '@/components/pages/my/MyPostsPage';
+---
+
+<Layout title="我的文章 - FastBlog">
+    <MyPostsPage client:idle/>
+</Layout>

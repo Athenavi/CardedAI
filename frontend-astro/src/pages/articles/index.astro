@@ -1,0 +1,12 @@
+---
+// 文章列表页
+import Layout from '@/layouts/Layout.astro';
+import ArticleList from '@/components/pages/ArticleList';
+---
+
+<Layout title="文章列表 - FastBlog" description="浏览所有文章">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">文章列表</h1>
+    <ArticleList client:load />
+  </div>
+</Layout>

@@ -1,0 +1,11 @@
+---
+// 首页 — Astro 静态外壳
+import Layout from '@/layouts/Layout.astro';
+import ModernHomePage from '@/components/home/ModernHomePage';
+---
+
+<Layout title="FastBlog - 首页" description="发现精彩内容，连接智慧世界">
+  <div class="min-h-screen">
+    <ModernHomePage client:load />
+  </div>
+</Layout>

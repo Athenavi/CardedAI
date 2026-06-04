@@ -1,0 +1,32 @@
+{
+  "name": "fastblog-mobile",
+  "version": "1.0.0",
+  "description": "FastBlog Mobile App using Capacitor",
+  "main": "index.js",
+  "scripts": {
+    "build:web": "cd ../frontend-astro && npm run build",
+    "sync": "cap sync",
+    "android": "cap open android",
+    "ios": "cap open ios",
+    "run:android": "cap run android",
+    "run:ios": "cap run ios",
+    "build:android": "npm run build:web && npx cap sync && cd android && ./gradlew assembleRelease",
+    "build:ios": "npm run build:web && npx cap sync && cd ios && xcodebuild -workspace App/App.xcworkspace -scheme App -configuration Release archive"
+  },
+  "keywords": [
+    "capacitor",
+    "mobile",
+    "fastblog",
+    "pwa"
+  ],
+  "author": "FastBlog Team",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^5.7.8",
+    "@capacitor/core": "^5.7.0",
+    "@capacitor/ios": "^5.7.8"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^5.7.0"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "name": "Modern Minimal",
+  "slug": "modern-minimal",
+  "version": "2.0.0",
+  "description": "现代简约风格主题 - 干净、优雅、响应式设计，支持代码高亮和深色模式，适合技术博客和个人作品集",
+  "author": "FastBlog Team",
+  "author_url": "https://athenavi.github.io",
+  "theme_url": "https://athenavi.github.io/themes/modern-minimal",
+  "screenshot": "screenshot.svg",
+  "tags": [
+    "minimal",
+    "modern",
+    "clean",
+    "responsive",
+    "personal",
+    "technology",
+    "code",
+    "dark-mode"
+  ],
+  "requires": {
+    "fastblog": ">=1.0.0"
+  },
+  "supports": [
+    "custom-logo",
+    "custom-header",
+    "featured-image",
+    "post-thumbnails",
+    "comments",
+    "widgets",
+    "table-of-contents",
+    "code-highlighting",
+    "dark-mode",
+    "responsive-design"
+  ],
+  "settings_schema": {
+    "colors": {
+      "primary": "#3b82f6",
+      "secondary": "#64748b",
+      "accent": "#f59e0b",
+      "background": "#ffffff",
+      "foreground": "#1f2937",
+      "muted": "#f3f4f6",
+      "border": "#e5e7eb",
+      "code_background": "#1e293b",
+      "code_text": "#e2e8f0"
+    },
+    "layout": {
+      "sidebar_position": "right",
+      "content_width": "max-w-5xl",
+      "show_sidebar": true,
+      "show_toc": true,
+      "toc_position": "sticky",
+      "header_style": "centered",
+      "footer_style": "simple"
+    },
+    "typography": {
+      "font_family": "Inter, system-ui, -apple-system, sans-serif",
+      "code_font": "Fira Code, JetBrains Mono, monospace",
+      "font_size": "16px",
+      "line_height": 1.75,
+      "heading_weight": 600,
+      "heading_letter_spacing": "-0.025em"
+    },
+    "features": {
+      "show_reading_time": true,
+      "show_word_count": true,
+      "show_related_posts": true,
+      "show_author_box": true,
+      "smooth_scroll": true,
+      "lazy_load_images": true,
+      "auto_dark_mode": true,
+      "show_code_line_numbers": true,
+      "show_copy_button": true,
+      "show_table_of_contents": true
+    }
+  }
+}

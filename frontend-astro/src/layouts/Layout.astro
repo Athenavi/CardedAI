@@ -1,0 +1,60 @@
+---
+// 根布局 — Astro 替代 Next.js 的 app/layout.tsx
+import '@/styles/globals.css';
+import '@/styles/rtl.css';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import {GlobalShortcuts} from '@/components/GlobalShortcuts';
+import MobileGestures from '@/components/MobileGestures';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  dir?: 'ltr' | 'rtl';
+  lang?: string;
+}
+
+const {title = 'FastBlog', description = 'A modern blog platform', dir = 'ltr', lang = 'zh-CN'} = Astro.props;
+---
+
+<html lang={lang} dir={dir} suppressHydrationWarning>
+  <head>
+    <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3b82f6" />
+    <slot name="head" />
+
+    <!-- Theme sync: apply dark class before paint to prevent flash -->
+    <script is:inline>
+      (function() {
+        var key = 'fastblog-theme';
+        var cls = 'dark';
+        var root = document.documentElement;
+        try {
+          var stored = localStorage.getItem(key);
+          if (stored === 'dark') {
+            root.classList.add(cls);
+          } else if (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            root.classList.add(cls);
+          }
+        } catch(e) {}
+      })();
+    </script>
+  </head>
+  <body class="antialiased" suppressHydrationWarning>
+    <Navbar client:load />
+    <GlobalShortcuts client:load />
+    <MobileGestures client:load />
+
+    <main class="min-h-screen">
+      <slot />
+    </main>
+
+    <Footer client:load />
+
+    <slot name="scripts" />
+  </body>
+</html>

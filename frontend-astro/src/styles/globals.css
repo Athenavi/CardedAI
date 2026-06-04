@@ -1,0 +1,2 @@
+/* globals.css — 统一入口，复用 global.css 的完整设计系统 */
+@import "./global.css";
