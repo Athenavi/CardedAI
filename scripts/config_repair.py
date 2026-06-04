@@ -6,7 +6,7 @@ FastBlog 配置修复工具
 
 使用方法:
     python scripts/config_repair.py --help
-    
+
 子命令:
     - backup: 备份当前配置文件
     - restore: 从备份还原配置文件
@@ -52,22 +52,7 @@ class ConfigRepairTool:
         self._load_config()
 
     def _load_config(self):
-        """加载 routes.yaml 和 models.yaml 配置"""
-        # 加载 routes.yaml
-        if routes_file.exists():
-            try:
-                with open(routes_file, 'r', encoding='utf-8') as f:
-                    self.data = yaml.safe_load(f) or {}
-                self.models = self.data.get('models', {})
-            except Exception as e:
-                print(f"⚠ 加载 routes.yaml 失败：{e}")
-                self.data = {}
-                self.models = {}
-        else:
-            print(f"⚠ routes.yaml 不存在，将使用空配置")
-            self.data = {'endpoints': [], 'models': {}}
-            self.models = {}
-
+        """ models.yaml 配置 """
         # 加载 models.yaml（如果存在）
         if models_file.exists():
             try:
@@ -85,7 +70,7 @@ class ConfigRepairTool:
     def backup(self, name: Optional[str] = None, include_models: bool = True):
         """
         备份当前配置文件
-        
+
         Args:
             name: 备份名称，默认为时间戳
             include_models: 是否包含 models.yaml
@@ -181,7 +166,7 @@ class ConfigRepairTool:
     def restore(self, backup_name: str, restore_routes: bool = True, restore_models: bool = True):
         """
         从备份还原配置文件
-        
+
         Args:
             backup_name: 备份名称（不含扩展名）
             restore_routes: 是否还原 routes.yaml
@@ -203,16 +188,6 @@ class ConfigRepairTool:
                 print()
 
             restored_count = 0
-
-            # 还原 routes.yaml
-            if restore_routes:
-                routes_backup = backup_subdir / 'routes.yaml'
-                if routes_backup.exists():
-                    shutil.copy2(routes_backup, routes_file)
-                    print(f"✓ 已还原 routes.yaml")
-                    restored_count += 1
-                else:
-                    print(f"⚠ 备份中没有 routes.yaml")
 
             # 还原 models.yaml
             if restore_models:
@@ -238,10 +213,10 @@ class ConfigRepairTool:
     def repair(self, file_type: str = 'all'):
         """
         尝试修复损坏的配置文件
-        
+
         Args:
             file_type: 'routes', 'models', 或 'all'
-        
+
         功能:
         - 修复 YAML 格式错误
         - 移除无效的 Unicode 字符
@@ -412,19 +387,6 @@ class ConfigRepairTool:
             elif choice == '4':
                 print("\n📊 当前配置信息:")
 
-                # 检查 routes.yaml
-                if routes_file.exists():
-                    try:
-                        with open(routes_file, 'r', encoding='utf-8') as f:
-                            data = yaml.safe_load(f)
-                        print(f"\n✅ routes.yaml")
-                        print(f"   - 端点数量：{len(data.get('endpoints', []))}")
-                        print(f"   - 模型数量：{len(data.get('models', {}))}")
-                    except Exception as e:
-                        print(f"\n❌ routes.yaml 读取失败：{e}")
-                else:
-                    print(f"\n❌ routes.yaml 不存在")
-
                 # 检查 models.yaml
                 if models_file.exists():
                     try:
@@ -531,7 +493,7 @@ class ConfigRepairTool:
     def reverse_from_models(self):
         """
         从现有的 shared/models 逆向生成 routes.yaml
-        
+
         分析 shared/models 目录下的 SQLAlchemy 模型，
         自动生成对应的 routes.yaml 配置
         """
@@ -788,11 +750,7 @@ class ConfigRepairTool:
             print("\nℹ️  所有模型已经是最新的")
 
     def _save(self):
-        """保存 routes.yaml 和 models.yaml"""
-        # 保存到 routes.yaml
-        with open(routes_file, 'w', encoding='utf-8') as f:
-            yaml.dump(self.data, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
-        print("✓ 已保存到 routes.yaml")
+        """保存 models.yaml """
 
         # 保存到 models.yaml（如果有修改）
         if self.extra_models_data:

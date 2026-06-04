@@ -1,3 +1,46 @@
+# ============================================================================
+#   模型定义配置文件
+# ============================================================================
+#
+# 本文件用于定义项目中所有的 SQLAlchemy 数据模型和 Pydantic 请求/响应模型。
+# 代码生成器会根据此配置文件自动生成：
+#   - SQLAlchemy ORM 模型 (shared/models/*.py)
+#   - FastAPI 路由 (src/api/v1/generated/generated_router.py)（弃用的特性）
+#   - TypeScript 类型定义 (frontend-next/types/generated/api-types.ts)
+#   - TypeScript API 客户端 (frontend-next/types/generated/api-client.ts)
+#
+# 使用方法：
+#   1. 在此文件中添加或修改模型定义
+#   2. 运行命令: python scripts/generate_routes.py generate-all
+#   3. 生成的代码会自动保存到对应目录
+#
+# 模型配置说明：
+#   - orm: true          # 标记为 ORM 模型，会生成 SQLAlchemy 模型文件
+#   - table: xxx         # 指定数据库表名
+#   - def_list: [...]    # 自定义方法列表（在 shared/defs/<model>_defs.py 中定义）
+#   - defs_target: xxx   # 自定义方法文件名（相对于 shared/defs/）
+#   - properties:        # 模型属性定义
+#       field_name:
+#         type: string   # 数据类型 (string, integer, boolean, text, datetime等)
+#         description:   # 字段描述
+#         maxLength:     # 最大长度（字符串类型）
+#         nullable:      # 是否可为空
+#         default:       # 默认值
+#         unique:        # 是否唯一
+#         foreignKey:    # 外键引用（引用其他模型的名称）
+#         enum: []       # 枚举值列表
+#         format:        # 格式（如 email, date-time）
+#         index: true    # 是否创建索引
+#   - unlogged: false     # 是否为 PostgreSQL UNLOGGED 表（不启用 WAL，性能更高，但崩溃时可能丢失数据）
+#
+# 注意事项：
+#   - 请勿手动修改自动生成的模型文件（文件头部有注释标识）
+#   - 自定义方法应放在 shared/defs/ 目录下的对应文件中
+#   - 修改配置后需要重新运行代码生成器
+#   - 数据库迁移需要单独执行（建议使用 Alembic）
+#
+# ============================================================================
+
 models:
   AuditLog:
     description: 操作审计日志模型
@@ -3567,3 +3610,959 @@ models:
         columns:
           - created_at
         comment: 时间索引
+
+  # ============================================================================
+  # 情报引擎模型 (shared/models/intel/)
+  # ============================================================================
+
+  DataSource:
+    description: 数据源配置
+    status: active
+    module: intel
+    orm: true
+    table: intel_data_sources
+    properties:
+      id:
+        type: bigint
+        description: 数据源 ID
+      name:
+        type: string
+        maxLength: 200
+        description: 数据源名称
+      source_type:
+        type: string
+        maxLength: 50
+        nullable: true
+        description: '源类型 (rss/web/api/search/social)'
+      url:
+        type: text
+        nullable: true
+        description: 源 URL
+      config:
+        type: text
+        nullable: true
+        description: '采集配置 (JSON: 选择器、频率等)'
+      schedule_cron:
+        type: string
+        maxLength: 100
+        nullable: true
+        description: 采集调度 Cron 表达式
+      is_active:
+        type: boolean
+        default: true
+        description: 是否启用
+      last_collected_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: 最后采集时间
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+      created_by:
+        type: bigint
+        nullable: true
+        description: 创建用户
+        foreignKey: User
+    indexes:
+      - name: idx_intel_ds_type
+        columns:
+          - source_type
+        comment: 源类型索引
+      - name: idx_intel_ds_active
+        columns:
+          - is_active
+        comment: 启用状态索引
+
+  CollectedItem:
+    description: 采集到的原始数据条目
+    status: active
+    module: intel
+    orm: true
+    table: intel_collected_items
+    properties:
+      id:
+        type: bigint
+        description: 条目 ID
+      source_id:
+        type: bigint
+        nullable: true
+        description: 数据源 ID
+        foreignKey: DataSource
+      url:
+        type: text
+        nullable: true
+        description: 原始 URL
+      title:
+        type: string
+        maxLength: 500
+        nullable: true
+        description: 标题
+      content_raw:
+        type: text
+        nullable: true
+        description: 原始内容
+      content_cleaned:
+        type: text
+        nullable: true
+        description: 清洗后内容
+      content_hash:
+        type: string
+        maxLength: 64
+        nullable: true
+        index: true
+        description: 内容哈希 (用于去重)
+      metadata_json:
+        type: text
+        nullable: true
+        description: '元数据 (JSON: 作者、发布时间等)'
+      status:
+        type: string
+        maxLength: 20
+        default: raw
+        description: '状态 (raw/cleaned/analyzed/archived)'
+      collected_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: 采集时间
+      analyzed_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: 分析时间
+    indexes:
+      - name: idx_intel_ci_source
+        columns:
+          - source_id
+        comment: 数据源索引
+      - name: idx_intel_ci_status
+        columns:
+          - status
+        comment: 状态索引
+      - name: idx_intel_ci_hash
+        columns:
+          - content_hash
+        comment: 内容哈希索引
+
+  Intelligence:
+    description: AI 分析后的情报条目
+    status: active
+    module: intel
+    orm: true
+    table: intel_intelligence
+    properties:
+      id:
+        type: bigint
+        description: 情报 ID
+      title:
+        type: string
+        maxLength: 500
+        nullable: true
+        description: 情报标题
+      summary:
+        type: text
+        nullable: true
+        description: AI 生成的摘要
+      sentiment:
+        type: string
+        maxLength: 20
+        nullable: true
+        description: '情感倾向 (positive/negative/neutral)'
+      category:
+        type: string
+        maxLength: 100
+        nullable: true
+        description: AI 分类
+      importance_score:
+        type: float
+        nullable: true
+        description: 重要性评分 (0-1)
+      item_ids:
+        type: text
+        nullable: true
+        description: 关联的采集条目 ID 列表 (JSON)
+      tags:
+        type: text
+        nullable: true
+        description: AI 提取的标签 (JSON)
+      source_urls:
+        type: text
+        nullable: true
+        description: 来源链接 (JSON)
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+    indexes:
+      - name: idx_intel_intel_sentiment
+        columns:
+          - sentiment
+        comment: 情感索引
+      - name: idx_intel_intel_category
+        columns:
+          - category
+        comment: 分类索引
+      - name: idx_intel_intel_score
+        columns:
+          - importance_score
+        comment: 重要性索引
+
+  Briefing:
+    description: 情报简报
+    status: active
+    module: intel
+    orm: true
+    table: intel_briefings
+    properties:
+      id:
+        type: bigint
+        description: 简报 ID
+      title:
+        type: string
+        maxLength: 500
+        nullable: true
+        description: 简报标题
+      content:
+        type: text
+        nullable: true
+        description: Markdown 格式简报内容
+      briefing_type:
+        type: string
+        maxLength: 50
+        nullable: true
+        description: '简报类型 (daily/weekly/alert/custom)'
+      intelligence_ids:
+        type: text
+        nullable: true
+        description: 包含的情报 ID 列表 (JSON)
+      channels_sent:
+        type: text
+        nullable: true
+        description: 已推送渠道 (JSON)
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+    indexes:
+      - name: idx_intel_brief_type
+        columns:
+          - briefing_type
+        comment: 简报类型索引
+
+  AlertRule:
+    description: 预警规则
+    status: active
+    module: intel
+    orm: true
+    table: intel_alert_rules
+    properties:
+      id:
+        type: bigint
+        description: 规则 ID
+      name:
+        type: string
+        maxLength: 200
+        nullable: true
+        description: 规则名称
+      conditions:
+        type: text
+        nullable: true
+        description: 触发条件 (JSON)
+      keywords:
+        type: text
+        nullable: true
+        description: 关键词列表 (JSON)
+      severity:
+        type: string
+        maxLength: 20
+        nullable: true
+        description: '严重程度 (low/medium/high/critical)'
+      actions:
+        type: text
+        nullable: true
+        description: 触发动作 (JSON)
+      is_active:
+        type: boolean
+        default: true
+        description: 是否启用
+      created_by:
+        type: bigint
+        nullable: true
+        description: 创建用户
+        foreignKey: User
+      last_triggered_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: 最后触发时间
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+    indexes:
+      - name: idx_intel_ar_severity
+        columns:
+          - severity
+        comment: 严重程度索引
+      - name: idx_intel_ar_active
+        columns:
+          - is_active
+        comment: 启用状态索引
+
+  AlertEvent:
+    description: 预警事件记录
+    status: active
+    module: intel
+    orm: true
+    table: intel_alert_events
+    properties:
+      id:
+        type: bigint
+        description: 事件 ID
+      rule_id:
+        type: bigint
+        nullable: true
+        description: 触发的规则 ID
+        foreignKey: AlertRule
+      intelligence_id:
+        type: bigint
+        nullable: true
+        description: 关联的情报 ID
+        foreignKey: Intelligence
+      severity:
+        type: string
+        maxLength: 20
+        nullable: true
+        description: 事件严重程度
+      message:
+        type: text
+        nullable: true
+        description: 告警消息
+      status:
+        type: string
+        maxLength: 20
+        default: pending
+        description: '状态 (pending/acknowledged/resolved)'
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+    indexes:
+      - name: idx_intel_ae_rule
+        columns:
+          - rule_id
+        comment: 规则索引
+      - name: idx_intel_ae_status
+        columns:
+          - status
+        comment: 状态索引
+
+  # ============================================================================
+  # 知识引擎模型 (shared/models/knowledge/)
+  # ============================================================================
+
+  KnowledgeBase:
+    description: 知识库
+    status: active
+    module: knowledge
+    orm: true
+    table: knowledge_bases
+    properties:
+      id:
+        type: bigint
+        description: 知识库 ID
+      name:
+        type: string
+        maxLength: 200
+        nullable: true
+        description: 知识库名称
+      description:
+        type: text
+        nullable: true
+        description: 知识库描述
+      embedding_model:
+        type: string
+        maxLength: 100
+        nullable: true
+        description: 使用的 Embedding 模型
+      chunk_size:
+        type: integer
+        default: 512
+        description: 切片大小
+      chunk_overlap:
+        type: integer
+        default: 50
+        description: 切片重叠
+      vector_collection:
+        type: string
+        maxLength: 100
+        nullable: true
+        description: 向量集合名称
+      document_count:
+        type: integer
+        default: 0
+        description: 文档数量
+      chunk_count:
+        type: integer
+        default: 0
+        description: 切片数量
+      created_by:
+        type: bigint
+        nullable: true
+        description: 创建用户
+        foreignKey: User
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+      updated_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: 更新时间
+    indexes:
+      - name: idx_kb_name
+        columns:
+          - name
+        comment: 名称索引
+
+  KnowledgeDocument:
+    description: 知识库文档
+    status: active
+    module: knowledge
+    orm: true
+    table: knowledge_documents
+    properties:
+      id:
+        type: bigint
+        description: 文档 ID
+      knowledge_base_id:
+        type: bigint
+        nullable: true
+        description: 所属知识库 ID
+        foreignKey: KnowledgeBase
+      title:
+        type: string
+        maxLength: 500
+        nullable: true
+        description: 文档标题
+      file_path:
+        type: text
+        nullable: true
+        description: 文件存储路径
+      file_type:
+        type: string
+        maxLength: 50
+        nullable: true
+        description: '文件类型 (pdf/docx/txt/html/url)'
+      content_text:
+        type: text
+        nullable: true
+        description: 提取的纯文本
+      chunk_count:
+        type: integer
+        default: 0
+        description: 切片数量
+      status:
+        type: string
+        maxLength: 20
+        default: uploading
+        description: '状态 (uploading/parsing/indexed/failed)'
+      metadata_json:
+        type: text
+        nullable: true
+        description: 文档元数据 (JSON)
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+    indexes:
+      - name: idx_kd_kb
+        columns:
+          - knowledge_base_id
+        comment: 知识库索引
+      - name: idx_kd_status
+        columns:
+          - status
+        comment: 状态索引
+
+  DocumentChunk:
+    description: 文档切片
+    status: active
+    module: knowledge
+    orm: true
+    table: knowledge_document_chunks
+    properties:
+      id:
+        type: bigint
+        description: 切片 ID
+      document_id:
+        type: bigint
+        nullable: true
+        description: 所属文档 ID
+        foreignKey: KnowledgeDocument
+      knowledge_base_id:
+        type: bigint
+        nullable: true
+        description: 所属知识库 ID
+        foreignKey: KnowledgeBase
+      chunk_index:
+        type: integer
+        nullable: true
+        description: 切片序号
+      content:
+        type: text
+        nullable: true
+        description: 切片内容
+      embedding_id:
+        type: string
+        maxLength: 100
+        nullable: true
+        description: 向量数据库中的 ID
+      metadata_json:
+        type: text
+        nullable: true
+        description: '元数据 (JSON: 页码、章节等)'
+      token_count:
+        type: integer
+        nullable: true
+        description: Token 数量
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+    indexes:
+      - name: idx_dc_doc
+        columns:
+          - document_id
+        comment: 文档索引
+      - name: idx_dc_kb
+        columns:
+          - knowledge_base_id
+        comment: 知识库索引
+
+  ReportTemplate:
+    description: 报告模板
+    status: active
+    module: knowledge
+    orm: true
+    table: knowledge_report_templates
+    properties:
+      id:
+        type: bigint
+        description: 模板 ID
+      name:
+        type: string
+        maxLength: 200
+        nullable: true
+        description: 模板名称
+      description:
+        type: text
+        nullable: true
+        description: 模板描述
+      template_content:
+        type: text
+        nullable: true
+        description: 模板内容 (Markdown/Jinja2)
+      sections:
+        type: text
+        nullable: true
+        description: 模板章节定义 (JSON)
+      created_by:
+        type: bigint
+        nullable: true
+        description: 创建用户
+        foreignKey: User
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+      updated_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: 更新时间
+
+  GeneratedReport:
+    description: 生成的报告
+    status: active
+    module: knowledge
+    orm: true
+    table: knowledge_generated_reports
+    properties:
+      id:
+        type: bigint
+        description: 报告 ID
+      template_id:
+        type: bigint
+        nullable: true
+        description: 使用的模板 ID
+        foreignKey: ReportTemplate
+      title:
+        type: string
+        maxLength: 500
+        nullable: true
+        description: 报告标题
+      content:
+        type: text
+        nullable: true
+        description: 生成的报告内容 (Markdown)
+      knowledge_base_ids:
+        type: text
+        nullable: true
+        description: 引用的知识库 ID 列表 (JSON)
+      status:
+        type: string
+        maxLength: 20
+        default: generating
+        description: '状态 (generating/completed/failed)'
+      created_by:
+        type: bigint
+        nullable: true
+        description: 创建用户
+        foreignKey: User
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+    indexes:
+      - name: idx_gr_template
+        columns:
+          - template_id
+        comment: 模板索引
+      - name: idx_gr_status
+        columns:
+          - status
+        comment: 状态索引
+
+  # ============================================================================
+  # 自动化工作流模型 (shared/models/workflow/)
+  # ============================================================================
+
+  WorkflowDefinition:
+    description: 工作流定义
+    status: active
+    module: workflow
+    orm: true
+    table: workflow_definitions
+    properties:
+      id:
+        type: bigint
+        description: 工作流 ID
+      name:
+        type: string
+        maxLength: 200
+        nullable: true
+        description: 工作流名称
+      description:
+        type: text
+        nullable: true
+        description: 工作流描述
+      version:
+        type: integer
+        default: 1
+        description: 版本号
+      graph:
+        type: text
+        nullable: true
+        description: 'DAG 图结构 (JSON: {nodes, edges})'
+      trigger_config:
+        type: text
+        nullable: true
+        description: '触发配置 (JSON: {type, cron, event})'
+      is_active:
+        type: boolean
+        default: false
+        description: 是否启用
+      created_by:
+        type: bigint
+        nullable: true
+        description: 创建用户
+        foreignKey: User
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+      updated_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: 更新时间
+    indexes:
+      - name: idx_wfd_active
+        columns:
+          - is_active
+        comment: 启用状态索引
+
+  WorkflowExecution:
+    description: 工作流执行实例
+    status: active
+    module: workflow
+    orm: true
+    table: workflow_executions
+    properties:
+      id:
+        type: bigint
+        description: 执行 ID
+      workflow_id:
+        type: bigint
+        nullable: true
+        description: 工作流定义 ID
+        foreignKey: WorkflowDefinition
+      status:
+        type: string
+        maxLength: 20
+        default: pending
+        description: '状态 (pending/running/completed/failed/cancelled)'
+      trigger_type:
+        type: string
+        maxLength: 50
+        nullable: true
+        description: '触发类型 (manual/scheduled/event)'
+      input_data:
+        type: text
+        nullable: true
+        description: 输入数据 (JSON)
+      output_data:
+        type: text
+        nullable: true
+        description: 输出数据 (JSON)
+      error_message:
+        type: text
+        nullable: true
+        description: 错误信息
+      started_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: 开始时间
+      completed_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: 完成时间
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+    relationships:
+      node_executions:
+        target: NodeExecution
+        back_populates: execution
+    indexes:
+      - name: idx_wfe_workflow
+        columns:
+          - workflow_id
+        comment: 工作流索引
+      - name: idx_wfe_status
+        columns:
+          - status
+        comment: 状态索引
+
+  NodeExecution:
+    description: 工作流节点执行记录
+    status: active
+    module: workflow
+    orm: true
+    table: workflow_node_executions
+    properties:
+      id:
+        type: bigint
+        description: 节点执行 ID
+      execution_id:
+        type: bigint
+        nullable: true
+        description: 所属执行实例 ID
+        foreignKey: WorkflowExecution
+      node_id:
+        type: string
+        maxLength: 100
+        nullable: true
+        description: 节点在 DAG 中的 ID
+      node_type:
+        type: string
+        maxLength: 50
+        nullable: true
+        description: '节点类型 (llm/collector/rag/transform/condition/notify)'
+      status:
+        type: string
+        maxLength: 20
+        nullable: true
+        description: '状态 (pending/running/completed/failed/skipped)'
+      input_data:
+        type: text
+        nullable: true
+        description: 输入数据 (JSON)
+      output_data:
+        type: text
+        nullable: true
+        description: 输出数据 (JSON)
+      error_message:
+        type: text
+        nullable: true
+        description: 错误信息
+      duration_ms:
+        type: integer
+        nullable: true
+        description: 执行耗时 (毫秒)
+      started_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: 开始时间
+      completed_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: 完成时间
+    indexes:
+      - name: idx_ne_execution
+        columns:
+          - execution_id
+        comment: 执行实例索引
+      - name: idx_ne_status
+        columns:
+          - status
+        comment: 状态索引
+
+  Trigger:
+    description: 工作流触发器
+    status: active
+    module: workflow
+    orm: true
+    table: workflow_triggers
+    properties:
+      id:
+        type: bigint
+        description: 触发器 ID
+      workflow_id:
+        type: bigint
+        nullable: true
+        description: 关联的工作流 ID
+        foreignKey: WorkflowDefinition
+      trigger_type:
+        type: string
+        maxLength: 50
+        nullable: true
+        description: '触发类型 (cron/event/webhook/manual)'
+      config:
+        type: text
+        nullable: true
+        description: 触发器配置 (JSON)
+      is_active:
+        type: boolean
+        default: true
+        description: 是否启用
+      last_fired_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: 最后触发时间
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+    indexes:
+      - name: idx_trigger_workflow
+        columns:
+          - workflow_id
+        comment: 工作流索引
+
+  AgentTool:
+    description: AI Agent 工具注册
+    status: active
+    module: workflow
+    orm: true
+    table: workflow_agent_tools
+    properties:
+      id:
+        type: bigint
+        description: 工具 ID
+      name:
+        type: string
+        maxLength: 200
+        nullable: true
+        description: 工具名称
+      description:
+        type: text
+        nullable: true
+        description: 工具描述
+      tool_type:
+        type: string
+        maxLength: 50
+        nullable: true
+        description: '工具类型 (api/function/collector/transformer)'
+      schema:
+        type: text
+        nullable: true
+        description: 工具参数 JSON Schema
+      config:
+        type: text
+        nullable: true
+        description: 工具配置 (JSON)
+      is_active:
+        type: boolean
+        default: true
+        description: 是否启用
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+    indexes:
+      - name: idx_tool_type
+        columns:
+          - tool_type
+        comment: 工具类型索引
+
+  AgentMemory:
+    description: AI Agent 记忆存储
+    status: active
+    module: workflow
+    orm: true
+    table: workflow_agent_memories
+    properties:
+      id:
+        type: bigint
+        description: 记忆 ID
+      agent_id:
+        type: string
+        maxLength: 100
+        nullable: true
+        description: Agent 标识
+      session_id:
+        type: string
+        maxLength: 100
+        nullable: true
+        description: 会话 ID
+      memory_type:
+        type: string
+        maxLength: 50
+        nullable: true
+        description: '记忆类型 (short_term/long_term/episodic)'
+      content:
+        type: text
+        nullable: true
+        description: 记忆内容
+      metadata_json:
+        type: text
+        nullable: true
+        description: 元数据 (JSON)
+      created_at:
+        type: string
+        format: date-time
+        description: 创建时间
+    indexes:
+      - name: idx_mem_agent
+        columns:
+          - agent_id
+        comment: Agent 索引
+      - name: idx_mem_session
+        columns:
+          - session_id
+        comment: 会话索引
+      - name: idx_mem_type
+        columns:
+          - memory_type
+        comment: 记忆类型索引

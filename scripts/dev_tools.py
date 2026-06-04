@@ -6,7 +6,7 @@ FastBlog 开发工具脚本
 
 使用方法:
     python scripts/dev_tools.py --help
-    
+
 子命令:
     - generate-shared-services: 生成共享服务模块的导入代码
     - verify-routes: 验证 FastAPI 和 Next.jsNinja 路由的一致性
@@ -36,39 +36,12 @@ class SharedServicesGenerator:
         self.routes_file = project_root / 'config' / 'routes.yaml'
 
     def generate(self):
-        """分析 routes.yaml 并生成共享服务模块的导入代码"""
-        if not self.routes_file.exists():
-            print(f"❌ 配置文件不存在：{self.routes_file}")
-            return False
+        output = []
+        output.append('# ============================================================================')
+        output.append('# 该模块已废弃')
+        output.append('# ============================================================================')
 
-        # 读取 routes.yaml
-        with open(self.routes_file, 'r', encoding='utf-8') as f:
-            data = yaml.safe_load(f)
-
-        # 收集所有 handler 及其 module 信息
-        handlers_by_module = defaultdict(set)
-        for endpoint in data['endpoints']:
-            handler = endpoint.get('handler', '')
-            module = endpoint.get('module', 'unknown')
-            if handler and handler != 'placeholder':
-                handlers_by_module[module].add(handler)
-
-        # 打印统计信息
-        print(f"共找到 {sum(len(h) for h in handlers_by_module.values())} 个 handler")
-        print(f"涉及 {len(handlers_by_module)} 个模块\n")
-
-        # 生成 __init__.py 内容
-        output = self._generate_init_content(handlers_by_module)
-
-        # 写入文件
-        output_file = project_root / 'src' / 'shared' / 'services' / '__init__.py'
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(output))
-
-        print(f"\n✓ 已生成：{output_file}")
-        print(f"共 {len([h for handlers in handlers_by_module.values() for h in handlers])} 个 API 函数")
-        return True
+        return output
 
     def _generate_init_content(self, handlers_by_module: Dict[str, Set[str]]) -> List[str]:
         """生成 __init__.py 文件内容"""

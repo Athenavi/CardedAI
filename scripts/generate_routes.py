@@ -44,28 +44,30 @@ class RouteGenerator:
     def __init__(self, config_path: str = None):
         """
         初始化生成器
-        
+
         Args:
-            config_path: routes.yaml 配置文件路径
+            config_path: routes.yaml 配置文件路径（可选，不提供则仅从 models.yaml 加载模型）
         """
         self.project_root = Path(__file__).parent.parent
+
+        # 加载 routes.yaml 配置（可选）
         self.config_path = Path(config_path) if config_path else self.project_root / "config" / "routes.yaml"
+        self.config = {}
+        if self.config_path.exists():
+            with open(self.config_path, 'r', encoding='utf-8') as f:
+                self.config = yaml.safe_load(f) or {}
+            print(f"已加载路由配置：{self.config_path}")
+        else:
+            print(f"提示：routes.yaml 不存在（{self.config_path}），仅使用 models.yaml 中的配置")
 
-        if not self.config_path.exists():
-            raise FileNotFoundError(f"配置文件不存在：{self.config_path}")
-
-        # 加载配置
-        with open(self.config_path, 'r', encoding='utf-8') as f:
-            self.config = yaml.safe_load(f)
-
-        # 加载额外的模型配置（如果有）
+        # 加载模型配置（models.yaml）
         self.models_config_path = self.project_root / "config" / "models.yaml"
         self.extra_models = {}
         if self.models_config_path.exists():
             with open(self.models_config_path, 'r', encoding='utf-8') as f:
                 extra_config = yaml.safe_load(f)
                 self.extra_models = extra_config.get('models', {})
-                print(f"已加载额外模型配置：{len(self.extra_models)} 个模型")
+                print(f"已加载模型配置：{len(self.extra_models)} 个模型")
 
         # 设置模板目录
         self.template_dir = self.project_root / "scripts" / "templates"
@@ -89,7 +91,6 @@ class RouteGenerator:
         self.models = {**self.config.get('models', {}), **self.extra_models}
         self.endpoints = self.config.get('endpoints', [])
         self.generation_config = self.config.get('generation', {})
-        # 不再使用 shared_models，改为从 models[*].orm 读取
 
     def generate_all(self):
         """生成所有代码"""
@@ -265,11 +266,24 @@ class RouteGenerator:
 
         generated_count = 0
         success_models = []
+        # 记录使用了哪些子模块，以便后续创建 __init__.py
+        used_modules = set()
 
         for model_name, model_def in orm_models.items():
             try:
+                # 读取 module 属性（可选），决定模型文件的子目录位置
+                module_path = model_def.get('module', '').strip()
+                if module_path:
+                    # 规范化路径分隔符（支持 "intel" 或 "intel/sub" 格式）
+                    module_path = module_path.replace('\\', '/').strip('/')
+                    used_modules.add(module_path)
+                    output_dir = output_base / module_path
+                    output_dir.mkdir(parents=True, exist_ok=True)
+                else:
+                    output_dir = output_base
+
                 # 每个模型生成一个单独的文件
-                output_path = output_base / f"{self._model_name_to_filename(model_name)}.py"
+                output_path = output_dir / f"{self._model_name_to_filename(model_name)}.py"
 
                 # 从 properties 自动生成 SQLAlchemy 字段，并传入全量模型配置用于外键解析
                 properties = model_def.get('properties', {})
@@ -327,6 +341,8 @@ class RouteGenerator:
                         'has_uuid_pk': has_uuid_pk,
                         'has_datetime_default': has_datetime_default,
                     },
+                    # 子模块路径（用于控制 Base 导入方式）
+                    'module_path': module_path,
                 }
 
                 content = self._render_template('sqlalchemy_model.py.jinja2', template_data)
@@ -341,6 +357,9 @@ class RouteGenerator:
                 print(f"    详细信息：{traceback.format_exc()}")
                 # 存在失败模型时直接退出，避免生成不完整的 __init__.py
                 raise SystemExit(1)
+
+        # 为每个使用的子模块创建 __init__.py
+        self._create_module_init_files(output_base, used_modules)
 
         # 全部生成成功后才更新 __init__.py
         if success_models:
@@ -467,11 +486,11 @@ class RouteGenerator:
     def _load_custom_methods(self, model_name: str, def_list: list) -> dict:
         """
         从 shared/defs/<model_name>_defs.py 加载自定义方法（向后兼容）
-        
+
         Args:
             model_name: 模型名称（如 User）
             def_list: 方法名称列表（如 ['is_vip']）
-            
+
         Returns:
             包含方法源码的字典 {method_name: source_code}
         """
@@ -481,12 +500,12 @@ class RouteGenerator:
     def _load_custom_methods_from_target(self, model_name: str, def_list: list, defs_target: str) -> dict:
         """
         从指定的文件加载自定义方法
-        
+
         Args:
             model_name: 模型名称（如 User）
             def_list: 方法名称列表（如 ['is_vip']）
             defs_target: 目标文件名（相对于 shared/defs/），如 'user_defs.py' 或 'mydef.py'
-            
+
         Returns:
             包含方法源码的字典 {method_name: source_code}
         """
@@ -545,7 +564,7 @@ class RouteGenerator:
             'validate', 'reconstructor', 'declared_attr',
             'hybrid_property', 'hybrid_method', 'AssociationProxy'
         }
-        
+
         fields = {}
         first_integer_field = None  # 用于无 id 且未明确声明自增的主键自动设置递增
 
@@ -555,7 +574,7 @@ class RouteGenerator:
         for prop_name, prop_def in properties.items():
             raw_type = prop_def.get('type', 'string')
             field_type = self._map_property_type_to_sqlalchemy(raw_type)
-            
+
             # 检查是否为保留字，如果是则重命名
             python_field_name = prop_name
             db_column_name = None
@@ -685,7 +704,7 @@ class RouteGenerator:
     def _scan_association_tables(self) -> Dict[str, list]:
         """
         自动扫描 shared/models 目录下的关联表（Table 对象）
-        
+
         Returns:
             {'imports': [import_statements], 'exports': [export_names]}
         """
@@ -723,87 +742,164 @@ class RouteGenerator:
 
         return {'imports': imports, 'exports': exports}
 
+    def _create_module_init_files(self, output_base: Path, used_modules: set):
+        """为每个使用的子模块目录创建 __init__.py 文件
+
+        Args:
+            output_base: shared/models/ 基础路径
+            used_modules: 使用的子模块路径集合（如 {'intel', 'knowledge', 'workflow'}）
+        """
+        for module_path in sorted(used_modules):
+            module_dir = output_base / module_path
+            module_dir.mkdir(parents=True, exist_ok=True)
+            init_file = module_dir / "__init__.py"
+            if not init_file.exists():
+                init_content = f'''"""
+{module_path} 子模块 - 模型定义
+由代码生成器自动生成 - 请勿手动修改
+"""
+'''
+                self._write_file(init_file, init_content)
+                print(f"  [OK] Module __init__.py: {init_file}")
+
     def _update_shared_models_init_from_orm(self, orm_models_config: Dict):
-        """更新 shared/models/__init__.py文件（从 orm 配置）"""
+        """更新 shared/models/__init__.py 文件（懒加载版本）
+
+        生成纯懒加载结构：通过 _LAZY_IMPORTS 字典 + __getattr__ 实现按需导入。
+        支持模块层级结构：如果模型定义了 module 属性，
+        懒加载路径会使用嵌套格式（如 .intel.data_source）。
+        """
         init_path = self.project_root / "shared" / "models" / "__init__.py"
 
-        # 生成导入语句
-        imports = []
+        # 构建懒加载映射条目和 __all__ 列表
+        lazy_entries = []  # (model_name, module_path) 元组列表
         all_exports = ['Base']
 
         for model_name, model_def in orm_models_config.items():
             filename = self._model_name_to_filename(model_name)
-            # 每个模型只有一个类名
-            class_names = [model_name]
+            module_path = model_def.get('module', '').strip()
 
-            imports.append(f"from .{filename} import {', '.join(class_names)}")
-            all_exports.extend(class_names)
+            if module_path:
+                module_path = module_path.replace('\\', '/').strip('/')
+                module_dotted = module_path.replace('/', '.')
+                lazy_path = f'.{module_dotted}.{filename}'
+            else:
+                lazy_path = f'.{filename}'
 
-        # 自动扫描并添加关联表（Table 对象）的导入
+            lazy_entries.append((model_name, lazy_path))
+            all_exports.append(model_name)
+
+        # 已知模型名集合（用于去重）
+        known_model_names = {name for name, _ in lazy_entries}
+
+        # 扫描共享模型目录中手动创建但未在 models.yaml 中定义的模型文件
+        # 这些文件使用 `from . import Base` 且包含 class XXX(Base): 定义
+        import re
+        shared_models_dir = self.project_root / "shared" / "models"
+        for py_file in sorted(shared_models_dir.rglob("*.py")):
+            if py_file.name.startswith('_') or py_file.name == '__init__.py':
+                continue
+            try:
+                content = py_file.read_text(encoding='utf-8')
+            except (UnicodeDecodeError, OSError):
+                continue
+            # 检查是否是使用 `from . import Base` 的手动模型文件
+            if 'from . import Base' not in content and 'from . import Base' not in content.replace(' ', ''):
+                continue
+            # 提取 class XXX(Base): 中的类名
+            class_matches = re.findall(r'class\s+(\w+)\s*\(\s*Base\s*\)\s*:', content)
+            for class_name in class_matches:
+                if class_name in known_model_names:
+                    continue
+                # 计算相对于 shared/models/ 的路径
+                rel_path = py_file.relative_to(shared_models_dir)
+                parts = list(rel_path.with_suffix('').parts)
+                if len(parts) == 1:
+                    lazy_path = f'.{parts[0]}'
+                else:
+                    lazy_path = '.' + '.'.join(parts)
+                lazy_entries.append((class_name, lazy_path))
+                all_exports.append(class_name)
+                known_model_names.add(class_name)
+                print(f"  [INFO] 发现手动模型文件：{rel_path} -> {class_name}")
+
+        # 自动扫描关联表（Table 对象）
         association_imports = self._scan_association_tables()
-        imports.extend(association_imports['imports'])
-        all_exports.extend(association_imports['exports'])
+        for import_stmt in association_imports['imports']:
+            # 解析 "from .xxx import yyy" 格式
+            match = re.search(r'from \.(\S+) import (\w+)', import_stmt)
+            if match:
+                lazy_path = f'.{match.group(1)}'
+                table_name = match.group(2)
+                lazy_entries.append((table_name, lazy_path))
+                all_exports.append(table_name)
 
-        # 读取现有文件，保留非自动生成的部分
-        if init_path.exists():
-            with open(init_path, 'r', encoding='utf-8') as f:
-                content = f.read()
+        # 格式化懒加载映射表
+        max_name_len = max(len(name) for name, _ in lazy_entries) if lazy_entries else 20
+        lazy_lines = []
+        for name, path in sorted(lazy_entries, key=lambda x: x[0]):
+            lazy_lines.append(f"    '{name}': '{path}',")
+        lazy_section = "\n".join(lazy_lines)
 
-            # 保留 Base 定义和手动维护的导入（删除所有自动生成部分）
-            lines = content.split('\n')
-            new_lines = []
-            in_generated_section = False
-            skip_next_empty = False
+        # 格式化 __all__ 列表
+        all_lines = []
+        for name in sorted(all_exports):
+            all_lines.append(f"    '{name}',")
+        all_section = "\n".join(all_lines)
 
-            for line in lines:
-                # 检测自动生成部分的开始
-                if '由 routes.yaml 自动生成' in line or 'GENERATED SECTION' in line or '自动生成的导入' in line:
-                    in_generated_section = True
-                    continue
-                if in_generated_section and (
-                        '# ===' in line or '# ================================================================='):
-                    skip_next_empty = True
-                    continue
-                if skip_next_empty and (line.strip() == '' or line.startswith('#')):
-                    continue
-                skip_next_empty = False
+        # 生成完整的 __init__.py 内容
+        new_content = f'''"""
+Models 包 - 懒加载版本
 
-                # 如果不在自动生成部分，保留该行
-                if not in_generated_section:
-                    # 但跳过旧的 from . 导入（这些会被重新生成）
-                    if not (line.startswith('from .') or (line.startswith('__all__') and '=' in line)):
-                        new_lines.append(line)
+所有模型类通过 __getattr__ 按需导入，避免启动时一次性加载所有模型文件。
+Base 保持立即导入（SQLAlchemy 元数据初始化必需）。
 
-                # 遇到空的 __all__ 定义也跳过
-                if line.strip() == '__all__ = [':
-                    in_generated_section = True
-                    continue
-                if in_generated_section and line.strip() == ']':
-                    in_generated_section = False
-                    continue
-
-            # 重新构建文件基础内容
-            content = '\n'.join(new_lines)
-            # 清理多余的空行
-            while content.startswith('\n'):
-                content = content[1:]
-        else:
-            content = "from sqlalchemy.orm import declarative_base\n\nBase = declarative_base()\n"
-
-        # 添加新的导入
-        import_section = "\n".join(imports)
-        all_section = "\n__all__ = [\n    '" + "',\n    '".join(all_exports) + "'\n]"
-
-        new_content = f"""{content}
-{import_section}
-
-# ==================== 自动生成的导入 - 由 routes.yaml 管理 ====================
-# 此部分由脚本自动生成 - 请勿手动修改
-{all_section}
-# ============================================================================
+由代码生成器自动生成 - 请勿手动修改
 """
 
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
+
+# ==================== 懒加载映射表 ====================
+# 模型名 -> 相对模块路径（不含 shared.models 前缀）
+_LAZY_IMPORTS = {{
+{lazy_section}
+}}
+
+# 已加载的模型缓存（避免重复导入）
+_loaded_models = {{}}
+
+
+def __getattr__(name):
+    """模块级 __getattr__：按需懒加载模型类"""
+    if name in _loaded_models:
+        return _loaded_models[name]
+
+    module_path = _LAZY_IMPORTS.get(name)
+    if module_path is not None:
+        import importlib
+        module = importlib.import_module(module_path, package='shared.models')
+        cls = getattr(module, name)
+        # 缓存到模块命名空间，后续访问直接命中
+        globals()[name] = cls
+        _loaded_models[name] = cls
+        return cls
+
+    raise AttributeError(f"module 'shared.models' has no attribute {{name!r}}")
+
+
+# ==================== 自动生成 - __all__ ====================
+# 此部分由脚本自动生成 - 请勿手动修改
+
+__all__ = [
+{all_section}
+]
+# ============================================================================
+'''
+
         self._write_file(init_path, new_content)
+        print(f"  [OK] 更新 shared/models/__init__.py（懒加载模式，{len(lazy_entries)} 个模型）")
 
     def _update_shared_models_init(self, shared_models_config: Dict):
         """更新 shared/models/__init__.py 文件"""
