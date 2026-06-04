@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to FastBlog will be documented in this file.
+All notable changes to CardedAI (FastBlog) will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -9,20 +9,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Intelligence Engine (Phase 2)
+- Data collection pipeline with pluggable collectors (RSS, Web, API)
+- Text cleaning pipeline: cleaner, deduplicator, enricher
+- AI analysis engine: sentiment analysis, auto-classification, summarization
+- Alert rule engine with keyword/sentiment/frequency triggers
+- Intelligence briefing generator (daily, weekly, topic-based)
+- Intel API endpoints: sources, items, intelligence, briefings, alerts
+
+#### Knowledge Engine (Phase 3)
+- Document parser supporting PDF, Word, TXT, Markdown
+- Smart text chunker with configurable size and overlap
+- Embedding service with local (sentence-transformers) and OpenAI backends
+- Vector store abstraction with Milvus/Qdrant/Chroma support
+- RAG chain: semantic search + LLM question answering with citation
+- AI report generator with multiple templates
+- Knowledge API endpoints: bases, documents, search, reports
+
+#### Automation Engine (Phase 4)
+- DAG workflow engine with topological sort and concurrent execution
+- Node executors: LLM, Collector, RAG, Condition, Notify
+- Trigger service: Cron, Webhook, Event-driven triggers
+- Agent tool registry with dynamic registration and testing
+- Workflow API endpoints: definitions, executions, tools, triggers
+
+#### Frontend Integration (Phase 5)
+- Intelligence Dashboard (AdminIntelDashboard) with real-time stats
+- Knowledge Workbench (AdminKnowledgeWorkbench) with RAG search UI
+- Workflow Editor (AdminWorkflowEditor) with visual DAG builder
+- Astro pages for intel, knowledge, and workflow admin sections
+
+#### MCP Extensions (Phase 6)
+- MCP Server extended with intelligence, knowledge, and workflow tools
+- Python SDK: IntelMixin, KnowledgeMixin, WorkflowMixin added to FastBlogClient
+- JavaScript SDK: Full TypeScript interfaces for intel, knowledge, workflow APIs
+- Async Python SDK client (AsyncFastBlogClient) with all Mixin support
+
+#### Performance Optimization (Phase 6)
+- RAG search cache with automatic invalidation on document changes
+- Workflow concurrency manager (semaphore-based, Redis-optional)
+- Batch embedding processor with async queue and auto-batching
+- Redis Streams task queue for collection jobs with fallback to memory
+- Global performance stats aggregation endpoint
+- Redis connection sentinel pattern to prevent reconnection storms
+
+#### Infrastructure
 - Bilingual documentation (English & Chinese)
-- Comprehensive CI/CD pipeline
-- Docker Compose production configuration
+- Comprehensive CI/CD pipeline with GitHub Actions
+- Docker Compose production configuration (backend + frontend + postgres + redis)
 - Makefile for common development tasks
 - Security policy documentation
 - Root-level contributing guide
 - EditorConfig for consistent formatting
-- MCP (Model Context Protocol) Server for AI integration
+- Phase 2-6 integration test suites (231 tests total)
 
 ### Changed
 
 - Improved project documentation structure
-- Enhanced README with better organization
+- Enhanced README with architecture diagrams and feature overview
 - Updated all documentation to reflect V0.3 architecture
+- Redis connection uses sentinel pattern with socket_timeout for resilience
+- All performance integrations use lazy imports with graceful degradation
 
 ## [V0.3.26.0521] - 2026-05-21
 
@@ -108,9 +155,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Article CRUD operations
 - Basic admin dashboard
 
-[Unreleased]: https://github.com/Athenavi/fast_blog/compare/v0.2.0...HEAD
-
+[Unreleased]: https://github.com/Athenavi/fast_blog/compare/V0.3.26.0521...HEAD
 [V0.3.26.0521]: https://github.com/Athenavi/fast_blog/compare/v0.2.0...V0.3.26.0521
-
 [V0.2.0]: https://github.com/Athenavi/fast_blog/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Athenavi/fast_blog/releases/tag/v0.1.0

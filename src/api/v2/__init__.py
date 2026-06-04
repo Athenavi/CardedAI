@@ -178,6 +178,15 @@ ROUTE_REGISTRY_V2 = [
     # ==================== 示例和工具端点（集中管理）====================
     ("src.api.v2.examples_tools", "/api/v2/examples", ["examples-tools"], False),
 
+    # ==================== 情报引擎（V2 聚合路由器）====================
+    ("src.api.v2.intel", "/api/v2/intel", ["intel-v2"], True),
+
+    # ==================== 知识引擎（V2 聚合路由器）====================
+    ("src.api.v2.knowledge", "/api/v2/knowledge", ["knowledge-v2"], True),
+
+    # ==================== 自动化引擎（V2 聚合路由器）====================
+    ("src.api.v2.workflow", "/api/v2/workflow", ["workflow-v2"], True),
+
     # [已删除] 企业管理模块（EnterpriseLicense, SupportTicket 等模型已移除）
 ]
 

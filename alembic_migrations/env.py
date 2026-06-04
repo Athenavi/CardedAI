@@ -165,6 +165,26 @@ _model_modules = [
     'shared.models.role_capability',
     'shared.models.user_role',
     'shared.models.permission_audit_log',
+    # ---- 情报引擎模型 ----
+    'shared.models.intel.data_source',
+    'shared.models.intel.collected_item',
+    'shared.models.intel.intelligence',
+    'shared.models.intel.briefing',
+    'shared.models.intel.alert_rule',
+    'shared.models.intel.alert_event',
+    # ---- 知识引擎模型 ----
+    'shared.models.knowledge.knowledge_base',
+    'shared.models.knowledge.knowledge_document',
+    'shared.models.knowledge.document_chunk',
+    'shared.models.knowledge.report_template',
+    'shared.models.knowledge.generated_report',
+    # ---- 自动化引擎模型 ----
+    'shared.models.workflow.workflow_definition',
+    'shared.models.workflow.workflow_execution',
+    'shared.models.workflow.node_execution',
+    'shared.models.workflow.trigger',
+    'shared.models.workflow.agent_tool',
+    'shared.models.workflow.agent_memory',
 ]
 
 _loaded_count = 0

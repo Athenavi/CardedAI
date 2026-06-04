@@ -11,7 +11,7 @@ We release patches for security vulnerabilities for the following versions:
 
 ## 🐛 Reporting a Vulnerability
 
-We take the security of FastBlog seriously. If you discover a security vulnerability, please report it responsibly.
+We take the security of CardedAI seriously. If you discover a security vulnerability, please report it responsibly.
 
 ### How to Report
 
@@ -56,7 +56,7 @@ We support responsible disclosure and will not take legal action against researc
 
 ## 🛡️ Security Best Practices
 
-When deploying FastBlog in production:
+When deploying CardedAI in production:
 
 1. **Always use HTTPS** — Never run production without TLS
 2. **Change default secrets** — Rotate all default keys and passwords
@@ -69,7 +69,7 @@ When deploying FastBlog in production:
 
 ## 🔐 Security Features
 
-FastBlog includes the following security features:
+CardedAI includes the following security features:
 
 - JWT-based authentication with refresh tokens
 - Two-factor authentication (TOTP)

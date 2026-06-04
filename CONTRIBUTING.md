@@ -1,6 +1,6 @@
-# Contributing to FastBlog
+# Contributing to CardedAI
 
-Thank you for your interest in contributing to FastBlog! This document provides guidelines and information about
+Thank you for your interest in contributing to CardedAI! This document provides guidelines and information about
 contributing to this project.
 
 ## 📋 Table of Contents
@@ -342,4 +342,4 @@ async def test_async_article_fetch(async_client):
 
 ## 🙏 Thank You
 
-Your contributions make FastBlog better for everyone. Thank you for taking the time to contribute!
+Your contributions make CardedAI better for everyone. Thank you for taking the time to contribute!

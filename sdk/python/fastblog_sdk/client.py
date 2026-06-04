@@ -18,9 +18,18 @@ except ImportError:
     HAS_AIOHTTP = False
     aiohttp = None
 
+# 引入扩展 Mixin（情报/知识/工作流）
+from .intel import IntelMixin, AsyncIntelMixin
+from .knowledge import KnowledgeMixin, AsyncKnowledgeMixin
+from .workflow import WorkflowMixin, AsyncWorkflowMixin
 
-class FastBlogClient:
-    """FastBlog API 同步客户端（V2 API）"""
+
+class FastBlogClient(IntelMixin, KnowledgeMixin, WorkflowMixin):
+    """FastBlog API 同步客户端（V2 API）
+
+    继承情报（IntelMixin）、知识（KnowledgeMixin）、工作流（WorkflowMixin）扩展方法。
+    所有扩展方法通过 self._request() 统一发送请求。
+    """
 
     def __init__(self, base_url: str = "http://localhost:9421/api/v2", token: Optional[str] = None):
         """
@@ -307,8 +316,12 @@ class FastBlogClient:
 
 
 # 异步客户端
-class AsyncFastBlogClient:
-    """FastBlog API 异步客户端（V2 API）"""
+class AsyncFastBlogClient(AsyncIntelMixin, AsyncKnowledgeMixin, AsyncWorkflowMixin):
+    """FastBlog API 异步客户端（V2 API）
+
+    继承情报（AsyncIntelMixin）、知识（AsyncKnowledgeMixin）、工作流（AsyncWorkflowMixin）扩展方法。
+    所有扩展方法通过 self._request() 统一发送请求。
+    """
 
     def __init__(self, base_url: str = "http://localhost:9421/api/v2", token: Optional[str] = None):
         """

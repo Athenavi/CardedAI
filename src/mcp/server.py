@@ -58,6 +58,13 @@ class MCPServer:
         self._register_builtin_tools()
         self._register_builtin_prompts()
 
+        # 注册情报/知识/工作流扩展工具
+        try:
+            from src.mcp.extensions import register_all_extensions
+            register_all_extensions(self)
+        except Exception:
+            pass  # 扩展注册失败不影响核心功能
+
     def _register_builtin_resources(self):
         """注册内置资源"""
         # 文章资源
