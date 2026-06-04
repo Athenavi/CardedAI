@@ -29,7 +29,11 @@ from sqlalchemy import {{ core_imports | join(', ') }}
 {% if has_relationships %}from sqlalchemy.orm import relationship
 {% endif %}
 
+{% if module_path %}
+from shared.models import Base  # 使用统一的 Base（跨子包引用）
+{% else %}
 from . import Base  # 使用统一的 Base
+{% endif %}
 
 
 {% for class_name, class_def in classes.items() %}
