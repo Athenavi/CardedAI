@@ -1,7 +1,7 @@
 """
 SQLAlchemy 模型定义 - Webhook
 由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-05-25 10:58:31
+生成时间：2026-06-04 14:52:23
 """
 
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, Index
@@ -66,3 +66,5 @@ class Webhook(Base):
     def __repr__(self):
         """字符串表示"""
         return f'<Webhook id={self.id}>'
+
+

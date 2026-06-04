@@ -57,15 +57,11 @@ ROUTE_REGISTRY_V2 = [
     # V2 Comments 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
     ("src.api.v2.comments", "/api/v2/comments", ["comments-v2"], True),
     # V1 comments 各子模块已废弃，功能已迁移到 V2 聚合路由器
-    # ==================== 聊天与消息（V2 聚合路由器）====================
-    # V2 Chat 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
-    ("src.api.v2.chat", "/api/v2/chats", ["chat-v2"], True),
+    # [已删除] 聊天与消息模块（PrivateMessage, ChatGroup 等模型已移除）
     # ==================== 通知消息（V2 聚合路由器）====================
     # V2 Notifications 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
     ("src.api.v2.notifications", "/api/v2/notifications", ["notifications-v2"], True),
-    # ==================== 协作功能（V2 聚合路由器）====================
-    # V2 Collaboration 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
-    ("src.api.v2.collaboration", "/api/v2/collaboration", ["collaboration-v2"], True),
+    # [已删除] 协作功能模块（Workspace, Task 等模型已移除）
 
     # ==================== CMS 内容管理（V2 聚合路由器）====================
     # V2 Content Management 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
@@ -80,10 +76,7 @@ ROUTE_REGISTRY_V2 = [
     # 前端直接调用 /api/v2/global-styles/list
     ("src.api.v1.content_management.global_styles", "/api/v2/global-styles", ["global-styles"], False),
 
-    # ==================== 电商功能（V2 聚合路由器）====================
-    # V2 Ecommerce 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
-    ("src.api.v2.ecommerce", "/api/v2/shop", ["ecommerce-v2"], True),
-    # V1 ecommerce 各子模块已废弃，功能已迁移到 V2 聚合路由器
+    # [已删除] 电商功能模块（Product, Cart, Order 等模型已移除）
 
     # ==================== 媒体管理 ====================
     ("src.api.v1.media", "/api/v2/media", ["media"], False),
@@ -142,11 +135,7 @@ ROUTE_REGISTRY_V2 = [
     ("src.api.v2.integrations", "/api/v2/integrations", ["integrations-v2"], True),
     # V1 integrations 各子模块已废弃，功能已迁移到 V2 聚合路由器
 
-    # ==================== 广告管理（V2 聚合路由器）====================
-    # V2 Marketing 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
-    ("src.api.v2.marketing", "/api/v2/ads", ["marketing-v2"], True),
-    # V1 marketing 各子模块已废弃，功能已迁移到 V2 聚合路由器
-    # ("src.api.v1.marketing.advertisement_system", "/api/v2/ads", ["advertisement-system"], False),
+    # [已删除] 广告管理模块（Ad, AdPlacement 等模型已移除）
 
     # ==================== 静态生成（V2 聚合路由器）====================
     # V2 Static Generation 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
@@ -154,14 +143,8 @@ ROUTE_REGISTRY_V2 = [
     # V1 static_generation 各子模块已废弃，功能已迁移到 V2 聚合路由器
     # ("src.api.v1.static_generation.static_site_generation", "/api/v2/static-site", ["static-site-generation"], False),
 
-    # ==================== 支付工具 ====================
-    ("src.api.v1.utils.payment", "/api/v2/payments", ["payment"], False),
-
-    # ==================== 支付系统管理（网关/交易/税务配置）====================
-    ("src.api.v1.payment.payment_management", "/api/v2/payment-management", ["payment-management"], False),
-
-    # ==================== 迁移系统管理（任务/日志）====================
-    ("src.api.v1.system.migration_management", "/api/v2/migration-management", ["migration-management"], False),
+    # [已删除] 支付系统模块（PaymentGateway, PaymentTransaction 等模型已移除）
+    # [已删除] 迁移系统模块（MigrationTask, MigrationLog 模型已移除）
 
     # ==================== 内容管理扩展（修订注释/菜单位置）====================
     ("src.api.v1.content_management.content_management_ext", "/api/v2/cms/management", ["content-management-ext"],
@@ -195,9 +178,7 @@ ROUTE_REGISTRY_V2 = [
     # ==================== 示例和工具端点（集中管理）====================
     ("src.api.v2.examples_tools", "/api/v2/examples", ["examples-tools"], False),
 
-    # ==================== 企业管理（V2 聚合路由器）====================
-    # V2 Enterprise 模块整合许可证、工单、部署脚本、监控告警
-    ("src.api.v2.enterprise", "/api/v2/enterprise", ["enterprise-v2"], False),
+    # [已删除] 企业管理模块（EnterpriseLicense, SupportTicket 等模型已移除）
 ]
 
 # v1 到 v2 的路径映射表（用于自动重定向）
@@ -239,8 +220,7 @@ V1_TO_V2_REDIRECT_MAP = {
     "/api/v1/performance-monitor": "/api/v2/monitoring/performance",
     "/api/v1/performance-tracking": "/api/v2/monitoring/performance",
 
-    # 广告相关
-    "/api/v1/admin/ad": "/api/v2/ads/management",
+    # [已删除] 广告相关重定向
 
     # 翻译相关
     "/api/v1/i18n": "/api/v2/translations",

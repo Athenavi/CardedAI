@@ -196,18 +196,10 @@ export class ArticleService {
             created_at: string;
             updated_at: string;
             hidden: boolean;
-            is_vip_only: boolean;
-            required_vip_level: number;
             article_ad: string;
             is_featured: boolean;
         };
         content: string;
-        vip_plans?: Array<{
-            id: number;
-            name: string;
-            level: number;
-            price: number;
-        }>;
         domain?: string;
     }>> {
         return apiClient.get(`/articles/edit/${id}`);

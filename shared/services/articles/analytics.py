@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class ArticleViewTracker:
     """
     文章浏览量追踪器（内存存储）
-    
+
     用于记录文章浏览量，支持按日期统计
     """
 
@@ -32,7 +32,7 @@ class ArticleViewTracker:
     def record_view(self, article_id: int, ip_address: str = None):
         """
         记录文章浏览
-        
+
         Args:
             article_id: 文章ID
             ip_address: 访客IP
@@ -48,11 +48,11 @@ class ArticleViewTracker:
     def get_views_by_date(self, article_id: int = None, days: int = 30) -> Dict[str, int]:
         """
         获取按日期分组的浏览量
-        
+
         Args:
             article_id: 文章ID，None表示所有文章
             days: 统计天数
-            
+
         Returns:
             {date: view_count}
         """
@@ -76,11 +76,11 @@ class ArticleViewTracker:
     def get_total_views(self, article_id: int = None, days: int = None) -> int:
         """
         获取总浏览量
-        
+
         Args:
             article_id: 文章ID，None表示所有文章
             days: 统计天数，None表示全部
-            
+
         Returns:
             总浏览量
         """
@@ -104,11 +104,11 @@ class ArticleViewTracker:
     def get_unique_visitors(self, article_id: int = None, days: int = 30) -> int:
         """
         获取独立访客数（基于IP）
-        
+
         Args:
             article_id: 文章ID
             days: 统计天数
-            
+
         Returns:
             独立访客数
         """
@@ -137,7 +137,7 @@ view_tracker = ArticleViewTracker()
 class AnalyticsService:
     """
     数据分析服务
-    
+
     参考 Google Analytics 和 Matomo 的设计模式
     """
 
@@ -147,10 +147,10 @@ class AnalyticsService:
     async def get_overview_stats(self, days: int = 30) -> Dict:
         """
         获取概览统计数据
-        
+
         Args:
             days: 统计天数
-            
+
         Returns:
             概览数据
         """
@@ -215,10 +215,10 @@ class AnalyticsService:
     async def get_article_views_trend(self, days: int = 30) -> List[Dict]:
         """
         获取文章浏览量趋势
-        
+
         Args:
             days: 统计天数
-            
+
         Returns:
             每日浏览量列表
         """
@@ -254,16 +254,16 @@ class AnalyticsService:
     async def get_popular_articles(self, limit: int = 10, days: int = 7) -> List[Dict]:
         """
         获取热门文章
-        
+
         Args:
             limit: 返回数量
             days: 统计天数
-            
+
         Returns:
             热门文章列表
         """
         from shared.models.article import Article
-        
+
         cutoff_date = datetime.now() - timedelta(days=days)
 
         # 获取所有文章
@@ -271,7 +271,7 @@ class AnalyticsService:
             select(Article.id, Article.title, Article.slug)
         )
         articles = result.all()
-        
+
         # 统计每篇文章的浏览量
         popular_articles = []
         for article in articles:
@@ -292,7 +292,7 @@ class AnalyticsService:
     async def get_category_distribution(self) -> List[Dict]:
         """
         获取分类分布
-        
+
         Returns:
             分类统计列表
         """
@@ -324,10 +324,10 @@ class AnalyticsService:
     async def get_user_activity(self, days: int = 30) -> Dict:
         """
         获取用户活动统计
-        
+
         Args:
             days: 统计天数
-            
+
         Returns:
             用户活动数据
         """
@@ -372,10 +372,10 @@ class AnalyticsService:
     async def get_content_performance(self, days: int = 30) -> Dict:
         """
         获取内容表现分析
-        
+
         Args:
             days: 统计天数
-            
+
         Returns:
             内容表现数据
         """
@@ -402,92 +402,6 @@ class AnalyticsService:
             'avg_comments_per_article': round(total_comments / total_articles, 2),
             'period_days': days,
         }
-
-    async def get_traffic_sources(self, days: int = 30) -> List[Dict]:
-        """
-        获取流量来源分析
-        
-        Args:
-            days: 统计天数
-            
-        Returns:
-            流量来源列表
-        """
-        from shared.models.page_view import PageView
-
-        cutoff_date = datetime.now() - timedelta(days=days)
-
-        # 按引荐来源分组
-        stmt = (
-            select(
-                func.coalesce(PageView.referrer, literal('直接访问')).label('source'),
-                func.count(PageView.id).label('count'),
-            )
-            .where(PageView.created_at >= cutoff_date)
-            .group_by('source')
-            .order_by(desc('count'))
-            .limit(10)
-        )
-        result = await self.db.execute(stmt)
-        rows = result.all()
-
-        total_count = sum(row.count for row in rows) or 1
-        colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
-
-        sources = []
-        for idx, row in enumerate(rows):
-            pct = round((row.count / total_count) * 100, 1)
-            sources.append({
-                'name': row.source,
-                'count': row.count,
-                'value': pct,
-                'color': colors[idx % len(colors)],
-            })
-
-        return sources
-
-    async def get_device_stats(self, days: int = 30) -> List[Dict]:
-        """
-        获取设备统计
-        
-        Args:
-            days: 统计天数
-            
-        Returns:
-            设备分布数据
-        """
-        from shared.models.page_view import PageView
-        from sqlalchemy import literal
-
-        cutoff_date = datetime.now() - timedelta(days=days)
-
-        stmt = (
-            select(
-                func.coalesce(PageView.device_type, literal('未知')).label('device'),
-                func.count(PageView.id).label('count'),
-            )
-            .where(PageView.created_at >= cutoff_date)
-            .group_by('device')
-            .order_by(desc('count'))
-        )
-        result = await self.db.execute(stmt)
-        rows = result.all()
-
-        total = sum(row.count for row in rows) or 1
-        device_list = []
-        colors = ['#8b5cf6', '#ec4899', '#06b6d4']
-
-        for idx, row in enumerate(rows):
-            pct = round((row.count / total) * 100, 1)
-            device_list.append({
-                'name': row.device,
-                'count': row.count,
-                'value': pct,
-                'color': colors[idx % len(colors)],
-            })
-
-        return device_list
-
 
 # 工厂函数
 def create_analytics_service(db: AsyncSession) -> AnalyticsService:

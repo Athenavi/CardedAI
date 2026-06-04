@@ -1,7 +1,7 @@
 """
 SQLAlchemy 模型定义 - MediaOptimization
 由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-05-25 10:58:31
+生成时间：2026-06-04 14:52:23
 """
 
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, ForeignKey, Index
@@ -9,22 +9,27 @@ from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateT
 from . import Base  # 使用统一的 Base
 
 
+
 class MediaOptimization(Base):
     """媒体优化配置模型（支持 WebP 转换、多尺寸生成、CDN 集成）模型"""
     __tablename__ = 'media_optimizations'
+
 
     __table_args__ = (
         Index('idx_media_optimization_media', 'media_id'),
         Index('idx_media_optimization_status', 'optimization_status'),
     )
 
+
     id = Column(BigInteger, primary_key=True, autoincrement=True, doc='配置 ID')
 
     media_id = Column(BigInteger, ForeignKey('media.id'), doc='媒体 ID')
 
+
     webp_url = Column(String(500), nullable=True, doc='WebP 格式 URL')
 
     sizes_json = Column(Text, nullable=True, doc='多尺寸 JSON (thumbnail, medium, large)')
+
 
     cdn_url = Column(String(500), nullable=True, doc='CDN URL')
 
@@ -33,6 +38,7 @@ class MediaOptimization(Base):
     created_at = Column(DateTime, doc='创建时间')
 
     updated_at = Column(DateTime, doc='更新时间')
+
 
     def to_dict(self, exclude_sensitive=True):
         """转换为字典
@@ -61,3 +67,5 @@ class MediaOptimization(Base):
     def __repr__(self):
         """字符串表示"""
         return f'<MediaOptimization id={self.id}>'
+
+

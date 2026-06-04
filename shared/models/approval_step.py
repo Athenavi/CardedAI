@@ -1,47 +1,38 @@
 """
 SQLAlchemy 模型定义 - ApprovalStep
-由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-05-25 10:58:31
+审批步骤模型
 """
 
-from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, ForeignKey, Index
+from sqlalchemy import Column, Integer, BigInteger, String, Text, DateTime, ForeignKey, Index
 
 from . import Base  # 使用统一的 Base
 
 
-
 class ApprovalStep(Base):
-    """审批步骤模型模型"""
+    """审批步骤模型"""
     __tablename__ = 'approval_steps'
 
-
     __table_args__ = (
-        Index('idx_approval_steps_record', 'record_id'),
-        Index('idx_approval_steps_approver', 'approver_id'),
-        Index('idx_approval_steps_level', 'level'),
+        Index('idx_approval_steps_record_id', 'record_id'),
+        Index('idx_approval_steps_approver_id', 'approver_id'),
+        Index('idx_approval_steps_record_level', 'record_id', 'level'),
     )
-
 
     id = Column(BigInteger, primary_key=True, autoincrement=True, doc='审批步骤 ID')
 
-    record_id = Column(BigInteger, ForeignKey('approval_records.id'), doc='审批记录 ID')
+    record_id = Column(BigInteger, ForeignKey('approval_records.id'), nullable=False, doc='审批记录 ID')
 
+    level = Column(Integer, nullable=False, doc='审批级别')
 
-    level = Column(Integer, index=True, doc='审批级别')
+    approver_id = Column(BigInteger, ForeignKey('users.id'), nullable=False, doc='审批人 ID')
 
-
-    approver_id = Column(BigInteger, ForeignKey('users.id'), nullable=True, doc='审批人 ID')
-
-
-    action = Column(String(20), nullable=True, doc='操作（approved/rejected）')
+    action = Column(String(20), nullable=True, doc='审批动作 (approved/rejected)')
 
     comment = Column(Text, nullable=True, doc='审批意见')
 
+    reviewed_at = Column(DateTime, nullable=True, doc='审批时间')
 
-    reviewed_at = Column(DateTime, nullable=True, doc='审核时间')
-
-    created_at = Column(DateTime, doc='创建时间')
-
+    created_at = Column(DateTime, nullable=True, doc='创建时间')
 
     def to_dict(self, exclude_sensitive=True):
         """转换为字典
@@ -69,4 +60,4 @@ class ApprovalStep(Base):
 
     def __repr__(self):
         """字符串表示"""
-        return f'<ApprovalStep id={self.id}>'
+        return f'<ApprovalStep id={self.id} level={self.level}>'

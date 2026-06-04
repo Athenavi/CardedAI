@@ -63,56 +63,20 @@ export default defineConfig({
       },
     },
       build: {
+          // chunk 大小警告阈值（RichEditor 已经懒加载，564kB 可接受）
+          chunkSizeWarningLimit: 600,
           // 代码分割优化
           rollupOptions: {
               output: {
-                  manualChunks: {
-                      'vendor-react': ['react', 'react-dom'],
-                      'vendor-query': ['@tanstack/react-query'],
-                      'vendor-motion': ['framer-motion'],
-                      'vendor-icons': ['lucide-react'],
-                      'vendor-radix': [
-                          '@radix-ui/react-dialog',
-                          '@radix-ui/react-dropdown-menu',
-                          '@radix-ui/react-select',
-                          '@radix-ui/react-tabs',
-                          '@radix-ui/react-toast',
-                          '@radix-ui/react-accordion',
-                          '@radix-ui/react-avatar',
-                          '@radix-ui/react-popover',
-                          '@radix-ui/react-switch',
-                          '@radix-ui/react-checkbox',
-                      ],
-                      'vendor-editor': [
-                          '@tiptap/react',
-                          '@tiptap/starter-kit',
-                          '@tiptap/pm',
-                          '@tiptap/extension-link',
-                          '@tiptap/extension-image',
-                          '@tiptap/extension-placeholder',
-                          '@tiptap/extension-code-block-lowlight',
-                          '@tiptap/extension-table',
-                          '@tiptap/extension-table-cell',
-                          '@tiptap/extension-table-header',
-                          '@tiptap/extension-table-row',
-                          '@tiptap/extension-task-list',
-                          '@tiptap/extension-task-item',
-                          '@tiptap/extension-text-align',
-                          '@tiptap/extension-underline',
-                          '@tiptap/extension-highlight',
-                          '@tiptap/extension-typography',
-                          '@tiptap/extension-floating-menu',
-                          '@tiptap/extension-text-style',
-                          '@tiptap/extension-color',
-                          '@tiptap/extension-font-family',
-                      ],
-                      'vendor-collab': [
-                          'yjs',
-                          'y-websocket',
-                          'y-prosemirror',
-                          '@tiptap/extension-collaboration',
-                          '@tiptap/extension-collaboration-cursor',
-                      ],
+                  manualChunks(id) {
+                      if (id.includes('node_modules')) {
+                          if (id.includes('/react/') || id.includes('/react-dom/')) return 'vendor-react';
+                          if (id.includes('/@tanstack/react-query/')) return 'vendor-query';
+                          if (id.includes('/framer-motion/')) return 'vendor-motion';
+                          if (id.includes('/lucide-react/')) return 'vendor-icons';
+                          if (id.includes('/@radix-ui/')) return 'vendor-radix';
+                          if (id.includes('/@tiptap/') || id.includes('/lowlight/') || id.includes('/highlight.js/') || id.includes('/yjs/') || id.includes('/y-websocket/') || id.includes('/y-prosemirror/')) return 'vendor-editor';
+                      }
                   },
               },
           },

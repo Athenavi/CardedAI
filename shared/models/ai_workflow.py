@@ -1,7 +1,7 @@
 """
 SQLAlchemy 模型定义 - AIWorkflow
 由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-05-25 10:58:31
+生成时间：2026-06-04 14:52:23
 """
 
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, ForeignKey, Index
@@ -26,23 +26,29 @@ class AIWorkflow(Base):
 
     user_id = Column(BigInteger, ForeignKey('users.id'), doc='用户 ID')
 
+
     task_type = Column(String(50), nullable=True, doc='任务类型 (writing_assist, seo_optimize, tag_recommend)')
 
     input_data = Column(Text, nullable=False, doc='输入数据 (JSON)')
 
+
     output_data = Column(Text, nullable=True, doc='输出结果 (JSON)')
+
 
     model_used = Column(String(100), nullable=True, doc='使用的 AI 模型')
 
     tokens_used = Column(Integer, default=0, doc='消耗的 Token 数量')
 
+
     status = Column(String(20), default='pending', doc='状态 (pending, processing, completed, failed)')
 
     error_message = Column(Text, nullable=True, doc='错误信息')
 
+
     created_at = Column(DateTime, doc='创建时间')
 
     completed_at = Column(DateTime, nullable=True, doc='完成时间')
+
 
     def to_dict(self, exclude_sensitive=True):
         """转换为字典
@@ -74,3 +80,5 @@ class AIWorkflow(Base):
     def __repr__(self):
         """字符串表示"""
         return f'<AIWorkflow id={self.id}>'
+
+

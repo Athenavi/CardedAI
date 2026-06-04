@@ -1,7 +1,7 @@
 """
 Models 包 - 懒加载版本
 
-所有模型类通过 __getattr__ 按需导入，避免启动时一次性加载 90+ 个模型文件。
+所有模型类通过 __getattr__ 按需导入，避免启动时一次性加载所有模型文件。
 Base 保持立即导入（SQLAlchemy 元数据初始化必需）。
 """
 
@@ -26,6 +26,7 @@ _LAZY_IMPORTS = {
     'MediaOptimization': '.media_optimization',
     'ArticleRevisionNote': '.article_revision_note',
     'SystemSettings': '.system_settings',
+    'AdminSettings': '.system_settings',
     'ArticleContent': '.article_content',
     'ArticleLike': '.article_like',
     'FileHash': '.file_hash',
@@ -38,23 +39,12 @@ _LAZY_IMPORTS = {
     'UploadChunk': '.upload_chunk',
     'DownloadTask': '.download_task',
     'Notification': '.notification',
-    'PrivateMessage': '.private_message',
-    'UserBlock': '.user_block',
     'SearchHistory': '.search_history',
     'SearchIndex': '.search_index',
-    'PageView': '.page_view',
-    'UserActivity': '.user_activity',
-    'VIPPlan': '.vip_plan',
-    'VIPSubscription': '.vip_subscription',
-    'VIPFeature': '.vip_feature',
     'CustomField': '.custom_field',
-    'EmailSubscription': '.email_subscription',
     'ArticleRevision': '.article_revision',
     'Plugin': '.plugin',
     'Theme': '.theme',
-    'Form': '.form',
-    'FormField': '.form_field',
-    'FormSubmission': '.form_submission',
     'WidgetInstance': '.widget_instance',
     'BlockPattern': '.block_pattern',
     'CustomPostType': '.custom_post_type',
@@ -64,65 +54,21 @@ _LAZY_IMPORTS = {
     'OAuthAccount': '.o_auth_account',
     'ArticleSEO': '.article_seo',
     'ShareStat': '.share_stat',
-    'Product': '.product',
-    'Cart': '.cart',
-    'CartItem': '.cart_item',
-    'Order': '.order',
     'SensitiveWord': '.sensitive_word',
     'UserSession': '.user_session',
     'LoginAttempt': '.login_attempt',
     'TokenBlacklist': '.token_blacklist',
-    'AdPlacement': '.ad_placement',
-    'Ad': '.ad',
-    'AdClick': '.ad_click',
-    'AdImpression': '.ad_impression',
-    'RevenueRecord': '.revenue_record',
-    'RevenueSharingConfig': '.revenue_sharing_config',
-    'PayoutRequest': '.payout_request',
-    'UserRevenueStats': '.user_revenue_stats',
-    'ChatGroup': '.chat_group',
-    'ChatGroupMember': '.chat_group_member',
-    'ChatGroupInvite': '.chat_group_invite',
-    'ScheduledReport': '.scheduled_report',
-    'ReportHistory': '.report_history',
     'ArticleAnnotation': '.article_annotation',
     'Webhook': '.webhook',
     'WebhookDelivery': '.webhook_delivery',
+    'EmailServiceConfig': '.email_service_config',
+    'ApprovalRecord': '.approval_record',
+    'ApprovalStep': '.approval_step',
     'Role': '.role',
     'Capability': '.capability',
     'RoleCapability': '.role_capability',
     'UserRole': '.user_role',
     'PermissionAuditLog': '.permission_audit_log',
-    'Workspace': '.workspace',
-    'WorkspaceMember': '.workspace_member',
-    'Task': '.task',
-    'ApprovalRecord': '.approval_record',
-    'ApprovalStep': '.approval_step',
-    'Site': '.site',
-    'SiteUser': '.site_user',
-    'ContentMapping': '.content_mapping',
-    'GoogleAnalyticsConfig': '.google_analytics_config',
-    'BaiduAnalyticsConfig': '.baidu_analytics_config',
-    'NotificationIntegration': '.notification_integration',
-    'EmailServiceConfig': '.email_service_config',
-    'SAMLConfig': '.saml_config',
-    'LDAPConfig': '.ldap_config',
-    'SSOProvider': '.sso_provider',
-    'PaymentGateway': '.payment_gateway',
-    'PaymentTransaction': '.payment_transaction',
-    'CryptoPayment': '.crypto_payment',
-    'TaxConfig': '.tax_config',
-    'OrderItem': '.order_item',
-    'EnterpriseLicense': '.enterprise_license',
-    'SupportTicket': '.support_ticket',
-    'SupportTicketReply': '.support_ticket_reply',
-    'DeploymentScript': '.deployment_script',
-    'DeploymentLog': '.deployment_log',
-    'MonitoringAlert': '.monitoring_alert',
-    'MonitoringMetric': '.monitoring_metric',
-    'MigrationTask': '.migration_task',
-    'MigrationLog': '.migration_log',
-    'GlobalStyleConfig': '.global_style_config',
 }
 
 # 已加载的模型缓存（避免重复导入）
@@ -146,6 +92,63 @@ def __getattr__(name):
 
     raise AttributeError(f"module 'shared.models' has no attribute {name!r}")
 
+
+from .audit_log import AuditLog
+from .ai_workflow import AIWorkflow
+from .page_builder import PageBuilder
+from .global_style import GlobalStyle
+from .field_permission import FieldPermission
+from .user import User
+from .article import Article
+from .category import Category
+from .category_subscription import CategorySubscription
+from .media import Media
+from .media_folder import MediaFolder
+from .media_optimization import MediaOptimization
+from .article_revision_note import ArticleRevisionNote
+from .system_settings import SystemSettings
+from .article_content import ArticleContent
+from .article_like import ArticleLike
+from .file_hash import FileHash
+from .menus import Menus
+from .menu_items import MenuItems
+from .menu_location import MenuLocation
+from .menu_location_assignment import MenuLocationAssignment
+from .pages import Pages
+from .upload_task import UploadTask
+from .upload_chunk import UploadChunk
+from .download_task import DownloadTask
+from .notification import Notification
+from .search_history import SearchHistory
+from .search_index import SearchIndex
+from .custom_field import CustomField
+from .article_revision import ArticleRevision
+from .plugin import Plugin
+from .theme import Theme
+from .widget_instance import WidgetInstance
+from .block_pattern import BlockPattern
+from .custom_post_type import CustomPostType
+from .comment_vote import CommentVote
+from .comment_subscription import CommentSubscription
+from .comment import Comment
+from .o_auth_account import OAuthAccount
+from .article_seo import ArticleSEO
+from .share_stat import ShareStat
+from .sensitive_word import SensitiveWord
+from .user_session import UserSession
+from .login_attempt import LoginAttempt
+from .token_blacklist import TokenBlacklist
+from .article_annotation import ArticleAnnotation
+from .webhook import Webhook
+from .webhook_delivery import WebhookDelivery
+from .role import Role
+from .capability import Capability
+from .role_capability import RoleCapability
+from .user_role import UserRole
+from .permission_audit_log import PermissionAuditLog
+
+# ==================== 自动生成的导入 - 由 routes.yaml 管理 ====================
+# 此部分由脚本自动生成 - 请勿手动修改
 
 __all__ = [
     'Base',
@@ -175,23 +178,12 @@ __all__ = [
     'UploadChunk',
     'DownloadTask',
     'Notification',
-    'PrivateMessage',
-    'UserBlock',
     'SearchHistory',
     'SearchIndex',
-    'PageView',
-    'UserActivity',
-    'VIPPlan',
-    'VIPSubscription',
-    'VIPFeature',
     'CustomField',
-    'EmailSubscription',
     'ArticleRevision',
     'Plugin',
     'Theme',
-    'Form',
-    'FormField',
-    'FormSubmission',
     'WidgetInstance',
     'BlockPattern',
     'CustomPostType',
@@ -201,27 +193,10 @@ __all__ = [
     'OAuthAccount',
     'ArticleSEO',
     'ShareStat',
-    'Product',
-    'Cart',
-    'CartItem',
-    'Order',
     'SensitiveWord',
     'UserSession',
     'LoginAttempt',
     'TokenBlacklist',
-    'AdPlacement',
-    'Ad',
-    'AdClick',
-    'AdImpression',
-    'RevenueRecord',
-    'RevenueSharingConfig',
-    'PayoutRequest',
-    'UserRevenueStats',
-    'ChatGroup',
-    'ChatGroupMember',
-    'ChatGroupInvite',
-    'ScheduledReport',
-    'ReportHistory',
     'ArticleAnnotation',
     'Webhook',
     'WebhookDelivery',
@@ -229,36 +204,6 @@ __all__ = [
     'Capability',
     'RoleCapability',
     'UserRole',
-    'PermissionAuditLog',
-    'Workspace',
-    'WorkspaceMember',
-    'Task',
-    'ApprovalRecord',
-    'ApprovalStep',
-    'Site',
-    'SiteUser',
-    'ContentMapping',
-    'GoogleAnalyticsConfig',
-    'BaiduAnalyticsConfig',
-    'NotificationIntegration',
-    'EmailServiceConfig',
-    'SAMLConfig',
-    'LDAPConfig',
-    'SSOProvider',
-    'PaymentGateway',
-    'PaymentTransaction',
-    'CryptoPayment',
-    'TaxConfig',
-    'OrderItem',
-    'EnterpriseLicense',
-    'SupportTicket',
-    'SupportTicketReply',
-    'DeploymentScript',
-    'DeploymentLog',
-    'MonitoringAlert',
-    'MonitoringMetric',
-    'MigrationTask',
-    'MigrationLog',
-    'GlobalStyleConfig'
+    'PermissionAuditLog'
 ]
 # ============================================================================

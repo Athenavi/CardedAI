@@ -15,7 +15,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  Crown,
   Edit,
   ExternalLink,
   Eye,
@@ -435,7 +434,6 @@ function ArticlesInner() {
                                 <div className="flex items-center gap-2 mt-0.5">
                                     {a.category_name &&
                                         <span className="text-xs text-gray-400">{a.category_name}</span>}
-                                    {a.is_vip_only && <Crown className="w-3 h-3 text-amber-500"/>}
                                     {a.hidden && <EyeOff className="w-3 h-3 text-gray-400"/>}
                                 </div>
                             </div>

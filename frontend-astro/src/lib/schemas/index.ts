@@ -48,7 +48,6 @@ export const articleSchema = z.object({
   tags: z.string().optional(),
   status: z.union([z.literal(0), z.literal(1)]).default(0),
   hidden: z.boolean().optional().default(false),
-  is_vip_only: z.boolean().optional().default(false),
 });
 export type ArticleFormData = z.infer<typeof articleSchema>;
 

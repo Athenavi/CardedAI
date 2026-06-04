@@ -159,7 +159,6 @@ describe('articleSchema', () => {
       tags: 'tag1,tag2',
       status: 1,
       hidden: true,
-      is_vip_only: true,
     });
     expect(result.success).toBe(true);
   });

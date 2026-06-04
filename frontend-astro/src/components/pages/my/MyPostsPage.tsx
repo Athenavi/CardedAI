@@ -15,7 +15,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
-  Crown,
   Edit,
   Eye,
   EyeOff,
@@ -49,7 +48,6 @@ interface Article {
   views?: number;
   likes?: number;
   hidden?: boolean;
-  is_vip_only?: boolean;
   has_password?: boolean;
   created_at: string;
   updated_at?: string;
@@ -348,8 +346,6 @@ const ArticleListItem: React.FC<{
                 )}
                 {article.hidden && <span className="flex items-center gap-1 text-xs text-gray-400"><EyeOff
                   className="w-3 h-3"/>隐藏</span>}
-                {article.is_vip_only && <span className="flex items-center gap-1 text-xs text-amber-500"><Crown
-                  className="w-3 h-3"/>VIP</span>}
                 {article.has_password && <span className="flex items-center gap-1 text-xs text-blue-500"><Lock
                   className="w-3 h-3"/>已加密</span>}
               </div>

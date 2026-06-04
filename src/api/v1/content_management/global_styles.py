@@ -10,7 +10,6 @@ from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.global_style import GlobalStyle
-from shared.models.global_style_config import GlobalStyleConfig
 from src.api.v1.core.responses import ApiResponse
 from src.auth import jwt_required_dependency as jwt_required
 from src.utils.database.main import get_async_session
@@ -31,8 +30,8 @@ async def list_global_styles(
         全局样式配置列表
     """
     try:
-        # 查询 GlobalStyleConfig 表
-        query = select(GlobalStyleConfig).order_by(desc(GlobalStyleConfig.is_active), GlobalStyleConfig.id)
+        # 查询 GlobalStyle 表
+        query = select(GlobalStyle).order_by(desc(GlobalStyle.is_active), GlobalStyle.id)
         result = await db.execute(query)
         configs = result.scalars().all()
 
@@ -57,7 +56,6 @@ async def list_global_styles(
             }
             styles.append(style_data)
 
-        # 如果 GlobalStyleConfig 为空，尝试从 GlobalStyle 表获取
         if not styles:
             gs_query = select(GlobalStyle).order_by(desc(GlobalStyle.is_active), GlobalStyle.id)
             gs_result = await db.execute(gs_query)
@@ -94,7 +92,7 @@ async def get_global_style(
     """获取单个全局样式详情"""
     try:
         result = await db.execute(
-            select(GlobalStyleConfig).where(GlobalStyleConfig.id == style_id)
+            select(GlobalStyle).where(GlobalStyle.id == style_id)
         )
         config = result.scalar_one_or_none()
 
@@ -129,7 +127,7 @@ async def create_global_style(
         if not slug:
             slug = name.lower().replace(" ", "-")
 
-        new_config = GlobalStyleConfig(
+        new_config = GlobalStyle(
             name=name,
             slug=slug,
             theme_type=theme_type,
@@ -167,7 +165,7 @@ async def activate_global_style(
     """激活指定全局样式"""
     try:
         result = await db.execute(
-            select(GlobalStyleConfig).where(GlobalStyleConfig.id == style_id)
+            select(GlobalStyle).where(GlobalStyle.id == style_id)
         )
         config = result.scalar_one_or_none()
 
@@ -177,7 +175,7 @@ async def activate_global_style(
         # 取消所有已激活的样式
         from sqlalchemy import update
         await db.execute(
-            update(GlobalStyleConfig).values(is_active=False)
+            update(GlobalStyle).values(is_active=False)
         )
 
         # 激活目标样式
@@ -203,7 +201,7 @@ async def delete_global_style(
     """删除全局样式"""
     try:
         result = await db.execute(
-            select(GlobalStyleConfig).where(GlobalStyleConfig.id == style_id)
+            select(GlobalStyle).where(GlobalStyle.id == style_id)
         )
         config = result.scalar_one_or_none()
 

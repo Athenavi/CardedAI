@@ -16,7 +16,6 @@ from shared.models.article_content import ArticleContent
 from shared.models.article_revision import ArticleRevision
 from shared.models.category import Category
 from shared.models.user import User
-from shared.models.vip_plan import VIPPlan
 from shared.services.articles.article_manager import article_query_service, password_protection_service, \
     save_article_revision
 from shared.services.content_management.shortcode_service import shortcode_service
@@ -1147,7 +1146,6 @@ async def get_edit_article_api(
         content_text = content_obj.content if content_obj else ""
 
         categories = (await db.execute(select(Category))).scalars().all()
-        vip_plans = (await db.execute(select(VIPPlan))).scalars().all()
 
         return ApiResponse(success=True, data={
             "article": {
@@ -1167,7 +1165,7 @@ async def get_edit_article_api(
             },
             "content": content_text,
             "categories": [{"id": c.id, "name": c.name, "description": c.description} for c in categories],
-            "vip_plans": [{"id": p.id, "name": p.name, "level": p.level, "price": p.price} for p in vip_plans],
+            "vip_plans": [],
             "domain": app_config.domain
         })
     except Exception as e:
@@ -1183,10 +1181,9 @@ async def get_new_article_form_api(
 ):
     try:
         categories = (await db.execute(select(Category))).scalars().all()
-        vip_plans = (await db.execute(select(VIPPlan))).scalars().all()
         return ApiResponse(success=True, data={
             "categories": [{"id": c.id, "name": c.name, "description": c.description} for c in categories],
-            "vip_plans": [{"id": p.id, "name": p.name, "level": p.level, "price": p.price} for p in vip_plans],
+            "vip_plans": [],
             "domain": app_config.domain
         })
     except Exception as e:

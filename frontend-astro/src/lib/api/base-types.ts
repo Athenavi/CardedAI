@@ -67,8 +67,6 @@ export interface Article {
     likes: number;
     status: string;
     hidden?: boolean;
-    is_vip_only?: boolean;
-    required_vip_level?: number;
     article_ad?: string;
     created_at: string;
     updated_at: string;

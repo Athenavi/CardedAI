@@ -1,12 +1,12 @@
 [FRONTEND]
-version = 0.3.26.0603
-build_time = 2026-06-03T12:00:00Z
+version = 0.1.26.0604
+build_time = 2026-06-04T12:00:00Z
 framework = Next.js 16.1.6
 node_version = 25.2.1
 
 [BACKEND]
-version = V0.3.26.0603
-build_time = 2026-06-03T12:00:00Z
+version = V0.1.26.0604
+build_time = 2026-06-04T12:00:00Z
 framework = FastAPI 0.128.0
 python_version = 3.14.4+
 
@@ -16,5 +16,5 @@ migration_status = up_to_date
 
 [AUTHOR]
 maintainer = Athenavi
-repository = https://github.com/Athenavi/fast_blog
+repository = https://github.com/Athenavi/CardedAI
 

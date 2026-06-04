@@ -10,7 +10,6 @@ from sqlalchemy import desc
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared.models import VIPPlan, VIPFeature
 from shared.models.article import Article
 from shared.models.category import Category
 from shared.models.file_hash import FileHash
@@ -19,8 +18,6 @@ from shared.models.notification import Notification
 from shared.models.user import User
 # 导入 SQLAlchemy 模型和服务
 from shared.models.user import User as UserModel
-from shared.models.user_activity import UserActivity
-from shared.models.vip_subscription import VIPSubscription
 # 注意：避免在此处直接导入 article_service，防止循环依赖
 # article_service 的导入已移至使用位置
 from src.api.v1.core.responses import ApiResponse
@@ -39,21 +36,8 @@ async def get_activities(
     current_user: User = Depends(admin_required_api),
     db: AsyncSession = Depends(get_async_db)
 ):
-    """获取最近用户活动列表"""
-    offset = (page - 1) * per_page
-    query = select(UserActivity).order_by(desc(UserActivity.created_at)).offset(offset).limit(per_page)
-    result = await db.execute(query)
-    activities = result.scalars().all()
-
-    data = [
-        {
-            "message": f"{a.activity_type or ''} - {a.details or ''}",
-            "action": a.activity_type,
-            "created_at": a.created_at.isoformat() if a.created_at else None,
-        }
-        for a in activities
-    ]
-    return ApiResponse.success_response(data=data)
+    """获取最近用户活动列表（UserActivity 模型已移除，返回空数据）"""
+    return ApiResponse.success_response(data=[])
 
 
 @router.get("/stats")
@@ -799,90 +783,6 @@ async def update_system_settings(
         return ApiResponse(success=False, error=str(e))
 
 
-@router.get("/vip-management")
-async def get_vip_management_data(
-        request: Request,
-        current_user: User = Depends(admin_required_api),
-        db: AsyncSession = Depends(get_async_db)
-):
-    """
-    获取VIP管理数据 — 返回 stats / members / plans / features
-    """
-    try:
-        from datetime import datetime, timedelta
-        now = datetime.now()
-        month_ago = now - timedelta(days=30)
-
-        # 统计
-        total_result = await db.execute(select(func.count(VIPSubscription.id)))
-        total_count = total_result.scalar() or 0
-
-        monthly_result = await db.execute(
-            select(func.count(VIPSubscription.id)).where(VIPSubscription.created_at >= month_ago)
-        )
-        monthly_new = monthly_result.scalar() or 0
-
-        # 查询所有订阅
-        subscriptions_query = (
-            select(VIPSubscription)
-            .join(VIPPlan, VIPSubscription.plan == VIPPlan.id, isouter=True)
-        )
-        subscriptions_result = await db.execute(subscriptions_query)
-        subscriptions = subscriptions_result.scalars().all()
-
-        monthly_revenue = 0.0
-        members_data = []
-        for sub in subscriptions:
-            amt = float(sub.payment_amount) if sub.payment_amount else 0.0
-            if sub.created_at and sub.created_at >= month_ago:
-                monthly_revenue += amt
-            is_active = bool(sub.status == 1 and sub.expires_at and sub.expires_at > now)
-            username = sub.user.username if sub.user else "Unknown"
-            plan_name = sub.plan.name if sub.plan else "Unknown"
-            level = sub.plan.level if sub.plan else 0
-            members_data.append({
-                "id": sub.id,
-                "user_id": sub.user_id,
-                "username": username,
-                "plan_name": plan_name,
-                "level": level,
-                "starts_at": sub.starts_at.isoformat() if sub.starts_at else None,
-                "expires_at": sub.expires_at.isoformat() if sub.expires_at else None,
-                "is_active": is_active,
-                "amount": amt,
-                "transaction_id": sub.transaction_id,
-                "status": "active" if sub.status == 1 else "inactive",
-            })
-
-        active_members = sum(1 for m in members_data if m['is_active'])
-        renewal_rate = round(active_members / total_count * 100, 1) if total_count > 0 else 0
-
-        # 所有计划
-        plans_result = await db.execute(select(VIPPlan).order_by(VIPPlan.level))
-        plans = plans_result.scalars().all()
-
-        # 所有功能
-        features_result = await db.execute(select(VIPFeature).order_by(VIPFeature.required_level))
-        features = features_result.scalars().all()
-
-        return ApiResponse(success=True, data={
-            "stats": {
-                "total_vip_count": total_count,
-                "active_count": active_members,
-                "monthly_new": monthly_new,
-                "monthly_revenue": round(monthly_revenue, 2),
-                "renewal_rate": renewal_rate,
-            },
-            "members": members_data,
-            "plans": [p.to_dict() for p in plans],
-            "features": [f.to_dict() for f in features],
-        })
-    except Exception as e:
-        import traceback
-        print(f"VIP management error: {e}\n{traceback.format_exc()}")
-        return ApiResponse(success=False, error=str(e))
-
-
 @router.get("/blog-management/articles/stats")
 async def get_blog_management_articles_stats(
         request: Request,
@@ -1004,158 +904,6 @@ async def delete_blog_management_article(
     except Exception as e:
         import traceback
         print(f"Error in delete_blog_management_article: {e}\n{traceback.format_exc()}")
-        return ApiResponse(success=False, error=str(e))
-
-
-# ====== VIP 计划管理 (Admin) ======
-
-@router.post("/vip/plans")
-async def admin_create_vip_plan(
-    request: Request,
-    current_user: User = Depends(admin_required_api),
-    db: AsyncSession = Depends(get_async_db)
-):
-    """创建 VIP 套餐"""
-    try:
-        form = await request.form()
-        plan = VIPPlan(
-            name=form.get('name'),
-            description=form.get('description', ''),
-            price=float(form.get('price', 0)),
-            original_price=float(form.get('original_price', 0)) if form.get('original_price') else None,
-            duration_days=int(form.get('duration_days', 30)),
-            level=int(form.get('level', 1)),
-            features=form.get('features', '[]'),
-        )
-        db.add(plan)
-        await db.commit()
-        await db.refresh(plan)
-        return ApiResponse(success=True, data=plan.to_dict())
-    except Exception as e:
-        return ApiResponse(success=False, error=str(e))
-
-
-@router.put("/vip/plans/{plan_id}")
-async def admin_update_vip_plan(
-    request: Request,
-    plan_id: int,
-    current_user: User = Depends(admin_required_api),
-    db: AsyncSession = Depends(get_async_db)
-):
-    """更新 VIP 套餐"""
-    try:
-        result = await db.execute(select(VIPPlan).where(VIPPlan.id == plan_id))
-        plan = result.scalar_one_or_none()
-        if not plan:
-            return ApiResponse(success=False, error="套餐不存在")
-
-        form = await request.form()
-        plan.name = form.get('name', plan.name)
-        plan.description = form.get('description', plan.description)
-        plan.price = float(form.get('price', plan.price))
-        plan.original_price = float(form.get('original_price', plan.original_price)) if form.get('original_price') else plan.original_price
-        plan.duration_days = int(form.get('duration_days', plan.duration_days))
-        plan.level = int(form.get('level', plan.level))
-        plan.features = form.get('features', plan.features)
-        is_active = form.get('is_active')
-        if is_active is not None:
-            plan.is_active = is_active in ('1', 'true', 'True', True)
-        await db.commit()
-        await db.refresh(plan)
-        return ApiResponse(success=True, data=plan.to_dict())
-    except Exception as e:
-        return ApiResponse(success=False, error=str(e))
-
-
-@router.delete("/vip/plans/{plan_id}")
-async def admin_delete_vip_plan(
-    plan_id: int,
-    current_user: User = Depends(admin_required_api),
-    db: AsyncSession = Depends(get_async_db)
-):
-    """删除 VIP 套餐"""
-    try:
-        result = await db.execute(select(VIPPlan).where(VIPPlan.id == plan_id))
-        plan = result.scalar_one_or_none()
-        if not plan:
-            return ApiResponse(success=False, error="套餐不存在")
-        await db.delete(plan)
-        await db.commit()
-        return ApiResponse(success=True, data={"message": "已删除"})
-    except Exception as e:
-        return ApiResponse(success=False, error=str(e))
-
-
-# ====== VIP 功能管理 (Admin) ======
-
-@router.post("/vip/features")
-async def admin_create_vip_feature(
-    request: Request,
-    current_user: User = Depends(admin_required_api),
-    db: AsyncSession = Depends(get_async_db)
-):
-    """创建 VIP 功能"""
-    try:
-        form = await request.form()
-        feature = VIPFeature(
-            code=form.get('code'),
-            name=form.get('name'),
-            description=form.get('description', ''),
-            required_level=int(form.get('required_level', 1)),
-        )
-        db.add(feature)
-        await db.commit()
-        await db.refresh(feature)
-        return ApiResponse(success=True, data=feature.to_dict())
-    except Exception as e:
-        return ApiResponse(success=False, error=str(e))
-
-
-@router.put("/vip/features/{feature_id}")
-async def admin_update_vip_feature(
-    request: Request,
-    feature_id: int,
-    current_user: User = Depends(admin_required_api),
-    db: AsyncSession = Depends(get_async_db)
-):
-    """更新 VIP 功能"""
-    try:
-        result = await db.execute(select(VIPFeature).where(VIPFeature.id == feature_id))
-        feature = result.scalar_one_or_none()
-        if not feature:
-            return ApiResponse(success=False, error="功能不存在")
-
-        form = await request.form()
-        feature.code = form.get('code', feature.code)
-        feature.name = form.get('name', feature.name)
-        feature.description = form.get('description', feature.description)
-        feature.required_level = int(form.get('required_level', feature.required_level))
-        is_active = form.get('is_active')
-        if is_active is not None:
-            feature.is_active = is_active in ('1', 'true', 'True', True)
-        await db.commit()
-        await db.refresh(feature)
-        return ApiResponse(success=True, data=feature.to_dict())
-    except Exception as e:
-        return ApiResponse(success=False, error=str(e))
-
-
-@router.delete("/vip/features/{feature_id}")
-async def admin_delete_vip_feature(
-    feature_id: int,
-    current_user: User = Depends(admin_required_api),
-    db: AsyncSession = Depends(get_async_db)
-):
-    """删除 VIP 功能"""
-    try:
-        result = await db.execute(select(VIPFeature).where(VIPFeature.id == feature_id))
-        feature = result.scalar_one_or_none()
-        if not feature:
-            return ApiResponse(success=False, error="功能不存在")
-        await db.delete(feature)
-        await db.commit()
-        return ApiResponse(success=True, data={"message": "已删除"})
-    except Exception as e:
         return ApiResponse(success=False, error=str(e))
 
 

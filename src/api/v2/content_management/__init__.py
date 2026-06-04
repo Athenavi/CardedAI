@@ -22,7 +22,6 @@ def _build_router():
     from src.api.v1.content_management.custom_block_patterns import router as custom_block_patterns_router
     from src.api.v1.content_management.custom_post_types import router as custom_post_types_router
     from src.api.v1.content_management.feed import router as feed_router
-    from src.api.v1.content_management.form_builder import router as form_builder_router
     from src.api.v1.content_management.global_styles import router as global_styles_router
     from src.api.v1.content_management.menu_management import router as menu_management_router
     from src.api.v1.content_management.page_builder_routes import router as page_builder_router
@@ -30,7 +29,6 @@ def _build_router():
     from src.api.v1.content_management.widgets import router as widgets_router
 
     router.include_router(category_management_router, prefix="/categories")
-    router.include_router(form_builder_router, prefix="/admin/form")
     router.include_router(menu_management_router, prefix="/admin/menu")
     router.include_router(custom_block_patterns_router, prefix="/pattern")
     router.include_router(block_patterns_router, prefix="/block-patterns")
