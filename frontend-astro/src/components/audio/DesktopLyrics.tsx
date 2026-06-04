@@ -50,7 +50,7 @@ const ANIM_PRESETS: { value: AnimPreset; label: string; desc: string }[] = [
   {value: 'typewriter', label: '打字机', desc: 'clipPath 逐字展开'},
 ];
 
-const LS_KEY = 'fastblog_desktop_lyrics';
+const LS_KEY = 'Carded AI_desktop_lyrics';
 const DEFAULT_SETTINGS: LyricsSettings = {
   x: 50, y: 50, fontSize: 18, fontFamily: 'system-ui, sans-serif', opacity: 90, gradientId: 'purple-pink',
   boxWidth: 520, entryAnim: 'fade-up', exitAnim: 'fade-scale',

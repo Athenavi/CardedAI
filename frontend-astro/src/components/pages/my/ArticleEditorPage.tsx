@@ -59,7 +59,7 @@ import CoverImageUploader from '@/components/editor/CoverImageUploader';
 const RichEditor = React.lazy(() => import('@/components/editor/RichEditor'));
 
 /* ── Constants ── */
-const DRAFT_KEY = 'fastblog_draft';
+const DRAFT_KEY = 'Carded AI_draft';
 const slugify = (s: string) => s.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-|-$/g, '').slice(0, 200);
 const loadDraft = () => { try { const d = localStorage.getItem(DRAFT_KEY); return d ? JSON.parse(d) : null; } catch { return null; } };
 const persistDraft = (data: any) => {
@@ -835,7 +835,7 @@ const ArticleEditorPageInner: React.FC<Props> = ({mode}) => {
                           <span className="flex items-center gap-1"><FileText className="w-3 h-3"/>编辑模式</span>}
                   </div>
                   <div className="flex items-center gap-4">
-                      <span>FastBlog Editor</span>
+                      <span>Carded AI Editor</span>
                   </div>
               </footer>
           )}

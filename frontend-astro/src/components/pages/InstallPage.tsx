@@ -18,7 +18,7 @@ export default function InstallPage() {
   const [err, setErr] = useState('');
   const [prereqs, setPrereqs] = useState<any[]>([]);
     const [db, setDb] = useState({host: 'localhost', port: '5432', name: '', user: 'postgres', pass: ''});
-  const [site, setSite] = useState({name:'FastBlog', desc:'', url:''});
+  const [site, setSite] = useState({name:'Carded AI', desc:'', url:''});
   const [admin, setAdmin] = useState({username:'', email:'', password:''});
     const [migrationStatus, setMigrationStatus] = useState<{
         success?: boolean;
@@ -138,7 +138,7 @@ export default function InstallPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-950 dark:to-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
-        <div className="text-center mb-8"><div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center"><Server className="w-6 h-6 text-white"/></div><h1 className="text-2xl font-bold text-gray-900 dark:text-white">安装 FastBlog</h1></div>
+        <div className="text-center mb-8"><div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center"><Server className="w-6 h-6 text-white"/></div><h1 className="text-2xl font-bold text-gray-900 dark:text-white">安装 Carded AI</h1></div>
 
         {/* Steps */}
         <div className="flex gap-2 mb-8 justify-center">

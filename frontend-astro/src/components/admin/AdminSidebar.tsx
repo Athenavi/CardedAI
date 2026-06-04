@@ -73,33 +73,15 @@ export const navConfig: NavItem[] = [
   {labelKey: 'nav.ads', href: '/admin/ads', icon: Newspaper},
   {labelKey: 'nav.templates', href: '/admin/templates', icon: GitBranch},
   {labelKey: 'nav.notifications', href: '/admin/notifications', icon: Bell},
-  {labelKey: 'nav.collaboration', href: '/admin/collaboration', icon: Handshake},
   {labelKey: 'nav.integrations', href: '/admin/integrations', icon: Globe},
   {labelKey: 'nav.aiTools', href: '/admin/ai', icon: Brain},
-  {labelKey: 'nav.cdn', href: '/admin/cdn', icon: Radio},
   {labelKey: 'nav.accessibility', href: '/admin/accessibility', icon: Eye},
   {labelKey: 'nav.gdpr', href: '/admin/gdpr', icon: Shield},
   {sepKey: 'nav.advancedManagement'},
-  {labelKey: 'nav.enterprise', href: '/admin/enterprise', icon: Building2},
   {labelKey: 'nav.payment', href: '/admin/payment', icon: CreditCard},
   {labelKey: 'nav.migration', href: '/admin/migration', icon: ArrowRightLeft},
-  {labelKey: 'nav.contentExt', href: '/admin/content-ext', icon: FileEdit},
-  {labelKey: 'nav.userSecurity', href: '/admin/user-security', icon: Lock},
-  {labelKey: 'nav.searchMedia', href: '/admin/search-media', icon: Zap},
-  {labelKey: 'nav.ecommerce', href: '/admin/ecommerce', icon: Package},
-  {labelKey: 'nav.revenue', href: '/admin/revenue', icon: PieChart},
-  {labelKey: 'nav.multisite', href: '/admin/multisite', icon: Globe},
-  {labelKey: 'nav.chatGroups', href: '/admin/chat-groups', icon: MessageSquare},
-  {labelKey: 'nav.seo', href: '/admin/seo', icon: Search},
   {labelKey: 'nav.approval', href: '/admin/approval', icon: CheckSquare},
   {sepKey: 'nav.extensions'},
-  {labelKey: 'nav.badges', href: '/admin/ext/badges', icon: Award},
-  {labelKey: 'nav.points', href: '/admin/ext/points', icon: Coins},
-  {labelKey: 'nav.tipping', href: '/admin/ext/tipping', icon: Diamond},
-  {labelKey: 'nav.aiWriting', href: '/admin/ext/ai-writing', icon: PenLine},
-  {labelKey: 'nav.certification', href: '/admin/ext/certification', icon: Medal},
-  {labelKey: 'nav.nft', href: '/admin/ext/nft', icon: Diamond},
-  {labelKey: 'nav.recommendations', href: '/admin/ext/recommendations', icon: Star},
   {labelKey: 'nav.settings', href: '/admin/settings', icon: Settings},
 ];
 
@@ -142,7 +124,7 @@ export function DesktopSidebar({collapsed, onToggle}: { collapsed: boolean; onTo
     <aside
       className={`hidden lg:flex flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all ${collapsed ? 'w-16' : 'w-56'} flex-shrink-0`}>
       <div className="flex items-center justify-between h-14 px-4 border-b border-gray-200 dark:border-gray-800">
-        {!collapsed && <span className="font-bold text-gray-900 dark:text-white">FastBlog</span>}
+        {!collapsed && <span className="font-bold text-gray-900 dark:text-white">Carded AI</span>}
         <button onClick={onToggle} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400">
           <ChevronLeft className={`w-4 h-4 transition-transform ${collapsed ? 'rotate-180' : ''}`}/></button>
       </div>
@@ -181,7 +163,7 @@ export function MobileSidebar({open, onClose}: { open: boolean; onClose: () => v
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transform transition-transform lg:hidden safe-top ${open ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between h-14 px-4 border-b border-gray-200 dark:border-gray-800">
-          <span className="font-bold text-gray-900 dark:text-white">FastBlog</span>
+          <span className="font-bold text-gray-900 dark:text-white">Carded AI</span>
           <button onClick={onClose}
                   className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
             <X className="w-5 h-5 text-gray-500 dark:text-gray-400"/></button>

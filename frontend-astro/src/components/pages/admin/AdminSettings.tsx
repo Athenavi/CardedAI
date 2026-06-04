@@ -84,7 +84,7 @@ const SETTINGS_FIELDS: FieldDef[] = [
     key: 'site_title',
     label: '站点标题',
     category: 'basic',
-    placeholder: 'FastBlog',
+    placeholder: 'Carded AI',
     icon: Type,
     desc: '显示在浏览器标签和搜索引擎结果中'
   },
@@ -626,7 +626,7 @@ function SettingsInner() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `fastblog-settings-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `Carded AI-settings-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }, [localSettings, menus, menuItems, pages]);

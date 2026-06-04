@@ -44,7 +44,7 @@ const PWAInstallPrompt = () => {
         <div className="fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-50 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
             <div className="flex items-start justify-between">
                 <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">安装 FastBlog</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">安装 Carded AI</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">添加到主屏幕，获得更好的体验</p>
                 </div>
                 <button onClick={() => setShowPrompt(false)} className="p-1 text-gray-400 hover:text-gray-600">

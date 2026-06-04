@@ -691,7 +691,7 @@ const AudioPlayer: React.FC<{
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-white font-semibold truncate text-base">{media.original_filename}</p>
-                <p className="text-white/50 text-xs truncate">FastBlog Audio</p>
+                <p className="text-white/50 text-xs truncate">Carded AI Audio</p>
               </div>
             </div>
 
@@ -875,7 +875,7 @@ const AudioPlayer: React.FC<{
               </motion.div>
               <div className="min-w-0 max-w-[140px]">
                 <p className="text-white text-sm font-medium truncate">{media.original_filename}</p>
-                <p className="text-white/40 text-xs truncate">FastBlog</p>
+                <p className="text-white/40 text-xs truncate">Carded AI</p>
               </div>
               {/* Like button */}
               <motion.button

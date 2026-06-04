@@ -232,7 +232,7 @@ const Navbar: React.FC<NavbarProps> = ({title, subtitle, showBackButton = false,
                   </svg>
                 </div>
                 <span
-                  className="text-xl font-bold text-gray-900 dark:text-white hidden sm:block tracking-tight">FastBlog</span>
+                  className="text-xl font-bold text-gray-900 dark:text-white hidden sm:block tracking-tight">Carded AI</span>
               </a>
 
               {/* Page title (for admin pages) */}
