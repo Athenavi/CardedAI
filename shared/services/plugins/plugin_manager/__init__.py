@@ -10,47 +10,73 @@
 - 权限控制
 """
 
-from shared.services.plugins.plugin_manager.core import (
-    BasePlugin,
-    PluginManager,
-    PluginHook,
-    plugin_hooks,
-    plugin_manager,
-)
-from shared.services.plugins.plugin_manager.dependency import (
-    PluginDependencyManager,
-    plugin_dependency_manager,
-)
-from shared.services.plugins.plugin_manager.init import (
-    initialize_plugins,
-    trigger_plugin_event,
-    apply_plugin_filter,
-)
-from shared.services.plugins.plugin_manager.installer import (
-    PluginInstaller,
-    plugin_installer,
-)
-from shared.services.plugins.plugin_manager.manifest import (
-    PluginManifest,
-    ManifestValidator,
-    PluginCapability,
-    PluginDependency,
-    PluginSettingsField,
-    DependencyResolver,
-    PREDEFINED_CAPABILITIES,
-    get_capability_description,
-)
-from shared.services.plugins.plugin_manager.marketplace import (
-    PluginMarketService,
-)
-from shared.services.plugins.plugin_manager.public_api import (
-    PluginPublicAPI,
-    plugin_api,
-)
-from shared.services.plugins.plugin_manager.version_utils import (
-    compare_versions,
-    check_version_match,
-)
+# ==================== 懒加载映射表 ====================
+# 名称 -> (子模块路径, 原始名称)
+_LAZY_IMPORTS = {
+    # Core
+    'BasePlugin': ('.core', 'BasePlugin'),
+    'PluginManager': ('.core', 'PluginManager'),
+    'PluginHook': ('.core', 'PluginHook'),
+    'plugin_hooks': ('.core', 'plugin_hooks'),
+    'plugin_manager': ('.core', 'plugin_manager'),
+
+    # Dependency
+    'PluginDependencyManager': ('.dependency', 'PluginDependencyManager'),
+    'plugin_dependency_manager': ('.dependency', 'plugin_dependency_manager'),
+
+    # Init
+    'initialize_plugins': ('.init', 'initialize_plugins'),
+    'trigger_plugin_event': ('.init', 'trigger_plugin_event'),
+    'apply_plugin_filter': ('.init', 'apply_plugin_filter'),
+
+    # Installer
+    'PluginInstaller': ('.installer', 'PluginInstaller'),
+    'plugin_installer': ('.installer', 'plugin_installer'),
+
+    # Manifest
+    'PluginManifest': ('.manifest', 'PluginManifest'),
+    'ManifestValidator': ('.manifest', 'ManifestValidator'),
+    'PluginCapability': ('.manifest', 'PluginCapability'),
+    'PluginDependency': ('.manifest', 'PluginDependency'),
+    'PluginSettingsField': ('.manifest', 'PluginSettingsField'),
+    'DependencyResolver': ('.manifest', 'DependencyResolver'),
+    'PREDEFINED_CAPABILITIES': ('.manifest', 'PREDEFINED_CAPABILITIES'),
+    'get_capability_description': ('.manifest', 'get_capability_description'),
+
+    # Marketplace
+    'PluginMarketService': ('.marketplace', 'PluginMarketService'),
+
+    # Public API
+    'PluginPublicAPI': ('.public_api', 'PluginPublicAPI'),
+    'plugin_api': ('.public_api', 'plugin_api'),
+
+    # Version Utils
+    'compare_versions': ('.version_utils', 'compare_versions'),
+    'check_version_match': ('.version_utils', 'check_version_match'),
+}
+
+# 已加载的缓存
+_loaded = {}
+
+
+def __getattr__(name):
+    """模块级 __getattr__：按需懒加载"""
+    if name in _loaded:
+        return _loaded[name]
+
+    spec = _LAZY_IMPORTS.get(name)
+    if spec is not None:
+        import importlib
+        module_path, attr_name = spec
+        module = importlib.import_module(module_path, package=__name__)
+        cls = getattr(module, attr_name)
+        # 缓存到模块命名空间
+        globals()[name] = cls
+        _loaded[name] = cls
+        return cls
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = [
     # Core
@@ -80,8 +106,6 @@ __all__ = [
     # Dependency
     'PluginDependencyManager',
     'plugin_dependency_manager',
-
-    # Updater
 
     # Public API
     'PluginPublicAPI',

@@ -8,14 +8,26 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# 加载 .env 文件
+# 加载 .env 文件 - 支持多个位置
 project_root = Path(__file__).parent.parent
-env_file = project_root / '.env'
-if env_file.exists():
-    load_dotenv(env_file)
-    print(f"[Alembic] Loaded .env from {env_file}")
-else:
-    print(f"[Alembic] Warning: .env file not found at {env_file}")
+
+# 按优先级尝试加载 .env 文件
+env_candidates = [
+    project_root / '.env',              # 根目录 .env
+    project_root / 'config' / '.env',   # config 目录 .env（安装向导写入位置）
+]
+env_loaded = False
+for env_file in env_candidates:
+    if env_file.exists():
+        load_dotenv(env_file, override=True)
+        print(f"[Alembic] Loaded .env from {env_file}")
+        env_loaded = True
+        break
+
+if not env_loaded:
+    print(f"[Alembic] Warning: .env file not found. Searched:")
+    for p in env_candidates:
+        print(f"  - {p}")
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
@@ -35,7 +47,7 @@ if config.config_file_name is not None:
 def get_database_url():
     """
     从环境变量构建数据库URL（仅支持 PostgreSQL）
-    
+
     优先级:
     1. DATABASE_URL 环境变量 (完整URL)
     2. 分别的 DB_* 环境变量
@@ -59,28 +71,112 @@ def get_database_url():
         raise ValueError(
             f"数据库配置不完整: host={db_host}, user={db_user}, name={db_name}"
         )
-    
+
     # 构建 PostgreSQL URL
     return f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
 # Set the database URL
 db_url = get_database_url()
-print(f"[Alembic] Database URL: {db_url.split('@')[1].split('/')[0] if '@' in db_url else db_url}")  # 隐藏密码
+# 隐藏密码打印
+safe_url = db_url
+if '@' in db_url:
+    parts = db_url.split('@')
+    prefix = parts[0]
+    suffix = parts[1]
+    # 把密码部分替换为 ***
+    if ':' in prefix.split('://', 1)[-1]:
+        user_part = prefix.split('://', 1)[0] + '://' + prefix.split('://', 1)[-1].split(':')[0]
+        safe_url = f"{user_part}:***@{suffix}"
+print(f"[Alembic] Database URL: {safe_url}")
 config.set_main_option("sqlalchemy.url", db_url)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
 import sys
-from pathlib import Path
 
 # 添加项目根目录到路径
-project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-# 导入所有模型的 Base
+# 导入 Base
 from shared.models import Base
 target_metadata = Base.metadata
+
+# ============================================================
+# 显式导入所有模型模块，确保它们注册到 Base.metadata
+# 懒加载模式下，仅 import Base 不会触发模型类的加载
+# ============================================================
+import importlib
+
+_model_modules = [
+    'shared.models.user',
+    'shared.models.article',
+    'shared.models.article_content',
+    'shared.models.article_like',
+    'shared.models.article_seo',
+    'shared.models.article_revision',
+    'shared.models.article_revision_note',
+    'shared.models.article_annotation',
+    'shared.models.category',
+    'shared.models.category_subscription',
+    'shared.models.comment',
+    'shared.models.comment_vote',
+    'shared.models.comment_subscription',
+    'shared.models.media',
+    'shared.models.media_folder',
+    'shared.models.media_optimization',
+    'shared.models.system_settings',
+    'shared.models.global_style',
+    'shared.models.audit_log',
+    'shared.models.ai_workflow',
+    'shared.models.page_builder',
+    'shared.models.field_permission',
+    'shared.models.menus',
+    'shared.models.menu_items',
+    'shared.models.menu_location',
+    'shared.models.menu_location_assignment',
+    'shared.models.pages',
+    'shared.models.upload_task',
+    'shared.models.upload_chunk',
+    'shared.models.download_task',
+    'shared.models.notification',
+    'shared.models.search_history',
+    'shared.models.search_index',
+    'shared.models.custom_field',
+    'shared.models.plugin',
+    'shared.models.theme',
+    'shared.models.widget_instance',
+    'shared.models.block_pattern',
+    'shared.models.custom_post_type',
+    'shared.models.o_auth_account',
+    'shared.models.share_stat',
+    'shared.models.sensitive_word',
+    'shared.models.user_session',
+    'shared.models.login_attempt',
+    'shared.models.token_blacklist',
+    'shared.models.webhook',
+    'shared.models.webhook_delivery',
+    'shared.models.file_hash',
+    'shared.models.email_service_config',
+    'shared.models.approval_record',
+    'shared.models.approval_step',
+    'shared.models.role',
+    'shared.models.capability',
+    'shared.models.role_capability',
+    'shared.models.user_role',
+    'shared.models.permission_audit_log',
+]
+
+_loaded_count = 0
+for _mod_name in _model_modules:
+    try:
+        importlib.import_module(_mod_name)
+        _loaded_count += 1
+    except ImportError as e:
+        print(f"[Alembic] Warning: Could not import {_mod_name}: {e}")
+
+print(f"[Alembic] Loaded {_loaded_count}/{len(_model_modules)} model modules")
+print(f"[Alembic] Registered {len(target_metadata.tables)} tables in metadata")
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

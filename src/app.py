@@ -602,14 +602,6 @@ def register_middleware(app: FastAPI):
     except Exception as e:
         print(f"[Performance Monitor] 加载失败: {e}")
 
-    # 多站点（惰性加载：避免启动时导入 Site 模型）
-    try:
-        app.add_middleware(
-            _make_lazy_middleware("src.middleware.multisite_middleware", "MultiSiteMiddleware")
-        )
-    except Exception:
-        pass
-
 
 # ---------- 错误处理与静态文件 ----------
 def register_error_handlers(app: FastAPI):
