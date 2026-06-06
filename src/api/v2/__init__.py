@@ -187,6 +187,9 @@ ROUTE_REGISTRY_V2 = [
     # ==================== 自动化引擎（V2 聚合路由器）====================
     ("src.api.v2.workflow", "/api/v2/workflow", ["workflow-v2"], True),
 
+    # ==================== MCP Server（AI Agent 接口）====================
+    ("src.api.v2.mcp", "/api/v2/mcp", ["mcp-v2"], True),
+
     # [已删除] 企业管理模块（EnterpriseLicense, SupportTicket 等模型已移除）
 ]
 

@@ -1,16 +1,8 @@
 ---
+import AdminLayout from '@/layouts/AdminLayout.astro';
 import AdminKnowledgeWorkbench from '@/components/pages/admin/AdminKnowledgeWorkbench';
 ---
 
-<!doctype html>
-<html lang="zh-CN">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>知识工作台 - FastBlog</title>
-    <link rel="stylesheet" href="/src/styles/globals.css"/>
-</head>
-<body>
-<AdminKnowledgeWorkbench client:idle/>
-</body>
-</html>
+<AdminLayout title="知识工作台">
+  <AdminKnowledgeWorkbench client:idle />
+</AdminLayout>

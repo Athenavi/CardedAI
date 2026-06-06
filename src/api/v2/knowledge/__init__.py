@@ -1,7 +1,7 @@
 """
 V2 知识引擎 API 路由
 
-提供知识库管理、文档上传与解析、RAG 搜索与问答、研报生成等端点。
+提供知识库管理、文档上传与解析、RAG 搜索与问答、研报生成等端点
 """
 
 import json
@@ -17,9 +17,9 @@ from src.api.v1.core.responses import ApiResponse
 router = APIRouter()
 
 
-# ==================== 知识库管理 ====================
+# ==================== 知识库管"====================
 
-@router.post("/bases", summary="创建知识库")
+@router.post("/bases", summary="创建知识")
 async def create_knowledge_base(
     name: str = Form(...),
     description: str = Form(""),
@@ -27,7 +27,7 @@ async def create_knowledge_base(
     chunk_size: int = Form(512),
     chunk_overlap: int = Form(50),
 ):
-    """创建新的知识库"""
+    """创建新的知识"""
     try:
         from shared.models.knowledge.knowledge_base import KnowledgeBase
         from shared.services.knowledge.rag_chain import rag_chain
@@ -47,19 +47,19 @@ async def create_knowledge_base(
             db.add(kb)
             db.flush()
 
-            # 设置向量集合名称并创建
+            # 设置向量集合名称并创"
             kb.vector_collection = f"kb_{kb.id}"
             await rag_chain.ensure_collection(kb.id)
 
             db.commit()
             db.refresh(kb)
 
-            return ApiResponse.success(data=kb.to_dict(), message="知识库创建成功")
+            return ApiResponse.ok(data=kb.to_dict(), message="知识库创建成")
     except Exception as e:
-        return ApiResponse.error(message=f"创建知识库失败: {str(e)}")
+        return ApiResponse.fail(message=f"创建知识库失{(e)}")
 
 
-@router.get("/bases", summary="获取知识库列表")
+@router.get("/bases", summary="获取知识库列")
 async def get_knowledge_bases(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
@@ -80,7 +80,7 @@ async def get_knowledge_bases(
             result = db.execute(query.offset(offset).limit(per_page))
             items = [kb.to_dict() for kb in result.scalars().all()]
 
-            return ApiResponse.success(data={
+            return ApiResponse.ok(data={
                 "items": items,
                 "total": total,
                 "page": page,
@@ -88,26 +88,26 @@ async def get_knowledge_bases(
                 "pages": (total + per_page - 1) // per_page,
             })
     except Exception as e:
-        return ApiResponse.error(message=f"获取知识库列表失败: {str(e)}")
+        return ApiResponse.fail(message=f"获取知识库列表失{(e)}")
 
 
-@router.get("/bases/{base_id}", summary="获取知识库详情")
+@router.get("/bases/{base_id}", summary="获取知识库详")
 async def get_knowledge_base(base_id: int):
-    """获取指定知识库详情"""
+    """获取指定知识库详"""
     try:
         from shared.models.knowledge.knowledge_base import KnowledgeBase
 
         with get_db() as db:
             kb = db.get(KnowledgeBase, base_id)
             if not kb:
-                return ApiResponse.error(message="知识库不存在", code=404)
+                return ApiResponse.fail(message="知识库不存在", code=404)
 
-            return ApiResponse.success(data=kb.to_dict())
+            return ApiResponse.ok(data=kb.to_dict())
     except Exception as e:
-        return ApiResponse.error(message=f"获取知识库详情失败: {str(e)}")
+        return ApiResponse.fail(message=f"获取知识库详情失{(e)}")
 
 
-@router.put("/bases/{base_id}", summary="更新知识库")
+@router.put("/bases/{base_id}", summary="更新知识")
 async def update_knowledge_base(
     base_id: int,
     name: str = Form(None),
@@ -115,14 +115,14 @@ async def update_knowledge_base(
     chunk_size: int = Form(None),
     chunk_overlap: int = Form(None),
 ):
-    """更新知识库配置"""
+    """更新知识库配"""
     try:
         from shared.models.knowledge.knowledge_base import KnowledgeBase
 
         with get_db() as db:
             kb = db.get(KnowledgeBase, base_id)
             if not kb:
-                return ApiResponse.error(message="知识库不存在", code=404)
+                return ApiResponse.fail(message="知识库不存在", code=404)
 
             if name is not None:
                 kb.name = name
@@ -137,12 +137,12 @@ async def update_knowledge_base(
             db.commit()
             db.refresh(kb)
 
-            return ApiResponse.success(data=kb.to_dict(), message="知识库更新成功")
+            return ApiResponse.ok(data=kb.to_dict(), message="知识库更新成")
     except Exception as e:
-        return ApiResponse.error(message=f"更新知识库失败: {str(e)}")
+        return ApiResponse.fail(message=f"更新知识库失{(e)}")
 
 
-@router.delete("/bases/{base_id}", summary="删除知识库")
+@router.delete("/bases/{base_id}", summary="删除知识")
 async def delete_knowledge_base(base_id: int):
     """删除知识库及其所有文档和向量"""
     try:
@@ -154,9 +154,9 @@ async def delete_knowledge_base(base_id: int):
         with get_db() as db:
             kb = db.get(KnowledgeBase, base_id)
             if not kb:
-                return ApiResponse.error(message="知识库不存在", code=404)
+                return ApiResponse.fail(message="知识库不存在", code=404)
 
-            # 删除所有切片记录
+            # 删除所有切片记
             db.execute(
                 select(DocumentChunk).where(DocumentChunk.knowledge_base_id == base_id)
             )
@@ -166,7 +166,7 @@ async def delete_knowledge_base(base_id: int):
             for chunk in chunks:
                 db.delete(chunk)
 
-            # 删除所有文档记录
+            # 删除所有文档记
             docs = db.execute(
                 select(KnowledgeDocument).where(KnowledgeDocument.knowledge_base_id == base_id)
             ).scalars().all()
@@ -179,9 +179,9 @@ async def delete_knowledge_base(base_id: int):
             db.delete(kb)
             db.commit()
 
-            return ApiResponse.success(message="知识库已删除")
+            return ApiResponse.ok(message="知识库已删除")
     except Exception as e:
-        return ApiResponse.error(message=f"删除知识库失败: {str(e)}")
+        return ApiResponse.fail(message=f"删除知识库失{(e)}")
 
 
 # ==================== 文档管理 ====================
@@ -195,8 +195,7 @@ async def upload_document(
     上传文档到知识库
 
     支持格式: PDF, DOCX, TXT, HTML, MD
-    流程: 上传 → 解析 → 切片 → Embedding → 存入向量数据库
-    """
+    流程: 上传 "解析 "切片 "Embedding "存入向量数据"    """
     try:
         from shared.models.knowledge.knowledge_base import KnowledgeBase
         from shared.models.knowledge.knowledge_document import KnowledgeDocument
@@ -208,7 +207,7 @@ async def upload_document(
         with get_db() as db:
             kb = db.get(KnowledgeBase, base_id)
             if not kb:
-                return ApiResponse.error(message="知识库不存在", code=404)
+                return ApiResponse.fail(message="知识库不存在", code=404)
 
             # 1. 保存上传文件
             upload_dir = os.path.join("media", "knowledge", str(base_id))
@@ -219,7 +218,7 @@ async def upload_document(
             with open(file_path, "wb") as f:
                 f.write(content)
 
-            # 2. 检测文件类型
+            # 2. 检测文件类
             _, ext = os.path.splitext(file.filename)
             file_type = ext.lstrip(".").lower()
 
@@ -240,7 +239,7 @@ async def upload_document(
             if not parse_result.success:
                 doc.status = "failed"
                 db.commit()
-                return ApiResponse.error(message=f"文档解析失败: {parse_result.error}")
+                return ApiResponse.fail(message=f"文档解析失败: {parse_result.error}")
 
             doc.content_text = parse_result.text
 
@@ -256,7 +255,7 @@ async def upload_document(
             if not chunks:
                 doc.status = "failed"
                 db.commit()
-                return ApiResponse.error(message="文档切片为空")
+                return ApiResponse.fail(message="文档切片为空")
 
             # 6. 保存切片记录
             chunk_records = []
@@ -281,7 +280,7 @@ async def upload_document(
                 chunks=chunk_records,
             )
 
-            # 更新切片的 embedding_id
+            # 更新切片"embedding_id
             chunk_objs = db.execute(
                 select(DocumentChunk).where(DocumentChunk.document_id == doc.id)
             ).scalars().all()
@@ -303,13 +302,13 @@ async def upload_document(
             db.commit()
             db.refresh(doc)
 
-            return ApiResponse.success(data={
+            return ApiResponse.ok(data={
                 "document": doc.to_dict(),
                 "chunk_count": len(chunks),
                 "vector_count": len(vector_ids),
-            }, message="文档上传并索引成功")
+            }, message="文档上传并索引成")
     except Exception as e:
-        return ApiResponse.error(message=f"文档上传失败: {str(e)}")
+        return ApiResponse.fail(message=f"文档上传失败: {(e)}")
 
 
 @router.get("/bases/{base_id}/documents", summary="获取文档列表")
@@ -344,19 +343,19 @@ async def get_documents(
             result = db.execute(query.offset(offset).limit(per_page))
             items = [doc.to_dict() for doc in result.scalars().all()]
 
-            return ApiResponse.success(data={
+            return ApiResponse.ok(data={
                 "items": items,
                 "total": total,
                 "page": page,
                 "per_page": per_page,
             })
     except Exception as e:
-        return ApiResponse.error(message=f"获取文档列表失败: {str(e)}")
+        return ApiResponse.fail(message=f"获取文档列表失败: str{(e)}")
 
 
 @router.delete("/bases/{base_id}/documents/{doc_id}", summary="删除文档")
 async def delete_document(base_id: int, doc_id: int):
-    """删除文档及其切片和向量"""
+    """删除文档及其切片和向"""
     try:
         from shared.models.knowledge.knowledge_document import KnowledgeDocument
         from shared.models.knowledge.document_chunk import DocumentChunk
@@ -366,7 +365,7 @@ async def delete_document(base_id: int, doc_id: int):
         with get_db() as db:
             doc = db.get(KnowledgeDocument, doc_id)
             if not doc or doc.knowledge_base_id != base_id:
-                return ApiResponse.error(message="文档不存在", code=404)
+                return ApiResponse.fail(message="文档不存", code=404)
 
             # 收集向量 ID
             chunks = db.execute(
@@ -389,21 +388,23 @@ async def delete_document(base_id: int, doc_id: int):
                 except OSError:
                     pass
 
-            # 更新知识库统计
-            kb = db.get(KnowledgeBase, base_id)
-            if kb:
-                kb.document_count = max(0, (kb.document_count or 0) - 1)
-                kb.chunk_count = max(0, (kb.chunk_count or 0) - len(chunks))
+            # 更新知识库统
+
+        kb = db.get(KnowledgeBase, base_id)
+        if kb:
+            kb.document_count = max(0, (kb.document_count or 0) - 1)
+            kb.chunk_count = max(0, (kb.chunk_count or 0) - len(chunks))
 
             db.delete(doc)
             db.commit()
 
-            return ApiResponse.success(message="文档已删除")
+        return ApiResponse.ok(message="文档已删")
+
     except Exception as e:
-        return ApiResponse.error(message=f"删除文档失败: {str(e)}")
+        return ApiResponse.fail(message=f"删除文档失败: str{(e)}")
 
 
-# ==================== RAG 搜索与问答 ====================
+# ==================== RAG 搜索与问"====================
 
 @router.post("/bases/{base_id}/search", summary="RAG 语义搜索")
 async def rag_search(
@@ -412,7 +413,7 @@ async def rag_search(
     top_k: int = Form(10),
     score_threshold: float = Form(0.0),
 ):
-    """在知识库中进行语义搜索（纯向量检索，不经过 LLM）"""
+    """在知识库中进行语义搜索（纯向量检索，不经"LLM"""
     try:
         from shared.services.knowledge.rag_chain import rag_chain
 
@@ -423,13 +424,13 @@ async def rag_search(
             score_threshold=score_threshold,
         )
 
-        return ApiResponse.success(data={
+        return ApiResponse.ok(data={
             "query": query,
             "results": results,
             "count": len(results),
         })
     except Exception as e:
-        return ApiResponse.error(message=f"搜索失败: {str(e)}")
+        return ApiResponse.fail(message=f"搜索失败: str{(e)}")
 
 
 @router.post("/bases/{base_id}/qa", summary="知识问答")
@@ -440,10 +441,8 @@ async def knowledge_qa(
     system_prompt: str = Form(None),
 ):
     """
-    知识库问答（RAG）
-
-    流程: Embedding → 向量检索 → LLM 生成回答（附引用来源）
-    """
+    知识库问答（RAG"
+    流程: Embedding "向量检""LLM 生成回答（附引用来源"    """
     try:
         from shared.services.knowledge.rag_chain import rag_chain
 
@@ -456,16 +455,16 @@ async def knowledge_qa(
         )
 
         if not result.success:
-            return ApiResponse.error(message=f"问答失败: {result.error}")
+            return ApiResponse.fail(message=f"问答失败: {result.error}")
 
-        return ApiResponse.success(data={
+        return ApiResponse.ok(data={
             "question": question,
             "answer": result.answer,
             "sources": result.sources,
             "confidence": result.confidence,
         })
     except Exception as e:
-        return ApiResponse.error(message=f"问答失败: {str(e)}")
+        return ApiResponse.fail(message=f"问答失败: str{(e)}")
 
 
 # ==================== 研报生成 ====================
@@ -479,10 +478,9 @@ async def generate_report(
     detail_level: str = Form("standard"),
 ):
     """
-    基于知识库内容生成 AI 研报
+    基于知识库内容生"AI 研报
 
-    流程: RAG 检索 → 生成提纲 → 逐章节生成 → 汇总摘要
-    """
+    流程: RAG 检""生成提纲 "逐章节生""汇总摘"    """
     try:
         from shared.services.knowledge.report_generator import report_generator
         from shared.models.knowledge.generated_report import GeneratedReport
@@ -496,7 +494,7 @@ async def generate_report(
         )
 
         if not result.success:
-            return ApiResponse.error(message=f"研报生成失败: {result.error}")
+            return ApiResponse.fail(message=f"研报生成失败: {result.error}")
 
         # 保存研报到数据库
         with get_db() as db:
@@ -511,16 +509,17 @@ async def generate_report(
             db.commit()
             db.refresh(report)
 
-            return ApiResponse.success(data={
+            return ApiResponse.ok(data={
                 "report_id": report.id,
                 "title": result.title,
                 "summary": result.summary,
-                "sections": [{"title": s.title, "content": s.content, "order": s.order} for s in result.sections],
+                "sections": [{"title": s.title, "content": s.content, "order": s.order} for s in
+                             result.sections],
                 "sources_count": len(result.sources),
                 "generated_at": result.generated_at,
             }, message="研报生成成功")
     except Exception as e:
-        return ApiResponse.error(message=f"研报生成失败: {str(e)}")
+        return ApiResponse.fail(message=f"研报生成失败: str{(e)}")
 
 
 @router.get("/reports", summary="获取研报列表")
@@ -548,14 +547,14 @@ async def get_reports(
             result = db.execute(query.offset(offset).limit(per_page))
             items = [r.to_dict() for r in result.scalars().all()]
 
-            return ApiResponse.success(data={
+            return ApiResponse.ok(data={
                 "items": items,
                 "total": total,
                 "page": page,
                 "per_page": per_page,
             })
     except Exception as e:
-        return ApiResponse.error(message=f"获取研报列表失败: {str(e)}")
+        return ApiResponse.fail(message=f"获取研报列表失败: str{(e)}")
 
 
 @router.get("/reports/{report_id}", summary="获取研报详情")
@@ -567,11 +566,11 @@ async def get_report_detail(report_id: int):
         with get_db() as db:
             report = db.get(GeneratedReport, report_id)
             if not report:
-                return ApiResponse.error(message="研报不存在", code=404)
+                return ApiResponse.fail(message="研报不存", code=404)
 
-            return ApiResponse.success(data=report.to_dict())
+            return ApiResponse.ok(data=report.to_dict())
     except Exception as e:
-        return ApiResponse.error(message=f"获取研报详情失败: {str(e)}")
+        return ApiResponse.fail(message=f"获取研报详情失败: str{(e)}")
 
 
 # ==================== 报告模板 ====================
@@ -586,7 +585,8 @@ async def get_report_templates(
         from shared.models.knowledge.report_template import ReportTemplate
 
         with get_db() as db:
-            query = select(ReportTemplate).order_by(desc(ReportTemplate.created_at))
+            query = select(ReportTemplate).order_by(
+                desc(ReportTemplate.created_at))
 
             count_q = select(func.count()).select_from(ReportTemplate)
             total = db.execute(count_q).scalar() or 0
@@ -595,14 +595,14 @@ async def get_report_templates(
             result = db.execute(query.offset(offset).limit(per_page))
             items = [t.to_dict() for t in result.scalars().all()]
 
-            return ApiResponse.success(data={
+            return ApiResponse.ok(data={
                 "items": items,
                 "total": total,
                 "page": page,
                 "per_page": per_page,
             })
     except Exception as e:
-        return ApiResponse.error(message=f"获取模板列表失败: {str(e)}")
+        return ApiResponse.fail(message=f"获取模板列表失败: str{(e)}")
 
 
 @router.post("/templates", summary="创建报告模板")
@@ -614,7 +614,8 @@ async def create_report_template(
 ):
     """创建新的报告模板"""
     try:
-        from shared.models.knowledge.report_template import ReportTemplate
+        from shared.models.knowledge.report_template import \
+            ReportTemplate
 
         with get_db() as db:
             template = ReportTemplate(
@@ -628,6 +629,52 @@ async def create_report_template(
             db.commit()
             db.refresh(template)
 
-            return ApiResponse.success(data=template.to_dict(), message="模板创建成功")
+            return ApiResponse.ok(data=template.to_dict(),
+                                  message="模板创建成功")
     except Exception as e:
-        return ApiResponse.error(message=f"创建模板失败: {str(e)}")
+        return ApiResponse.fail(message=f"创建模板失败: str{(e)}")
+
+
+# ==================== 统计概览 ====================
+
+@router.get("/stats", summary="知识引擎统计概览")
+async def get_knowledge_stats():
+    """获取知识引擎的统计数据（用于仪表盘集成）"""
+    try:
+        from shared.models.knowledge.knowledge_base import \
+            KnowledgeBase
+        from shared.models.knowledge.knowledge_document import \
+            KnowledgeDocument
+        from shared.models.knowledge.generated_report import \
+            GeneratedReport
+
+        with get_db() as db:
+            bases_total = db.execute(select(
+                func.count(KnowledgeBase.id))).scalar() or 0
+            docs_total = db.execute(select(func.count(
+                KnowledgeDocument.id))).scalar() or 0
+            docs_indexed = db.execute(
+                select(
+                    func.count(KnowledgeDocument.id)).where(
+                    KnowledgeDocument.status == "indexed")
+            ).scalar() or 0
+            reports_total = db.execute(select(func.count(
+                GeneratedReport.id))).scalar() or 0
+
+            # 总切片数
+            total_chunks_result = db.execute(
+                select(func.coalesce(
+                    func.sum(KnowledgeBase.chunk_count), 0))
+            )
+            total_chunks = total_chunks_result.scalar() or 0
+
+        return ApiResponse.ok(data={
+            "knowledge_bases": {"total": bases_total},
+            "documents": {"total": docs_total,
+                          "indexed": docs_indexed},
+            "chunks": {"total": total_chunks},
+            "reports": {"total": reports_total},
+        })
+    except Exception as e:
+        return ApiResponse.fail(
+            message=f"获取统计失败: str{(e)}")

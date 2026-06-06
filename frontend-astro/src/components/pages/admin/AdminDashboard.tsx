@@ -6,6 +6,9 @@ import {AuthGuard} from '@/components/AuthGuard';
 import {QueryProvider} from '@/components/QueryProvider';
 import {AdminShell} from '@/components/admin/AdminShell';
 import {apiClient} from '@/lib/api/base-client';
+import {IntelService} from '@/lib/api/intel-service';
+import {KnowledgeService} from '@/lib/api/knowledge-service';
+import {WorkflowService} from '@/lib/api/workflow-service';
 import {motion} from 'framer-motion';
 import {
   ArrowUpRight,
@@ -18,7 +21,11 @@ import {
   Users,
   Activity,
   Clock,
-  BarChart3
+  BarChart3,
+  Radar,
+  BookOpen,
+  GitBranch,
+  Server
 } from 'lucide-react';
 
 // ═══ Enhanced Stat Card ═══
@@ -145,6 +152,40 @@ function DashboardInner() {
     },
   });
 
+    // Engine stats queries
+    const {data: intelStats} = useQuery({
+        queryKey: ['admin-intel-stats'],
+        queryFn: async () => {
+            try {
+                const res = await IntelService.getStats();
+                return res.success ? res.data : null;
+            } catch { return null; }
+        },
+        staleTime: 60_000,
+    });
+
+    const {data: knowledgeStats} = useQuery({
+        queryKey: ['admin-knowledge-stats'],
+        queryFn: async () => {
+            try {
+                const res = await KnowledgeService.getStats();
+                return res.success ? res.data : null;
+            } catch { return null; }
+        },
+        staleTime: 60_000,
+    });
+
+    const {data: workflowStats} = useQuery({
+        queryKey: ['admin-workflow-stats'],
+        queryFn: async () => {
+            try {
+                const res = await WorkflowService.getStats();
+                return res.success ? res.data : null;
+            } catch { return null; }
+        },
+        staleTime: 60_000,
+    });
+
     // Mock weekly data for charts (in production, fetch from API)
     const weeklyViews = [45, 62, 58, 80, 75, 90, 72];
     const weeklyUsers = [12, 18, 15, 22, 20, 28, 25];
@@ -232,6 +273,123 @@ function DashboardInner() {
             </motion.div>
         </div>
 
+        {/* ═══ Engine Overview ═══ */}
+        <div className="mb-8">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <Server className="w-5 h-5 text-gray-500"/>
+                引擎概览
+            </h3>
+            <div className="grid md:grid-cols-3 gap-4">
+                {/* Intel Engine Card */}
+                <motion.a
+                    href="/admin/intel/dashboard"
+                    initial={{opacity: 0, y: 20}}
+                    animate={{opacity: 1, y: 0}}
+                    transition={{delay: 0.2}}
+                    className="block bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:border-red-300 dark:hover:border-red-700 transition-colors group"
+                >
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center ring-1 ring-red-500/20">
+                            <Radar className="w-5 h-5 text-red-500"/>
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-900 dark:text-white">情报引擎</h4>
+                            <p className="text-xs text-gray-400">Intel Engine</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                        <div>
+                            <p className="text-xl font-extrabold text-gray-900 dark:text-white">{intelStats?.sources?.total ?? '—'}</p>
+                            <p className="text-[10px] text-gray-400">数据源</p>
+                        </div>
+                        <div>
+                            <p className="text-xl font-extrabold text-gray-900 dark:text-white">{intelStats?.intelligence?.total ?? '—'}</p>
+                            <p className="text-[10px] text-gray-400">情报</p>
+                        </div>
+                        <div>
+                            <p className="text-xl font-extrabold text-gray-900 dark:text-white">{intelStats?.alert_rules?.active ?? '—'}</p>
+                            <p className="text-[10px] text-gray-400">活跃预警</p>
+                        </div>
+                    </div>
+                    <div className="mt-3 text-xs text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        进入情报中心 →
+                    </div>
+                </motion.a>
+
+                {/* Knowledge Engine Card */}
+                <motion.a
+                    href="/admin/knowledge"
+                    initial={{opacity: 0, y: 20}}
+                    animate={{opacity: 1, y: 0}}
+                    transition={{delay: 0.3}}
+                    className="block bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:border-violet-300 dark:hover:border-violet-700 transition-colors group"
+                >
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center ring-1 ring-violet-500/20">
+                            <BookOpen className="w-5 h-5 text-violet-500"/>
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-900 dark:text-white">知识引擎</h4>
+                            <p className="text-xs text-gray-400">Knowledge Engine</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                        <div>
+                            <p className="text-xl font-extrabold text-gray-900 dark:text-white">{knowledgeStats?.knowledge_bases?.total ?? '—'}</p>
+                            <p className="text-[10px] text-gray-400">知识库</p>
+                        </div>
+                        <div>
+                            <p className="text-xl font-extrabold text-gray-900 dark:text-white">{knowledgeStats?.documents?.total ?? '—'}</p>
+                            <p className="text-[10px] text-gray-400">文档</p>
+                        </div>
+                        <div>
+                            <p className="text-xl font-extrabold text-gray-900 dark:text-white">{knowledgeStats?.reports?.total ?? '—'}</p>
+                            <p className="text-[10px] text-gray-400">研报</p>
+                        </div>
+                    </div>
+                    <div className="mt-3 text-xs text-violet-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        进入知识工作台 →
+                    </div>
+                </motion.a>
+
+                {/* Workflow Engine Card */}
+                <motion.a
+                    href="/admin/workflows"
+                    initial={{opacity: 0, y: 20}}
+                    animate={{opacity: 1, y: 0}}
+                    transition={{delay: 0.4}}
+                    className="block bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:border-teal-300 dark:hover:border-teal-700 transition-colors group"
+                >
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center ring-1 ring-teal-500/20">
+                            <GitBranch className="w-5 h-5 text-teal-500"/>
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-gray-900 dark:text-white">工作流引擎</h4>
+                            <p className="text-xs text-gray-400">Workflow Engine</p>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                        <div>
+                            <p className="text-xl font-extrabold text-gray-900 dark:text-white">{workflowStats?.definitions?.total ?? '—'}</p>
+                            <p className="text-[10px] text-gray-400">工作流</p>
+                        </div>
+                        <div>
+                            <p className="text-xl font-extrabold text-gray-900 dark:text-white">{workflowStats?.executions?.recent_24h ?? '—'}</p>
+                            <p className="text-[10px] text-gray-400">今日执行</p>
+                        </div>
+                        <div>
+                            <p className="text-xl font-extrabold text-gray-900 dark:text-white">{workflowStats?.tools?.total ?? '—'}</p>
+                            <p className="text-[10px] text-gray-400">Agent工具</p>
+                        </div>
+                    </div>
+                    <div className="mt-3 text-xs text-teal-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                        进入工作流编辑器 →
+                    </div>
+                </motion.a>
+            </div>
+        </div>
+
         {/* ═══ Quick Actions & Activity ═══ */}
         <div className="grid lg:grid-cols-3 gap-4">
             {/* Quick Actions */}
@@ -245,11 +403,13 @@ function DashboardInner() {
                     <Zap className="w-5 h-5 text-amber-500"/>
                     快捷操作
                 </h3>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                     {[
                         {label: '写文章', href: '/admin/editor', icon: PenSquare, color: 'blue'},
                         {label: '媒体库', href: '/admin/media', icon: Image, color: 'green'},
-                        {label: '评论', href: '/admin/comments', icon: MessageSquare, color: 'purple'},
+                        {label: '情报中心', href: '/admin/intel/dashboard', icon: Radar, color: 'red'},
+                        {label: '知识工作台', href: '/admin/knowledge', icon: BookOpen, color: 'violet'},
+                        {label: '工作流', href: '/admin/workflows', icon: GitBranch, color: 'teal'},
                         {label: '设置', href: '/admin/settings', icon: Settings, color: 'gray'},
                     ].map(action => {
                         const Icon = action.icon;

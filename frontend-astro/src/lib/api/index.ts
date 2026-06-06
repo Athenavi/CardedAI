@@ -28,6 +28,12 @@ export interface MediaResponse {
 }
 
 export {CategoryService} from './category-service';
+export {IntelService} from './intel-service';
+export type {IntelSource, CollectedItem, Intelligence, Briefing, AlertRule, AlertEvent, IntelStats} from './intel-service';
+export {KnowledgeService} from './knowledge-service';
+export type {KnowledgeBase, KnowledgeDocument, SearchResult, QAResult, GeneratedReport, ReportTemplate, KnowledgeStats} from './knowledge-service';
+export {WorkflowService} from './workflow-service';
+export type {WorkflowDefinition, WorkflowExecution, AgentTool, Trigger, WorkflowStats} from './workflow-service';
 
 export const MediaService = {
     async getMediaFiles(params: Record<string, any> = {}) {
