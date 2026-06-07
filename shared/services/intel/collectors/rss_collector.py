@@ -4,23 +4,30 @@ RSS/Atom 采集器
 使用 feedparser 解析 RSS/Atom 源，支持增量采集（基于 etag/last-modified）。
 """
 
+import importlib
 import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-try:
-    import feedparser
-except ImportError:
-    feedparser = None
-
-try:
-    import httpx
-except ImportError:
-    httpx = None
-
 from shared.services.intel.collectors.base import BaseCollector, CollectedItemData
 
 logger = logging.getLogger(__name__)
+
+
+def _get_feedparser():
+    """运行时懒导入 feedparser（支持安装后无需重启服务器即可生效）"""
+    try:
+        return importlib.import_module("feedparser")
+    except ImportError:
+        return None
+
+
+def _get_httpx():
+    """运行时懒导入 httpx（支持安装后无需重启服务器即可生效）"""
+    try:
+        return importlib.import_module("httpx")
+    except ImportError:
+        return None
 
 
 class RSSCollector(BaseCollector):
@@ -43,12 +50,14 @@ class RSSCollector(BaseCollector):
         Returns:
             List[CollectedItemData]
         """
-        if feedparser is None:
-            logger.error("feedparser 未安装，无法采集 RSS 源")
+        fp = _get_feedparser()
+        if fp is None:
+            logger.error("feedparser 未安装，无法采集 RSS 源（请执行: pip install feedparser）")
             return []
 
-        if httpx is None:
-            logger.error("httpx 未安装，无法发起 HTTP 请求")
+        hx = _get_httpx()
+        if hx is None:
+            logger.error("httpx 未安装，无法发起 HTTP 请求（请执行: pip install httpx）")
             return []
 
         etag = source_config.get("etag")
@@ -63,7 +72,7 @@ class RSSCollector(BaseCollector):
             headers["If-Modified-Since"] = last_modified
 
         try:
-            async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
+            async with hx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
                 resp = await client.get(url, headers=headers)
 
                 # 304 Not Modified — 无新内容
@@ -75,7 +84,7 @@ class RSSCollector(BaseCollector):
                     logger.warning(f"RSS 源请求失败 ({resp.status_code}): {url}")
                     return []
 
-                feed = feedparser.parse(resp.text)
+                feed = fp.parse(resp.text)
 
         except Exception as e:
             logger.error(f"RSS 采集异常 {url}: {e}")

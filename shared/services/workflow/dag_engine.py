@@ -169,14 +169,16 @@ class DAGEngine:
         """校验图结构，返回错误列表（空表示合法）
 
         检查项：
-        - 至少一个节点
         - 节点 id 唯一
         - 边引用的节点 id 存在
         - 无环
+
+        注意：允许空图（创建时用户尚未添加节点），
+        完整性校验在激活或执行前进行。
         """
         errors: List[str] = []
         if not nodes:
-            errors.append("图中无节点")
+            # 创建时允许空图，用户后续在编辑器中添加节点
             return errors
 
         ids = [n["id"] for n in nodes]
@@ -244,6 +246,10 @@ class DAGEngine:
             errors = self.validate_graph(nodes, edges)
             if errors:
                 raise ValueError(f"图校验失败: {'; '.join(errors)}")
+
+            # 执行时不允许空图
+            if not nodes:
+                raise ValueError("工作流图中无节点，无法执行。请先在编辑器中添加节点。")
 
             # 拓扑排序
             layers = self.topological_sort(nodes, edges)

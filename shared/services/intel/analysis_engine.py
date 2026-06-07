@@ -110,6 +110,7 @@ class AnalysisEngine:
             db.add(intel)
             db.flush()
             intelligence_id = intel.id
+            db.commit()
 
             # 更新采集条目状态
             item = db.get(CollectedItem, item_id)

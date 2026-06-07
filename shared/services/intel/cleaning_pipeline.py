@@ -141,6 +141,8 @@ class CleaningPipeline:
 
                 stats["processed"] += 1
 
+            db.commit()
+
         logger.info(
             f"清洗管道完成 source_id={source_id}: "
             f"processed={stats['processed']} success={stats['success']} errors={stats['errors']}"

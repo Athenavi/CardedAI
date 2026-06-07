@@ -122,66 +122,151 @@ const DagCanvas: React.FC<{
   onDeleteEdge: (id: string) => void;
   readOnly?: boolean;
   executionStatus?: Record<string, string>;
-}> = ({nodes, edges, selectedNode, onSelectNode, onMoveNode, onConnect, onDeleteNode, onDeleteEdge, readOnly, executionStatus}) => {
+}> = React.memo(({nodes, edges, selectedNode, onSelectNode, onMoveNode, onConnect, onDeleteNode, onDeleteEdge, readOnly, executionStatus}) => {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [dragging, setDragging] = useState<{ nodeId: string; offsetX: number; offsetY: number } | null>(null);
+  const nodeGroupRefs = useRef<Record<string, SVGGElement>>({});
+  const [isDragging, setIsDragging] = useState(false);
   const [connecting, setConnecting] = useState<{ source: string; mouseX: number; mouseY: number } | null>(null);
   const [viewBox, setViewBox] = useState({x: -50, y: -50, w: 1000, h: 600});
   const [panning, setPanning] = useState<{ startX: number; startY: number; vx: number; vy: number } | null>(null);
 
+  // ── Refs for stable callbacks (avoid recreating on every state change) ──
+  const nodesRef = useRef(nodes);
+  nodesRef.current = nodes;
+  const viewBoxRef = useRef(viewBox);
+  viewBoxRef.current = viewBox;
+  const onMoveNodeRef = useRef(onMoveNode);
+  onMoveNodeRef.current = onMoveNode;
+  const onConnectRef = useRef(onConnect);
+  onConnectRef.current = onConnect;
+  const connectingRef = useRef(connecting);
+  connectingRef.current = connecting;
+  const panningRef = useRef(panning);
+  panningRef.current = panning;
+
+  // ── Drag tracking via refs (NO state updates during drag = NO re-renders) ──
+  const dragRef = useRef<{nodeId: string; offsetX: number; offsetY: number} | null>(null);
+  const dragPosRef = useRef<{nodeId: string; x: number; y: number} | null>(null);
+
+  // ── rAF refs for throttling connecting preview & panning ──
+  const connectRafRef = useRef<number>(0);
+  const connectMouseRef = useRef<{x: number; y: number} | null>(null);
+  const panRafRef = useRef<number>(0);
+  const panMouseRef = useRef<{x: number; y: number} | null>(null);
+
+  // Cleanup rAF on unmount + commit pending drag
+  useEffect(() => {
+    return () => {
+      const dp = dragPosRef.current;
+      if (dp) onMoveNodeRef.current(dp.nodeId, dp.x, dp.y);
+      if (connectRafRef.current) cancelAnimationFrame(connectRafRef.current);
+      if (panRafRef.current) cancelAnimationFrame(panRafRef.current);
+    };
+  }, []);
+
+  // ── All callbacks below have STABLE deps (empty or rarely-changing) ──
   const getSVGPoint = useCallback((e: React.MouseEvent) => {
     if (!svgRef.current) return {x: 0, y: 0};
     const rect = svgRef.current.getBoundingClientRect();
-    const scaleX = viewBox.w / rect.width;
-    const scaleY = viewBox.h / rect.height;
+    const vb = viewBoxRef.current;
+    const scaleX = vb.w / rect.width;
+    const scaleY = vb.h / rect.height;
     return {
-      x: (e.clientX - rect.left) * scaleX + viewBox.x,
-      y: (e.clientY - rect.top) * scaleY + viewBox.y,
+      x: (e.clientX - rect.left) * scaleX + vb.x,
+      y: (e.clientY - rect.top) * scaleY + vb.y,
     };
-  }, [viewBox]);
+  }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent, nodeId: string) => {
     if (readOnly) return;
     e.stopPropagation();
     const pt = getSVGPoint(e);
-    const node = nodes.find(n => n.id === nodeId);
+    const node = nodesRef.current.find(n => n.id === nodeId);
     if (!node) return;
     onSelectNode(nodeId);
-    setDragging({nodeId, offsetX: pt.x - node.x, offsetY: pt.y - node.y});
-  }, [getSVGPoint, nodes, onSelectNode, readOnly]);
+    dragRef.current = {nodeId, offsetX: pt.x - node.x, offsetY: pt.y - node.y};
+    setIsDragging(true);
+  }, [getSVGPoint, onSelectNode, readOnly]);
 
   const handleSVGMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button === 1 || (e.button === 0 && e.altKey)) {
-      setPanning({startX: e.clientX, startY: e.clientY, vx: viewBox.x, vy: viewBox.y});
+      const vb = viewBoxRef.current;
+      const p = {startX: e.clientX, startY: e.clientY, vx: vb.x, vy: vb.y};
+      panningRef.current = p;
+      setPanning(p);
     } else {
       onSelectNode(null);
     }
-  }, [viewBox, onSelectNode]);
+  }, [onSelectNode]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const currentDrag = dragRef.current;
+    const currentPanning = panningRef.current;
     const pt = getSVGPoint(e);
-    if (dragging) {
-      onMoveNode(dragging.nodeId, pt.x - dragging.offsetX, pt.y - dragging.offsetY);
-    } else if (connecting) {
-      setConnecting(prev => prev ? {...prev, mouseX: pt.x, mouseY: pt.y} : null);
-    } else if (panning) {
-      const svgEl = svgRef.current;
-      if (!svgEl) return;
-      const rect = svgEl.getBoundingClientRect();
-      const scaleX = viewBox.w / rect.width;
-      const scaleY = viewBox.h / rect.height;
-      setViewBox(prev => ({
-        ...prev,
-        x: panning.vx - (e.clientX - panning.startX) * scaleX,
-        y: panning.vy - (e.clientY - panning.startY) * scaleY,
-      }));
+
+    if (currentDrag) {
+      // ── Direct DOM manipulation: move SVG <g> element via transform ──
+      // No state update, no React re-render, no callback recreation
+      const newX = pt.x - currentDrag.offsetX;
+      const newY = pt.y - currentDrag.offsetY;
+      const node = nodesRef.current.find(n => n.id === currentDrag.nodeId);
+      if (node) {
+        const el = nodeGroupRefs.current[currentDrag.nodeId];
+        if (el) {
+          el.setAttribute('transform', `translate(${newX - node.x}, ${newY - node.y})`);
+        }
+      }
+      dragPosRef.current = {nodeId: currentDrag.nodeId, x: newX, y: newY};
+    } else if (connectingRef.current) {
+      // Throttle connecting preview line to 60fps via rAF
+      connectMouseRef.current = {x: pt.x, y: pt.y};
+      if (!connectRafRef.current) {
+        connectRafRef.current = requestAnimationFrame(() => {
+          const m = connectMouseRef.current;
+          if (m) setConnecting(prev => prev ? {...prev, mouseX: m.x, mouseY: m.y} : null);
+          connectRafRef.current = 0;
+        });
+      }
+    } else if (currentPanning) {
+      // Throttle panning to 60fps via rAF
+      panMouseRef.current = {x: e.clientX, y: e.clientY};
+      if (!panRafRef.current) {
+        panRafRef.current = requestAnimationFrame(() => {
+          const mouse = panMouseRef.current;
+          const svgEl = svgRef.current;
+          if (!mouse || !svgEl) { panRafRef.current = 0; return; }
+          const rect = svgEl.getBoundingClientRect();
+          const vb = viewBoxRef.current;
+          const scaleX = vb.w / rect.width;
+          const scaleY = vb.h / rect.height;
+          setViewBox({
+            ...vb,
+            x: currentPanning.vx - (mouse.x - currentPanning.startX) * scaleX,
+            y: currentPanning.vy - (mouse.y - currentPanning.startY) * scaleY,
+          });
+          panRafRef.current = 0;
+        });
+      }
     }
-  }, [dragging, connecting, panning, getSVGPoint, onMoveNode, viewBox]);
+  }, [getSVGPoint]);
 
   const handleMouseUp = useCallback(() => {
-    setDragging(null);
+    // Commit drag position to state (ONE update instead of hundreds per drag)
+    const dp = dragPosRef.current;
+    if (dp) {
+      const el = nodeGroupRefs.current[dp.nodeId];
+      if (el) el.removeAttribute('transform');
+      onMoveNodeRef.current(dp.nodeId, dp.x, dp.y);
+      dragPosRef.current = null;
+    }
+    dragRef.current = null;
+    connectingRef.current = null;
+    panningRef.current = null;
+    setIsDragging(false);
     setConnecting(null);
     setPanning(null);
+    if (connectRafRef.current) { cancelAnimationFrame(connectRafRef.current); connectRafRef.current = 0; }
+    if (panRafRef.current) { cancelAnimationFrame(panRafRef.current); panRafRef.current = 0; }
   }, []);
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -200,20 +285,24 @@ const DagCanvas: React.FC<{
     if (readOnly) return;
     e.stopPropagation();
     const pt = getSVGPoint(e);
-    setConnecting({source: sourceId, mouseX: pt.x, mouseY: pt.y});
+    const c = {source: sourceId, mouseX: pt.x, mouseY: pt.y};
+    connectingRef.current = c;
+    setConnecting(c);
   }, [readOnly, getSVGPoint]);
 
   const endConnect = useCallback((e: React.MouseEvent, targetId: string) => {
-    if (connecting && connecting.source !== targetId) {
-      onConnect(connecting.source, targetId);
+    const c = connectingRef.current;
+    if (c && c.source !== targetId) {
+      onConnectRef.current(c.source, targetId);
     }
+    connectingRef.current = null;
     setConnecting(null);
-  }, [connecting, onConnect]);
+  }, []);
 
-  // Auto-layout: simple left-to-right layout
   const renderEdge = useCallback((edge: WFEdge) => {
-    const src = nodes.find(n => n.id === edge.source);
-    const tgt = nodes.find(n => n.id === edge.target);
+    const ns = nodesRef.current;
+    const src = ns.find(n => n.id === edge.source);
+    const tgt = ns.find(n => n.id === edge.target);
     if (!src || !tgt) return null;
     const sx = src.x + NODE_W;
     const sy = src.y + NODE_H / 2;
@@ -233,7 +322,7 @@ const DagCanvas: React.FC<{
         )}
       </g>
     );
-  }, [nodes, onDeleteEdge]);
+  }, [onDeleteEdge]);
 
   const renderNode = useCallback((node: WFNode) => {
     const nt = NODE_TYPES[node.type] || {label: node.type, color: '#6b7280', icon: Zap, bg: 'bg-gray-50'};
@@ -245,6 +334,7 @@ const DagCanvas: React.FC<{
 
     return (
       <g key={node.id}
+        ref={(el) => { if (el) nodeGroupRefs.current[node.id] = el; else delete nodeGroupRefs.current[node.id]; }}
         onMouseDown={e => handleMouseDown(e, node.id)}
         onMouseUp={e => endConnect(e, node.id)}
         className="cursor-pointer"
@@ -296,7 +386,7 @@ const DagCanvas: React.FC<{
       viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
       onMouseDown={handleSVGMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}
       onWheel={handleWheel}
-      style={{cursor: panning ? 'grabbing' : dragging ? 'move' : 'default'}}
+      style={{cursor: panning ? 'grabbing' : isDragging ? 'move' : 'default'}}
     >
       {/* Grid pattern */}
       <defs>
@@ -311,7 +401,7 @@ const DagCanvas: React.FC<{
 
       {/* Connecting line preview */}
       {connecting && (() => {
-        const src = nodes.find(n => n.id === connecting.source);
+        const src = nodesRef.current.find(n => n.id === connecting.source);
         if (!src) return null;
         const sx = src.x + NODE_W;
         const sy = src.y + NODE_H / 2;
@@ -324,7 +414,7 @@ const DagCanvas: React.FC<{
       {nodes.map(n => renderNode(n))}
     </svg>
   );
-};
+});
 
 // ═══ Node Config Panel ═══
 const NodeConfigPanel: React.FC<{
@@ -457,8 +547,8 @@ function WorkflowEditorInner() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      // Backend expects query params for create_definition (no Body annotation)
-      return apiClient.post('/workflow/definitions', undefined, {
+      // Send as JSON body (backend expects Body() params)
+      return apiClient.post('/workflow/definitions', {
         name: newDefName, description: newDefDesc,
         graph: JSON.stringify({nodes: [], edges: []}),
       });
@@ -474,8 +564,8 @@ function WorkflowEditorInner() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!currentDefId) return;
-      // Backend expects query params for update_definition (no Body annotation)
-      return apiClient.put(`/workflow/definitions/${currentDefId}`, undefined, {
+      // Send as JSON body (backend expects Body() params)
+      return apiClient.put(`/workflow/definitions/${currentDefId}`, {
         name: wfName, description: wfDesc,
         graph: JSON.stringify({nodes, edges}),
       });

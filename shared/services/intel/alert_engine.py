@@ -99,6 +99,8 @@ class AlertEngine:
                     except Exception:
                         pass
 
+            db.commit()
+
         return events
 
     def _evaluate_rule(

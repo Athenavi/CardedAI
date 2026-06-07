@@ -642,13 +642,24 @@ def _get_sync_session_factory():
 
         sync_engine = create_engine(sync_url, pool_pre_ping=True)
 
-        # 导入所有模型并创建缺失的表
+        # 导入所有模型（包括子目录）并创建缺失的表
         try:
-            from src.utils.database.main import _import_models_once
             from shared.models import Base
+            import importlib
+
+            # 导入顶层模型文件
+            from src.utils.database.main import _import_models_once
             _import_models_once()
+
+            # 确保子目录模型包也被导入（_import_models_once 可能已被旧版调用过）
+            for pkg_name in ['workflow', 'knowledge', 'intel']:
+                try:
+                    importlib.import_module(f'shared.models.{pkg_name}')
+                except Exception as pkg_err:
+                    logger.debug(f"子目录模型包导入失败 shared.models.{pkg_name}: {pkg_err}")
+
             Base.metadata.create_all(bind=sync_engine)
-            logger.info("Ensured all model tables exist (create_all)")
+            logger.info(f"Ensured all model tables exist (create_all), tables: {list(Base.metadata.tables.keys())}")
         except Exception as table_err:
             logger.warning(f"Table creation skipped/failed: {table_err}")
 

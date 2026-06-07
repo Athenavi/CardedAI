@@ -241,12 +241,15 @@ class CollectorEngine:
             except Exception as e:
                 logger.error(f"更新采集时间异常: {e}")
 
+            # 7. 提交所有变更（采集条目 + 更新采集时间）
+            db.commit()
+
         logger.info(
             f"采集完成 source_id={source_id} type={source_type}: "
             f"total={result['total']} new={result['new']} skipped={result['skipped']} errors={result['errors']}"
         )
 
-        # 7. 触发清洗管道（如果有新条目）
+        # 8. 触发清洗管道（如果有新条目）
         if result["new"] > 0:
             await self._trigger_cleaning(source_id)
 

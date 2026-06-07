@@ -135,6 +135,7 @@ class BriefingGenerator:
             db.add(briefing)
             db.flush()
             briefing_id = briefing.id
+            db.commit()
 
         return {
             "success": True,
@@ -251,6 +252,7 @@ class BriefingGenerator:
             db.add(briefing)
             db.flush()
             briefing_id = briefing.id
+            db.commit()
 
         return {
             "success": True,

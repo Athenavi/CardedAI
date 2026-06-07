@@ -236,6 +236,7 @@ class AgentToolRegistry:
                         db.add(db_tool)
                     count += 1
                 db.flush()
+                db.commit()
             return count
         except Exception as exc:
             logger.error(f"[ToolRegistry] 同步到数据库失败: {exc}")
@@ -385,7 +386,9 @@ async def _publish_article_handler(
             )
             db.add(article)
             db.flush()
-            return {"success": True, "article_id": article.id, "title": title}
+            article_id = article.id
+            db.commit()
+            return {"success": True, "article_id": article_id, "title": title}
     except Exception as exc:
         return {"success": False, "error": str(exc)}
 

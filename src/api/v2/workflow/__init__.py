@@ -1,11 +1,16 @@
 """
-V2 自动化引�?API 路由
+V2 自动化工作流 API 路由
 
-提供工作流定�?CRUD、执行管理、工具注册、触发器管理等端点�?
+提供工作流定义的 CRUD、执行管理、工具注册、触发器管理等端点。
 端点列表:
   定义管理:
-    POST   /definitions                    创建工作�?    GET    /definitions                    工作流列�?    GET    /definitions/{id}               工作流详�?    PUT    /definitions/{id}               更新工作�?    DELETE /definitions/{id}               删除工作�?    POST   /definitions/{id}/activate      激活工作流
-    POST   /definitions/{id}/deactivate    停用工作�?
+    POST   /definitions                    创建工作流定义
+    GET    /definitions                    工作流列表
+    GET    /definitions/{id}               工作流详情
+    PUT    /definitions/{id}               更新工作流定义
+    DELETE /definitions/{id}               删除工作流定义
+    POST   /definitions/{id}/activate      激活工作流
+    POST   /definitions/{id}/deactivate    停用工作流
   执行管理:
     POST   /definitions/{id}/execute       手动执行
     GET    /executions                     执行记录列表
@@ -14,10 +19,14 @@ V2 自动化引�?API 路由
 
   工具管理:
     GET    /tools                          可用工具列表
-    POST   /tools                          注册新工�?    POST   /tools/{name}/test              工具测试
+    POST   /tools                          注册新工具
+    POST   /tools/{name}/test              工具测试
 
-  触发器管�?
-    GET    /triggers                       触发器列�?    POST   /triggers/cron                  创建 cron 触发�?    POST   /triggers/event                 创建 event 触发�?    DELETE /triggers/{trigger_id}          删除触发�?
+  触发器管理:
+    GET    /triggers                       触发器列表
+    POST   /triggers/cron                  创建 cron 触发器
+    POST   /triggers/event                 创建 event 触发器
+    DELETE /triggers/{trigger_id}          删除触发器
   Webhook:
     POST   /webhooks/{token}               Webhook 触发执行
 """
@@ -27,7 +36,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from pydantic import BaseModel
 
 from shared.models.workflow.workflow_definition import WorkflowDefinition
@@ -47,15 +56,15 @@ class ExecuteWorkflowRequest(BaseModel):
     input_data: Optional[dict] = None
 
 
-# ==================== 工作流定义管�?====================
+# ==================== 工作流定义管理 ====================
 
 
 @router.post("/definitions", summary="创建工作流定")
 async def create_definition(
-    name: str,
-    graph: str,
-    description: str = None,
-    trigger_config: str = "{}",
+    name: str = Body(...),
+    graph: str = Body(...),
+    description: str = Body(default=None),
+    trigger_config: str = Body(default="{}"),
 ):
     try:
         graph_data = json.loads(graph) if isinstance(graph, str) else graph
@@ -64,14 +73,14 @@ async def create_definition(
             graph_data.get("edges", []),
         )
         if errors:
-            return ApiResponse.fail(message=f"图结构校验失�? {'; '.join(errors)}")
+            return ApiResponse.fail(message=f"图结构校验失败: {'; '.join(errors)}")
     except (json.JSONDecodeError, ValueError) as exc:
-        return ApiResponse.fail(message=f"graph 不是合法�?JSON: {exc}")
+        return ApiResponse.fail(message=f"graph 不是合法的 JSON: {exc}")
 
     try:
         trigger_json = json.loads(trigger_config) if isinstance(trigger_config, str) else trigger_config
     except json.JSONDecodeError:
-        return ApiResponse.fail(message="trigger_config 不是合法�?JSON")
+        return ApiResponse.fail(message="trigger_config 不是合法的 JSON")
 
     with get_db() as db:
         wf = WorkflowDefinition(
@@ -86,8 +95,9 @@ async def create_definition(
         db.add(wf)
         db.flush()
         wf_id = wf.id
+        db.commit()
 
-    return ApiResponse.ok(data={"id": wf_id}, message="工作流创建成")
+    return ApiResponse.ok(data={"id": wf_id}, message="工作流创建成功")
 
 
 @router.get("/definitions", summary="获取工作流定义列")
@@ -146,10 +156,10 @@ async def get_definition(def_id: int):
 @router.put("/definitions/{def_id}", summary="更新工作流定")
 async def update_definition(
     def_id: int,
-    name: str = None,
-    graph: str = None,
-    description: str = None,
-    trigger_config: str = None,
+    name: str = Body(default=None),
+    graph: str = Body(default=None),
+    description: str = Body(default=None),
+    trigger_config: str = Body(default=None),
 ):
     """更新工作流定 """
     from shared.models.workflow.workflow_definition import WorkflowDefinition
@@ -173,23 +183,24 @@ async def update_definition(
                     graph_data.get("edges", []),
                 )
                 if errors:
-                    return ApiResponse.fail(message=f"图结构校验失�? {'; '.join(errors)}")
+                    return ApiResponse.fail(message=f"图结构校验失败: {'; '.join(errors)}")
                 wf.graph = json.dumps(graph_data, ensure_ascii=False)
                 wf.version = (wf.version or 1) + 1
             except (json.JSONDecodeError, ValueError) as exc:
-                return ApiResponse.fail(message=f"graph 不是合法�?JSON: {exc}")
+                return ApiResponse.fail(message=f"graph 不是合法的 JSON: {exc}")
 
         if trigger_config is not None:
             try:
                 tc = json.loads(trigger_config) if isinstance(trigger_config, str) else trigger_config
                 wf.trigger_config = json.dumps(tc, ensure_ascii=False)
             except json.JSONDecodeError:
-                return ApiResponse.fail(message="trigger_config 不是合法�?JSON")
+                return ApiResponse.fail(message="trigger_config 不是合法的 JSON")
 
         wf.updated_at = datetime.now(timezone.utc)
         db.flush()
+        db.commit()
 
-    return ApiResponse.ok(message="工作流更新成")
+    return ApiResponse.ok(message="工作流更新成功")
 
 
 @router.delete("/definitions/{def_id}", summary="删除工作流定")
@@ -203,6 +214,7 @@ async def delete_definition(def_id: int):
             return ApiResponse.fail(message="工作流不存在", code=404)
         db.delete(wf)
         db.flush()
+        db.commit()
 
     return ApiResponse.ok(message="工作流已删除")
 
@@ -219,16 +231,18 @@ async def activate_definition(def_id: int):
         wf.is_active = True
         wf.updated_at = datetime.now(timezone.utc)
         db.flush()
+        db.commit()
 
-        # 注册触发�?    if wf.trigger_config:
-        try:
-            tc = json.loads(wf.trigger_config) if isinstance(wf.trigger_config, str) else wf.trigger_config
-            await _setup_triggers(def_id, wf.graph, tc)
-        except Exception as exc:
-            from src.unified_logger import default_logger as logger
-            logger.warning(f"[WorkflowAPI] 注册触发器失�? {exc}")
+        # 注册触发器
+        if wf.trigger_config:
+            try:
+                tc = json.loads(wf.trigger_config) if isinstance(wf.trigger_config, str) else wf.trigger_config
+                await _setup_triggers(def_id, wf.graph, tc)
+            except Exception as exc:
+                from src.unified_logger import default_logger as logger
+                logger.warning(f"[WorkflowAPI] 注册触发器失败: {exc}")
 
-    return ApiResponse.ok(message="工作流已激")
+            return ApiResponse.ok(message="工作流已激")
 
 
 @router.post("/definitions/{def_id}/deactivate", summary="停用工作")
@@ -243,8 +257,10 @@ async def deactivate_definition(def_id: int):
         wf.is_active = False
         wf.updated_at = datetime.now(timezone.utc)
         db.flush()
+        db.commit()
 
-    # 取消 cron 触发�?    await trigger_service.unregister_cron_trigger(def_id)
+    # 取消 cron 触发器
+    await trigger_service.unregister_cron_trigger(def_id)
 
     return ApiResponse.ok(message="工作流已停用")
 
@@ -268,7 +284,7 @@ async def execute_workflow(def_id: int, req: ExecuteWorkflowRequest = None):
     except ValueError as exc:
         return ApiResponse.fail(message=str(exc))
     except Exception as exc:
-        logger.error(f"工作流执行失�? {exc}")
+        logger.error(f"工作流执行失败: {exc}")
         return ApiResponse.fail(message=f"执行失败: {exc}")
 
 
@@ -332,22 +348,23 @@ async def cancel_execution(exec_id: int):
     with get_db() as db:
         ex = db.get(WorkflowExecution, exec_id)
         if not ex:
-            return ApiResponse.fail(message="执行记录不存", code=404)
+            return ApiResponse.fail(message="执行记录不存在", code=404)
         if ex.status not in ("pending", "running"):
-            return ApiResponse.fail(message=f"执行状态为 {ex.status}，无法取")
+            return ApiResponse.fail(message=f"执行状态为 {ex.status}，无法取消")
 
     dag_engine.cancel_execution(ex.workflow_id)
 
-    # 更新状
+    # 更新状态
     with get_db() as db:
         ex = db.get(WorkflowExecution, exec_id)
-    if ex:
-        ex.status = "cancelled"
-        ex.completed_at = datetime.now(timezone.utc)
-        ex.error_message = "执行被用户取"
-    db.flush()
+        if ex:
+            ex.status = "cancelled"
+            ex.completed_at = datetime.now(timezone.utc)
+            ex.error_message = "执行被用户取消"
+            db.flush()
+            db.commit()
 
-    return ApiResponse.ok(message="执行已取")
+    return ApiResponse.ok(message="执行已取消")
 
 
 # ==================== 工具管理 ====================
@@ -367,10 +384,10 @@ async def get_tools(tool_type: Optional[str] = None):
 
 @router.post("/tools", summary="注册新工")
 async def register_tool(
-    name: str,
-    description: str,
-    parameters: str,
-    tool_type: str = "function",
+    name: str = Body(...),
+    description: str = Body(...),
+    parameters: str = Body(...),
+    tool_type: str = Body(default="function"),
 ):
     """注册新的 Agent 工具（仅记录元数据到数据库）"""
     from shared.models.workflow.agent_tool import AgentTool
@@ -378,7 +395,7 @@ async def register_tool(
     try:
         params = json.loads(parameters) if isinstance(parameters, str) else parameters
     except json.JSONDecodeError:
-        return ApiResponse.fail(message="parameters 不是合法�?JSON Schema")
+        return ApiResponse.fail(message="parameters 不是合法的 JSON Schema")
 
     with get_db() as db:
         existing = db.query(AgentTool).filter_by(name=name).first()
@@ -396,25 +413,26 @@ async def register_tool(
         db.add(tool)
         db.flush()
         tool_id = tool.id
+        db.commit()
 
     return ApiResponse.ok(data={"id": tool_id}, message="工具注册成功")
 
 
 @router.post("/tools/{name}/test", summary="工具测试")
-async def test_tool(name: str, params: str = "{}"):
+async def test_tool(name: str, params: str = Body(default="{}")):
     """测试调用指定工具"""
     from shared.services.workflow.tool_registry import tool_registry
 
     try:
         p = json.loads(params) if isinstance(params, str) else params
     except json.JSONDecodeError:
-        return ApiResponse.fail(message="params 不是合法�?JSON")
+        return ApiResponse.fail(message="params 不是合法的 JSON")
 
     result = await tool_registry.call_tool_safe(name, p)
     return ApiResponse.ok(data=result)
 
 
-# ==================== 触发器管�?====================
+# ==================== 触发器管理 ====================
 
 
 @router.get("/triggers", summary="获取触发器列")
@@ -442,8 +460,8 @@ async def get_triggers():
 
 @router.post("/triggers/cron", summary="创建 cron 触发")
 async def create_cron_trigger(
-    workflow_id: int,
-    cron_expr: str,
+    workflow_id: int = Body(...),
+    cron_expr: str = Body(...),
 ):
     """注册定时触发 """
     from shared.services.workflow.trigger_service import trigger_service
@@ -467,16 +485,19 @@ async def create_cron_trigger(
                 )
                 db.add(trigger)
                 db.flush()
+                db.commit()
         except Exception:
             pass
-    finally:
-        ApiResponse.ok(data=result, message="Cron 触发器创建成")
+        return ApiResponse.ok(data=result, message="Cron 触发器创建成功")
+    except Exception as e:
+        logger.error(f"创建定时触发器失败: {e}")
+        return ApiResponse.fail(message=f"创建定时触发器失败: {str(e)}")
 
 
 @router.post("/triggers/event", summary="创建 event 触发")
 async def create_event_trigger(
-    workflow_id: int,
-    event_name: str,
+    workflow_id: int = Body(...),
+    event_name: str = Body(...),
 ):
     """注册事件触发 """
     from shared.services.workflow.trigger_service import trigger_service
@@ -501,15 +522,16 @@ async def create_event_trigger(
             )
             db.add(trigger)
             db.flush()
+            db.commit()
     except Exception:
         pass
 
-    return ApiResponse.ok(data=result, message="事件触发器创建成")
+    return ApiResponse.ok(data=result, message="事件触发器创建成功")
 
 
 @router.post("/triggers/webhook", summary="创建 webhook 触发")
 async def create_webhook_trigger(
-    workflow_id: int,
+    workflow_id: int = Body(...),
 ):
     """注册 Webhook 触发 """
     from shared.services.workflow.trigger_service import trigger_service
@@ -533,10 +555,11 @@ async def create_webhook_trigger(
             )
             db.add(trigger)
             db.flush()
+            db.commit()
     except Exception:
         pass
 
-    return ApiResponse.ok(data=result, message="Webhook 触发器创建成")
+    return ApiResponse.ok(data=result, message="Webhook 触发器创建成功")
 
 
 @router.delete("/triggers/{trigger_id}", summary="删除触发")
@@ -550,6 +573,7 @@ async def delete_trigger(trigger_id: int):
             return ApiResponse.fail(message="触发器不存在", code=404)
         db.delete(trigger)
         db.flush()
+        db.commit()
 
     return ApiResponse.ok(message="触发器已删除")
 
@@ -635,5 +659,5 @@ async def get_workflow_stats():
             "triggers": {"total": triggers_total},
         })
     except Exception as e:
-        logger.error(f"获取工作流统计失�? {e}")
+        logger.error(f"获取工作流统计失败: {e}")
         return ApiResponse.fail(message=f"获取统计失败: {str(e)}")

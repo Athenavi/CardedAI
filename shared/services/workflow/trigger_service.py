@@ -500,7 +500,9 @@ class TriggerService:
                 )
                 db.add(execution)
                 db.flush()
-                return execution.id
+                execution_id = execution.id
+                db.commit()
+                return execution_id
         except Exception as exc:
             logger.warning(f"[TriggerService] 创建执行记录失败: {exc}")
             return None
@@ -526,6 +528,7 @@ class TriggerService:
                     execution.error_message = result.error_message
                     execution.completed_at = result.completed_at
                     db.flush()
+                    db.commit()
         except Exception as exc:
             logger.warning(f"[TriggerService] 更新执行记录失败: {exc}")
 

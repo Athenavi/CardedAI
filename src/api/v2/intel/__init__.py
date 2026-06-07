@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 from src.api.v1.core.responses import ApiResponse, PaginationInfo
 
@@ -44,6 +44,23 @@ class CreateAlertRuleRequest(BaseModel):
     keywords: str = "[]"
     conditions: str = "{}"
     actions: str = "[]"
+    is_active: bool = True
+
+    @model_validator(mode='before')
+    @classmethod
+    def normalize_fields(cls, data):
+        if isinstance(data, dict):
+            # Accept rule_type as alias for severity
+            if 'rule_type' in data and 'severity' not in data:
+                data['severity'] = data.pop('rule_type')
+            # Accept condition (singular) as alias for conditions
+            if 'condition' in data and 'conditions' not in data:
+                data['conditions'] = data.pop('condition')
+            # Coerce dict/list fields to JSON strings
+            for key in ('conditions', 'keywords', 'actions'):
+                if key in data and isinstance(data[key], (dict, list)):
+                    data[key] = json.dumps(data[key], ensure_ascii=False)
+        return data
 
 
 # ==================== 数据源管理 ====================
@@ -73,6 +90,7 @@ async def create_source(req: CreateSourceRequest):
             db.add(source)
             db.flush()
             source_id = source.id
+            db.commit()
 
         return ApiResponse(success=True, data={"id": source_id}, message="数据源创建成功")
     except Exception as e:
@@ -173,6 +191,8 @@ async def update_source(source_id: int, req: UpdateSourceRequest):
             if req.is_active is not None:
                 source.is_active = req.is_active
 
+            db.commit()
+
         return ApiResponse(success=True, message="数据源更新成功")
     except HTTPException:
         raise
@@ -193,6 +213,7 @@ async def delete_source(source_id: int):
             if not source:
                 raise HTTPException(status_code=404, detail="数据源不存在")
             db.delete(source)
+            db.commit()
 
         return ApiResponse(success=True, message="数据源已删除")
     except HTTPException:
@@ -491,12 +512,13 @@ async def create_alert_rule(req: CreateAlertRuleRequest):
                 keywords=req.keywords,
                 conditions=req.conditions,
                 actions=req.actions,
-                is_active=True,
+                is_active=req.is_active,
                 created_at=datetime.now(timezone.utc),
             )
             db.add(rule)
             db.flush()
             rule_id = rule.id
+            db.commit()
 
         return ApiResponse(success=True, data={"id": rule_id}, message="预警规则创建成功")
     except Exception as e:

@@ -6,6 +6,7 @@ import {AuthGuard} from '@/components/AuthGuard';
 import {QueryProvider} from '@/components/QueryProvider';
 import {AdminShell} from '@/components/admin/AdminShell';
 import {apiClient} from '@/lib/api/base-client';
+import {useToast} from '@/components/ui/toast-provider';
 import {motion, AnimatePresence} from 'framer-motion';
 import {
   Activity,
@@ -47,14 +48,29 @@ interface DataSource {
   created_at: string;
 }
 
+interface CollectedItem {
+  id: number;
+  source_id: number;
+  title: string;
+  url?: string;
+  content_raw?: string;
+  content_cleaned?: string;
+  content_hash?: string;
+  metadata_json?: string;
+  status: string;
+  collected_at?: string;
+  analyzed_at?: string;
+}
+
 interface Intelligence {
   id: number;
   title: string;
   summary: string;
   category: string;
   sentiment: string;
-  importance: number;
-  source_url?: string;
+  importance_score: number;
+  item_ids?: string;
+  source_urls?: string;
   tags?: string;
   created_at: string;
 }
@@ -80,10 +96,11 @@ interface AlertRule {
 }
 
 // ═══ Tab Type ═══
-type TabKey = 'sources' | 'intelligence' | 'briefings' | 'alerts';
+type TabKey = 'sources' | 'items' | 'intelligence' | 'briefings' | 'alerts';
 
 const TABS: { key: TabKey; label: string; icon: React.FC<any> }[] = [
   {key: 'sources', label: '数据源', icon: Database},
+  {key: 'items', label: '采集条目', icon: FileText},
   {key: 'intelligence', label: '情报流', icon: Activity},
   {key: 'briefings', label: '简报', icon: Newspaper},
   {key: 'alerts', label: '预警', icon: AlertTriangle},
@@ -132,8 +149,10 @@ const StatCard: React.FC<{
 // ═══ Sources Tab ═══
 const SourcesPanel: React.FC = () => {
   const qc = useQueryClient();
+  const toast = useToast();
   const [showCreate, setShowCreate] = useState(false);
   const [newSource, setNewSource] = useState({name: '', source_type: 'rss', url: '', config: '{}'});
+  const [collectingId, setCollectingId] = useState<number | null>(null);
 
   const {data: sources, isLoading} = useQuery({
     queryKey: ['intel-sources'],
@@ -151,21 +170,53 @@ const SourcesPanel: React.FC = () => {
       qc.invalidateQueries({queryKey: ['intel-sources']});
       setShowCreate(false);
       setNewSource({name: '', source_type: 'rss', url: '', config: '{}'});
+      toast.success('创建成功', '数据源已添加');
+    },
+    onError: (err: any) => {
+      toast.error('创建失败', err?.message || '未知错误');
     }
   });
 
   const collectMutation = useMutation({
     mutationFn: async (id: number) => {
+      setCollectingId(id);
       return apiClient.post(`/intel/sources/${id}/collect`);
     },
-    onSuccess: () => qc.invalidateQueries({queryKey: ['intel-sources']})
+    onSuccess: (resp: any) => {
+      setCollectingId(null);
+      qc.invalidateQueries({queryKey: ['intel-sources']});
+      qc.invalidateQueries({queryKey: ['intel-items']});
+      qc.invalidateQueries({queryKey: ['intel-intelligence']});
+      qc.invalidateQueries({queryKey: ['intel-items-count']});
+      const d = resp?.data;
+      if (d && typeof d === 'object' && 'total' in d) {
+        const parts = [`共 ${d.total} 条`];
+        if (d.new > 0) parts.push(`新增 ${d.new} 条`);
+        if (d.skipped > 0) parts.push(`跳过 ${d.skipped} 条`);
+        if (d.errors > 0) parts.push(`错误 ${d.errors} 条`);
+        if (d.new > 0) {
+          toast.success('采集完成', parts.join('，') + '。可切换到「采集条目」查看。');
+        } else {
+          toast.info('采集完成', parts.join('，') + '，暂无新增内容。');
+        }
+      } else {
+        toast.success('采集成功', '数据已更新，可切换到「采集条目」查看。');
+      }
+    },
+    onError: (err: any) => {
+      setCollectingId(null);
+      toast.error('采集失败', err?.message || '请检查数据源配置或网络连接');
+    }
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       return apiClient.delete(`/intel/sources/${id}`);
     },
-    onSuccess: () => qc.invalidateQueries({queryKey: ['intel-sources']})
+    onSuccess: () => {
+      qc.invalidateQueries({queryKey: ['intel-sources']});
+      toast.success('删除成功', '数据源已移除');
+    }
   });
 
   return (
@@ -256,10 +307,10 @@ const SourcesPanel: React.FC = () => {
                       {new Date(src.last_collected_at).toLocaleString('zh-CN')}
                     </span>
                   )}
-                  <button onClick={() => collectMutation.mutate(src.id)} disabled={collectMutation.isPending}
+                  <button onClick={() => collectMutation.mutate(src.id)} disabled={collectingId !== null}
                     className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 transition-colors"
                     title="立即采集">
-                    <RefreshCw className={`w-4 h-4 ${collectMutation.isPending ? 'animate-spin' : ''}`}/>
+                    <RefreshCw className={`w-4 h-4 ${collectingId === src.id ? 'animate-spin' : ''}`}/>
                   </button>
                   <button onClick={() => { if (confirm('确定删除此数据源？')) deleteMutation.mutate(src.id); }}
                     className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition-colors"
@@ -276,25 +327,154 @@ const SourcesPanel: React.FC = () => {
   );
 };
 
+// ═══ Items Tab ═══
+const ItemsPanel: React.FC = () => {
+  const [status, setStatus] = useState('');
+  const [page, setPage] = useState(1);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  const {data: resp, isLoading} = useQuery({
+    queryKey: ['intel-items', status, page],
+    queryFn: async () => {
+      const params: any = {page, per_page: 20};
+      if (status) params.status = status;
+      const res = await apiClient.get('/intel/items', params);
+      return res;
+    }
+  });
+
+  const items: CollectedItem[] = Array.isArray(resp?.data) ? resp.data : [];
+  const total = resp?.pagination?.total || items.length;
+
+  const STATUS_MAP: Record<string, { label: string; color: string }> = {
+    raw: {label: '待处理', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'},
+    cleaned: {label: '已清洗', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'},
+    analyzed: {label: '已分析', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'},
+    error: {label: '错误', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'},
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">采集条目</h3>
+        <div className="flex items-center gap-2">
+          <select value={status} onChange={e => {setStatus(e.target.value); setPage(1);}}
+            className="px-3 py-1.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+            <option value="">全部状态</option>
+            <option value="raw">待处理</option>
+            <option value="cleaned">已清洗</option>
+            <option value="analyzed">已分析</option>
+            <option value="error">错误</option>
+          </select>
+          <span className="text-sm text-gray-500">共 {total} 条</span>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-blue-500"/></div>
+      ) : items.length === 0 ? (
+        <div className="text-center py-12 text-gray-500">
+          <FileText className="w-12 h-12 mx-auto mb-3 opacity-50"/>
+          <p>暂无采集条目</p>
+          <p className="text-xs mt-1">在「数据源」页面点击采集按钮获取数据</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {items.map((item) => {
+            const s = STATUS_MAP[item.status] || STATUS_MAP.raw;
+            const isExpanded = expandedId === item.id;
+            return (
+              <motion.div key={item.id} initial={{opacity: 0, x: -10}} animate={{opacity: 1, x: 0}}
+                className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
+                <div className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                  onClick={() => setExpandedId(isExpanded ? null : item.id)}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-gray-900 dark:text-white truncate">{item.title || '无标题'}</h4>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.color}`}>{s.label}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                      <span>来源 #{item.source_id}</span>
+                      {item.url && <a href={item.url} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}
+                        className="text-blue-500 hover:text-blue-600 flex items-center gap-0.5 truncate max-w-[250px]">
+                        <ExternalLink className="w-3 h-3"/> {item.url}
+                      </a>}
+                      <span>{item.collected_at ? new Date(item.collected_at).toLocaleString('zh-CN') : '-'}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 ml-4">
+                    <Eye className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''} text-gray-400`}/>
+                  </div>
+                </div>
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div initial={{height: 0, opacity: 0}} animate={{height: 'auto', opacity: 1}} exit={{height: 0, opacity: 0}}
+                      className="overflow-hidden">
+                      <div className="px-4 pb-4 pt-0 border-t border-gray-100 dark:border-gray-800">
+                        {item.content_cleaned && (
+                          <div className="mt-3">
+                            <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">清洗内容</h5>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap line-clamp-8">{item.content_cleaned}</p>
+                          </div>
+                        )}
+                        {item.content_raw && (
+                          <div className="mt-3">
+                            <h5 className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">原始内容</h5>
+                            <pre className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg p-3 overflow-x-auto max-h-48">
+                              {item.content_raw}
+                            </pre>
+                          </div>
+                        )}
+                        {!item.content_cleaned && !item.content_raw && (
+                          <p className="text-sm text-gray-400 mt-3">暂无详细内容</p>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
+
+          {/* Pagination */}
+          {total > 20 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                className="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50">
+                上一页
+              </button>
+              <span className="text-sm text-gray-500">{page} / {Math.ceil(total / 20)}</span>
+              <button onClick={() => setPage(p => p + 1)} disabled={page >= Math.ceil(total / 20)}
+                className="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-sm disabled:opacity-50">
+                下一页
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ═══ Intelligence Tab ═══
 const IntelligencePanel: React.FC = () => {
   const [category, setCategory] = useState('');
   const [sentiment, setSentiment] = useState('');
   const [page, setPage] = useState(1);
 
-  const {data, isLoading} = useQuery({
+  const {data: resp, isLoading} = useQuery({
     queryKey: ['intel-intelligence', category, sentiment, page],
     queryFn: async () => {
       const params: any = {page, per_page: 20};
       if (category) params.category = category;
       if (sentiment) params.sentiment = sentiment;
       const res = await apiClient.get('/intel/intelligence', params);
-      return res.data;
+      return res;
     }
   });
 
-  const items: Intelligence[] = data?.items || [];
-  const total = data?.total || 0;
+  const items: Intelligence[] = Array.isArray(resp?.data) ? resp.data : [];
+  const total = resp?.pagination?.total || items.length;
 
   return (
     <div className="space-y-6">
@@ -358,16 +538,22 @@ const IntelligencePanel: React.FC = () => {
                   <div className="flex flex-col items-end gap-2 shrink-0">
                     <div className="flex items-center gap-1">
                       {Array.from({length: 5}).map((_, i) => (
-                        <div key={i} className={`w-1.5 h-4 rounded-sm ${i < (item.importance || 0) ? 'bg-amber-400' : 'bg-gray-200 dark:bg-gray-700'}`}/>
+                        <div key={i} className={`w-1.5 h-4 rounded-sm ${i < (Number(item.importance_score) || 0) ? 'bg-amber-400' : 'bg-gray-200 dark:bg-gray-700'}`}/>
                       ))}
                     </div>
                     <span className="text-xs text-gray-500">{new Date(item.created_at).toLocaleString('zh-CN')}</span>
-                    {item.source_url && (
-                      <a href={item.source_url} target="_blank" rel="noopener noreferrer"
-                        className="text-blue-500 hover:text-blue-600">
-                        <ExternalLink className="w-4 h-4"/>
-                      </a>
-                    )}
+                    {item.source_urls && (() => {
+                      try {
+                        const urls = JSON.parse(item.source_urls);
+                        const firstUrl = Array.isArray(urls) ? urls[0] : typeof urls === 'string' ? urls : null;
+                        return firstUrl ? (
+                          <a href={firstUrl} target="_blank" rel="noopener noreferrer"
+                            className="text-blue-500 hover:text-blue-600">
+                            <ExternalLink className="w-4 h-4"/>
+                          </a>
+                        ) : null;
+                      } catch { return null; }
+                    })()}
                   </div>
                 </div>
               </motion.div>
@@ -650,6 +836,7 @@ function IntelDashboardInner() {
   const renderTab = () => {
     switch (activeTab) {
       case 'sources': return <SourcesPanel/>;
+      case 'items': return <ItemsPanel/>;
       case 'intelligence': return <IntelligencePanel/>;
       case 'briefings': return <BriefingsPanel/>;
       case 'alerts': return <AlertsPanel/>;

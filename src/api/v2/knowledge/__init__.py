@@ -478,9 +478,10 @@ async def generate_report(
     detail_level: str = Form("standard"),
 ):
     """
-    基于知识库内容生"AI 研报
+    基于知识库内容生成 AI 研报
 
-    流程: RAG 检""生成提纲 "逐章节生""汇总摘"    """
+    流程: RAG 检索 -> 生成提纲 -> 逐章节生成 -> 汇总摘要
+    """
     try:
         from shared.services.knowledge.report_generator import report_generator
         from shared.models.knowledge.generated_report import GeneratedReport
@@ -519,7 +520,7 @@ async def generate_report(
                 "generated_at": result.generated_at,
             }, message="研报生成成功")
     except Exception as e:
-        return ApiResponse.fail(message=f"研报生成失败: str{(e)}")
+        return ApiResponse.fail(message=f"研报生成失败: {str(e)}")
 
 
 @router.get("/reports", summary="获取研报列表")

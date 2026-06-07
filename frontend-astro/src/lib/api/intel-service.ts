@@ -21,25 +21,26 @@ export interface CollectedItem {
     source_id: number;
     source_name?: string;
     title: string;
-    content?: string;
     url?: string;
-    raw_data?: Record<string, any>;
-    status: string; // collected, cleaned, analyzed, failed
-    created_at: string;
+    content_raw?: string;
+    content_cleaned?: string;
+    content_hash?: string;
+    metadata_json?: string;
+    status: string; // raw, cleaned, analyzed, error
+    collected_at?: string;
+    analyzed_at?: string;
 }
 
 export interface Intelligence {
     id: number;
-    collected_item_id: number;
     title: string;
     summary?: string;
-    content?: string;
     category?: string;
     sentiment?: string; // positive, negative, neutral
-    importance?: number; // 1-5
-    tags?: string[];
-    key_entities?: Record<string, any>;
-    source_name?: string;
+    importance_score?: number; // 0-5 (Numeric)
+    item_ids?: string; // JSON array of related collected item IDs
+    tags?: string; // comma-separated tags
+    source_urls?: string; // JSON array of source URLs
     created_at: string;
 }
 
