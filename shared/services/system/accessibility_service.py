@@ -2,13 +2,22 @@
 无障碍支持服务
 提供 WCAG 2.1 标准的无障碍功能支持
 """
+import json
+import logging
 from typing import Dict, Any, List
+
+from src.extensions import get_db
+
+logger = logging.getLogger(__name__)
+
+# 配置在 system_settings 表中的 key 前缀
+_CONFIG_KEY_PREFIX = 'accessibility_config_'
 
 
 class AccessibilityService:
     """
     无障碍支持服务
-    
+
     功能:
     1. 键盘导航支持
     2. 屏幕阅读器优化
@@ -16,60 +25,141 @@ class AccessibilityService:
     4. 字体大小调整
     5. 动画减少选项
     6. ARIA 标签生成
+
+    持久化: 使用 system_settings 表存储 per-user 配置
+    - key: accessibility_config_{user_id}
+    - value: JSON 字符串
     """
 
-    def __init__(self):
-        self.service_name = "AccessibilityService"
+    # 默认无障碍配置
+    DEFAULT_CONFIG: Dict[str, Any] = {
+        'keyboard_navigation': True,
+        'screen_reader_support': True,
+        'high_contrast_mode': False,
+        'font_size': 'medium',  # small, medium, large, x-large
+        'reduce_motion': False,
+        'focus_visible': True,
+        'skip_links': True,
+    }
 
-        # 默认无障碍配置
-        self.default_config = {
-            'keyboard_navigation': True,
-            'screen_reader_support': True,
-            'high_contrast_mode': False,
-            'font_size': 'medium',  # small, medium, large, x-large
-            'reduce_motion': False,
-            'focus_visible': True,
-            'skip_links': True,
-        }
+    # 有效配置键
+    VALID_KEYS = set(DEFAULT_CONFIG.keys())
 
-    def get_accessibility_config(self) -> Dict[str, Any]:
-        """获取无障碍配置"""
-        return self.default_config.copy()
+    # 有效字体大小
+    VALID_FONT_SIZES = ['small', 'medium', 'large', 'x-large']
+
+    def get_accessibility_config(self, user_id: int) -> Dict[str, Any]:
+        """
+        获取用户的无障碍配置
+
+        Args:
+            user_id: 用户 ID
+
+        Returns:
+            用户的无障碍配置字典
+        """
+        setting_key = f'{_CONFIG_KEY_PREFIX}{user_id}'
+        try:
+            with get_db() as db:
+                from shared.models.system_settings import SystemSettings
+                record = db.query(SystemSettings).filter(
+                    SystemSettings.setting_key == setting_key
+                ).first()
+
+                if record and record.setting_value:
+                    try:
+                        user_config = json.loads(record.setting_value)
+                        # 合并默认值，确保返回所有字段
+                        merged = {**self.DEFAULT_CONFIG, **user_config}
+                        return merged
+                    except json.JSONDecodeError:
+                        logger.warning(f"Failed to parse accessibility config for user {user_id}")
+
+        except Exception as e:
+            logger.error(f"DB error getting accessibility config for user {user_id}: {e}")
+
+        return self.DEFAULT_CONFIG.copy()
 
     def update_accessibility_config(self, user_id: int, config: Dict[str, Any]) -> Dict[str, Any]:
         """
-        更新用户无障碍配置
-        
+        更新用户无障碍配置（持久化到 system_settings 表）
+
         Args:
             user_id: 用户ID
             config: 新的配置
-            
+
         Returns:
-            更新后的配置
+            更新后的完整配置
         """
         # 验证配置项
-        valid_keys = set(self.default_config.keys())
         for key in config:
-            if key not in valid_keys:
+            if key not in self.VALID_KEYS:
                 raise ValueError(f"Invalid config key: {key}")
 
         # 验证值的有效性
         if 'font_size' in config:
-            valid_sizes = ['small', 'medium', 'large', 'x-large']
-            if config['font_size'] not in valid_sizes:
+            if config['font_size'] not in self.VALID_FONT_SIZES:
                 raise ValueError(f"Invalid font_size: {config['font_size']}")
 
-        # 更新配置（实际应该保存到数据库）
-        self.default_config.update(config)
+        # 验证布尔字段
+        bool_keys = [k for k in self.VALID_KEYS if k != 'font_size']
+        for key in bool_keys:
+            if key in config and not isinstance(config[key], bool):
+                raise ValueError(f"Config key '{key}' must be a boolean")
 
-        return self.default_config.copy()
+        setting_key = f'{_CONFIG_KEY_PREFIX}{user_id}'
+
+        try:
+            with get_db() as db:
+                from shared.models.system_settings import SystemSettings
+                from datetime import datetime, timezone
+
+                record = db.query(SystemSettings).filter(
+                    SystemSettings.setting_key == setting_key
+                ).first()
+
+                # 获取当前配置
+                if record and record.setting_value:
+                    try:
+                        current = json.loads(record.setting_value)
+                    except json.JSONDecodeError:
+                        current = {}
+                else:
+                    current = {}
+
+                # 合并更新
+                current.update(config)
+
+                if record:
+                    record.setting_value = json.dumps(current, ensure_ascii=False)
+                    record.updated_at = datetime.now(timezone.utc)
+                else:
+                    record = SystemSettings(
+                        setting_key=setting_key,
+                        setting_value=json.dumps(current, ensure_ascii=False),
+                        setting_type='json',
+                        description=f'用户 {user_id} 的无障碍配置',
+                        is_public=False,
+                        created_at=datetime.now(timezone.utc),
+                        updated_at=datetime.now(timezone.utc),
+                    )
+                    db.add(record)
+
+                db.commit()
+
+                # 返回合并默认值的完整配置
+                return {**self.DEFAULT_CONFIG, **current}
+
+        except Exception as e:
+            logger.error(f"DB error updating accessibility config for user {user_id}: {e}")
+            raise
 
     def generate_skip_links(self) -> List[Dict[str, str]]:
         """
         生成跳过链接
-        
+
         跳过链接允许键盘用户快速跳转到页面的主要部分
-        
+
         Returns:
             跳过链接列表
         """
@@ -103,7 +193,7 @@ class AccessibilityService:
     def generate_keyboard_shortcuts(self) -> List[Dict[str, str]]:
         """
         生成键盘快捷键
-        
+
         Returns:
             快捷键列表
         """
@@ -148,11 +238,11 @@ class AccessibilityService:
     def generate_aria_labels(self, element_type: str, context: Dict[str, Any] = None) -> Dict[str, str]:
         """
         生成 ARIA 标签
-        
+
         Args:
             element_type: 元素类型 (button, link, form, navigation, etc.)
             context: 上下文信息
-            
+
         Returns:
             ARIA 属性字典
         """
@@ -200,7 +290,7 @@ class AccessibilityService:
     def get_high_contrast_css(self) -> str:
         """
         生成高对比度模式的 CSS
-        
+
         Returns:
             CSS 样式字符串
         """
@@ -243,10 +333,10 @@ class AccessibilityService:
     def get_font_size_css(self, size: str) -> str:
         """
         生成字体大小调整的 CSS
-        
+
         Args:
             size: 字体大小级别 (small, medium, large, x-large)
-            
+
         Returns:
             CSS 样式字符串
         """
@@ -290,7 +380,7 @@ class AccessibilityService:
     def get_reduce_motion_css(self) -> str:
         """
         生成减少动画的 CSS
-        
+
         Returns:
             CSS 样式字符串
         """
@@ -316,10 +406,10 @@ class AccessibilityService:
     def validate_accessibility(self, html_content: str) -> Dict[str, Any]:
         """
         验证 HTML 内容的无障碍性
-        
+
         Args:
             html_content: HTML 内容
-            
+
         Returns:
             验证结果，包括问题和警告
         """
@@ -372,7 +462,7 @@ class AccessibilityService:
     def get_accessibility_guide(self) -> Dict[str, Any]:
         """
         获取无障碍使用指南
-        
+
         Returns:
             指南内容
         """

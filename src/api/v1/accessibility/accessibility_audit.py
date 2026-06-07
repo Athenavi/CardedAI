@@ -80,21 +80,25 @@ async def get_accessibility_checklist():
                     'task': '为所有图片添加ALT文本',
                     'priority': 'high',
                     'wcag_criterion': '1.1.1',
+                    'level': 'A',
                 },
                 {
                     'task': '为视频添加字幕',
                     'priority': 'high',
                     'wcag_criterion': '1.2.2',
+                    'level': 'A',
                 },
                 {
                     'task': '确保颜色对比度至少4.5:1',
                     'priority': 'high',
                     'wcag_criterion': '1.4.3',
+                    'level': 'AA',
                 },
                 {
                     'task': '文本可以调整大小至200%',
                     'priority': 'medium',
                     'wcag_criterion': '1.4.4',
+                    'level': 'AA',
                 },
             ]
         },
@@ -105,26 +109,31 @@ async def get_accessibility_checklist():
                     'task': '所有功能可通过键盘访问',
                     'priority': 'high',
                     'wcag_criterion': '2.1.1',
+                    'level': 'A',
                 },
                 {
                     'task': '提供跳过导航链接',
                     'priority': 'medium',
                     'wcag_criterion': '2.4.1',
+                    'level': 'A',
                 },
                 {
                     'task': '页面有明确的标题',
                     'priority': 'high',
                     'wcag_criterion': '2.4.2',
+                    'level': 'A',
                 },
                 {
                     'task': '焦点顺序合理',
                     'priority': 'medium',
                     'wcag_criterion': '2.4.3',
+                    'level': 'A',
                 },
                 {
                     'task': '链接目的清晰',
                     'priority': 'medium',
                     'wcag_criterion': '2.4.4',
+                    'level': 'A',
                 },
             ]
         },
@@ -135,16 +144,19 @@ async def get_accessibility_checklist():
                     'task': '声明页面语言',
                     'priority': 'high',
                     'wcag_criterion': '3.1.1',
+                    'level': 'A',
                 },
                 {
                     'task': '表单控件有标签',
                     'priority': 'high',
                     'wcag_criterion': '3.3.2',
+                    'level': 'A',
                 },
                 {
                     'task': '错误提示清晰明确',
                     'priority': 'high',
                     'wcag_criterion': '3.3.1',
+                    'level': 'A',
                 },
             ]
         },
@@ -155,11 +167,13 @@ async def get_accessibility_checklist():
                     'task': '使用有效的HTML',
                     'priority': 'high',
                     'wcag_criterion': '4.1.1',
+                    'level': 'A',
                 },
                 {
                     'task': '正确使用ARIA属性',
                     'priority': 'medium',
                     'wcag_criterion': '4.1.2',
+                    'level': 'A',
                 },
             ]
         }

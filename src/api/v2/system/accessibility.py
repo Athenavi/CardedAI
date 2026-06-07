@@ -2,9 +2,11 @@
 无障碍支持 API - V2 版本
 提供 WCAG 2.1 标准的无障碍功能
 """
+import json
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
+from pydantic import BaseModel
 
 from shared.models.user import User
 from shared.services.system.accessibility_service import AccessibilityService
@@ -17,13 +19,24 @@ router = APIRouter(prefix="/accessibility", tags=["Accessibility"])
 accessibility_service = AccessibilityService()
 
 
+class AccessibilityConfigUpdate(BaseModel):
+    """无障碍配置更新请求体"""
+    keyboard_navigation: Optional[bool] = None
+    screen_reader_support: Optional[bool] = None
+    high_contrast_mode: Optional[bool] = None
+    font_size: Optional[str] = None
+    reduce_motion: Optional[bool] = None
+    focus_visible: Optional[bool] = None
+    skip_links: Optional[bool] = None
+
+
 @router.get("/config", summary="获取无障碍配置")
 async def get_accessibility_config(
         current_user: User = Depends(jwt_required)
 ):
     """
     获取当前用户的无障碍配置
-    
+
     返回用户的个性化无障碍设置，包括：
     - 键盘导航启用状态
     - 屏幕阅读器支持
@@ -32,7 +45,7 @@ async def get_accessibility_config(
     - 动画减少选项
     """
     try:
-        config = accessibility_service.get_accessibility_config()
+        config = accessibility_service.get_accessibility_config(current_user.id)
 
         return ApiResponse(
             success=True,
@@ -48,19 +61,13 @@ async def get_accessibility_config(
 
 @router.post("/config", summary="更新无障碍配置")
 async def update_accessibility_config(
-        keyboard_navigation: Optional[bool] = None,
-        screen_reader_support: Optional[bool] = None,
-        high_contrast_mode: Optional[bool] = None,
-        font_size: Optional[str] = None,
-        reduce_motion: Optional[bool] = None,
-        focus_visible: Optional[bool] = None,
-        skip_links: Optional[bool] = None,
+        body: AccessibilityConfigUpdate,
         current_user: User = Depends(jwt_required)
 ):
     """
     更新用户的无障碍配置
-    
-    参数:
+
+    接收 JSON 请求体，包含以下可选字段：
     - keyboard_navigation: 启用键盘导航
     - screen_reader_support: 启用屏幕阅读器支持
     - high_contrast_mode: 启用高对比度模式
@@ -68,26 +75,17 @@ async def update_accessibility_config(
     - reduce_motion: 减少动画效果
     - focus_visible: 显示焦点轮廓
     - skip_links: 启用跳过链接
-    
-    所有参数都是可选的，只更新提供的参数
+
+    所有字段都是可选的，只更新提供的字段
     """
     try:
-        # 构建配置字典
-        config = {}
-        if keyboard_navigation is not None:
-            config['keyboard_navigation'] = keyboard_navigation
-        if screen_reader_support is not None:
-            config['screen_reader_support'] = screen_reader_support
-        if high_contrast_mode is not None:
-            config['high_contrast_mode'] = high_contrast_mode
-        if font_size is not None:
-            config['font_size'] = font_size
-        if reduce_motion is not None:
-            config['reduce_motion'] = reduce_motion
-        if focus_visible is not None:
-            config['focus_visible'] = focus_visible
-        if skip_links is not None:
-            config['skip_links'] = skip_links
+        config = body.model_dump(exclude_none=True)
+
+        if not config:
+            return ApiResponse(
+                success=False,
+                error="未提供任何配置项"
+            )
 
         updated_config = accessibility_service.update_accessibility_config(
             user_id=current_user.id,
@@ -116,7 +114,7 @@ async def update_accessibility_config(
 async def get_skip_links():
     """
     获取页面跳过链接
-    
+
     跳过链接允许键盘用户快速跳转到页面的主要部分，
     避免逐个遍历导航菜单等元素。
     """
@@ -142,7 +140,7 @@ async def get_skip_links():
 async def get_keyboard_shortcuts():
     """
     获取系统键盘快捷键列表
-    
+
     返回所有可用的键盘快捷键及其功能说明
     """
     try:
@@ -172,10 +170,10 @@ async def get_keyboard_shortcuts():
 async def get_aria_labels(element_type: str):
     """
     获取指定元素类型的 ARIA 标签建议
-    
+
     参数:
     - element_type: 元素类型 (button, link, navigation, search, form, dialog, alert, menu, tablist)
-    
+
     返回推荐的 ARIA 属性配置
     """
     try:
@@ -207,7 +205,7 @@ async def get_aria_labels(element_type: str):
 async def get_high_contrast_css():
     """
     获取高对比度模式的 CSS 样式
-    
+
     可以在页面中应用这些样式以启用高对比度模式
     """
     try:
@@ -218,8 +216,7 @@ async def get_high_contrast_css():
             data={
                 'css': css,
                 'usage': '将 .high-contrast 类添加到 body 元素以启用高对比度模式'
-            },
-            headers={'Content-Type': 'text/css'}
+            }
         )
 
     except Exception as e:
@@ -233,7 +230,7 @@ async def get_high_contrast_css():
 async def get_font_size_css(size: str):
     """
     获取指定字体大小的 CSS 样式
-    
+
     参数:
     - size: 字体大小级别 (small, medium, large, x-large)
     """
@@ -246,8 +243,7 @@ async def get_font_size_css(size: str):
                 'size': size,
                 'css': css,
                 'usage': f'将 .font-size-{size} 类添加到 body 元素'
-            },
-            headers={'Content-Type': 'text/css'}
+            }
         )
 
     except Exception as e:
@@ -261,7 +257,7 @@ async def get_font_size_css(size: str):
 async def get_reduce_motion_css():
     """
     获取减少动画效果的 CSS 样式
-    
+
     禁用不必要的动画，适合对运动敏感的用户
     """
     try:
@@ -272,8 +268,7 @@ async def get_reduce_motion_css():
             data={
                 'css': css,
                 'usage': '将 .reduce-motion 类添加到 body 元素，或依赖媒体查询自动应用'
-            },
-            headers={'Content-Type': 'text/css'}
+            }
         )
 
     except Exception as e:
@@ -285,17 +280,17 @@ async def get_reduce_motion_css():
 
 @router.post("/validate", summary="验证无障碍性")
 async def validate_accessibility(
-        html_content: str
+        html_content: str = Body(..., embed=True)
 ):
     """
     验证 HTML 内容的无障碍性
-    
+
     检查常见的无障碍问题，如：
     - 图片缺少 alt 属性
     - 表单缺少 label
     - 标题层级不正确
     - 缺少语言属性
-    
+
     参数:
     - html_content: 要验证的 HTML 内容
     """
@@ -319,7 +314,7 @@ async def validate_accessibility(
 async def get_accessibility_guide():
     """
     获取完整的无障碍使用指南
-    
+
     包括：
     - 键盘导航说明
     - 屏幕阅读器支持
@@ -346,7 +341,7 @@ async def get_accessibility_guide():
 async def get_wcag_compliance():
     """
     获取 WCAG 2.1 合规信息
-    
+
     返回系统符合的 WCAG 标准和级别
     """
     return ApiResponse(
