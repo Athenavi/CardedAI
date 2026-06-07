@@ -80,7 +80,7 @@ async function request<T = any>(
     params?: Record<string, any>
 ): Promise<ApiResponse<T>> {
   try {
-    const url = buildUrl(path, method === 'GET' ? params : undefined);
+    const url = buildUrl(path, params);
     const opts: RequestInit = {
       method,
       credentials: 'include',
@@ -140,9 +140,10 @@ async function request<T = any>(
 
 export const apiClient = {
   get: <T = any>(path: string, params?: Record<string, any>) => request<T>('GET', path, undefined, undefined, params),
-  post: <T = any>(path: string, body?: any) => request<T>('POST', path, 'application/json', body),
-  postForm: <T = any>(path: string, body?: Record<string, any>) => request<T>('POST', path, 'application/x-www-form-urlencoded', body),
-  put: <T = any>(path: string, body?: any) => request<T>('PUT', path, 'application/json', body),
+  post: <T = any>(path: string, body?: any, params?: Record<string, any>) => request<T>('POST', path, 'application/json', body, params),
+  postForm: <T = any>(path: string, body?: Record<string, any>, params?: Record<string, any>) => request<T>('POST', path, 'application/x-www-form-urlencoded', body, params),
+  put: <T = any>(path: string, body?: any, params?: Record<string, any>) => request<T>('PUT', path, 'application/json', body, params),
+  putForm: <T = any>(path: string, body?: Record<string, any>, params?: Record<string, any>) => request<T>('PUT', path, 'application/x-www-form-urlencoded', body, params),
   patch: <T = any>(path: string, body?: any) => request<T>('PATCH', path, 'application/json', body),
   delete: <T = any>(path: string) => request<T>('DELETE', path),
     /** 通用请求方法，支持任意 method + FormData 等 */

@@ -132,7 +132,8 @@ const BasesPanel: React.FC = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: async () => apiClient.post('/knowledge/bases', newBase),
+    // Backend uses Form() annotation → must send form-encoded body
+    mutationFn: async () => apiClient.postForm('/knowledge/bases', newBase),
     onSuccess: () => { qc.invalidateQueries({queryKey: ['knowledge-bases']}); setShowCreate(false); }
   });
 
@@ -146,9 +147,8 @@ const BasesPanel: React.FC = () => {
       if (!selectedBase) return;
       const formData = new FormData();
       formData.append('file', file);
-      return apiClient.post(`/knowledge/bases/${selectedBase.id}/documents/upload`, formData, {
-        headers: {'Content-Type': 'multipart/form-data'}
-      });
+      // FormData is auto-detected by base-client; no need for extra headers
+      return apiClient.post(`/knowledge/bases/${selectedBase.id}/documents/upload`, formData);
     },
     onSuccess: () => {
       qc.invalidateQueries({queryKey: ['knowledge-docs']});
@@ -391,10 +391,12 @@ const SearchPanel: React.FC = () => {
     setAnswer('');
     try {
       if (mode === 'search') {
-        const res = await apiClient.post(`/knowledge/bases/${selectedBaseId}/search`, {query, top_k: 5});
+        // Backend uses Form() annotation → must send form-encoded body
+        const res = await apiClient.postForm(`/knowledge/bases/${selectedBaseId}/search`, {query, top_k: 5});
         setResults(res.data?.results || res.data || []);
       } else {
-        const res = await apiClient.post(`/knowledge/bases/${selectedBaseId}/qa`, {question: query, top_k: 5});
+        // Backend uses Form() annotation → must send form-encoded body
+        const res = await apiClient.postForm(`/knowledge/bases/${selectedBaseId}/qa`, {question: query, top_k: 5});
         setAnswer(res.data?.answer || '');
         setResults(res.data?.sources || []);
       }
@@ -487,7 +489,7 @@ const ReportsPanel: React.FC = () => {
   const qc = useQueryClient();
   const [generating, setGenerating] = useState(false);
   const [selectedBaseId, setSelectedBaseId] = useState<number | null>(null);
-  const [genConfig, setGenConfig] = useState({topic: '', report_type: 'research', style: 'professional'});
+  const [genConfig, setGenConfig] = useState({topic: '', template: 'default', max_sections: 6, detail_level: 'standard'});
 
   const {data: bases} = useQuery({
     queryKey: ['knowledge-bases-for-reports'],
@@ -508,7 +510,8 @@ const ReportsPanel: React.FC = () => {
   const generateMutation = useMutation({
     mutationFn: async () => {
       if (!selectedBaseId) throw new Error('请选择知识库');
-      return apiClient.post(`/knowledge/bases/${selectedBaseId}/reports/generate`, genConfig);
+      // Backend uses Form() annotation → must send form-encoded body
+      return apiClient.postForm(`/knowledge/bases/${selectedBaseId}/reports/generate`, genConfig);
     },
     onSuccess: () => qc.invalidateQueries({queryKey: ['knowledge-reports']})
   });
@@ -532,9 +535,10 @@ const ReportsPanel: React.FC = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">报告类型</label>
-            <select value={genConfig.report_type} onChange={e => setGenConfig({...genConfig, report_type: e.target.value})}
+            <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">报告模板</label>
+            <select value={genConfig.template} onChange={e => setGenConfig({...genConfig, template: e.target.value})}
               className="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
+              <option value="default">默认模板</option>
               <option value="research">研究报告</option>
               <option value="summary">摘要报告</option>
               <option value="comparison">对比分析</option>
@@ -650,7 +654,7 @@ export default function AdminKnowledgeWorkbench() {
   return (
     <AuthGuard>
       <QueryProvider>
-        <AdminShell>
+        <AdminShell title="知识工作台">
           <KnowledgeWorkbenchInner/>
         </AdminShell>
       </QueryProvider>

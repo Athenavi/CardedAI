@@ -1,0 +1,63 @@
+---
+import '@/styles/globals.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = '管理后台', description = 'FastBlog 管理后台' } = Astro.props;
+---
+
+<!doctype html>
+<html lang={Astro.currentLocale || 'zh-CN'} dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex, nofollow" />
+
+    <title>{title} - FastBlog</title>
+
+    <!-- Preload critical fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    </noscript>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+
+    <!-- Theme sync: apply dark class before paint to prevent flash -->
+    <script is:inline>
+      (function() {
+        var key = 'fastblog-theme';
+        var cls = 'dark';
+        var root = document.documentElement;
+        try {
+          var stored = localStorage.getItem(key);
+          if (stored === 'dark') {
+            root.classList.add(cls);
+          } else if (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            root.classList.add(cls);
+          }
+        } catch(e) {}
+      })();
+    </script>
+
+    <slot name="head" />
+  </head>
+  <body class="antialiased bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+    <slot />
+  </body>
+</html>

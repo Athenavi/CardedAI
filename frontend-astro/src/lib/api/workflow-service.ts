@@ -8,8 +8,8 @@ export interface WorkflowDefinition {
     id: number;
     name: string;
     description?: string;
-    graph_data: Record<string, any>;
-    trigger_config?: Record<string, any>;
+    graph: string;  // JSON string of {nodes, edges}
+    trigger_config?: string;  // JSON string
     is_active: boolean;
     version: number;
     created_at: string;
@@ -78,19 +78,21 @@ export class WorkflowService {
     static async createDefinition(data: {
         name: string;
         description?: string;
-        graph_data: Record<string, any>;
-        trigger_config?: Record<string, any>;
+        graph: string;
+        trigger_config?: string;
     }): Promise<ApiResponse<WorkflowDefinition>> {
-        return apiClient.post('/workflow/definitions', data);
+        // Backend expects query params (no Body/Form annotation)
+        return apiClient.post('/workflow/definitions', undefined, data);
     }
 
     static async updateDefinition(defId: number, data: {
         name?: string;
         description?: string;
-        graph_data?: Record<string, any>;
-        trigger_config?: Record<string, any>;
+        graph?: string;
+        trigger_config?: string;
     }): Promise<ApiResponse<WorkflowDefinition>> {
-        return apiClient.put(`/workflow/definitions/${defId}`, data);
+        // Backend expects query params (no Body/Form annotation)
+        return apiClient.put(`/workflow/definitions/${defId}`, undefined, data);
     }
 
     static async deleteDefinition(defId: number): Promise<ApiResponse<void>> {
@@ -135,16 +137,24 @@ export class WorkflowService {
     static async registerTool(data: {
         name: string;
         tool_type: string;
-        description?: string;
+        description: string;
         parameters?: Record<string, any>;
-        implementation?: string;
     }): Promise<ApiResponse<AgentTool>> {
-        return apiClient.post('/workflow/tools', data);
+        // Backend expects query params for register_tool
+        const params: Record<string, any> = {
+            name: data.name,
+            tool_type: data.tool_type,
+            description: data.description,
+            parameters: JSON.stringify(data.parameters || {}),
+        };
+        return apiClient.post('/workflow/tools', undefined, params);
     }
 
-    static async testTool(name: string, params?: Record<string, any>): Promise<ApiResponse<any>> {
-        const qs = `?params=${encodeURIComponent(JSON.stringify(params || {}))}`;
-        return apiClient.post(`/workflow/tools/${name}/test${qs}`);
+    static async testTool(name: string, toolParams?: Record<string, any>): Promise<ApiResponse<any>> {
+        // Backend expects query param: params (JSON string)
+        return apiClient.post(`/workflow/tools/${name}/test`, undefined, {
+            params: JSON.stringify(toolParams || {}),
+        });
     }
 
     // --- 触发器管理 ---
@@ -154,25 +164,33 @@ export class WorkflowService {
 
     static async createCronTrigger(data: {
         workflow_id: number;
-        cron_expression: string;
-        timezone?: string;
+        cron_expr: string;
     }): Promise<ApiResponse<Trigger>> {
-        return apiClient.post('/workflow/triggers/cron', data);
+        // Backend expects query params for create_cron_trigger
+        return apiClient.post('/workflow/triggers/cron', undefined, {
+            workflow_id: data.workflow_id,
+            cron_expr: data.cron_expr,
+        });
     }
 
     static async createEventTrigger(data: {
         workflow_id: number;
-        event_type: string;
-        filter_expression?: string;
+        event_name: string;
     }): Promise<ApiResponse<Trigger>> {
-        return apiClient.post('/workflow/triggers/event', data);
+        // Backend expects query params for create_event_trigger
+        return apiClient.post('/workflow/triggers/event', undefined, {
+            workflow_id: data.workflow_id,
+            event_name: data.event_name,
+        });
     }
 
     static async createWebhookTrigger(data: {
         workflow_id: number;
-        description?: string;
     }): Promise<ApiResponse<Trigger>> {
-        return apiClient.post('/workflow/triggers/webhook', data);
+        // Backend expects query params for create_webhook_trigger
+        return apiClient.post('/workflow/triggers/webhook', undefined, {
+            workflow_id: data.workflow_id,
+        });
     }
 
     static async deleteTrigger(triggerId: number): Promise<ApiResponse<void>> {

@@ -288,7 +288,7 @@ const IntelligencePanel: React.FC = () => {
       const params: any = {page, per_page: 20};
       if (category) params.category = category;
       if (sentiment) params.sentiment = sentiment;
-      const res = await apiClient.get('/intel/intelligence', {params});
+      const res = await apiClient.get('/intel/intelligence', params);
       return res.data;
     }
   });
@@ -410,7 +410,12 @@ const BriefingsPanel: React.FC = () => {
 
   const generateMutation = useMutation({
     mutationFn: async () => {
-      return apiClient.post('/intel/briefings/generate', genConfig);
+      // Backend expects query params for this endpoint, build URL with params
+      const qs = new URLSearchParams(
+        Object.entries(genConfig).filter(([, v]) => v !== undefined && v !== null && v !== '')
+          .map(([k, v]) => [k, String(v)])
+      ).toString();
+      return apiClient.post(`/intel/briefings/generate${qs ? '?' + qs : ''}`);
     },
     onSuccess: () => {
       qc.invalidateQueries({queryKey: ['intel-briefings']});
@@ -627,19 +632,19 @@ function IntelDashboardInner() {
   // Stats
   const {data: sourcesData} = useQuery({
     queryKey: ['intel-sources-count'],
-    queryFn: async () => { const r = await apiClient.get('/intel/sources', {params: {per_page: 1}}); return r.data?.total || 0; }
+    queryFn: async () => { const r = await apiClient.get('/intel/sources', {per_page: 1}); return r.data?.total || 0; }
   });
   const {data: intelData} = useQuery({
     queryKey: ['intel-count'],
-    queryFn: async () => { const r = await apiClient.get('/intel/intelligence', {params: {per_page: 1}}); return r.data?.total || 0; }
+    queryFn: async () => { const r = await apiClient.get('/intel/intelligence', {per_page: 1}); return r.data?.total || 0; }
   });
   const {data: briefingsData} = useQuery({
     queryKey: ['intel-briefings-count'],
-    queryFn: async () => { const r = await apiClient.get('/intel/briefings', {params: {per_page: 1}}); return r.data?.total || 0; }
+    queryFn: async () => { const r = await apiClient.get('/intel/briefings', {per_page: 1}); return r.data?.total || 0; }
   });
   const {data: alertsData} = useQuery({
     queryKey: ['intel-alerts-count'],
-    queryFn: async () => { const r = await apiClient.get('/intel/alerts/rules', {params: {per_page: 1}}); return r.data?.total || 0; }
+    queryFn: async () => { const r = await apiClient.get('/intel/alerts/rules', {per_page: 1}); return r.data?.total || 0; }
   });
 
   const renderTab = () => {
@@ -700,7 +705,7 @@ export default function AdminIntelDashboard() {
   return (
     <AuthGuard>
       <QueryProvider>
-        <AdminShell>
+        <AdminShell title="情报中心">
           <IntelDashboardInner/>
         </AdminShell>
       </QueryProvider>

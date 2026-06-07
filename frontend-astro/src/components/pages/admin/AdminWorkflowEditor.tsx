@@ -270,7 +270,7 @@ const DagCanvas: React.FC<{
           {nt.label}
         </text>
         {/* Status indicator */}
-        {statusConf && (
+        {statusConf && StatusIcon && (
           <foreignObject x={node.x + NODE_W - 28} y={node.y + 8} width={20} height={20}>
             <StatusIcon className={`w-4 h-4 ${statusConf.color} ${execStatus === 'running' ? 'animate-spin' : ''}`}/>
           </foreignObject>
@@ -397,7 +397,7 @@ const NodeConfigPanel: React.FC<{
                 onChange={e => onUpdate(node.id, {config: {...node.config, [f.key]: e.target.value}})}
                 className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm">
                 {f.key === 'source_type' && (<><option value="rss">RSS</option><option value="web">网页</option><option value="api">API</option></>)}
-                {f.key === 'operator' && (<><option value=">">></option><option value="<"><</option><option value=">=">>=</option><option value="<="><=</option><option value="==">==</option><option value="!=">!=</option><option value="contains">包含</option></>)}
+                {f.key === 'operator' && (<><option value=">">{'>'}</option><option value="<">{'<'}</option><option value=">=">{'>='}</option><option value="<=">{'<='}</option><option value="==">{'=='}</option><option value="!=">{'!='}</option><option value="contains">包含</option></>)}
                 {f.key === 'channel' && (<><option value="email">邮件</option><option value="webhook">Webhook</option><option value="log">日志</option></>)}
               </select>
             ) : f.type === 'number' ? (
@@ -457,7 +457,8 @@ function WorkflowEditorInner() {
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      return apiClient.post('/workflow/definitions', {
+      // Backend expects query params for create_definition (no Body annotation)
+      return apiClient.post('/workflow/definitions', undefined, {
         name: newDefName, description: newDefDesc,
         graph: JSON.stringify({nodes: [], edges: []}),
       });
@@ -473,7 +474,8 @@ function WorkflowEditorInner() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!currentDefId) return;
-      return apiClient.put(`/workflow/definitions/${currentDefId}`, {
+      // Backend expects query params for update_definition (no Body annotation)
+      return apiClient.put(`/workflow/definitions/${currentDefId}`, undefined, {
         name: wfName, description: wfDesc,
         graph: JSON.stringify({nodes, edges}),
       });
@@ -753,7 +755,7 @@ function WorkflowEditorInner() {
                 nodes={nodes} edges={edges}
                 selectedNode={selectedNode}
                 onSelectNode={setSelectedNode}
-                onMoveNode={updateNode}
+                onMoveNode={(id, x, y) => updateNode(id, {x, y})}
                 onConnect={addEdge}
                 onDeleteNode={deleteNode}
                 onDeleteEdge={deleteEdge}
@@ -909,7 +911,7 @@ export default function AdminWorkflowEditor() {
   return (
     <AuthGuard>
       <QueryProvider>
-        <AdminShell>
+        <AdminShell title="工作流引擎">
           <WorkflowEditorInner/>
         </AdminShell>
       </QueryProvider>

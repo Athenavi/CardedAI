@@ -97,7 +97,8 @@ export class KnowledgeService {
         chunk_size?: number;
         chunk_overlap?: number;
     }): Promise<ApiResponse<KnowledgeBase>> {
-        return apiClient.post('/knowledge/bases', data);
+        // Backend uses Form() annotation → must send form-encoded body
+        return apiClient.postForm('/knowledge/bases', data);
     }
 
     static async updateBase(baseId: number, data: {
@@ -106,7 +107,8 @@ export class KnowledgeService {
         chunk_size?: number;
         chunk_overlap?: number;
     }): Promise<ApiResponse<KnowledgeBase>> {
-        return apiClient.put(`/knowledge/bases/${baseId}`, data);
+        // Backend uses Form() annotation → must send form-encoded body
+        return apiClient.putForm(`/knowledge/bases/${baseId}`, data);
     }
 
     static async deleteBase(baseId: number): Promise<ApiResponse<void>> {
@@ -151,27 +153,31 @@ export class KnowledgeService {
 
     // --- RAG 搜索与问答 ---
     static async ragSearch(baseId: number, query: string, topK: number = 5): Promise<ApiResponse<SearchResult[]>> {
-        return apiClient.post(`/knowledge/bases/${baseId}/search`, {query, top_k: topK});
+        // Backend uses Form() annotation → must send form-encoded body
+        return apiClient.postForm(`/knowledge/bases/${baseId}/search`, {query, top_k: topK});
     }
 
     static async knowledgeQA(baseId: number, question: string, params?: {
         top_k?: number;
-        model?: string;
+        system_prompt?: string;
     }): Promise<ApiResponse<QAResult>> {
-        return apiClient.post(`/knowledge/bases/${baseId}/qa`, {
+        // Backend uses Form() annotation → must send form-encoded body
+        return apiClient.postForm(`/knowledge/bases/${baseId}/qa`, {
             question,
-            ...params
+            top_k: params?.top_k,
+            system_prompt: params?.system_prompt,
         });
     }
 
     // --- 研报生成 ---
     static async generateReport(baseId: number, data: {
-        title: string;
-        report_type?: string;
-        query?: string;
-        template_id?: number;
+        topic: string;
+        template?: string;
+        max_sections?: number;
+        detail_level?: string;
     }): Promise<ApiResponse<GeneratedReport>> {
-        return apiClient.post(`/knowledge/bases/${baseId}/reports/generate`, data);
+        // Backend uses Form() annotation → must send form-encoded body
+        return apiClient.postForm(`/knowledge/bases/${baseId}/reports/generate`, data);
     }
 
     static async getReports(params?: {
@@ -198,10 +204,11 @@ export class KnowledgeService {
     static async createReportTemplate(data: {
         name: string;
         description?: string;
-        template_type?: string;
-        structure: Record<string, any>;
+        template_content?: string;
+        sections?: string;
     }): Promise<ApiResponse<ReportTemplate>> {
-        return apiClient.post('/knowledge/templates', data);
+        // Backend uses Form() annotation → must send form-encoded body
+        return apiClient.postForm('/knowledge/templates', data);
     }
 
     // --- 统计 ---
