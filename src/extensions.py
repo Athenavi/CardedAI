@@ -604,14 +604,72 @@ def init_extensions(app):
     # Base.metadata.create_all(bind=engine)  # 已删除
 
 
-# 便捷函数：获取数据库会话
+# 便捷函数：获取数据库会话（同步）
+# 向后兼容：当 SessionLocal 为 None 时，自动从数据库 URL 创建同步引擎
+_sync_session_factory = None
+
+def _get_sync_session_factory():
+    """延迟创建同步会话工厂（从数据库 URL 创建同步引擎）"""
+    global _sync_session_factory
+    if _sync_session_factory is not None:
+        return _sync_session_factory
+
+    try:
+        from sqlalchemy import create_engine
+        from sqlalchemy.orm import sessionmaker
+
+        # 获取数据库 URL 并转换为同步驱动
+        try:
+            from src.setting import settings
+            db_url = settings.database_url
+        except (ImportError, Exception):
+            db_url = db_manager.database_url if hasattr(db_manager, 'database_url') else None
+
+        if not db_url:
+            logger.error("No database URL available for sync session factory")
+            return None
+
+        # 将异步驱动转换为同步驱动
+        sync_url = db_url
+        for async_drv, sync_drv in [
+            ('+asyncpg', '+psycopg2'),
+            ('+aiosqlite', ''),
+            ('+asyncmy', '+pymysql'),
+        ]:
+            if async_drv in sync_url:
+                sync_url = sync_url.replace(async_drv, sync_drv)
+                break
+
+        sync_engine = create_engine(sync_url, pool_pre_ping=True)
+
+        # 导入所有模型并创建缺失的表
+        try:
+            from src.utils.database.main import _import_models_once
+            from shared.models import Base
+            _import_models_once()
+            Base.metadata.create_all(bind=sync_engine)
+            logger.info("Ensured all model tables exist (create_all)")
+        except Exception as table_err:
+            logger.warning(f"Table creation skipped/failed: {table_err}")
+
+        _sync_session_factory = sessionmaker(bind=sync_engine, autocommit=False, autoflush=False)
+        logger.info("Created sync session factory from database URL")
+        return _sync_session_factory
+    except Exception as e:
+        logger.error(f"Failed to create sync session factory: {e}")
+        return None
+
 @contextmanager
 def get_db() -> Generator:
-    """获取数据库会话的便捷函数"""
-    if SessionLocal is None:
-        raise RuntimeError("Extensions not initialized. Call init_extensions first.")
+    """获取数据库会话的便捷函数（兼容旧代码）"""
+    factory = SessionLocal or _get_sync_session_factory()
+    if factory is None:
+        raise RuntimeError(
+            "Extensions not initialized and sync session factory unavailable. "
+            "Call init_extensions first or ensure db_manager is initialized."
+        )
 
-    db_session = SessionLocal()
+    db_session = factory()
     try:
         yield db_session
     finally:

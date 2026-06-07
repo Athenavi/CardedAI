@@ -677,4 +677,4 @@ async def get_knowledge_stats():
         })
     except Exception as e:
         return ApiResponse.fail(
-            message=f"获取统计失败: str{(e)}")
+            message=f"获取统计失败: {str(e)}")
