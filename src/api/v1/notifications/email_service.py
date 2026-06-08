@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.services.notifications.email_service_integration import email_service_integration
 from src.api.v1.core.responses import ApiResponse
-from src.api.v1.system.multisite import check_admin_permission
+# [多站点已移除]
 from src.auth.auth_deps import jwt_required_dependency as jwt_required
 from src.extensions import get_async_db_session as get_async_db
 
@@ -91,7 +91,7 @@ async def create_email_config(
     try:
         # 检查权限
         
-        has_permission = await check_admin_permission(db, current_user.id)
+        has_permission = getattr(current_user, 'is_superuser', False) or getattr(current_user, 'is_staff', False)
         if not has_permission:
             return ApiResponse(success=False, error="Insufficient permissions")
 
@@ -146,7 +146,7 @@ async def update_email_config(
     try:
         # 检查权限
         
-        has_permission = await check_admin_permission(db, current_user.id)
+        has_permission = getattr(current_user, 'is_superuser', False) or getattr(current_user, 'is_staff', False)
         if not has_permission:
             return ApiResponse(success=False, error="Insufficient permissions")
 
@@ -185,7 +185,7 @@ async def deactivate_email_config(
     try:
         # 检查权限
         
-        has_permission = await check_admin_permission(db, current_user.id)
+        has_permission = getattr(current_user, 'is_superuser', False) or getattr(current_user, 'is_staff', False)
         if not has_permission:
             return ApiResponse(success=False, error="Insufficient permissions")
 
@@ -322,7 +322,7 @@ async def get_all_configs(
     try:
         # 检查权限
         
-        has_permission = await check_admin_permission(db, current_user.id)
+        has_permission = getattr(current_user, 'is_superuser', False) or getattr(current_user, 'is_staff', False)
         if not has_permission:
             return ApiResponse(success=False, error="Insufficient permissions")
 

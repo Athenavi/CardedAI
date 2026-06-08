@@ -8,6 +8,7 @@ DAG 工作流执行引擎
 - 自动传递节点间数据
 - 处理条件分支跳过
 - 记录每一步的执行状态
+- **持久化节点执行记录到数据库**
 - 集成 WorkflowConcurrencyManager 限制并发资源
 """
 
@@ -16,7 +17,7 @@ import json
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional
 
 from src.unified_logger import default_logger as logger
@@ -212,6 +213,7 @@ class DAGEngine:
         graph_data,
         input_data: Optional[Dict] = None,
         trigger_type: str = "manual",
+        execution_id: Optional[int] = None,
     ) -> ExecutionResult:
         """执行工作流
 
@@ -220,11 +222,13 @@ class DAGEngine:
             graph_data: 图结构 (dict / JSON str)
             input_data: 全局输入数据
             trigger_type: 触发类型 (manual / scheduled / event)
+            execution_id: 执行记录 DB ID（传入则持久化节点执行记录）
 
         Returns:
             ExecutionResult
         """
         result = ExecutionResult(
+            execution_id=execution_id,
             workflow_id=workflow_id,
             status="running",
             started_at=datetime.utcnow(),
@@ -291,6 +295,7 @@ class DAGEngine:
 
                 for node, res in zip(layer, results):
                     nid = node["id"]
+                    ntype = node.get("type", "unknown")
                     if isinstance(res, Exception):
                         result.node_results[nid] = {
                             "status": "failed",
@@ -299,6 +304,16 @@ class DAGEngine:
                         logger.error(
                             f"[DAGEngine] 节点 {nid} 执行失败: {res}"
                         )
+                        # 持久化失败的 NodeExecution
+                        if execution_id:
+                            self._save_node_execution(
+                                execution_id=execution_id,
+                                node_id=nid,
+                                node_type=ntype,
+                                status="failed",
+                                error_message=str(res),
+                                node=node,
+                            )
                         # 根据节点配置决定是否继续
                         if node.get("config", {}).get("fail_fast", True):
                             raise res
@@ -308,6 +323,16 @@ class DAGEngine:
                             "status": "completed",
                             "output": res,
                         }
+                        # 持久化成功的 NodeExecution
+                        if execution_id:
+                            self._save_node_execution(
+                                execution_id=execution_id,
+                                node_id=nid,
+                                node_type=ntype,
+                                status="completed",
+                                output=res,
+                                node=node,
+                            )
 
             # 聚合最终输出
             if result.status == "running":
@@ -437,6 +462,70 @@ class DAGEngine:
         """标记执行为取消状态"""
         self._cancel_flags[workflow_id] = True
         logger.info(f"[DAGEngine] 工作流 {workflow_id} 已标记为取消")
+
+    # ------------------------------------------------------------------
+    # 节点执行记录持久化
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _save_node_execution(
+        execution_id: int,
+        node_id: str,
+        node_type: str,
+        status: str,
+        error_message: Optional[str] = None,
+        output: Any = None,
+        node: Optional[Dict] = None,
+    ) -> None:
+        """持久化单个节点执行记录到数据库
+
+        Args:
+            execution_id: 所属执行实例 ID
+            node_id: 节点在 DAG 中的 ID
+            node_type: 节点类型
+            status: 状态 (completed/failed/skipped)
+            error_message: 错误信息
+            output: 节点输出数据
+            node: 原始节点配置（用于提取输入数据）
+        """
+        try:
+            from datetime import datetime, timezone
+            from src.extensions import get_db
+            from shared.models.workflow.node_execution import NodeExecution
+
+            with get_db() as db:
+                record = NodeExecution(
+                    execution_id=execution_id,
+                    node_id=node_id,
+                    node_type=node_type,
+                    status=status,
+                    input_data=json.dumps(node.get("config", {}), ensure_ascii=False) if node else None,
+                    output_data=json.dumps(output, ensure_ascii=False, default=str) if output and status == "completed" else None,
+                    error_message=error_message,
+                    started_at=datetime.now(timezone.utc),
+                    completed_at=datetime.now(timezone.utc),
+                )
+                db.add(record)
+                db.flush()
+                db.commit()
+        except Exception as exc:
+            logger.warning(f"[DAGEngine] 持久化 NodeExecution 失败 ({node_id}): {exc}")
+
+    # ------------------------------------------------------------------
+    # 启动时注册所有节点执行器
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def init_executors() -> None:
+        """注册所有内置节点执行器到 dag_engine 全局实例"""
+        try:
+            from shared.services.workflow.node_executors import get_all_executors
+            executors = get_all_executors()
+            for node_type, executor in executors.items():
+                dag_engine.register_executor(node_type, executor)
+            logger.info(f"[DAGEngine] 已注册 {len(executors)} 个节点执行器: {list(executors.keys())}")
+        except Exception as exc:
+            logger.error(f"[DAGEngine] 注册节点执行器失败: {exc}")
 
 
 # 全局单例

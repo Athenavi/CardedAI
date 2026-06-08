@@ -236,7 +236,6 @@ def register_lazy_modules():
 
     # 高优先级模块（启动后尽快加载）
     lazy_loader.register_module("scheduler", "src.scheduler", priority=1, critical=False)
-    lazy_loader.register_module("plugins", "shared.services.plugins.plugin_manager.init", priority=1, critical=False)
 
     # 中优先级模块（按需加载）
     lazy_loader.register_module("analytics", "shared.services.analytics", priority=2, critical=False)

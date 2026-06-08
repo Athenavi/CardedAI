@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from shared.models.comment import Comment
 from shared.services.comments.comment_manager import comment_like_service, comment_notification_service
 from shared.services.notifications.webhook_service import webhook_service
-from shared.services.plugins.plugin_manager.init import trigger_plugin_event
 from shared.services.security.spam_filter_manager import spam_filter
 from shared.services.users.user_manager import gravatar_service
 from src.api.v1.core.responses import ApiResponse
@@ -170,19 +169,8 @@ async def create_comment(
                 article_result = await db.execute(article_query)
                 article = article_result.scalar_one_or_none()
 
-                # 触发关注插件的评论事件
-                try:
-                    commenter_id = current_user.id if current_user else None
-                    if commenter_id and article:
-                        await trigger_plugin_event('comment_created', {
-                            'user_id': str(commenter_id),
-                            'article_id': article.id,
-                            'article_title': article.title,
-                            'content': new_comment.content,
-                        })
-                except Exception as plugin_err:
-                    print(f"Trigger plugin event failed: {plugin_err}")
-
+                # [插件系统已移除]
+                
                 # 获取文章作者信息
                 if article and article.user:
                     author_query = select(User).where(User.id == article.user)

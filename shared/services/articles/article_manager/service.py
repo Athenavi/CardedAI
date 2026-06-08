@@ -521,18 +521,4 @@ def _trigger_article_event(event_name: str, data: dict):
         event_name: 事件名称
         data: 事件数据
     """
-    try:
-        import asyncio
-        from shared.services.plugins.plugin_manager.init import trigger_plugin_event
-
-        # 检查是否有运行的事件循环
-        try:
-            loop = asyncio.get_running_loop()
-            # 如果有运行的事件循环，创建任务
-            asyncio.create_task(trigger_plugin_event(event_name, data))
-        except RuntimeError:
-            # 没有运行的事件循环，记录日志但不抛出异常
-            logger.debug(f"No running event loop, skipping {event_name} event trigger")
-    except Exception as e:
-        # 事件触发失败不应该影响主流程
-        logger.debug(f"Failed to trigger {event_name} event: {e}")
+    pass

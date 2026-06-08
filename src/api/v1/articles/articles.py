@@ -173,23 +173,9 @@ async def _get_article_detail(
         "author": author_info,
     }
 
-    # 尝试调用插件钩子增强文章数据
-    try:
-        from shared.services.plugins.plugin_manager.init import apply_plugin_filter
-
-        # 添加当前用户ID（供插件使用）
-        if current_user:
-            article_data['current_user_id'] = str(current_user.id)
-
-        # 应用插件过滤器
-        enhanced_data = apply_plugin_filter('article_data', article_data)
-
-        # 使用增强后的数据
-        if enhanced_data:
-            article_data = enhanced_data
-    except Exception as e:
-        # 插件钩子失败不应影响主功能
-        print(f"[Plugin] article_data hook failed: {e}")
+    # 添加当前用户ID
+    if current_user:
+        article_data['current_user_id'] = str(current_user.id)
 
     return article_data
 
