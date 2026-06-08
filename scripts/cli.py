@@ -212,9 +212,6 @@ def cmd_deploy(args):
     """部署项目"""
     print("🚀 Deploying FastBlog...")
     print("⚠️  Deployment not fully implemented yet")
-    print("   Please use Docker or manual deployment for now")
-    print("\n📚 Docker deployment:")
-    print("   docker-compose up -d")
 
 
 def cmd_info(args):
