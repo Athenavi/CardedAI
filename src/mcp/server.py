@@ -470,43 +470,59 @@ class MCPServer:
         return []
 
     async def _get_categories_resource(self, params: Dict) -> List[Dict]:
-        """获取分类列表"""
-        return [
-            {
-                "id": 1,
-                "name": "技术",
-                "slug": "tech",
-            }
-        ]
+        """获取分类列表 (Real DB)"""
+        async for db in get_async_session():
+            from sqlalchemy import select
+            from shared.models.category import Category
+            query = select(Category).order_by(Category.id).limit(50)
+            result = await db.execute(query)
+            cats = result.scalars().all()
+            return [{"id": c.id, "name": c.name, "slug": c.slug} for c in cats]
+        return []
 
     async def _get_users_resource(self, params: Dict) -> List[Dict]:
-        """获取用户列表"""
-        return [
-            {
-                "id": 1,
-                "username": "admin",
-                "role": "administrator",
-            }
-        ]
+        """获取用户列表 (Real DB)"""
+        async for db in get_async_session():
+            from sqlalchemy import select
+            from shared.models.user import User
+            query = select(User).order_by(User.id).limit(50)
+            result = await db.execute(query)
+            users = result.scalars().all()
+            return [{"id": u.id, "username": u.username, "role": "administrator" if u.is_superuser else "user"} for u in users]
+        return []
 
     async def _get_media_resource(self, params: Dict) -> List[Dict]:
-        """获取媒体列表"""
-        return [
-            {
-                "id": 1,
-                "filename": "example.jpg",
-                "url": "/media/example.jpg",
-                "alt_text": "示例图片",
-            }
-        ]
+        """获取媒体列表 (Real DB)"""
+        async for db in get_async_session():
+            from sqlalchemy import select
+            from shared.models.media import Media
+            query = select(Media).order_by(Media.id.desc()).limit(50)
+            result = await db.execute(query)
+            items = result.scalars().all()
+            return [{"id": m.id, "filename": m.filename, "url": m.file_url or f"/media/{m.id}", "alt_text": m.alt_text or ""} for m in items]
+        return []
 
     async def _get_settings_resource(self, params: Dict) -> Dict:
-        """获取站点设置"""
-        return {
-            "site_name": "FastBlog",
-            "site_url": "https://example.com",
-            "language": "zh-CN",
-        }
+        """获取站点设置 (Real DB)"""
+        try:
+            from shared.models.system_settings import SystemSettings
+            from src.extensions import get_db
+            site_name = "FastBlog"
+            site_url = "http://localhost:9421"
+            language = "zh-CN"
+            with get_db() as db:
+                for key in ("site_name", "site_url", "site_language"):
+                    rec = db.query(SystemSettings).filter(SystemSettings.setting_key == key).first()
+                    if rec and rec.setting_value:
+                        if key == "site_name":
+                            site_name = rec.setting_value
+                        elif key == "site_url":
+                            site_url = rec.setting_value
+                        elif key == "site_language":
+                            language = rec.setting_value
+            return {"site_name": site_name, "site_url": site_url, "language": language}
+        except Exception:
+            return {"site_name": "FastBlog", "site_url": "http://localhost:9421", "language": "zh-CN"}
 
     # ==================== 工具处理器 ====================
 
@@ -561,28 +577,52 @@ class MCPServer:
             }
 
     async def _update_article_tool(self, arguments: Dict) -> Dict:
-        """更新文章工具"""
+        """更新文章工具 (Real DB)"""
         article_id = arguments.get("article_id")
-
         if not article_id:
             raise ValueError("Article ID is required")
 
-        return {
-            "success": True,
-            "message": f"Article {article_id} updated successfully",
-        }
+        async for db in get_async_session():
+            from sqlalchemy import select
+            article = await db.get(Article, article_id)
+            if not article:
+                raise ValueError(f"Article {article_id} not found")
+
+            if "title" in arguments:
+                article.title = arguments["title"]
+            if "status" in arguments:
+                article.status = 1 if arguments["status"] == "published" else 0
+            article.updated_at = datetime.utcnow()
+            await db.flush()
+
+            if "content" in arguments:
+                q = select(ArticleContent).where(ArticleContent.article == article_id)
+                r = await db.execute(q)
+                ac = r.scalar_one_or_none()
+                if ac:
+                    ac.content = arguments["content"]
+                    ac.updated_at = datetime.utcnow()
+                else:
+                    ac = ArticleContent(article=article_id, content=arguments["content"],
+                                        created_at=datetime.utcnow(), updated_at=datetime.utcnow())
+                    db.add(ac)
+
+            await db.commit()
+            return {"success": True, "message": f"Article {article_id} updated successfully", "article_id": article_id}
 
     async def _delete_article_tool(self, arguments: Dict) -> Dict:
-        """删除文章工具"""
+        """删除文章工具 (Real DB)"""
         article_id = arguments.get("article_id")
-
         if not article_id:
             raise ValueError("Article ID is required")
 
-        return {
-            "success": True,
-            "message": f"Article {article_id} deleted successfully",
-        }
+        async for db in get_async_session():
+            article = await db.get(Article, article_id)
+            if not article:
+                raise ValueError(f"Article {article_id} not found")
+            await db.delete(article)
+            await db.commit()
+            return {"success": True, "message": f"Article {article_id} deleted successfully", "article_id": article_id}
 
     async def _search_articles_tool(self, arguments: Dict) -> List[Dict]:
         """搜索文章工具"""
@@ -617,31 +657,60 @@ class MCPServer:
             return []
 
     async def _generate_seo_description_tool(self, arguments: Dict) -> Dict:
-        """生成SEO描述工具"""
+        """生成SEO描述工具 (Real: extract from article content)"""
         article_id = arguments.get("article_id")
-
         if not article_id:
             raise ValueError("Article ID is required")
 
-        return {
-            "success": True,
-            "seo_description": "这是一个优化的SEO描述示例",
-            "keywords": ["关键词1", "关键词2"],
-        }
+        async for db in get_async_session():
+            article = await db.get(Article, article_id)
+            if not article:
+                raise ValueError(f"Article {article_id} not found")
+
+            excerpt = article.excerpt or ""
+            title = article.title or ""
+
+            # Generate description from excerpt or first 160 chars of title
+            seo_desc = excerpt[:160] if excerpt else title[:160]
+            # Extract keywords from tags
+            tags = article.tags_list or ""
+            keywords = [t.strip() for t in tags.split(",") if t.strip()][:5]
+
+            return {
+                "success": True,
+                "seo_description": seo_desc,
+                "keywords": keywords,
+                "article_id": article_id,
+            }
 
     async def _upload_media_tool(self, arguments: Dict) -> Dict:
-        """上传媒体工具"""
+        """上传媒体工具 (Real: register file in DB)"""
         file_path = arguments.get("file_path")
-
         if not file_path:
             raise ValueError("File path is required")
 
-        return {
-            "success": True,
-            "message": f"File uploaded: {file_path}",
-            "media_id": 1,
-            "url": f"/media/{Path(file_path).name}",
-        }
+        from pathlib import Path as P
+        fname = P(file_path).name
+
+        async for db in get_async_session():
+            from shared.models.media import Media
+            new_media = Media(
+                filename=fname,
+                file_url=f"/media/{fname}",
+                file_path=file_path,
+                file_size=0,
+                mime_type="application/octet-stream",
+            )
+            db.add(new_media)
+            await db.flush()
+            media_id = new_media.id
+            await db.commit()
+            return {
+                "success": True,
+                "message": f"File registered: {fname}",
+                "media_id": media_id,
+                "url": f"/media/{fname}",
+            }
 
     # ==================== 辅助方法 ====================
 
