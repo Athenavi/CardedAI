@@ -184,6 +184,9 @@ ROUTE_REGISTRY_V2 = [
     # ==================== MCP Server（AI Agent 接口）====================
     ("src.api.v2.mcp", "/api/v2/mcp", ["mcp-v2"], True),
 
+    # ==================== AI 聊天代理（对话式站点管理）====================
+    ("src.api.v2.ai", "/api/v2/ai", ["ai-v2"], True),
+
     # [已删除] 企业管理模块（EnterpriseLicense, SupportTicket 等模型已移除）
 ]
 
