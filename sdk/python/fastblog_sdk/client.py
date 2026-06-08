@@ -366,7 +366,7 @@ class AsyncFastBlogClient(AsyncIntelMixin, AsyncKnowledgeMixin, AsyncWorkflowMix
         Returns:
             响应数据
         """
-        session = await self._get_session()
+        await self._get_session()
         url = f"{self.base_url}{endpoint}"
 
         async with session.request(method, url, **kwargs) as response:
@@ -545,7 +545,7 @@ class AsyncFastBlogClient(AsyncIntelMixin, AsyncKnowledgeMixin, AsyncWorkflowMix
         Returns:
             上传的媒体信息
         """
-        session = await self._get_session()
+        await self._get_session()
 
         from pathlib import Path
         file_name = Path(file_path).name

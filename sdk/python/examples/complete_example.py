@@ -18,7 +18,7 @@ def main():
         print("\n📝 登录...")
         login_result = client.login("admin@example.com", "password")
         if login_result.get('success'):
-            print(f"✅ 登录成功")
+            print("✅ 登录成功")
             token = login_result['data'].get('token')
             print(f"Token: {token[:20]}...")
         else:
@@ -126,7 +126,7 @@ def main():
             upload_result = client.upload_media("test_image.jpg")
             if upload_result.get('success'):
                 media_data = upload_result['data']
-                print(f"✅ 媒体上传成功")
+                print("✅ 媒体上传成功")
                 print(f"  ID: {media_data.get('id')}")
                 print(f"  文件名: {media_data.get('filename')}")
                 print(f"  URL: {media_data.get('url')}")

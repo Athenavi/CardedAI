@@ -288,7 +288,7 @@ class AsyncKnowledgeMixin:
                               metadata: Dict[str, Any] = None) -> Dict[str, Any]:
         import aiohttp
         from pathlib import Path
-        session = await self._get_session()
+        await self._get_session()
         file_name = Path(file_path).name
         with open(file_path, 'rb') as f:
             form_data = aiohttp.FormData()
