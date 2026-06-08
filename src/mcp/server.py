@@ -563,8 +563,7 @@ class MCPServer:
                 user_id=user_id,
                 action="ai_create_article",
                 resource_type="Article",
-                resource_id=str(new_article.id),
-                description=f"AI Agent created article: {title}",
+                resource_id=new_article.id,
                 created_at=datetime.utcnow()
             )
             db.add(audit_log)
