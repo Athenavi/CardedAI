@@ -153,6 +153,7 @@ class TriggerService:
                 graph_data=graph_data,
                 input_data=input_data or {},
                 trigger_type="scheduled",
+                execution_id=execution_id,
             )
 
             # 更新执行记录
@@ -216,6 +217,7 @@ class TriggerService:
                     graph_data=wf_graph,
                     input_data=merged_input,
                     trigger_type="event",
+                    execution_id=execution_id,
                 )
 
                 await self._update_execution_record(execution_id, result)
@@ -350,6 +352,7 @@ class TriggerService:
             graph_data=graph_data,
             input_data=input_data,
             trigger_type="webhook",
+            execution_id=execution_id,
         )
 
         await self._update_execution_record(execution_id, result)
@@ -386,6 +389,7 @@ class TriggerService:
             graph_data=graph_data,
             input_data=input_data or {},
             trigger_type="manual",
+            execution_id=execution_id,
         )
 
         await self._update_execution_record(execution_id, result)

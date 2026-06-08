@@ -403,6 +403,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except ImportError as e:
         print(f"[调度器初始化] ⚠️ 跳过: {e}")
 
+    # 3.5 工作流引擎节点执行器注册
+    try:
+        from shared.services.workflow.dag_engine import DAGEngine
+        step_start = _time.monotonic()
+        safe_run("工作流引擎执行器注册", DAGEngine.init_executors)
+        print(f"[lifespan] 执行器注册耗时: {_time.monotonic() - step_start:.2f}s")
+    except ImportError as e:
+        print(f"[执行器注册] ⚠️ 跳过: {e}")
+
     if is_installed:
         step_start = _time.monotonic()
         await safe_run_async("定时发布调度器", _start_scheduled_publisher)
