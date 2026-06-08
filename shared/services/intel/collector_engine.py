@@ -314,9 +314,11 @@ def setup_default_collectors() -> None:
     from shared.services.intel.collectors.rss_collector import RSSCollector
     from shared.services.intel.collectors.web_collector import WebCollector
     from shared.services.intel.collectors.api_collector import APICollector
+    from shared.services.intel.collectors.search_collector import SearchCollector
 
     collector_engine.register_collector(RSSCollector())
     collector_engine.register_collector(WebCollector())
     collector_engine.register_collector(APICollector())
+    collector_engine.register_collector(SearchCollector())
 
     logger.info(f"默认采集器已注册: {collector_engine.registered_types}")

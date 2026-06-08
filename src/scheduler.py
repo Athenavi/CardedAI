@@ -67,6 +67,13 @@ class SessionScheduler:
         # 启动调度器
         self.scheduler.start()
 
+        # 注册情报引擎定时任务
+        try:
+            from shared.services.intel.scheduler import init_intel_scheduler
+            init_intel_scheduler(self.scheduler)
+        except Exception as e:
+            logger.warning(f"无法注册情报定时任务: {e}")
+
         # 每个 worker 都输出自己的计划任务信息（带 worker 标识，使用环境变量避免重复）
         from src.setting import _get_worker_info
         import os

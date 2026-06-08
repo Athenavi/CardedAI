@@ -433,12 +433,16 @@ async def get_briefing_detail(briefing_id: int):
 
 @router.post("/briefings/generate", summary="生成简报", response_model=ApiResponse)
 async def generate_briefing(briefing_type: str = "daily", topic: Optional[str] = None, days: int = 7):
-    """基于最新情报生成简报"""
+    """基于最新情报生成简报（支持 daily / weekly / monthly / custom）"""
     from shared.services.intel.briefing_generator import briefing_generator
 
     try:
         if briefing_type == "daily":
             result = await briefing_generator.generate_daily_briefing()
+        elif briefing_type == "weekly":
+            result = await briefing_generator.generate_weekly_briefing()
+        elif briefing_type == "monthly":
+            result = await briefing_generator.generate_monthly_briefing()
         elif briefing_type == "custom" and topic:
             result = await briefing_generator.generate_custom_briefing(topic=topic, days=days)
         else:
