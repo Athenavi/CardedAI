@@ -938,28 +938,7 @@ models:
         description: 是否可见
     required:
       - name
-  CategorySubscription:
-    description: 分类订阅模型
-    status: active
-    frontend_page: /admin/categories
-    properties:
-      id:
-        type: bigint
-        description: 订阅 ID
-      category:
-        type: bigint
-        description: 分类
-        foreignKey: Category
-      subscriber:
-        type: bigint
-        description: 订阅用户
-        foreignKey: User
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-    orm: true
-    table: category_subscriptions
+
   Media:
     description: 媒体文件模型
     status: active

@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared.models import CategorySubscription
+# [分类订阅已移除]
 from shared.models.article import Article
 from shared.models.category import Category
 from src.api.v1.core.responses import ApiResponse
