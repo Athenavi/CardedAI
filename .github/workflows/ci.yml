@@ -1,7 +1,7 @@
 # ============================================================================
 # CardedAI — Continuous Integration
 # ============================================================================
-# Runs on every push to main/develop and on pull requests.
+# Runs only on version tags (v*).
 # Jobs: Python lint → Python tests → Frontend build → SDK lint
 # ============================================================================
 
@@ -9,9 +9,7 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
+    tags: ["v*"]
 
 concurrency:
   group: ci-${{ github.ref }}

@@ -232,7 +232,50 @@ function AccessContent() {
   const guidelines = useMemo(() => {
     if (!guidelinesData) return [];
     if (Array.isArray(guidelinesData)) return guidelinesData;
-    return guidelinesData.guidelines || guidelinesData.items || [];
+
+    // Backend returns { principles: { perceivable: {name, description, guidelines: [...string]}, ... },
+    //                    conformance_levels: { A: {name, description, requirement}, ... } }
+    const result: {
+      id: string;
+      title: string;
+      description: string;
+      list?: string[];
+      level?: string;
+      requirement?: string;
+    }[] = [];
+
+    // Flatten principles
+    const principles = (guidelinesData as any).principles;
+    if (principles && typeof principles === 'object') {
+      for (const [key, val] of Object.entries(principles) as [string, any][]) {
+        if (val?.name) {
+          result.push({
+            id: key,
+            title: val.name,
+            description: val.description || '',
+            list: Array.isArray(val.guidelines) ? val.guidelines : undefined,
+          });
+        }
+      }
+    }
+
+    // Flatten conformance levels
+    const levels = (guidelinesData as any).conformance_levels;
+    if (levels && typeof levels === 'object') {
+      for (const [key, val] of Object.entries(levels) as [string, any][]) {
+        if (val?.name) {
+          result.push({
+            id: key,
+            title: val.name,
+            description: val.description || '',
+            level: key,
+            requirement: val.requirement || '',
+          });
+        }
+      }
+    }
+
+    return result;
   }, [guidelinesData]);
 
   // ── Tools sections ──
@@ -251,10 +294,13 @@ function AccessContent() {
     <>
       {/* ═══ 1. User Preferences ═══ */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
           <Monitor className="w-5 h-5" />
           用户无障碍偏好
         </h3>
+        <p className="text-xs text-gray-400 mb-4">
+          自定义站点的无障碍设置，包括键盘导航、屏幕阅读器支持、高对比度模式和字体大小等
+        </p>
         {configLoading ? (
           <LoadingSkeleton rows={3} />
         ) : configError ? (
@@ -325,10 +371,13 @@ function AccessContent() {
 
       {/* ═══ 2. WCAG Compliance Checklist ═══ */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <h3 className="font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
           <BookOpen className="w-5 h-5" />
           WCAG 合规检查清单
         </h3>
+        <p className="text-xs text-gray-400 mb-4">
+          按 WCAG 2.1 四个原则分类的可访问性检查项，帮助确保站点符合无障碍标准
+        </p>
         {checklistLoading ? (
           <LoadingSkeleton rows={4} />
         ) : checklistError ? (
@@ -383,7 +432,7 @@ function AccessContent() {
       {/* ═══ 3. WCAG Guidelines ═══ */}
       {guidelinesLoading ? (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
             <BookOpen className="w-5 h-5" />
             WCAG 2.1 指南
           </h3>
@@ -398,17 +447,32 @@ function AccessContent() {
           <div className="space-y-3">
             {guidelines.map((g: any, i: number) => (
               <div
-                key={i}
+                key={g.id || i}
                 className="p-4 border border-gray-100 dark:border-gray-800 rounded-xl"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {g.title || g.name || g.guideline || `指南 ${i + 1}`}
+                      {g.title || g.name || `指南 ${i + 1}`}
                     </p>
                     {g.description && (
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {g.description}
+                      </p>
+                    )}
+                    {g.list && g.list.length > 0 && (
+                      <ul className="mt-2 space-y-1">
+                        {g.list.map((item: string, j: number) => (
+                          <li key={j} className="text-xs text-gray-400 flex items-start gap-1.5">
+                            <span className="text-blue-400 mt-0.5 shrink-0">•</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {g.requirement && (
+                      <p className="text-xs text-gray-400 mt-1 italic">
+                        {g.requirement}
                       </p>
                     )}
                   </div>
@@ -419,7 +483,7 @@ function AccessContent() {
                         'bg-gray-100 dark:bg-gray-800 text-gray-500'
                       }`}
                     >
-                      {g.level}
+                      Level {g.level}
                     </span>
                   )}
                 </div>
@@ -432,7 +496,7 @@ function AccessContent() {
       {/* ═══ 4. Tools ═══ */}
       {toolsLoading ? (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
             <Wrench className="w-5 h-5" />
             辅助工具
           </h3>
@@ -440,10 +504,13 @@ function AccessContent() {
         </div>
       ) : toolsError ? (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
             <Wrench className="w-5 h-5" />
             辅助工具
           </h3>
+          <p className="text-xs text-gray-400 mb-4">
+            推荐的无障碍测试工具和屏幕阅读器，帮助验证站点可访问性
+          </p>
           <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-900/20 rounded-xl text-red-600 dark:text-red-400 text-sm">
             <AlertIcon className="w-5 h-5 shrink-0" />
             加载工具数据失败
