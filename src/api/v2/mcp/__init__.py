@@ -20,9 +20,11 @@ import logging
 import uuid
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
+from src.auth import jwt_required_dependency as jwt_required
+from shared.models.user import User as UserModel
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +62,10 @@ def _get_mcp_server():
 # ==================== 核心端点 ====================
 
 @router.post("", summary="MCP JSON-RPC 请求端点")
-async def mcp_jsonrpc(request: MCPRequest):
+async def mcp_jsonrpc(
+    request: MCPRequest,
+    current_user: UserModel = Depends(jwt_required),
+):
     """
     处理 MCP JSON-RPC 2.0 请求
 
@@ -96,7 +101,10 @@ async def mcp_jsonrpc(request: MCPRequest):
 
 
 @router.post("/batch", summary="MCP 批量 JSON-RPC 请求")
-async def mcp_batch_jsonrpc(batch: MCPBatchRequest):
+async def mcp_batch_jsonrpc(
+    batch: MCPBatchRequest,
+    current_user: UserModel = Depends(jwt_required),
+):
     """
     批量处理多个 MCP JSON-RPC 请求
 

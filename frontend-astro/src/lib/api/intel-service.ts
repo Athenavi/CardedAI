@@ -144,6 +144,7 @@ export class IntelService {
         per_page?: number;
         category?: string;
         sentiment?: string;
+        query?: string;
     }): Promise<ApiResponse<Intelligence[]>> {
         return apiClient.get('/intel/intelligence', params);
     }

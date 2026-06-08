@@ -297,9 +297,10 @@ async def get_intelligence(
     per_page: int = 20,
     category: Optional[str] = None,
     sentiment: Optional[str] = None,
+    query: Optional[str] = None,
 ):
     """获取 AI 分析后的情报条目"""
-    from sqlalchemy import select, func, desc
+    from sqlalchemy import select, func, desc, or_
     from shared.models import Intelligence
     from src.extensions import get_db
 
@@ -310,6 +311,14 @@ async def get_intelligence(
                 base_query = base_query.where(Intelligence.category == category)
             if sentiment:
                 base_query = base_query.where(Intelligence.sentiment == sentiment)
+            if query:
+                like_pattern = f"%{query}%"
+                base_query = base_query.where(
+                    or_(
+                        Intelligence.title.ilike(like_pattern),
+                        Intelligence.summary.ilike(like_pattern),
+                    )
+                )
 
             # 统计总数
             count_query = select(func.count()).select_from(base_query.subquery())
@@ -424,12 +433,16 @@ async def get_briefing_detail(briefing_id: int):
 
 @router.post("/briefings/generate", summary="生成简报", response_model=ApiResponse)
 async def generate_briefing(briefing_type: str = "daily", topic: Optional[str] = None, days: int = 7):
-    """基于最新情报生成简报"""
+    """基于最新情报生成简报（支持 daily / weekly / monthly / custom）"""
     from shared.services.intel.briefing_generator import briefing_generator
 
     try:
         if briefing_type == "daily":
             result = await briefing_generator.generate_daily_briefing()
+        elif briefing_type == "weekly":
+            result = await briefing_generator.generate_weekly_briefing()
+        elif briefing_type == "monthly":
+            result = await briefing_generator.generate_monthly_briefing()
         elif briefing_type == "custom" and topic:
             result = await briefing_generator.generate_custom_briefing(topic=topic, days=days)
         else:
