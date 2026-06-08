@@ -335,10 +335,8 @@ _V1_SUB_ROUTERS = [
     ('security_router', 'src.api.v1.system.security_monitor_routes'),
     ('publish_router', 'src.api.v1.articles.third_party_publish_routes'),
     ('webhook_router', 'src.api.v1.system.webhook_routes'),
-    ('plugin_market_router', 'src.api.v1.plugins.marketplace_routes'),
     ('page_builder_router', 'src.api.v1.content_management.page_builder_routes'),
     ('component_router', 'src.api.v1.content_management.component_routes'),
-    ('theme_market_router', 'src.api.v1.content_management.theme_market_routes'),
 ]
 
 

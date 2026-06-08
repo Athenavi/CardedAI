@@ -417,13 +417,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         await safe_run_async("定时发布调度器", _start_scheduled_publisher)
         print(f"[lifespan] 定时发布调度器耗时: {_time.monotonic() - step_start:.2f}s")
 
-    # 4. 插件系统
-    try:
-        step_start = _time.monotonic()
-        safe_run("插件系统", _init_plugins)
-        print(f"[lifespan] 插件系统耗时: {_time.monotonic() - step_start:.2f}s")
-    except ImportError as e:
-        print(f"[插件系统] ⚠️ 跳过: {e}")
+    # 4. [已移除] 插件系统
 
     # 5. 下载队列处理器
     if is_installed:
@@ -459,12 +453,8 @@ async def _start_scheduled_publisher():
 
 
 def _init_plugins():
-    try:
-        from shared.services.plugins.plugin_manager.init import initialize_plugins
-        return initialize_plugins()
-    except ImportError as e:
-        print(f"[插件系统] 导入失败: {e}")
-        return None
+    # [已移除] 插件系统已删除
+    return None
 
 
 async def _init_download_processor():
@@ -652,25 +642,8 @@ def register_error_handlers(app: FastAPI):
 
     @app.exception_handler(404)
     async def custom_404_handler(request: Request, exc: HTTPException):
-        # 1. 尝试插件钩子拦截
-        try:
-            from shared.services.plugins.plugin_manager.core import plugin_hooks
-            error_data = {
-                'url': str(request.url),
-                'ip': request.client.host if request.client else '',
-                'method': request.method,
-                'timestamp': datetime.now().isoformat(),
-            }
-            # 同步触发
-            plugin_hooks.do_action_sync('response_404', error_data)
-            response_data = plugin_hooks.apply_filters('response_404', error_data)
-            if isinstance(response_data, dict) and response_data.get('intercepted'):
-                return HTMLResponse(content=response_data.get('html_content', ''),
-                                    status_code=response_data.get('status_code', 404))
-        except Exception as e:
-            print(f"[Plugin] 404 hook error: {e}")
-
-        # 2. API 路径直接返回 JSON 404
+        # [插件系统已移除] 直接处理
+        # API 路径直接返回 JSON 404
         path = request.url.path
         if path.startswith('/api/') or 'application/json' in request.headers.get('accept', ''):
             from src.error import error

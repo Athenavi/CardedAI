@@ -460,69 +460,6 @@ plugin = {name.replace("-", "_").title()}Plugin()
 '''
 
 
-class ThemeBuilderSkill(BaseSkill):
-    """
-    主题样式生成 Skill
-
-    根据描述生成 CSS 样式和主题配置
-    """
-
-    def __init__(self):
-        metadata = SkillMetadata(
-            name="theme_builder",
-            version="1.0.0",
-            description="根据设计描述生成 CSS 样式和主题配置",
-            author="FastBlog Team",
-            category=SkillCategory.THEME_CUSTOMIZATION,
-            permissions=[SkillPermission.WRITE],
-            tags=["theme", "css", "design", "styling"],
-            icon="🎨",
-        )
-        super().__init__(metadata)
-
-    async def execute(self, context: SkillContext) -> SkillResult:
-        """执行主题构建任务"""
-        style_description = context.parameters.get("description")
-
-        if not style_description:
-            return SkillResult(success=False, error="Style description is required")
-
-        # 生成 CSS 代码
-        css_code = self._generate_css(style_description)
-
-        return SkillResult(
-            success=True,
-            data={
-                "css": css_code,
-                "preview_url": "/api/v2/assets/themes/preview/custom",
-            },
-            message="Theme styles generated"
-        )
-
-    def _generate_css(self, description: str) -> str:
-        """生成 CSS 代码"""
-        return f"""/*
- * Generated Theme Styles
- * Description: {description}
- */
-
-:root {{
-    --primary-color: #3b82f6;
-    --secondary-color: #64748b;
-    --accent-color: #f59e0b;
-    --background-color: #ffffff;
-    --text-color: #1f2937;
-}}
-
-body {{
-    font-family: 'Inter', system-ui, sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-}}
-
-/* Additional styles based on description */
-"""
-
 
 class DataMigratorSkill(BaseSkill):
     """
@@ -617,7 +554,6 @@ def register_core_skills():
         ContentCreatorSkill(),
         SEOOptimizerSkill(),
         PluginGeneratorSkill(),
-        ThemeBuilderSkill(),
         DataMigratorSkill(),
     ]
 

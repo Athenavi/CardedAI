@@ -63,7 +63,7 @@ export const navConfig: NavItem[] = [
   {labelKey: 'nav.comments', href: '/admin/comments', icon: MessageSquare},
   {labelKey: 'nav.users', href: '/admin/users', icon: Users},
   {labelKey: 'nav.roles', href: '/admin/roles', icon: Shield},
-  {labelKey: 'nav.plugins', href: '/admin/plugins', icon: Puzzle},
+  
   {labelKey: 'nav.backup', href: '/admin/backup', icon: Database},
   {labelKey: 'nav.sensitiveWords', href: '/admin/sensitive-words', icon: AlertTriangle},
   {labelKey: 'nav.analytics', href: '/admin/analytics', icon: TrendingUp},

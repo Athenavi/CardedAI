@@ -22,7 +22,7 @@ def _build_router():
     from src.api.v1.content_management.custom_block_patterns import router as custom_block_patterns_router
     from src.api.v1.content_management.custom_post_types import router as custom_post_types_router
     from src.api.v1.content_management.feed import router as feed_router
-    from src.api.v1.content_management.global_styles import router as global_styles_router
+    # [\u4e3b\u9898\u7cfb\u7edf\u5df2\u79fb\u9664] global_styles
     from src.api.v1.content_management.menu_management import router as menu_management_router
     from src.api.v1.content_management.page_builder_routes import router as page_builder_router
     from src.api.v1.content_management.shortcode import router as shortcode_router
@@ -32,7 +32,7 @@ def _build_router():
     router.include_router(menu_management_router, prefix="/admin/menu")
     router.include_router(custom_block_patterns_router, prefix="/pattern")
     router.include_router(block_patterns_router, prefix="/block-patterns")
-    router.include_router(global_styles_router, prefix="/global-styles")
+    # [主题系统已移除] global_styles
     router.include_router(block_editor_router, prefix="/editor")
     router.include_router(custom_post_types_router, prefix="/post-types")
     router.include_router(feed_router, prefix="")
