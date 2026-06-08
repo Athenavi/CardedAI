@@ -15,20 +15,14 @@ from pydantic import BaseModel
 
 from src.auth import jwt_required_dependency as jwt_required
 from shared.models.user import User as UserModel
+from src.api.v1.core.responses import ApiResponse
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["ai"])
 
 
-# ==================== 请求/响应模型 ====================
-
-class ChatMessage(BaseModel):
-    role: str  # user / assistant
-    content: Optional[str] = None
-    tool_calls: Optional[List[Dict[str, Any]]] = None
-    tool_call_id: Optional[str] = None
-
+# ==================== 请求模型 ====================
 
 class ChatRequest(BaseModel):
     messages: List[Dict[str, Any]]
@@ -38,14 +32,6 @@ class ChatRequest(BaseModel):
     system_prompt: Optional[str] = None
     temperature: float = 0.7
     max_tokens: int = 4096
-
-
-class ChatResponse(BaseModel):
-    success: bool
-    message: Optional[str] = None
-    reply: Optional[str] = None
-    tool_results: Optional[List[Dict[str, Any]]] = None
-    error: Optional[str] = None
 
 
 # ==================== 核心逻辑 ====================
@@ -60,58 +46,32 @@ def _build_openai_tools() -> List[Dict[str, Any]]:
     mcp = _get_mcp_server()
     tools = []
     for name, tool in mcp.tools.items():
-        openai_tool = {
+        props = {}
+        required = []
+        for pname, pdef in tool["parameters"].items():
+            ptype = pdef.get("type", "string")
+            json_type = {"integer": "integer", "string": "string", "boolean": "boolean",
+                         "array": "array", "number": "number"}.get(ptype, "string")
+            props[pname] = {"type": json_type, "description": pdef.get("description", "")}
+            if pdef.get("required", False):
+                required.append(pname)
+        tools.append({
             "type": "function",
             "function": {
                 "name": name,
                 "description": tool["description"],
-                "parameters": {
-                    "type": "object",
-                    "properties": {},
-                    "required": [],
-                },
+                "parameters": {"type": "object", "properties": props, "required": required},
             },
-        }
-        # Convert MCP parameter format to JSON Schema
-        params = tool["parameters"]
-        props = {}
-        required = []
-        for pname, pdef in params.items():
-            ptype = pdef.get("type", "string")
-            json_type = {"integer": "integer", "string": "string", "boolean": "boolean",
-                         "array": "array", "number": "number"}.get(ptype, "string")
-            prop = {"type": json_type, "description": pdef.get("description", "")}
-            props[pname] = prop
-            if pdef.get("required", False):
-                required.append(pname)
-        openai_tool["function"]["parameters"]["properties"] = props
-        openai_tool["function"]["parameters"]["required"] = required
-        tools.append(openai_tool)
+        })
     return tools
 
 
-async def _call_llm_with_tools(
-    messages: List[Dict[str, Any]],
-    llm_endpoint: str,
-    llm_key: str,
-    model: str,
-    tools: List[Dict[str, Any]],
-    system_prompt: Optional[str] = None,
-    temperature: float = 0.7,
-    max_tokens: int = 4096,
-) -> Dict[str, Any]:
-    """调用 LLM，传入工具定义，返回响应"""
-    full_messages = []
-    if system_prompt:
-        full_messages.append({"role": "system", "content": system_prompt})
-    full_messages.extend(messages)
+async def _call_llm(messages, llm_endpoint, llm_key, model, tools, system_prompt=None,
+                    temperature=0.7, max_tokens=4096) -> Dict:
+    full = [{"role": "system", "content": system_prompt}] if system_prompt else []
+    full.extend(messages)
 
-    payload = {
-        "model": model,
-        "messages": full_messages,
-        "temperature": temperature,
-        "max_tokens": max_tokens,
-    }
+    payload = {"model": model, "messages": full, "temperature": temperature, "max_tokens": max_tokens}
     if tools:
         payload["tools"] = tools
 
@@ -119,10 +79,7 @@ async def _call_llm_with_tools(
         resp = await client.post(
             f"{llm_endpoint.rstrip('/')}/chat/completions",
             json=payload,
-            headers={
-                "Authorization": f"Bearer {llm_key}",
-                "Content-Type": "application/json",
-            },
+            headers={"Authorization": f"Bearer {llm_key}", "Content-Type": "application/json"},
         )
 
     if resp.status_code != 200:
@@ -131,50 +88,32 @@ async def _call_llm_with_tools(
     data = resp.json()
     choice = data.get("choices", [{}])[0]
     message = choice.get("message", {})
+    result = {"success": True, "content": message.get("content", ""), "tool_calls": []}
 
-    result = {
-        "success": True,
-        "content": message.get("content", ""),
-        "tool_calls": [],
-        "finish_reason": choice.get("finish_reason", ""),
-    }
-
-    # Parse tool calls from OpenAI format
-    raw_tool_calls = message.get("tool_calls", [])
-    if raw_tool_calls:
-        for tc in raw_tool_calls:
-            func = tc.get("function", {})
-            try:
-                arguments = json.loads(func.get("arguments", "{}"))
-            except json.JSONDecodeError:
-                arguments = {}
-            result["tool_calls"].append({
-                "id": tc.get("id", ""),
-                "type": "function",
-                "function": {
-                    "name": func.get("name", ""),
-                    "arguments": arguments,
-                },
-            })
+    for tc in message.get("tool_calls", []):
+        func = tc.get("function", {})
+        try:
+            arguments = json.loads(func.get("arguments", "{}"))
+        except json.JSONDecodeError:
+            arguments = {}
+        result["tool_calls"].append({
+            "id": tc.get("id", ""),
+            "type": "function",
+            "function": {"name": func.get("name", ""), "arguments": arguments},
+        })
 
     return result
 
 
 async def _execute_mcp_tool(tool_name: str, arguments: dict) -> dict:
-    """通过 MCP Server 执行工具调用"""
     mcp = _get_mcp_server()
-    result = await mcp._handle_tool_call(
-        {"name": tool_name, "arguments": arguments},
-        request_id="ai-chat",
-    )
-    # MCP returns JSON-RPC format; extract the result text
+    result = await mcp._handle_tool_call({"name": tool_name, "arguments": arguments}, request_id="ai-chat")
     content = result.get("result", {}).get("content", [{}])[0].get("text", "")
     error = result.get("error", {}).get("message", "")
     if error:
         return {"success": False, "error": error}
     try:
-        data = json.loads(content)
-        return {"success": True, "data": data}
+        return {"success": True, "data": json.loads(content)}
     except (json.JSONDecodeError, TypeError):
         return {"success": True, "data": content}
 
@@ -182,27 +121,13 @@ async def _execute_mcp_tool(tool_name: str, arguments: dict) -> dict:
 # ==================== API 端点 ====================
 
 @router.post("/mcp-chat", summary="MCP AI 对话代理")
-async def mcp_chat(
-    req: ChatRequest,
-    current_user: UserModel = Depends(jwt_required),
-):
-    """
-    AI 对话代理端点。
-
-    用户传入 LLM 配置 + 消息历史，后端自动：
-    1. 获取所有 MCP 工具定义
-    2. 调用用户指定的 LLM（含工具定义）
-    3. 如果 LLM 返回工具调用，执行并回传结果给 LLM
-    4. 返回最终回复
-    """
+async def mcp_chat(req: ChatRequest, current_user: UserModel = Depends(jwt_required)):
     if not req.llm_key:
-        return ChatResponse(success=False, error="请提供 API Key (sk-...)")
-
+        return ApiResponse(success=False, error="请提供 API Key (sk-...)")
     if not req.llm_endpoint:
-        return ChatResponse(success=False, error="请提供 LLM 端点地址")
+        return ApiResponse(success=False, error="请提供 LLM 端点地址")
 
     try:
-        # Build default system prompt
         sys_prompt = req.system_prompt or (
             "你是一个 CardedAI 站点管理助手。你可以通过以下工具帮助用户管理站点。\n\n"
             "使用规则：\n"
@@ -212,83 +137,51 @@ async def mcp_chat(
             "4. 对于不确定的操作，先询问用户确认"
         )
 
-        # Get MCP tools in OpenAI format
         tools = _build_openai_tools()
-
-        # Call LLM (may loop for tool calls, max 10 rounds)
         messages = list(req.messages)
         tool_results = []
-        max_rounds = 10
+        final_reply = ""
 
-        for round_idx in range(max_rounds):
-            llm_result = await _call_llm_with_tools(
-                messages=messages,
-                llm_endpoint=req.llm_endpoint,
-                llm_key=req.llm_key,
-                model=req.model,
-                tools=tools,
-                system_prompt=sys_prompt if round_idx == 0 else None,
-                temperature=req.temperature,
-                max_tokens=req.max_tokens,
+        for _ in range(10):
+            llm_result = await _call_llm(
+                messages=messages, llm_endpoint=req.llm_endpoint, llm_key=req.llm_key,
+                model=req.model, tools=tools,
+                system_prompt=sys_prompt if _ == 0 else None,
+                temperature=req.temperature, max_tokens=req.max_tokens,
             )
 
             if not llm_result.get("success"):
-                return ChatResponse(success=False, error=llm_result.get("error", "LLM 调用失败"))
+                return ApiResponse(success=False, error=llm_result.get("error", "LLM 调用失败"))
 
-            # Add assistant message to history
-            assistant_msg = {"role": "assistant", "content": llm_result.get("content") or None}
+            content = llm_result.get("content", "")
             tool_calls = llm_result.get("tool_calls", [])
 
+            msg = {"role": "assistant", "content": content or None}
             if tool_calls:
-                assistant_msg["tool_calls"] = [
-                    {
-                        "id": tc["id"],
-                        "type": "function",
-                        "function": {
-                            "name": tc["function"]["name"],
-                            "arguments": json.dumps(tc["function"]["arguments"], ensure_ascii=False),
-                        },
-                    }
+                msg["tool_calls"] = [
+                    {"id": tc["id"], "type": "function",
+                     "function": {"name": tc["function"]["name"],
+                                  "arguments": json.dumps(tc["function"]["arguments"], ensure_ascii=False)}}
                     for tc in tool_calls
                 ]
-
-            messages.append(assistant_msg)
+            messages.append(msg)
 
             if not tool_calls:
-                # No tool calls → this is the final response
-                return ChatResponse(
-                    success=True,
-                    reply=llm_result.get("content", ""),
-                    tool_results=tool_results if tool_results else None,
-                )
+                final_reply = content
+                break
 
-            # Execute each tool call
             for tc in tool_calls:
-                tool_name = tc["function"]["name"]
-                arguments = tc["function"]["arguments"]
-                logger.info(f"[AI Chat] 执行工具: {tool_name}({arguments})")
+                exec_result = await _execute_mcp_tool(tc["function"]["name"], tc["function"]["arguments"])
+                tool_results.append({"tool": tc["function"]["name"], "arguments": tc["function"]["arguments"],
+                                      "result": exec_result})
+                messages.append({"role": "tool", "tool_call_id": tc["id"],
+                                  "content": json.dumps(exec_result, ensure_ascii=False)})
 
-                exec_result = await _execute_mcp_tool(tool_name, arguments)
-                tool_results.append({
-                    "tool": tool_name,
-                    "arguments": arguments,
-                    "result": exec_result,
-                })
-
-                # Add tool result as a message
-                messages.append({
-                    "role": "tool",
-                    "tool_call_id": tc["id"],
-                    "content": json.dumps(exec_result, ensure_ascii=False),
-                })
-
-        # Max rounds reached, return last assistant message
-        return ChatResponse(
-            success=True,
-            reply=llm_result.get("content", "") if llm_result else "已达到最大对话轮次",
-            tool_results=tool_results if tool_results else None,
-        )
+        return ApiResponse(success=True, data={
+            "reply": final_reply,
+            "tool_results": tool_results if tool_results else None,
+        })
 
     except Exception as e:
         logger.error(f"[AI Chat] 错误: {e}")
-        return ChatResponse(success=False, error=str(e))
+        return ApiResponse(success=False, error=str(e))
