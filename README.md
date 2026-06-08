@@ -8,14 +8,13 @@
 
 <p align="center">
   <a href="https://github.com/Athenavi/fast_blog/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="License"></a>
-  <a href="https://github.com/Athenavi/fast_blog/actions"><img src="https://img.shields.io/github/actions/workflow/status/Athenavi/fast_blog/ci.yml?branch=main" alt="CI"></a>
-  <a href="https://github.com/Athenavi/fast_blog/releases"><img src="https://img.shields.io/badge/version-V0.3.26-green" alt="Version"></a>
+  <a href="https://github.com/Athenavi/fast_blog/releases"><img src="https://img.shields.io/badge/version-V0.1.26.0608-green" alt="Version"></a>
   <a href="https://python.org"><img src="https://img.shields.io/badge/python-3.14+-blue" alt="Python"></a>
   <a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/FastAPI-0.136-009688" alt="FastAPI"></a>
   <a href="https://astro.build"><img src="https://img.shields.io/badge/Astro-5.x-FF5D01" alt="Astro"></a>
 </p>
 
-<p align="center">
+> **CardedAI** 基于 [fast_blog V0.3.26.0530](https://github.com/Athenavi/fast_blog) 开发，增加了 AI CMS 个人站长场景的深度优化。
   <a href="#-快速开始">快速开始</a> &bull;
   <a href="#-核心功能">核心功能</a> &bull;
   <a href="#-系统架构">系统架构</a> &bull;
@@ -221,5 +220,4 @@ CardedAI/
 │   ├── python/                   # Python SDK
 │   └── javascript/               # JavaScript SDK
 ├── tests/                        # 测试套件
-├── docker-compose.yml            # Docker 编排
 └── Makefile                      # 开发命令
