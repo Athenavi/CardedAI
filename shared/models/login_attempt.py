@@ -30,7 +30,7 @@ class LoginAttempt(Base):
 
     user_agent = Column(String(500), nullable=True, doc='User-Agent')
 
-    is_success = Column(Boolean, default=False, doc='是否成功')
+    is_success = Column('success', Boolean, default=False, doc='是否成功')
 
 
     failure_reason = Column(String(255), nullable=True, doc='失败原因')
