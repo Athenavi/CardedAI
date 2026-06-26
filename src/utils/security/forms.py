@@ -36,7 +36,6 @@ class RegisterForm(Form):
     bio = StringField('Bio')
     location = StringField('Location')
     website = StringField('Website')
-    profile_private = BooleanField('Private Profile')
     newsletter = BooleanField('Subscribe to Newsletter')
     marketing_emails = BooleanField('Receive Marketing Emails')
     terms = BooleanField('Terms', validators=[
@@ -56,7 +55,6 @@ class ProfileForm(Form):
     locale = SelectField('Language Preference',
                          choices=[('zh_CN', '中文'), ('en', 'English')],
                          default='zh_CN')
-    profile_private = BooleanField('Private Profile')
 
 
 class ChangePasswordForm(Form):

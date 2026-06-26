@@ -368,10 +368,6 @@ async def get_authors_sitemap(
 
     # 添加各个作者页面
     for author in authors:
-        # 检查用户资料是否公开
-        if author.profile_private:
-            continue
-
         generator.add_url(SitemapUrl(
             loc=f"{site_url}/user/{author.id}",
             lastmod=author.last_login_at or author.date_joined,

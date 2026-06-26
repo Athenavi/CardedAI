@@ -14,7 +14,6 @@ class UserRead(schemas.BaseUser[int]):
     bio: Optional[str] = None
     register_ip: Optional[str] = None
     is_2fa_enabled: Optional[bool] = False
-    profile_private: Optional[bool] = False
     vip_level: Optional[int] = 0
     locale: Optional[str] = "zh_CN"
 
@@ -22,12 +21,10 @@ class UserRead(schemas.BaseUser[int]):
 class UserCreate(schemas.BaseUserCreate):
     username: str
     bio: Optional[str] = None
-    profile_private: Optional[bool] = False
     locale: Optional[str] = "zh_CN"
 
 
 class UserUpdate(schemas.BaseUserUpdate):
     username: Optional[str] = None
     bio: Optional[str] = None
-    profile_private: Optional[bool] = None
     locale: Optional[str] = None

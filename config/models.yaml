@@ -255,10 +255,6 @@ models:
         type: string
         nullable: true
         description: 涓汉绠€浠?
-      profile_private:
-        type: boolean
-        default: false
-        description: 鏄惁绉佸瘑璧勬枡
       vip_level:
         type: bigint
         default: 0
@@ -405,10 +401,6 @@ models:
         type: string
         default: zh_CN
         description: 璇█璁剧疆
-      profile_private:
-        type: boolean
-        default: false
-        description: 鏄惁绉佸瘑璧勬枡
   ProfileUpdateRequest:
     type: schema
     description: 鐢ㄦ埛璧勬枡鏇存柊璇锋眰

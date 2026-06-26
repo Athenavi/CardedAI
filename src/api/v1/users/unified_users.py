@@ -407,7 +407,7 @@ async def update_current_user_profile_api(
             return ApiResponse(success=False, error='User not found')
 
         # 更新用户信息
-        for field in ['username', 'email', 'bio', 'profile_private', 'locale']:
+        for field in ['username', 'email', 'bio', 'locale']:
             if field in data:
                 if field == 'username':
                     # 检查用户名修改限制
@@ -454,7 +454,6 @@ async def update_current_user_profile_api(
             "email": user.email,
             "avatar": avatar_url,
             "bio": user.bio,
-            "profile_private": user.profile_private,
             "locale": user.locale,
             "last_login": getattr(user, 'last_login', None).isoformat() if getattr(user, 'last_login',
                                                                                    None) else None
@@ -598,7 +597,6 @@ async def get_user_settings_api(
         return ApiResponse(
             success=True,
             data={
-                "profile_private": current_user.profile_private,
                 "locale": current_user.locale,
                 "bio": current_user.bio,
             }
@@ -619,9 +617,6 @@ async def update_user_settings_api(
     try:
         data = await request.json()
 
-        if 'profile_private' in data:
-            current_user.profile_private = bool(data['profile_private'])
-
         if 'locale' in data:
             if not is_valid_iso_language_code(data['locale']):
                 return ApiResponse(success=False, error='Invalid locale')
@@ -633,7 +628,6 @@ async def update_user_settings_api(
             success=True,
             message="设置更新成功",
             data={
-                "profile_private": current_user.profile_private,
                 "locale": current_user.locale,
             }
         )

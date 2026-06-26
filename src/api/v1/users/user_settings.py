@@ -18,16 +18,11 @@ class ProfileUpdateRequest(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
     bio: Optional[str] = None
-    profile_private: Optional[bool] = None
     locale: Optional[str] = None
 
 
 class ChangeEmailRequest(BaseModel):
     email: str
-
-
-class ChangePrivacyRequest(BaseModel):
-    profile_private: bool = False
 
 
 class ChangeLocaleRequest(BaseModel):
@@ -58,7 +53,6 @@ async def setting_profiles_back(user_id: int, user_info, cache_instance, avatar_
             'limit_username_lock': cache_instance.get(f'limit_username_lock_{user_id}'),
             'bio': bio,
             'user_email': user.email,
-            'profile_private': user.profile_private,
         }
     except Exception as e:
         print(f"Error in setting_profiles_back: {e}")
@@ -78,7 +72,7 @@ async def change_profiles_back(
     if not change_type:
         return JSONResponse(content={'error': 'Change type is required'}, status_code=400)
 
-    if change_type not in ['avatar', 'username', 'email', 'password', 'bio', 'privacy', 'locale']:
+    if change_type not in ['avatar', 'username', 'email', 'password', 'bio', 'locale']:
         return JSONResponse(content={'error': 'Invalid change type'}, status_code=400)
 
     # 清除缓存
@@ -126,20 +120,6 @@ async def change_profiles_back(
         bio = form_data.get('bio')
         await db_save_bio(user_id, bio, db)
         return JSONResponse(content={'message': 'Bio updated successfully'})
-
-    elif change_type == 'privacy':
-        # 重新获取用户对象以确保在当前会话中
-        from sqlalchemy import select
-        user_query = select(User).where(User.id == user_id)
-        user_result = await db.execute(user_query)
-        user = user_result.scalar_one_or_none()
-        if not user:
-            return JSONResponse(content={'error': 'User not found'}, status_code=404)
-
-        profile_private = data.get('profile_private', False)
-        user.profile_private = bool(profile_private)
-        await db.commit()
-        return JSONResponse(content={'message': 'Privacy settings updated successfully'})
 
     elif change_type == 'locale':
         # 重新获取用户对象以确保在当前会话中

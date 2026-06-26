@@ -38,9 +38,6 @@ class User(Base):
 
     bio = Column(String(255), nullable=True, doc='个人简介')
 
-    profile_private = Column(Boolean, default=False, doc='是否私密资料')
-
-
     vip_level = Column(BigInteger, default=0, doc='VIP 等级')
 
 
@@ -87,7 +84,6 @@ class User(Base):
             'password': self.password,
             'profile_picture': self.profile_picture,
             'bio': self.bio,
-            'profile_private': self.profile_private,
             'vip_level': self.vip_level,
             'vip_expires_at': self.vip_expires_at.isoformat() if self.vip_expires_at else None,
             'is_active': self.is_active,

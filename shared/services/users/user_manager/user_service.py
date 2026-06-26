@@ -18,7 +18,7 @@ from src.utils.security.password_validator import hash_password, verify_password
 
 # 常量定义
 EMAIL_PATTERN = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-ALLOWED_PROFILE_FIELDS = {'profile_picture', 'bio', 'locale', 'profile_private'}
+ALLOWED_PROFILE_FIELDS = {'profile_picture', 'bio', 'locale'}
 
 
 async def get_user_by_id(db: AsyncSession, user_id: int) -> Optional[UserModel]:

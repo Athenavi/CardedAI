@@ -216,7 +216,6 @@ def _create_user_response(user):
         "bio": user.bio or "",
         "location": user.locale or "",
         "website": "",
-        "profile_private": user.profile_private,
         "display_name": user.username,
         "locale": user.locale or "zh_CN",
         "created_at": user.date_joined if hasattr(user, "date_joined") and user.date_joined else None,
