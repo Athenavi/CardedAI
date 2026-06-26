@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.article import Article
 from shared.models.category import Category
-from shared.models.category_subscription import CategorySubscription
+# [分类订阅已移除]
 from src.api.v1.core.responses import ApiResponse
 from src.auth import jwt_required_dependency as jwt_required
 from src.utils.database.main import get_async_session

@@ -132,6 +132,9 @@ apps/*/migrations/*.py
 /mobile-app/node_modules/
 /frontend-astro/node_modules/
 
+# Large binaries (use system-installed version instead)
+tools/ffmpeg/
+
 # Terraform
 *.tfstate
 *.tfstate.*

@@ -47,36 +47,7 @@ def get_article_meta_tags(article, content=None, author=None, request: Request =
         'twitter:image': cover_image if cover_image else f"{host_url}/api/v2/static/images/default-cover.jpg",
     }
 
-    # 尝试调用插件钩子增强元标签
-    try:
-        from shared.services.plugins.plugin_manager.init import apply_plugin_filter
-
-        # 构建插件期望的数据格式
-        meta_data = {
-            'tags': [],
-            'article': {
-                'title': article.title,
-                'excerpt': article.excerpt or '',
-                'slug': article.slug,
-                'featured_image': cover_image,
-                'tags': [t.strip() for t in re.split(r'[,;]', article.tags_list) if
-                         t.strip()] if article.tags_list else [],
-                'created_at': article.created_at,
-                'updated_at': article.updated_at,
-            }
-        }
-
-        # 应用插件过滤器
-        enhanced_meta = apply_plugin_filter('page_meta_tags', meta_data)
-
-        # 如果有增强的标签，添加到返回结果中
-        if enhanced_meta and 'tags' in enhanced_meta:
-            # 将插件生成的HTML标签转换为字典格式（可选）
-            # 这里我们直接返回原始meta_tags，因为前端可能需要HTML格式的标签
-            pass
-    except Exception as e:
-        # 插件钩子失败不应影响主功能
-        print(f"[SEO] Plugin hook failed: {e}")
+    # [插件系统已移除]
 
     return meta_tags
 
@@ -108,27 +79,7 @@ def get_page_meta_tags(title, description="", keywords="", page_type="website", 
         'twitter:description': description,
     }
 
-    # 尝试调用插件钩子增强元标签
-    try:
-        from shared.services.plugins.plugin_manager.init import apply_plugin_filter
-
-        # 构建插件期望的数据格式
-        meta_data = {
-            'tags': [],
-            'page_type': page_type,
-        }
-
-        # 根据页面类型应用不同的过滤器
-        if page_type == 'homepage':
-            enhanced_meta = apply_plugin_filter('homepage_meta_tags', meta_data)
-        else:
-            enhanced_meta = apply_plugin_filter('page_meta_tags', meta_data)
-
-        # 如果有增强的标签，可以记录下来（当前实现保持原样）
-        pass
-    except Exception as e:
-        # 插件钩子失败不应影响主功能
-        print(f"[SEO] Plugin hook failed: {e}")
+    # [插件系统已移除]
 
     return meta_tags
 

@@ -605,6 +605,16 @@ const ReportsPanel: React.FC = () => {
 function KnowledgeWorkbenchInner() {
   const [activeTab, setActiveTab] = useState<TabKey>('bases');
 
+  // Stats
+  const {data: stats} = useQuery({
+    queryKey: ['knowledge-stats'],
+    queryFn: async () => {
+      const res = await apiClient.get('/knowledge/stats');
+      return res.data || {};
+    },
+    staleTime: 60_000,
+  });
+
   const renderTab = () => {
     switch (activeTab) {
       case 'bases': return <BasesPanel/>;
@@ -622,6 +632,14 @@ function KnowledgeWorkbenchInner() {
           知识工作台
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">知识库管理、RAG 智能问答与研报生成</p>
+      </div>
+
+      {/* Stats Dashboard */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <StatCard label="知识库" value={stats?.total_bases ?? stats?.bases ?? '-'} icon={Database} color="blue"/>
+        <StatCard label="文档" value={stats?.total_documents ?? stats?.documents ?? '-'} icon={FileText} color="green"/>
+        <StatCard label="文档切片" value={stats?.total_chunks ?? stats?.chunks ?? '-'} icon={BarChart3} color="purple"/>
+        <StatCard label="报告" value={stats?.total_reports ?? stats?.reports ?? '-'} icon={Rss} color="orange"/>
       </div>
 
       {/* Tabs */}

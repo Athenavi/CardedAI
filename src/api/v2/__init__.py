@@ -72,9 +72,6 @@ ROUTE_REGISTRY_V2 = [
     # 前端直接调用 /api/v2/block-patterns/list
     ("src.api.v1.content_management.block_patterns", "/api/v2/block-patterns", ["block-patterns"], False),
 
-    # ==================== 全局样式（独立顶级路由）====================
-    # 前端直接调用 /api/v2/global-styles/list
-    ("src.api.v1.content_management.global_styles", "/api/v2/global-styles", ["global-styles"], False),
 
     # [已删除] 电商功能模块（Product, Cart, Order 等模型已移除）
 
@@ -122,9 +119,6 @@ ROUTE_REGISTRY_V2 = [
     # ==================== 主题管理（移除） ====================
 
     # ==================== 插件管理（V2 聚合路由器）====================
-    # V2 Plugins 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
-    ("src.api.v2.plugins", "/api/v2/plugins", ["plugins-v2"], True),
-
     # ==================== 翻译（V2 聚合路由器）====================
     # V2 Translation 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
     ("src.api.v2.translation", "/api/v2", ["translation-v2"], True),
@@ -189,6 +183,9 @@ ROUTE_REGISTRY_V2 = [
 
     # ==================== MCP Server（AI Agent 接口）====================
     ("src.api.v2.mcp", "/api/v2/mcp", ["mcp-v2"], True),
+
+    # ==================== AI 聊天代理（对话式站点管理）====================
+    ("src.api.v2.ai", "/api/v2/ai", ["ai-v2"], True),
 
     # [已删除] 企业管理模块（EnterpriseLicense, SupportTicket 等模型已移除）
 ]
