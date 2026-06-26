@@ -85,7 +85,7 @@ ROUTE_REGISTRY_V2 = [
 
     # ==================== 安全与权限（V2 聚合路由器）====================
     # V2 Security 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
-    ("src.api.v2.security", "/api/v2/security", ["security-v2"], True),
+    ("src.api.v2.security", "/api/v2/security", ["security-v2"], False),
     # V1 security 各子模块已废弃，功能已迁移到 V2 聚合路由器
 
     # ==================== 认证模块（新增）====================
@@ -97,11 +97,11 @@ ROUTE_REGISTRY_V2 = [
     ("src.api.v2.users", "/api/v2", ["users-v2"], True),
     # ==================== 性能监控与优化（V2 聚合路由器）====================
     # V2 Performance 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
-    ("src.api.v2.performance", "/api/v2/performance", ["performance-v2"], True),
+    ("src.api.v2.performance", "/api/v2/performance", ["performance-v2"], False),
     # V1 performance 各子模块已废弃，功能已迁移到 V2 聚合路由器
 
     # ==================== 备份管理（V2 完整版）====================
-    ("src.api.v2.system.backup_management", "/api/v2/system", ["backup-v2"], True),
+    ("src.api.v2.system.backup_management", "/api/v2/system", ["backup-v2"], False),
 
     # ==================== 系统管理（V2 聚合路由器）====================
     # V2 System 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
@@ -114,7 +114,7 @@ ROUTE_REGISTRY_V2 = [
     # ==================== GDPR 合规（V2 完整版）====================
     # V1 gdpr_compliance 已废弃，功能已整合到 V2 compliance_api
     # ("src.api.v1.compliance.gdpr_compliance", "/api/v2/gdpr", ["gdpr-compliance"], False),
-    ("src.api.v2.compliance.compliance_api", "/api/v2", ["compliance-management-v2"], True),
+    ("src.api.v2.compliance.compliance_api", "/api/v2", ["compliance-management-v2"], False),
 
     # ==================== 主题管理（移除） ====================
 
@@ -157,7 +157,7 @@ ROUTE_REGISTRY_V2 = [
 
     # ==================== 高级扩展功能（V2 聚合路由器）====================
     # V2 Advanced Features 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
-    ("src.api.v2.advanced_features", "/api/v2/ext", ["advanced-features-v2"], True),
+    ("src.api.v2.advanced_features", "/api/v2/ext", ["advanced-features-v2"], False),
     # V1 advanced_features 各子模块已废弃，功能已迁移到 V2 聚合路由器
 
     # ==================== 其他系统模块（misc 模块已完全清理并删除）====================
