@@ -569,16 +569,15 @@ class DataMigratorSkill(BaseSkill):
 
             if source_platform == "wordpress":
                 # WordPress XML 迁移
-                from shared.services.integrations.wordpress_importer import WordPressImporter
+                from shared.services.integrations.wordpress_import import WordPressImportService as WordPressImporter
                 importer = WordPressImporter()
                 result = await importer.import_from_file(import_file)
                 migrated_items = result.get("migrated_items", migrated_items)
             elif source_platform == "halo":
-                # Halo 迁移
-                from shared.services.integrations.halo_importer import HaloImporter
-                importer = HaloImporter()
-                result = await importer.import_from_file(import_file)
-                migrated_items = result.get("migrated_items", migrated_items)
+                return SkillResult(
+                    success=False,
+                    error="Halo import support has been removed. Use WordPress or manual migration."
+                )
             else:
                 return SkillResult(
                     success=False,
