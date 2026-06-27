@@ -165,7 +165,7 @@ class BaseConfig:
         'application/xml',
         'application/octet-stream',  # 通用二进制文件
     ]
-    UPLOAD_LIMIT = 60 * 1024 * 1024
+    UPLOAD_LIMIT = int(os.environ.get('UPLOAD_LIMIT', str(500 * 1024 * 1024)))
     MAX_LINE = 1000
     MAX_CACHE_TIMESTAMP = 7200
     USER_FREE_STORAGE_LIMIT = 0.5 * 1024 * 1024 * 1024  # 512MB 用户免费空间限制
