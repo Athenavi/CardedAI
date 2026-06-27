@@ -277,6 +277,7 @@ export function ChatArea() {
   const fullTextRef = useRef('');
   const typingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const typingIndexRef = useRef(0);
+  const committedRef = useRef(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Persist sessions to localStorage
@@ -387,6 +388,7 @@ export function ChatArea() {
     setStreamingContent('');
     setToolResults([]);
 
+    committedRef.current = false;
     const abortController = new AbortController();
     abortRef.current = abortController;
 
@@ -465,6 +467,7 @@ export function ChatArea() {
               typingIndexRef.current = reply.length;
               setStreamingContent(reply);
               // Small delay then commit as final message
+              committedRef.current = true;
               setTimeout(() => {
                 const results = data.tool_results || [];
                 const assistantMsg: ChatMessage = {role: 'assistant', content: reply};
@@ -476,6 +479,7 @@ export function ChatArea() {
                 setStreamingContent(null);
               }, 300);
             } else if (data.type === 'error') {
+              committedRef.current = true;
               setMessages(prev => [...prev, {role: 'assistant', content: `❌ ${data.content}`}]);
               setStreamingContent(null);
             }
@@ -495,15 +499,15 @@ export function ChatArea() {
         clearInterval(typingTimerRef.current);
         typingTimerRef.current = null;
       }
-      // Commit any remaining uncommitted text
-      if (fullTextRef.current && typingIndexRef.current > 0 && !messages.some(m => m.content === fullTextRef.current)) {
+      // Commit any remaining uncommitted text (only if done event didn't already commit)
+      if (!committedRef.current && fullTextRef.current && typingIndexRef.current > 0) {
         setMessages(msgs => {
-          // Avoid duplicates
           if (msgs.some(m => m.content === fullTextRef.current)) return msgs;
           return [...msgs, {role: 'assistant', content: fullTextRef.current}];
         });
         setStreamingContent(null);
       }
+      committedRef.current = false;
     }
   }, [config, messages, loading]);
 
