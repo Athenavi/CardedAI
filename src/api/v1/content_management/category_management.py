@@ -165,11 +165,10 @@ async def get_categories_with_stats_api(
             select(
                 Category,
                 func.coalesce(func.count(func.distinct(Article.id)), 0).label('article_count'),
-                func.coalesce(func.count(func.distinct(CategorySubscription.id)), 0).label('subscriber_count')
+                func.literal(0).label('subscriber_count')
             )
             .select_from(
                 Category.__table__.outerjoin(Article.__table__, Category.id == Article.category)
-                .outerjoin(CategorySubscription.__table__, Category.id == CategorySubscription.category)
             )
             .group_by(Category.id)
             .order_by(Category.sort_order.asc(), Category.name.asc())
