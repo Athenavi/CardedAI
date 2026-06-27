@@ -7,10 +7,12 @@ AI 聊天代理 API — 通过 MCP 工具与 LLM 对话完成系统操作
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+import asyncio
+from typing import Any, AsyncGenerator, Dict, List, Optional
 
 import httpx
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from src.auth import jwt_required_dependency as jwt_required
@@ -103,6 +105,142 @@ async def _call_llm(messages, llm_endpoint, llm_key, model, tools, system_prompt
         })
 
     return result
+
+
+async def _call_llm_stream(messages, llm_endpoint, llm_key, model, tools, system_prompt=None,
+                           temperature=0.7, max_tokens=4096) -> AsyncGenerator[str, None]:
+    """流式调用 LLM，逐个 yield token。"""
+    full = [{"role": "system", "content": system_prompt}] if system_prompt else []
+    full.extend(messages)
+
+    payload = {"model": model, "messages": full, "temperature": temperature,
+               "max_tokens": max_tokens, "stream": True}
+    if tools:
+        payload["tools"] = tools
+
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        async with client.stream(
+            "POST",
+            f"{llm_endpoint.rstrip('/')}/chat/completions",
+            json=payload,
+            headers={"Authorization": f"Bearer {llm_key}", "Content-Type": "application/json"},
+        ) as resp:
+            if resp.status_code != 200:
+                error_text = await resp.aread()
+                yield json.dumps({"type": "error", "content": f"LLM API error ({resp.status_code}): {error_text[:300].decode()}"})
+                return
+
+            content_parts = []
+            tool_calls_buffer = {}  # {index: {id, name, arguments}}
+
+            async for line in resp.aiter_lines():
+                if not line.startswith("data: "):
+                    continue
+                data_str = line[6:].strip()
+                if data_str == "[DONE]":
+                    break
+                try:
+                    chunk = json.loads(data_str)
+                except json.JSONDecodeError:
+                    continue
+
+                delta = chunk.get("choices", [{}])[0].get("delta", {})
+                if delta.get("content"):
+                    content_parts.append(delta["content"])
+                    yield json.dumps({"type": "token", "content": delta["content"]})
+
+                for tc in delta.get("tool_calls", []):
+                    idx = tc.get("index", 0)
+                    if idx not in tool_calls_buffer:
+                        tool_calls_buffer[idx] = {"id": "", "name": "", "arguments": ""}
+                    if tc.get("id"):
+                        tool_calls_buffer[idx]["id"] = tc["id"]
+                    func = tc.get("function", {})
+                    if func.get("name"):
+                        tool_calls_buffer[idx]["name"] += func["name"]
+                    if func.get("arguments"):
+                        tool_calls_buffer[idx]["arguments"] += func["arguments"]
+
+            yield json.dumps({"type": "done",
+                              "content": "".join(content_parts),
+                              "tool_calls": [v for v in sorted(tool_calls_buffer.values(), key=lambda x: x["id"])]})
+
+
+async def _mcp_chat_stream_events(req: ChatRequest) -> AsyncGenerator[str, None]:
+    """执行完整的 MCP 对话（含工具调用），以 SSE 事件流 yield。"""
+    sys_prompt = req.system_prompt or (
+        "你是一个 CardedAI 站点管理助手。你可以通过以下工具帮助用户管理站点。\n\n"
+        "使用规则：\n"
+        "1. 优先使用工具完成用户请求\n"
+        "2. 如果工具返回结果，基于结果给出友好的回复\n"
+        "3. 如果工具调用失败，向用户解释错误原因\n"
+        "4. 对于不确定的操作，先询问用户确认"
+    )
+
+    tools = _build_openai_tools()
+    messages = list(req.messages)
+    tool_results = []
+
+    for _ in range(10):
+        collected_content = []
+        collected_tool_calls = []
+
+        async for event in _call_llm_stream(
+            messages=messages, llm_endpoint=req.llm_endpoint, llm_key=req.llm_key,
+            model=req.model, tools=tools,
+            system_prompt=sys_prompt if _ == 0 else None,
+            temperature=req.temperature, max_tokens=req.max_tokens,
+        ):
+            data = json.loads(event)
+            if data["type"] == "error":
+                yield f"data: {event}\n\n"
+                return
+            if data["type"] == "token":
+                collected_content.append(data["content"])
+                yield f"data: {event}\n\n"
+            if data["type"] == "done":
+                collected_tool_calls = data.get("tool_calls", [])
+
+        content = "".join(collected_content)
+        msg = {"role": "assistant", "content": content or None}
+        if collected_tool_calls:
+            msg["tool_calls"] = [
+                {"id": tc["id"], "type": "function",
+                 "function": {"name": tc["name"],
+                              "arguments": tc["arguments"]}}
+                for tc in collected_tool_calls
+            ]
+        messages.append(msg)
+
+        if not collected_tool_calls:
+            yield f"data: {json.dumps({'type': 'done', 'reply': content, 'tool_results': tool_results if tool_results else None})}\n\n"
+            return
+
+        for tc in collected_tool_calls:
+            try:
+                args = json.loads(tc["arguments"])
+            except json.JSONDecodeError:
+                args = {}
+            exec_result = await _execute_mcp_tool(tc["name"], args)
+            tool_results.append({"tool": tc["name"], "arguments": args, "result": exec_result})
+            yield f"data: {json.dumps({'type': 'tool_result', 'tool': tc['name'], 'result': str(exec_result.get('data', ''))[:500]})}\n\n"
+            messages.append({"role": "tool", "tool_call_id": tc["id"],
+                             "content": json.dumps(exec_result, ensure_ascii=False)})
+
+    yield f"data: {json.dumps({'type': 'error', 'content': '工具调用次数过多，请简化您的请求'})}\n\n"
+
+
+@router.post("/mcp-chat/stream", summary="MCP AI 对话代理（流式）")
+async def mcp_chat_stream(req: ChatRequest, current_user: UserModel = Depends(jwt_required)):
+    if not req.llm_key:
+        return ApiResponse(success=False, error="请提供 API Key (sk-...)")
+    if not req.llm_endpoint:
+        return ApiResponse(success=False, error="请提供 LLM 端点地址")
+    return StreamingResponse(
+        _mcp_chat_stream_events(req),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 async def _execute_mcp_tool(tool_name: str, arguments: dict) -> dict:

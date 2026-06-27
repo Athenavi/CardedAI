@@ -154,9 +154,22 @@ function ToolCallCard({tool, args, result}: { tool: string; args: any; result: a
 }
 
 // ═══ Message Bubble ═══
-function MessageBubble({msg, toolResults}: { msg: ChatMessage; toolResults?: ToolResult[] }) {
+function MessageBubble({msg, toolResults, streamingContent}: {
+  msg: ChatMessage;
+  toolResults?: ToolResult[];
+  streamingContent?: string;
+}) {
   const isUser = msg.role === 'user';
   const hasToolCalls = msg.tool_calls && msg.tool_calls.length > 0;
+  const displayContent = streamingContent ?? msg.content ?? '';
+
+  // Lazy-load react-markdown only when rendering assistant messages
+  const [Markdown, setMarkdown] = useState<React.ComponentType<{children: string}> | null>(null);
+  useEffect(() => {
+    if (!isUser && displayContent) {
+      import('react-markdown').then(mod => setMarkdown(() => mod.default));
+    }
+  }, [isUser, displayContent]);
 
   return (
     <div className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
@@ -169,14 +182,23 @@ function MessageBubble({msg, toolResults}: { msg: ChatMessage; toolResults?: Too
       </div>
 
       <div className={`max-w-[80%] ${isUser ? 'text-right' : ''}`}>
-        {/* Message content */}
-        {msg.content && (
-          <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+        {/* Message content with markdown rendering */}
+        {displayContent && (
+          <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
             isUser
               ? 'bg-blue-600 text-white rounded-tr-md'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-tl-md'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-tl-md prose prose-sm dark:prose-invert max-w-none'
           }`}>
-            {msg.content}
+            {isUser ? (
+              <span className="whitespace-pre-wrap">{displayContent}</span>
+            ) : Markdown ? (
+              <Markdown>{displayContent}</Markdown>
+            ) : (
+              <span className="whitespace-pre-wrap">{displayContent}</span>
+            )}
+            {streamingContent !== undefined && (
+              <span className="animate-pulse ml-0.5 inline-block w-1.5 h-4 bg-purple-500 rounded-sm"/>
+            )}
           </div>
         )}
 
@@ -234,6 +256,8 @@ function ChatArea() {
   const [toolResults, setToolResults] = useState<ToolResult[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [streamingContent, setStreamingContent] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({behavior: 'smooth'}); }, [messages, toolResults]);
@@ -253,46 +277,97 @@ function ChatArea() {
     setMessages(newMessages);
     setInput('');
     setLoading(true);
+    setStreamingContent('');
     setToolResults([]);
 
+    const abortController = new AbortController();
+    abortRef.current = abortController;
+
     try {
-      const res = await apiClient.post('/ai/mcp-chat', {
-        messages: newMessages.map(m => ({
-          role: m.role,
-          content: m.content || '',
-          tool_calls: m.tool_calls,
-        })),
-        llm_endpoint: config.endpoint,
-        llm_key: config.key,
-        model: config.model,
+      const url = `${window.location.origin}/api/v2/ai/mcp-chat/stream`;
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          messages: newMessages.map(m => ({
+            role: m.role,
+            content: m.content || '',
+            tool_calls: m.tool_calls,
+          })),
+          llm_endpoint: config.endpoint,
+          llm_key: config.key,
+          model: config.model,
+        }),
+        signal: abortController.signal,
       });
 
-      if (res.success && res.data) {
-        const reply = res.data.reply || '';
-        const results = res.data.tool_results || [];
+      if (!resp.ok) {
+        setMessages(prev => [...prev, {role: 'assistant', content: `❌ 请求失败 (${resp.status})`}]);
+        setLoading(false);
+        setStreamingContent(null);
+        return;
+      }
 
-        const assistantMsg: ChatMessage = {role: 'assistant', content: reply};
-        if (results.length > 0) {
-          assistantMsg.tool_calls = results.map(r => ({type: 'function'}));
+      const reader = resp.body?.getReader();
+      if (!reader) throw new Error('No reader available');
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let finalReply = '';
+
+      while (true) {
+        const {done, value} = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, {stream: true});
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const data = JSON.parse(line.slice(6));
+            if (data.type === 'token') {
+              finalReply += data.content;
+              setStreamingContent(finalReply);
+            } else if (data.type === 'tool_result') {
+              setToolResults(prev => [...prev, {
+                tool: data.tool, arguments: {}, result: {data: data.result},
+              }]);
+            } else if (data.type === 'done') {
+              if (data.reply) finalReply = data.reply;
+              const results = data.tool_results || [];
+              const assistantMsg: ChatMessage = {role: 'assistant', content: finalReply};
+              if (results.length > 0) {
+                assistantMsg.tool_calls = results.map(() => ({type: 'function'}));
+              }
+              setMessages(prev => [...prev, assistantMsg]);
+              setToolResults(prev => [...prev, ...results]);
+              setStreamingContent(null);
+            } else if (data.type === 'error') {
+              setMessages(prev => [...prev, {role: 'assistant', content: `❌ ${data.content}`}]);
+              setStreamingContent(null);
+            }
+          } catch {}
         }
-
-        setMessages(prev => [...prev, assistantMsg]);
-        setToolResults(prev => [...prev, ...results]);
-      } else {
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: `❌ 错误: ${res.error || res.data?.error || '请求失败'}`,
-        }]);
       }
     } catch (e: any) {
+      if (e.name === 'AbortError') return;
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: `❌ 网络错误: ${e.message || '无法连接到服务器'}`,
       }]);
     } finally {
       setLoading(false);
+      abortRef.current = null;
+      setStreamingContent(prev => {
+        if (prev) {
+          setMessages(msgs => [...msgs, {role: 'assistant', content: prev}]);
+        }
+        return null;
+      });
     }
-  }, [messages, loading, config, loading]);
+  }, [config, messages, loading]);
 
   const clearChat = () => {
     setMessages([]);
@@ -339,11 +414,16 @@ function ChatArea() {
           <WelcomeScreen onExample={handleExample}/>
         ) : (
           messages.map((msg, i) => (
-            <MessageBubble key={i} msg={msg} toolResults={i === messages.length - 1 ? toolResults : undefined}/>
+            <MessageBubble key={i} msg={msg}
+              toolResults={i === messages.length - 1 ? toolResults : undefined}
+              streamingContent={i === messages.length - 1 && streamingContent !== null && msg.role === 'assistant' ? streamingContent : undefined}/>
           ))
         )}
 
         {loading && (
+          streamingContent ? (
+            <MessageBubble msg={{role: 'assistant', content: streamingContent}} streamingContent={streamingContent}/>
+          ) : (
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
               <Bot className="w-4 h-4 text-purple-600 dark:text-purple-400"/>
