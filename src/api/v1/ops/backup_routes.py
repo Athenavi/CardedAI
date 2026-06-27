@@ -15,7 +15,7 @@ router = APIRouter(prefix="/backup", tags=["Backup Management"])
 
 @router.post("/database")
 async def create_database_backup(
-        backup_type: str = Query("daily", regex="^(daily|weekly|monthly)$"),
+        backup_type: str = Query("daily", pattern="^(daily|weekly|monthly)$"),
         current_user: User = Depends(jwt_required)
 ):
     """

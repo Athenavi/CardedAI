@@ -19,7 +19,7 @@ router = APIRouter()
 async def audit_page(
         html_content: str = Body(..., description="HTML内容"),
         url: Optional[str] = Body(None, description="页面URL"),
-        level: str = Body('AA', regex='^(A|AA|AAA)$', description="审计级别"),
+        level: str = Body('AA', pattern='^(A|AA|AAA)$', description="审计级别"),
         current_user=Depends(jwt_required),
 ):
     """审计页面"""
@@ -38,7 +38,7 @@ async def audit_page(
 @router.post("/batch", summary="批量审计", description="审计多个页面")
 async def audit_batch(
         pages: List[dict] = Body(..., description="页面列表 [{url, html}]"),
-        level: str = Body('AA', regex='^(A|AA|AAA)$', description="审计级别"),
+        level: str = Body('AA', pattern='^(A|AA|AAA)$', description="审计级别"),
         current_user=Depends(jwt_required),
 ):
     """批量审计"""

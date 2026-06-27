@@ -18,7 +18,7 @@ class PaginationParams:
             page: int = Query(1, ge=1, description="页码（从1开始）"),
             per_page: int = Query(20, ge=1, le=100, description="每页数量（1-100）"),
             sort_by: Optional[str] = Query(None, description="排序字段，如: created_at,updated_at"),
-            sort_order: Optional[str] = Query("desc", regex="^(asc|desc)$", description="排序方向: asc或desc"),
+            sort_order: Optional[str] = Query("desc", pattern="^(asc|desc)$", description="排序方向: asc或desc"),
     ):
         self.page = page
         self.per_page = per_page
@@ -132,7 +132,7 @@ class CursorPagination:
             cursor: Optional[str] = Query(None, description="游标（上一页最后一条记录的ID或时间戳）"),
             limit: int = Query(20, ge=1, le=100, description="每页数量"),
             sort_by: str = Query("id", description="排序字段"),
-            sort_order: str = Query("desc", regex="^(asc|desc)$", description="排序方向"),
+            sort_order: str = Query("desc", pattern="^(asc|desc)$", description="排序方向"),
     ):
         self.cursor = cursor
         self.limit = limit
