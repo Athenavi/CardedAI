@@ -3,8 +3,6 @@
 """
 from decimal import Decimal
 
-from src.utils.storage.s3_storage import s3_storage
-
 
 def convert_storage_size(total_bytes):
     """
@@ -33,6 +31,8 @@ def convert_storage_size(total_bytes):
 
 def async_file_cleanup(db_session, cleanup_data):
     """后台线程执行的清理任务"""
+    from src.utils.storage.s3_storage import s3_storage
+
     try:
         for file_info in cleanup_data:
             storage_path = file_info['storage_path']
