@@ -129,10 +129,10 @@ class ArticleViewStatsService:
         pattern = self.VIEW_COUNT_KEY.format("*")
         keys = []
 
-        # 检查是否是 Redis 缓存（具有 redis 属性）
-        if hasattr(cache, 'redis'):
+        # 检查是否是 Redis 缓存（具有 _client 属性）
+        if hasattr(cache, '_client'):
             # 使用 Redis 的 scan_iter 方法
-            async for key in cache.redis.scan_iter(match=pattern):
+            async for key in cache._client.scan_iter(match=pattern):
                 keys.append(key)
         else:
             # 对于 SimpleCache，我们需要遍历所有键来匹配模式
@@ -198,10 +198,10 @@ class ArticleViewStatsService:
         pattern = self.VIEW_COUNT_KEY.format("*")
         articles = []
 
-        # 检查是否是 Redis 缓存（具有 redis 属性）
-        if hasattr(cache, 'redis'):
+        # 检查是否是 Redis 缓存（具有 _client 属性）
+        if hasattr(cache, '_client'):
             # 使用 Redis 的 scan_iter 方法
-            async for key in cache.redis.scan_iter(match=pattern):
+            async for key in cache._client.scan_iter(match=pattern):
                 count = await cache.get(key)
                 if count and int(count) > 0:
                     article_id = int(key.split(":")[-1])
@@ -235,10 +235,10 @@ class ArticleViewStatsService:
         # 同时清除防刷记录
         pattern = f"article:view_record:{article_id}:*"
 
-        # 检查是否是 Redis 缓存（具有 redis 属性）
-        if hasattr(cache, 'redis'):
+        # 检查是否是 Redis 缓存（具有 _client 属性）
+        if hasattr(cache, '_client'):
             # 使用 Redis 的 scan_iter 方法
-            async for key in cache.redis.scan_iter(match=pattern):
+            async for key in cache._client.scan_iter(match=pattern):
                 await cache.delete(key)
         else:
             # 对于 SimpleCache，我们需要遍历所有键来匹配模式
