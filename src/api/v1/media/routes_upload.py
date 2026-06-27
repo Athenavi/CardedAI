@@ -34,7 +34,7 @@ async def upload_media_file(
             # 视频格式
             'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/x-matroska',
             # 音频格式
-            'audio/mpeg', 'audio/wav', 'audio/flac', 'audio/aac', 'audio/ogg', 'audio/mp3', 'audio/x-wav',
+            'audio/mpeg', 'audio/wav', 'audio/flac', 'audio/x-flac', 'audio/aac', 'audio/ogg', 'audio/mp3', 'audio/x-wav',
             # 文档格式
             'application/pdf',
             'application/msword',  # .doc
@@ -117,7 +117,7 @@ async def _process_single_file(user_id, file_data, filename, allowed_size, allow
         # 视频格式
         'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/x-matroska',
         # 音频格式
-        'audio/mpeg', 'audio/wav', 'audio/flac', 'audio/aac', 'audio/ogg', 'audio/mp3', 'audio/x-wav',
+        'audio/mpeg', 'audio/wav', 'audio/flac', 'audio/x-flac', 'audio/aac', 'audio/ogg', 'audio/mp3', 'audio/x-wav',
         # 文档格式
         'application/pdf',
         'application/msword',  # .doc

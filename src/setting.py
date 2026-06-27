@@ -135,7 +135,7 @@ class BaseConfig:
         'audio/wav',
         'audio/mpeg',
         'audio/ogg',
-        'audio/flac',
+        'audio/flac', 'audio/x-flac',
         'audio/aac',
         'audio/mp3',
         'audio/x-wav',

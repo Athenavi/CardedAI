@@ -2,14 +2,12 @@
 媒体列表、统计、分类、标签查询
 """
 
-from decimal import Decimal
 from pathlib import Path
 from typing import Optional
 
-import humanize
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse, Response
-from sqlalchemy import select, func, case
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.file_hash import FileHash
@@ -17,8 +15,6 @@ from shared.models.media import Media
 from src.api.v1.core.responses import ApiResponse
 from src.auth import jwt_required_dependency as jwt_required
 from src.extensions import get_async_db_session as get_async_db
-from .dependencies import get_user_storage_used, get_user_storage_limit
-from .utils import convert_storage_size
 
 router = APIRouter()
 from src.unified_logger import default_logger as logger
@@ -158,52 +154,22 @@ async def list_media(
         }
         order_by = sort_mapping.get(sort_by, Media.created_at.desc())
 
-        paginated_query = base_query.order_by(order_by).offset(offset).limit(per_page)
-        media_result = await db.execute(paginated_query)
-        media_files = media_result.all()  # 返回 (Media, FileHash) 元组列表
-
+        # 仅保留分页计数——storage/stats 移至独立 /statistics 端点避免全表扫描
         count_query = select(func.count()).select_from(base_query.subquery())
         total_result = await db.execute(count_query)
         total = total_result.scalar() or 0
 
-        # Windows + asyncpg 兼容性修复：顺序执行而不是并发执行
-        # asyncio.gather 会在同一个会话上并发执行，导致 "another operation is in progress" 错误
-        storage_used = await get_user_storage_used(user_id, db)
-        storage_total_bytes = await get_user_storage_limit(user_id, db)
-        storage_total_bytes = Decimal(str(storage_total_bytes))
-
-        stats_subquery = (
-            select(FileHash.mime_type, FileHash.file_size, Media.id)
-            .join(Media, FileHash.hash == Media.hash)
-            .where(Media.user == user_id)
-            .subquery()
-        )
-        stats_query = select(
-            func.count().label('total_count'),
-            func.sum(case((stats_subquery.c.mime_type.startswith('image'), 1), else_=0)).label('image_count'),
-            func.sum(case((stats_subquery.c.mime_type.startswith('video'), 1), else_=0)).label('video_count'),
-            func.sum(case((stats_subquery.c.mime_type.startswith('audio'), 1), else_=0)).label('audio_count'),
-            func.sum(case((stats_subquery.c.mime_type.in_([
-                'application/pdf', 'application/msword',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'application/vnd.ms-excel',
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'text/plain', 'text/markdown'
-            ]), 1), else_=0)).label('document_count')
-        ).select_from(stats_subquery)
-        stats_result = await db.execute(stats_query)
-        stats_row = stats_result.first()
-
-        storage_percentage = min(100, int((storage_used / storage_total_bytes * 100))) if storage_total_bytes > 0 else 0
+        paginated_query = base_query.order_by(order_by).offset(offset).limit(per_page)
+        media_result = await db.execute(paginated_query)
+        media_files = media_result.all()  # 返回 (Media, FileHash) 元组列表
 
         media_items = []
-        for media, fh in media_files:  # 解包元组
-            # 注意：不访问 media.categories 和 media.tags 关系字段，避免触发懒加载
+        for media, fh in media_files:
             media_items.append({
                 'id': media.id,
                 'filename': media.filename,
                 'original_filename': media.original_filename,
-                'title': media.original_filename,  # 使用文件名作为标题
+                'title': media.original_filename,
                 'hash': media.hash,
                 'file_path': media.file_path,
                 'file_url': media.file_url,
@@ -216,8 +182,8 @@ async def list_media(
                 'height': media.height,
                 'description': media.description,
                 'alt_text': media.alt_text,
-                'category': media.category,  # 这是列字段，不是关系
-                'tags': media.tags,  # 这是列字段（String），不是关系
+                'category': media.category,
+                'tags': media.tags,
                 'created_at': media.created_at.isoformat() if media.created_at else None,
                 'updated_at': media.updated_at.isoformat() if media.updated_at else None
             })
@@ -232,17 +198,6 @@ async def list_media(
                     "current_page": page, "pages": total_pages, "total": total,
                     "has_prev": page > 1, "has_next": page < total_pages, "per_page": per_page
                 },
-                "stats": {
-                    'image_count': int(stats_row.image_count or 0),
-                    'video_count': int(stats_row.video_count or 0),
-                    'audio_count': int(stats_row.audio_count or 0),
-                    'document_count': int(stats_row.document_count or 0),
-                    'storage_used': humanize.naturalsize(storage_used),
-                    'storage_total': convert_storage_size(storage_total_bytes),
-                    'storage_percentage': storage_percentage,
-                    'canBeUploaded': (storage_total_bytes - storage_used) > 1024,
-                    'totalUsed': storage_used
-                }
             }
         }
     except Exception as e:
