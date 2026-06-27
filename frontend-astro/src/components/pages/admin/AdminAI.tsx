@@ -20,6 +20,8 @@ import {
   Terminal,
   Check,
   X,
+  MessageSquare,
+  Plus,
 } from 'lucide-react';
 
 // ═══ Types ═══
@@ -34,6 +36,15 @@ interface ToolResult {
   tool: string;
   arguments: any;
   result: any;
+}
+
+interface ChatSession {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  toolResults: ToolResult[];
+  createdAt: number;
+  updatedAt: number;
 }
 
 interface LLMConfig {
@@ -252,21 +263,111 @@ function ChatArea() {
     } catch { return {endpoint: 'https://api.openai.com/v1', key: '', model: 'gpt-4o'}; }
   });
   const [showConfig, setShowConfig] = useState(!config.key);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<ChatSession[]>(() => {
+    try { return JSON.parse(localStorage.getItem('ai-chat-sessions') || '[]'); } catch { return []; }
+  });
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [toolResults, setToolResults] = useState<ToolResult[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState<string | null>(null);
+  const [showSidebar, setShowSidebar] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const fullTextRef = useRef('');
   const typingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const typingIndexRef = useRef(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Persist sessions to localStorage
+  const persistSessions = useCallback((updatedSessions: ChatSession[]) => {
+    setSessions(updatedSessions);
+    localStorage.setItem('ai-chat-sessions', JSON.stringify(updatedSessions));
+  }, []);
+
+  // Load active session
+  useEffect(() => {
+    if (!activeSessionId) {
+      // Create first session if none exists
+      if (sessions.length === 0) {
+        const newSession: ChatSession = {
+          id: crypto.randomUUID(), title: '新对话', messages: [], toolResults: [],
+          createdAt: Date.now(), updatedAt: Date.now(),
+        };
+        persistSessions([newSession]);
+        setActiveSessionId(newSession.id);
+      } else {
+        setActiveSessionId(sessions[0].id);
+      }
+      return;
+    }
+    const session = sessions.find(s => s.id === activeSessionId);
+    if (session) {
+      setMessages(session.messages);
+      setToolResults(session.toolResults);
+    }
+  }, [activeSessionId, sessions.length === 0]);
+
+  // Auto-save messages to current session
+  const saveCurrentSession = useCallback((msgs: ChatMessage[], results: ToolResult[]) => {
+    setSessions(prev => {
+      const updated = prev.map(s =>
+        s.id === activeSessionId
+          ? {...s, messages: msgs, toolResults: results, updatedAt: Date.now(),
+             title: msgs.find(m => m.role === 'user')?.content?.slice(0, 30) || s.title}
+          : s
+      );
+      localStorage.setItem('ai-chat-sessions', JSON.stringify(updated));
+      return updated;
+    });
+  }, [activeSessionId]);
+
+  const createNewSession = useCallback(() => {
+    const newSession: ChatSession = {
+      id: crypto.randomUUID(), title: '新对话', messages: [], toolResults: [],
+      createdAt: Date.now(), updatedAt: Date.now(),
+    };
+    persistSessions([newSession, ...sessions]);
+    setActiveSessionId(newSession.id);
+    setMessages([]);
+    setToolResults([]);
+    setStreamingContent(null);
+  }, [sessions, persistSessions]);
+
+  const deleteSession = useCallback((id: string) => {
+    const updated = sessions.filter(s => s.id !== id);
+    persistSessions(updated);
+    if (id === activeSessionId) {
+      setActiveSessionId(updated[0]?.id || null);
+    }
+  }, [sessions, activeSessionId, persistSessions]);
+
+  const switchSession = useCallback((id: string) => {
+    if (id === activeSessionId) return;
+    setActiveSessionId(id);
+    setStreamingContent(null);
+  }, [activeSessionId]);
+
   useEffect(() => { chatEndRef.current?.scrollIntoView({behavior: 'smooth'}); }, [messages, toolResults, streamingContent]);
 
   // Cleanup typewriter timer on unmount
   useEffect(() => () => { if (typingTimerRef.current) clearInterval(typingTimerRef.current); }, []);
+
+  // Auto-save messages to session on change
+  useEffect(() => {
+    if (activeSessionId && !loading && messages.length > 0) {
+      setSessions(prev => {
+        const updated = prev.map(s =>
+          s.id === activeSessionId
+            ? {...s, messages, toolResults, updatedAt: Date.now(),
+               title: messages.find(m => m.role === 'user')?.content?.slice(0, 30) || s.title}
+            : s
+        );
+        localStorage.setItem('ai-chat-sessions', JSON.stringify(updated));
+        return updated;
+      });
+    }
+  }, [messages, toolResults, loading]);
 
   const saveConfig = useCallback((c: LLMConfig) => {
     setConfig(c);
@@ -407,8 +508,18 @@ function ChatArea() {
   }, [config, messages, loading]);
 
   const clearChat = () => {
-    setMessages([]);
-    setToolResults([]);
+    const newMessages: ChatMessage[] = [];
+    const newResults: ToolResult[] = [];
+    setMessages(newMessages);
+    setToolResults(newResults);
+    setStreamingContent(null);
+    setSessions(prev => {
+      const updated = prev.map(s =>
+        s.id === activeSessionId ? {...s, messages: newMessages, toolResults: newResults, updatedAt: Date.now()} : s
+      );
+      localStorage.setItem('ai-chat-sessions', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const handleExample = (text: string) => {
@@ -418,18 +529,68 @@ function ChatArea() {
 
   return (
     <>
+      {/* Session sidebar */}
+      {showSidebar && (
+        <div className="fixed inset-0 z-40 flex">
+          <div className="w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col h-full shadow-xl">
+            <div className="p-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">历史会话</span>
+              <button onClick={() => setShowSidebar(false)}
+                className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <X className="w-4 h-4"/>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+              {sessions.map(s => (
+                <div key={s.id}
+                  className={`group flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer text-sm transition-colors ${
+                    s.id === activeSessionId
+                      ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={() => { switchSession(s.id); setShowSidebar(false); }}>
+                  <MessageSquare className="w-4 h-4 shrink-0"/>
+                  <span className="flex-1 truncate">{s.title}</span>
+                  <button onClick={e => { e.stopPropagation(); deleteSession(s.id); }}
+                    className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-500 transition-all">
+                    <X className="w-3.5 h-3.5"/>
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="p-3 border-t border-gray-100 dark:border-gray-800">
+              <button onClick={() => { createNewSession(); setShowSidebar(false); }}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 transition-colors">
+                <Plus className="w-4 h-4"/> 新建会话
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 bg-black/20" onClick={() => setShowSidebar(false)}/>
+        </div>
+      )}
+
       {/* Header bar */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
+          <button onClick={() => setShowSidebar(true)}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            title="历史会话">
+            <MessageSquare className="w-4 h-4"/>
+          </button>
           <h1 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-purple-500"/>
             AI 助手
           </h1>
-          {config.key && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400">
-              已连接
+          {sessions.length > 0 && activeSessionId && (
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
+              {sessions.find(s => s.id === activeSessionId)?.title || '新对话'}
             </span>
           )}
+          <button onClick={createNewSession}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+            title="新建会话">
+            <Plus className="w-4 h-4"/>
+          </button>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={clearChat} disabled={messages.length === 0}
