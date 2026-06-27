@@ -246,6 +246,10 @@ class MeilisearchService:
             搜索结果和分页信息
         """
         try:
+            # 确保索引已初始化
+            if self.index is None:
+                self.index = self.client.index(self.index_name)
+
             # 构建过滤器
             filters = []
 

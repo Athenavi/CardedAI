@@ -161,6 +161,12 @@ async def _call_llm_stream(messages, llm_endpoint, llm_key, model, tools, system
                     if func.get("arguments"):
                         tool_calls_buffer[idx]["arguments"] += func["arguments"]
 
+            # Ensure every tool call has an id (LLM streams may omit it)
+            import uuid
+            for v in tool_calls_buffer.values():
+                if not v["id"]:
+                    v["id"] = f"call_{uuid.uuid4().hex[:12]}"
+
             yield json.dumps({"type": "done",
                               "content": "".join(content_parts),
                               "tool_calls": [v for v in sorted(tool_calls_buffer.values(), key=lambda x: x["id"])]})
