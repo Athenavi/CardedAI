@@ -40,6 +40,7 @@ SEARCH_ENGINES = {
 
 class SearchCollector(BaseCollector):
     """搜索引擎数据采集器"""
+    source_type = "search"
 
     def validate_config(self, config: Dict[str, Any]) -> List[str]:
         errors = []
