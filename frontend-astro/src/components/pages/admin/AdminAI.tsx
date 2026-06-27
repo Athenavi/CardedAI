@@ -424,14 +424,15 @@ function ChatArea() {
           streamingContent ? (
             <MessageBubble msg={{role: 'assistant', content: streamingContent}} streamingContent={streamingContent}/>
           ) : (
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-              <Bot className="w-4 h-4 text-purple-600 dark:text-purple-400"/>
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                <Bot className="w-4 h-4 text-purple-600 dark:text-purple-400"/>
+              </div>
+              <div className="px-4 py-3 rounded-2xl bg-gray-100 dark:bg-gray-800 rounded-tl-md">
+                <Loader2 className="w-5 h-5 text-purple-500 animate-spin"/>
+              </div>
             </div>
-            <div className="px-4 py-3 rounded-2xl bg-gray-100 dark:bg-gray-800 rounded-tl-md">
-              <Loader2 className="w-5 h-5 text-purple-500 animate-spin"/>
-            </div>
-          </div>
+          )
         )}
         <div ref={chatEndRef}/>
       </div>
