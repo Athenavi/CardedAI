@@ -14,7 +14,6 @@ class UserRead(schemas.BaseUser[int]):
     bio: Optional[str] = None
     register_ip: Optional[str] = None
     is_2fa_enabled: Optional[bool] = False
-    vip_level: Optional[int] = 0
     locale: Optional[str] = "zh_CN"
 
 

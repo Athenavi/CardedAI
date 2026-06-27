@@ -40,11 +40,12 @@ async def get_user_storage_limit(user_id: int, db: AsyncSession):
             return BaseConfig.USER_FREE_STORAGE_LIMIT
 
         base_limit = BaseConfig.USER_FREE_STORAGE_LIMIT
-        if user.vip_level == 1:
+        vip_level = getattr(user, "vip_level", 0)
+        if vip_level == 1:
             return base_limit * 2
-        elif user.vip_level == 2:
+        elif vip_level == 2:
             return base_limit * 10
-        elif user.vip_level >= 3:
+        elif vip_level >= 3:
             return base_limit * 40
         return base_limit
     except Exception as e:

@@ -255,15 +255,6 @@ models:
         type: string
         nullable: true
         description: 个人简介
-      vip_level:
-        type: bigint
-        default: 0
-        description: VIP 等级
-      vip_expires_at:
-        type: string
-        format: date-time
-        nullable: true
-        description: VIP 过期时间
       is_active:
         type: boolean
         default: true
@@ -327,10 +318,6 @@ models:
         columns:
           - is_active
         comment: 激活状态索引
-      - name: idx_users_vip_level
-        columns:
-          - vip_level
-        comment: VIP等级索引
       - name: idx_users_date_joined
         columns:
           - date_joined

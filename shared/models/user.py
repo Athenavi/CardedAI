@@ -19,7 +19,6 @@ class User(Base):
         Index('idx_users_username', 'username', unique=True),
         Index('idx_users_email', 'email', unique=True),
         Index('idx_users_is_active', 'is_active'),
-        Index('idx_users_vip_level', 'vip_level'),
         Index('idx_users_date_joined', 'date_joined'),
         Index('idx_users_is_superuser', 'is_superuser'),
         Index('idx_users_last_login', 'last_login_at'),
@@ -37,11 +36,6 @@ class User(Base):
     profile_picture = Column(String(255), nullable=True, doc='个人资料图片')
 
     bio = Column(String(255), nullable=True, doc='个人简介')
-
-    vip_level = Column(BigInteger, default=0, doc='VIP 等级')
-
-
-    vip_expires_at = Column(DateTime, nullable=True, doc='VIP 过期时间')
 
     is_active = Column(Boolean, default=True, doc='是否激活')
 
@@ -84,8 +78,6 @@ class User(Base):
             'password': self.password,
             'profile_picture': self.profile_picture,
             'bio': self.bio,
-            'vip_level': self.vip_level,
-            'vip_expires_at': self.vip_expires_at.isoformat() if self.vip_expires_at else None,
             'is_active': self.is_active,
             'is_superuser': self.is_superuser,
             'date_joined': self.date_joined.isoformat() if self.date_joined else None,
