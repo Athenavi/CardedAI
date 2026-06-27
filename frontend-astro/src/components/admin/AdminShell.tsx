@@ -5,6 +5,8 @@ import {Menu} from 'lucide-react';
 import {ErrorBoundary} from '@/components/ui/ErrorBoundary';
 import {ToastProvider} from '@/components/ui/toast-provider';
 import {SidebarSkeleton} from './AdminSidebarSkeleton';
+import {PermissionProvider} from '@/components/PermissionContext';
+import {AdminGuard} from '@/components/AdminGuard';
 
 // 懒加载侧边栏组件 — 45+ lucide 图标被分离到独立 chunk
 const DesktopSidebar = lazy(() =>
@@ -20,6 +22,7 @@ export const AdminShell: React.FC<{title: string; children: React.ReactNode; act
 
   return (
     <ToastProvider>
+    <PermissionProvider>
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
       {/* Desktop sidebar — 懒加载 */}
       <Suspense fallback={<SidebarSkeleton collapsed={collapsed}/>}>
@@ -43,9 +46,10 @@ export const AdminShell: React.FC<{title: string; children: React.ReactNode; act
           </div>
           <div className="flex items-center gap-2">{actions}</div>
         </header>
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6"><ErrorBoundary>{children}</ErrorBoundary></main>
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6"><ErrorBoundary><AdminGuard>{children}</AdminGuard></ErrorBoundary></main>
       </div>
     </div>
+    </PermissionProvider>
     </ToastProvider>
   );
 };
