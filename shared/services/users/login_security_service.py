@@ -49,7 +49,6 @@ class LoginSecurityService:
             attempt = LoginAttempt(
                 username=username,
                 ip_address=ip_address,
-                user_agent=user_agent,
                 is_success=is_success,
                 failure_reason=failure_reason if not is_success else None,
                 created_at=now
