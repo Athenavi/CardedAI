@@ -2839,11 +2839,6 @@ models:
         maxLength: 45
         index: true
         description: IP地址
-      user_agent:
-        type: string
-        nullable: true
-        maxLength: 500
-        description: User-Agent
       is_success:
         type: boolean
         default: false

@@ -28,8 +28,6 @@ class LoginAttempt(Base):
 
     ip_address = Column(String(45), index=True, nullable=True, doc='IP地址')
 
-    user_agent = Column(String(500), nullable=True, doc='User-Agent')
-
     is_success = Column('success', Boolean, default=False, doc='是否成功')
 
 
@@ -48,7 +46,6 @@ class LoginAttempt(Base):
             'id': self.id,
             'username': self.username,
             'ip_address': self.ip_address,
-            'user_agent': self.user_agent,
             'is_success': self.is_success,
             'failure_reason': self.failure_reason,
             'created_at': self.created_at.isoformat() if self.created_at else None,
