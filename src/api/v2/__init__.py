@@ -72,7 +72,6 @@ ROUTE_REGISTRY_V2 = [
     # 前端直接调用 /api/v2/block-patterns/list
     ("src.api.v1.content_management.block_patterns", "/api/v2/block-patterns", ["block-patterns"], False),
 
-
     # [已删除] 电商功能模块（Product, Cart, Order 等模型已移除）
 
     # ==================== 媒体管理 ====================
@@ -154,15 +153,6 @@ ROUTE_REGISTRY_V2 = [
     # V2 Accessibility 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
     ("src.api.v2.accessibility", "/api/v2/accessibility", ["accessibility-v2"], True),
     # V1 accessibility 各子模块已废弃，功能已迁移到 V2 聚合路由器
-
-    # ==================== 高级扩展功能（V2 聚合路由器）====================
-    # V2 Advanced Features 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
-    ("src.api.v2.advanced_features", "/api/v2/ext", ["advanced-features-v2"], False),
-    # V1 advanced_features 各子模块已废弃，功能已迁移到 V2 聚合路由器
-
-    # ==================== 其他系统模块（misc 模块已完全清理并删除）====================
-    ("src.api.v1.analytics.site_analytics_api", "/api/v2/analytics/site", ["site-analytics"], False),
-    ("src.api.v1.articles.anomaly_detection", "/api/v2/system/anomaly-detection", ["anomaly-detection"], False),
     # ==================== 社交（V2 聚合路由器）====================
     # V2 Social 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
     ("src.api.v2.social", "/api/v2/social", ["social-v2"], True),

@@ -1,222 +1,222 @@
 ﻿# ============================================================================
-#   妯″瀷瀹氫箟閰嶇疆鏂囦欢
+#   模型定义配置文件
 # ============================================================================
 #
-# 鏈枃浠剁敤浜庡畾涔夐」鐩腑鎵€鏈夌殑 SQLAlchemy 鏁版嵁妯″瀷鍜?Pydantic 璇锋眰/鍝嶅簲妯″瀷銆?
-# 浠ｇ爜鐢熸垚鍣ㄤ細鏍规嵁姝ら厤缃枃浠惰嚜鍔ㄧ敓鎴愶細
-#   - SQLAlchemy ORM 妯″瀷 (shared/models/*.py)
-#   - FastAPI 璺敱 (src/api/v1/generated/generated_router.py)锛堝純鐢ㄧ殑鐗规€э級
-#   - TypeScript 绫诲瀷瀹氫箟 (frontend-next/types/generated/api-types.ts)
-#   - TypeScript API 瀹㈡埛绔?(frontend-next/types/generated/api-client.ts)
+# 本文件用于定义项目中所有的 SQLAlchemy 数据模型和 Pydantic 请求/响应模型。
+# 代码生成器会根据此配置文件自动生成：
+#   - SQLAlchemy ORM 模型 (shared/models/*.py)
+#   - FastAPI 路由 (src/api/v1/generated/generated_router.py)（废弃的特性）
+#   - TypeScript 类型定义 (frontend-next/types/generated/api-types.ts)
+#   - TypeScript API 客户端 (frontend-next/types/generated/api-client.ts)
 #
-# 浣跨敤鏂规硶锛?
-#   1. 鍦ㄦ鏂囦欢涓坊鍔犳垨淇敼妯″瀷瀹氫箟
-#   2. 杩愯鍛戒护: python scripts/generate_routes.py generate-all
-#   3. 鐢熸垚鐨勪唬鐮佷細鑷姩淇濆瓨鍒板搴旂洰褰?
+# 使用方法：
+#   1. 在此文件中添加或修改模型定义
+#   2. 运行命令: python scripts/generate_routes.py generate-all
+#   3. 生成的代码会自动保存到对应目录
 #
-# 妯″瀷閰嶇疆璇存槑锛?
-#   - orm: true          # 鏍囪涓?ORM 妯″瀷锛屼細鐢熸垚 SQLAlchemy 妯″瀷鏂囦欢
-#   - table: xxx         # 鎸囧畾鏁版嵁搴撹〃鍚?
-#   - def_list: [...]    # 鑷畾涔夋柟娉曞垪琛紙鍦?shared/defs/<model>_defs.py 涓畾涔夛級
-#   - defs_target: xxx   # 鑷畾涔夋柟娉曟枃浠跺悕锛堢浉瀵逛簬 shared/defs/锛?
-#   - properties:        # 妯″瀷灞炴€у畾涔?
+# 模型配置说明：
+#   - orm: true          # 标记为 ORM 模型，会生成 SQLAlchemy 模型文件
+#   - table: xxx         # 指定数据库表名
+#   - def_list: [...]    # 自定义方法列表（在 shared/defs/<model>_defs.py 中定义）
+#   - defs_target: xxx   # 自定义方法文件名（相对于 shared/defs/）
+#   - properties:        # 模型属性定义
 #       field_name:
-#         type: string   # 鏁版嵁绫诲瀷 (string, integer, boolean, text, datetime绛?
-#         description:   # 瀛楁鎻忚堪
-#         maxLength:     # 鏈€澶ч暱搴︼紙瀛楃涓茬被鍨嬶級
-#         nullable:      # 鏄惁鍙负绌?
-#         default:       # 榛樿鍊?
-#         unique:        # 鏄惁鍞竴
-#         foreignKey:    # 澶栭敭寮曠敤锛堝紩鐢ㄥ叾浠栨ā鍨嬬殑鍚嶇О锛?
-#         enum: []       # 鏋氫妇鍊煎垪琛?
-#         format:        # 鏍煎紡锛堝 email, date-time锛?
-#         index: true    # 鏄惁鍒涘缓绱㈠紩
-#   - unlogged: false     # 鏄惁涓?PostgreSQL UNLOGGED 琛紙涓嶅惎鐢?WAL锛屾€ц兘鏇撮珮锛屼絾宕╂簝鏃跺彲鑳戒涪澶辨暟鎹級
+#         type: string   # 数据类型 (string, integer, boolean, text, datetime等)
+#         description:   # 字段描述
+#         maxLength:     # 最大长度（字符串类型）
+#         nullable:      # 是否可为空
+#         default:       # 默认值
+#         unique:        # 是否唯一
+#         foreignKey:    # 外键引用（引用其他模型的名称）
+#         enum: []       # 枚举值列表
+#         format:        # 格式（如 email, date-time）
+#         index: true    # 是否创建索引
+#   - unlogged: false     # 是否为 PostgreSQL UNLOGGED 表（不启用 WAL，性能更高，但崩溃时可能丢失数据）
 #
-# 娉ㄦ剰浜嬮」锛?
-#   - 璇峰嬁鎵嬪姩淇敼鑷姩鐢熸垚鐨勬ā鍨嬫枃浠讹紙鏂囦欢澶撮儴鏈夋敞閲婃爣璇嗭級
-#   - 鑷畾涔夋柟娉曞簲鏀惧湪 shared/defs/ 鐩綍涓嬬殑瀵瑰簲鏂囦欢涓?
-#   - 淇敼閰嶇疆鍚庨渶瑕侀噸鏂拌繍琛屼唬鐮佺敓鎴愬櫒
-#   - 鏁版嵁搴撹縼绉婚渶瑕佸崟鐙墽琛岋紙寤鸿浣跨敤 Alembic锛?
+# 注意事项：
+#   - 请勿手动修改自动生成的模型文件（文件头部有注释标识）
+#   - 自定义方法应放在 shared/defs/ 目录下的对应文件中
+#   - 修改配置后需要重新运行代码生成器
+#   - 数据库迁移需要单独执行（建议使用 Alembic）
 #
 # ============================================================================
 
 models:
   AuditLog:
-    description: 鎿嶄綔瀹¤鏃ュ織妯″瀷
+    description: 操作审计日志模型
     status: active
     frontend_page: /admin/audit-logs
     properties:
       id:
         type: bigint
-        description: 鏃ュ織 ID
+        description: 日志 ID
       user_id:
         type: bigint
         nullable: true
-        description: 鎿嶄綔鐢ㄦ埛 ID
+        description: 操作用户 ID
         foreignKey: User
       action:
         type: string
         maxLength: 100
-        description: '鎿嶄綔鍔ㄤ綔 (濡? create_article, update_settings)'
+        description: '操作动作 (如 create_article, update_settings)'
       resource_type:
         type: string
         maxLength: 50
         nullable: true
-        description: '璧勬簮绫诲瀷 (濡? Article, User)'
+        description: '资源类型 (如 Article, User)'
       resource_id:
         type: bigint
         nullable: true
-        description: 璧勬簮 ID
+        description: 资源 ID
       ip_address:
         type: string
         maxLength: 45
         nullable: true
-        description: 鎿嶄綔 IP 鍦板潃
+        description: 操作 IP 地址
       user_agent:
         type: text
         nullable: true
-        description: 鐢ㄦ埛浠ｇ悊瀛楃涓?
+        description: 用户代理字符串
       request_data:
         type: text
         nullable: true
-        description: 璇锋眰鏁版嵁蹇収 (JSON)
+        description: 请求数据快照 (JSON)
       status:
         type: string
         maxLength: 20
         default: success
-        description: 鎿嶄綔鐘舵€?(success, failure)
+        description: 操作状态 (success, failure)
       error_message:
         type: text
         nullable: true
-        description: 閿欒淇℃伅
+        description: 错误信息
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     orm: true
     table: audit_logs
     indexes:
       - name: idx_audit_logs_user_id
         columns:
           - user_id
-        comment: 鐢ㄦ埛鎿嶄綔鏌ヨ绱㈠紩
+        comment: 用户操作查询索引
       - name: idx_audit_logs_action
         columns:
           - action
-        comment: 鍔ㄤ綔绫诲瀷鏌ヨ绱㈠紩
+        comment: 动作类型查询索引
       - name: idx_audit_logs_created_at
         columns:
           - created_at
         order: DESC
-        comment: 鏃堕棿鎺掑簭绱㈠紩
+        comment: 时间排序索引
       - name: idx_audit_logs_resource
         columns:
           - resource_type
           - resource_id
-        comment: 璧勬簮鎿嶄綔杩借釜绱㈠紩
+        comment: 资源操作追踪索引
   AIWorkflow:
-    description: AI 鏅鸿兘宸ヤ綔娴佽褰曟ā鍨?
+    description: AI 智能工作流记录模型
     status: active
     frontend_page: /admin/ai
     properties:
       id:
         type: bigint
-        description: 宸ヤ綔娴?ID
+        description: 工作流 ID
       user_id:
         type: bigint
-        description: 鐢ㄦ埛 ID
+        description: 用户 ID
         foreignKey: User
       task_type:
         type: string
         maxLength: 50
-        description: 浠诲姟绫诲瀷 (writing_assist, seo_optimize, tag_recommend)
+        description: 任务类型 (writing_assist, seo_optimize, tag_recommend)
       input_data:
         type: text
-        description: 杈撳叆鏁版嵁 (JSON)
+        description: 输入数据 (JSON)
       output_data:
         type: text
         nullable: true
-        description: 杈撳嚭缁撴灉 (JSON)
+        description: 输出结果 (JSON)
       model_used:
         type: string
         maxLength: 100
         nullable: true
-        description: 浣跨敤鐨?AI 妯″瀷
+        description: 使用的 AI 模型
       tokens_used:
         type: integer
         default: 0
-        description: 娑堣€楃殑 Token 鏁伴噺
+        description: 消耗的 Token 数量
       status:
         type: string
         maxLength: 20
         default: pending
-        description: 鐘舵€?(pending, processing, completed, failed)
+        description: 状态 (pending, processing, completed, failed)
       error_message:
         type: text
         nullable: true
-        description: 閿欒淇℃伅
+        description: 错误信息
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       completed_at:
         type: string
         format: date-time
         nullable: true
-        description: 瀹屾垚鏃堕棿
+        description: 完成时间
     orm: true
     table: ai_workflows
     indexes:
       - name: idx_ai_workflows_user_id
         columns:
           - user_id
-        comment: 鐢ㄦ埛宸ヤ綔娴佹煡璇㈢储寮?
+        comment: 用户工作流查询索引
       - name: idx_ai_workflows_task_type
         columns:
           - task_type
-        comment: 浠诲姟绫诲瀷绱㈠紩
+        comment: 任务类型索引
       - name: idx_ai_workflows_status
         columns:
           - status
-        comment: 鐘舵€佺储寮?
+        comment: 状态索引
   PageBuilder:
-    description: 鍙鍖栭〉闈㈡瀯寤哄櫒妯″瀷
+    description: 可视化页面构建器模型
     status: active
     frontend_page: /admin/page-builder
     properties:
       id:
         type: bigint
-        description: 椤甸潰 ID
+        description: 页面 ID
       title:
         type: string
         maxLength: 255
-        description: 椤甸潰鏍囬
+        description: 页面标题
       slug:
         type: string
         maxLength: 255
         unique: true
-        description: 椤甸潰璺緞鏍囪瘑
+        description: 页面路径标识
       blocks_data:
         type: text
-        description: 椤甸潰鍧楁暟鎹?(JSON 鏍煎紡瀛樺偍鎷栨嫿甯冨眬)
+        description: 页面块数据 (JSON 格式存储拖拽布局)
       template_name:
         type: string
         maxLength: 100
         nullable: true
-        description: 鍏宠仈鐨勪富棰樻ā鏉垮悕绉?
+        description: 关联的主题模板名称
       is_published:
         type: boolean
         default: false
-        description: 鏄惁鍙戝竷
+        description: 是否发布
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: page_builder
     indexes:
@@ -224,92 +224,92 @@ models:
         columns:
           - slug
         unique: true
-        comment: 椤甸潰Slug鍞竴绱㈠紩
+        comment: 页面Slug唯一索引
 
   User:
-    description: 鐢ㄦ埛妯″瀷
+    description: 用户模型
     status: active
     frontend_page: /admin/users
     properties:
       id:
         type: bigint
-        description: 鐢ㄦ埛 ID
+        description: 用户 ID
       username:
         type: string
-        description: 鐢ㄦ埛鍚?
+        description: 用户名
         unique: true
         maxLength: 255
       email:
         type: string
         format: email
-        description: 閭
+        description: 邮箱
       password:
         type: string
         maxLength: 255
-        description: 瀵嗙爜锛堝搱甯屽悗瀛樺偍锛?
+        description: 密码（哈希后存储）
       profile_picture:
         type: string
         nullable: true
-        description: 涓汉璧勬枡鍥剧墖
+        description: 个人资料图片
       bio:
         type: string
         nullable: true
-        description: 涓汉绠€浠?
+        description: 个人简介
       vip_level:
         type: bigint
         default: 0
-        description: VIP 绛夌骇
+        description: VIP 等级
       vip_expires_at:
         type: string
         format: date-time
         nullable: true
-        description: VIP 杩囨湡鏃堕棿
+        description: VIP 过期时间
       is_active:
         type: boolean
         default: true
-        description: 鏄惁婵€娲?
+        description: 是否激活
       is_superuser:
         type: boolean
         default: false
-        description: 鏄惁涓鸿秴绾х鐞嗗憳
+        description: 是否为超级管理员
       date_joined:
         type: string
         format: date-time
-        description: 娉ㄥ唽鏃堕棿
+        description: 注册时间
       last_login_at:
         type: string
         format: date-time
         nullable: true
-        description: 涓婃鐧诲綍鏃堕棿
+        description: 上次登录时间
       locale:
         type: string
         default: zh_CN
-        description: 璇█璁剧疆
+        description: 语言设置
       is_staff:
         type: boolean
         default: false
-        description: 鏄惁涓哄伐浣滀汉鍛?
+        description: 是否为工作人员
       last_login_ip:
         type: string
         nullable: true
-        description: 涓婃鐧诲綍 IP
+        description: 上次登录 IP
       register_ip:
         type: string
         nullable: true
-        description: 娉ㄥ唽 IP
+        description: 注册 IP
       is_2fa_enabled:
         type: boolean
         default: false
-        description: 鏄惁鍚敤鍙屽洜绱犺璇?
+        description: 是否启用双因素认证
       totp_secret:
         type: string
         nullable: true
         maxLength: 32
-        description: TOTP 瀵嗛挜
+        description: TOTP 密钥
       backup_codes:
         type: text
         nullable: true
-        description: 澶囩敤鐮?JSON鏍煎紡瀛樺偍)
+        description: 备用码 (JSON格式存储)
     orm: true
     table: users
     indexes:
@@ -317,244 +317,244 @@ models:
         columns:
           - username
         unique: true
-        comment: 鐢ㄦ埛鍚嶅敮涓€绱㈠紩
+        comment: 用户名唯一索引
       - name: idx_users_email
         columns:
           - email
         unique: true
-        comment: 閭鍞竴绱㈠紩
+        comment: 邮箱唯一索引
       - name: idx_users_is_active
         columns:
           - is_active
-        comment: 婵€娲荤姸鎬佺储寮?
+        comment: 激活状态索引
       - name: idx_users_vip_level
         columns:
           - vip_level
-        comment: VIP绛夌骇绱㈠紩
+        comment: VIP等级索引
       - name: idx_users_date_joined
         columns:
           - date_joined
         order: DESC
-        comment: 娉ㄥ唽鏃堕棿绱㈠紩
+        comment: 注册时间索引
       - name: idx_users_is_superuser
         columns:
           - is_superuser
-        comment: 瓒呯骇绠＄悊鍛樼储寮?
+        comment: 超级管理员索引
       - name: idx_users_last_login
         columns:
           - last_login_at
         order: DESC
-        comment: 鏈€鍚庣櫥褰曟椂闂寸储寮?
+        comment: 最后登录时间索引
     def_list:
       - is_vip
       - get_display_name
     defs_target: mydef.py
   UserCreate:
     type: schema
-    description: 鐢ㄦ埛鍒涘缓璇锋眰妯″瀷
+    description: 用户创建请求模型
     properties:
       username:
         type: string
         minLength: 3
         maxLength: 150
-        description: 鐢ㄦ埛鍚?
+        description: 用户名
       email:
         type: string
         format: email
-        description: 閭
+        description: 邮箱
       password:
         type: string
         minLength: 6
         writeOnly: true
-        description: 瀵嗙爜
+        description: 密码
       password_confirm:
         type: string
         minLength: 6
         writeOnly: true
-        description: 纭瀵嗙爜
+        description: 确认密码
     required:
       - username
       - password
       - password_confirm
   UserUpdate:
     type: schema
-    description: 鐢ㄦ埛鏇存柊璇锋眰妯″瀷
+    description: 用户更新请求模型
     properties:
       username:
         type: string
         minLength: 3
         maxLength: 150
-        description: 鐢ㄦ埛鍚?
+        description: 用户名
       email:
         type: string
         format: email
-        description: 閭
+        description: 邮箱
       profile_picture:
         type: string
         nullable: true
-        description: 涓汉璧勬枡鍥剧墖
+        description: 个人资料图片
       bio:
         type: string
         nullable: true
-        description: 涓汉绠€浠?
+        description: 个人简介
       locale:
         type: string
         default: zh_CN
-        description: 璇█璁剧疆
+        description: 语言设置
   ProfileUpdateRequest:
     type: schema
-    description: 鐢ㄦ埛璧勬枡鏇存柊璇锋眰
+    description: 用户资料更新请求
     properties:
       username:
         type: string
         nullable: true
-        description: 鐢ㄦ埛鍚?
+        description: 用户名
       email:
         type: string
         nullable: true
         format: email
-        description: 閭
+        description: 邮箱
       bio:
         type: string
         nullable: true
-        description: 涓汉绠€浠?
+        description: 个人简介
       profile_private:
         type: boolean
         nullable: true
-        description: 鏄惁绉佸瘑璧勬枡
+        description: 是否私有资料
       locale:
         type: string
         nullable: true
-        description: 璇█璁剧疆
+        description: 语言设置
   PasswordChange:
     type: schema
-    description: 瀵嗙爜淇敼璇锋眰妯″瀷
+    description: 密码修改请求模型
     properties:
       old_password:
         type: string
         writeOnly: true
-        description: 褰撳墠瀵嗙爜
+        description: 当前密码
       new_password:
         type: string
         minLength: 6
         writeOnly: true
-        description: 鏂板瘑鐮?
+        description: 新密码
       new_password_confirm:
         type: string
         minLength: 6
         writeOnly: true
-        description: 纭鏂板瘑鐮?
+        description: 确认新密码
     required:
       - old_password
       - new_password
       - new_password_confirm
   Article:
-    description: 鏂囩珷妯″瀷
+    description: 文章模型
     status: active
     frontend_page: /admin/articles
     properties:
       id:
         type: bigint
-        description: 鏂囩珷 ID
+        description: 文章 ID
       title:
         type: string
         maxLength: 255
-        description: 鏍囬
+        description: 标题
       slug:
         type: string
         maxLength: 255
-        description: 鏂囩珷 slug
+        description: 文章 slug
       excerpt:
         type: string
         nullable: true
-        description: 鎽樿
+        description: 摘要
       cover_image:
         type: string
         nullable: true
-        description: 灏侀潰鍥?URL
+        description: 封面图 URL
       category:
         type: bigint
         nullable: true
-        description: 鍒嗙被
+        description: 分类
         foreignKey: Category
       tags_list:
         type: array
         items:
           type: string
-        description: 鏍囩鍒楄〃
+        description: 标签列表
       views:
         type: bigint
         default: 0
-        description: 娴忚閲?
+        description: 浏览数
       user:
         type: bigint
-        description: 鐢ㄦ埛
+        description: 用户
         foreignKey: User
       likes:
         type: bigint
         default: 0
-        description: 鐐硅禐鏁?
+        description: 点赞数
       status:
         type: integer
         enum:
           - -1
           - 0
           - 1
-        description: 鐘舵€?(-1:宸插垹闄わ紝0:鑽夌锛?:宸插彂甯?
+        description: 状态(-1:已删除，0:草稿，1:已发布)
       hidden:
         type: boolean
         default: false
-        description: 鏄惁闅愯棌
+        description: 是否隐藏
       is_featured:
         type: boolean
         default: false
-        description: 鏄惁鎺ㄨ崘
+        description: 是否推荐
       is_vip_only:
         type: boolean
         default: false
-        description: 鏄惁浠?VIP 鍙
+        description: 是否仅 VIP 可见
       required_vip_level:
         type: integer
         default: 0
-        description: 鎵€闇€ VIP 绛夌骇
+        description: 所需 VIP 等级
       article_ad:
         type: string
         nullable: true
-        description: 骞垮憡鍐呭
+        description: 广告内容
       scheduled_publish_at:
         type: string
         format: date-time
         nullable: true
-        description: 瀹氭椂鍙戝竷鏃堕棿锛堣缃负鏈潵鏃堕棿鍚庤嚜鍔ㄥ彂甯冿級
+        description: 定时发布时间（设置为未来时间后自动发布）
       post_type:
         type: string
         maxLength: 50
         default: article
-        description: 鍐呭绫诲瀷(article/book/product绛?
+        description: 内容类型(article/book/product等)
         index: true
       is_sticky:
         type: boolean
         default: false
-        description: 鏄惁缃《锛堢矘鎬ф枃绔狅級
+        description: 是否置顶（粘性文章）
         index: true
       sticky_until:
         type: string
         format: date-time
         nullable: true
-        description: 缃《杩囨湡鏃堕棿锛堝彲閫夛紝杩囨湡鍚庤嚜鍔ㄥ彇娑堢疆椤讹級
+        description: 置顶过期时间（可选，过期后自动取消置顶）
       sort_order:
         type: bigint
         default: 0
-        description: 鎺掑簭椤哄簭锛堢敤浜庢嫋鎷芥帓搴忥級
+        description: 排序顺序（用于拖拽排序）
         index: true
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     table: articles
     indexes:
       - name: idx_articles_status
@@ -588,42 +588,42 @@ models:
         columns:
           - created_at
         order: DESC
-        comment: 鏂囩珷鍙戝竷鏃堕棿绱㈠紩锛堢敤浜庢渶鏂版枃绔犳煡璇級
+        comment: 文章发布时间索引（用于最新文章查询）
       - name: idx_articles_status_featured
         columns:
           - status
           - is_featured
-        comment: 鎺ㄨ崘鏂囩珷鏌ヨ绱㈠紩
+        comment: 推荐文章查询索引
       - name: idx_articles_status_views
         columns:
           - status
           - views
         order: DESC
-        comment: 鐑棬鏂囩珷鏌ヨ绱㈠紩
+        comment: 热门文章查询索引
       - name: idx_articles_slug
         columns:
           - slug
         unique: true
-        comment: 鏂囩珷slug鍞竴绱㈠紩
+        comment: 文章slug唯一索引
       - name: idx_articles_post_type_status
         columns:
           - post_type
           - status
-        comment: 鎸夌被鍨嬪拰鐘舵€佹煡璇㈢储寮?
+        comment: 按类型和状态查询索引
       - name: idx_articles_category_status_created
         columns:
           - category
           - status
           - created_at
         order: DESC
-        comment: 鍒嗙被鏂囩珷鍒楄〃鏌ヨ绱㈠紩
+        comment: 分类文章列表查询索引
       - name: idx_articles_user_status_created
         columns:
           - user
           - status
           - created_at
         order: DESC
-        comment: 鐢ㄦ埛鏂囩珷鍒楄〃鏌ヨ绱㈠紩
+        comment: 用户文章列表查询索引
     orm: true
     relationships:
       revisions:
@@ -637,110 +637,110 @@ models:
         uselist: false
   ArticleList:
     type: schema
-    description: 鏂囩珷鍒楄〃妯″瀷
+    description: 文章列表模型
     properties:
       id:
         type: bigint
-        description: 鏂囩珷 ID
+        description: 文章 ID
       title:
         type: string
         maxLength: 255
-        description: 鏍囬
+        description: 标题
       slug:
         type: string
         maxLength: 255
-        description: 鏂囩珷 slug
+        description: 文章 slug
       excerpt:
         type: string
         nullable: true
-        description: 鎽樿
+        description: 摘要
       cover_image:
         type: string
         nullable: true
-        description: 灏侀潰鍥?URL
+        description: 封面图 URL
       category_id:
         type: bigint
         nullable: true
-        description: 鍒嗙被 ID
+        description: 分类 ID
       tags_list:
         type: array
         items:
           type: string
-        description: 鏍囩鍒楄〃
+        description: 标签列表
       views:
         type: bigint
         default: 0
-        description: 娴忚閲?
+        description: 浏览数
       likes:
         type: bigint
         default: 0
-        description: 鐐硅禐鏁?
+        description: 点赞数
       status:
         type: integer
-        description: 鐘舵€?
+        description: 状态
       is_featured:
         type: boolean
         default: false
-        description: 鏄惁鎺ㄨ崘
+        description: 是否推荐
       is_vip_only:
         type: boolean
         default: false
-        description: 鏄惁浠?VIP 鍙
+        description: 是否仅 VIP 可见
       required_vip_level:
         type: integer
         default: 0
-        description: 鎵€闇€ VIP 绛夌骇
+        description: 所需 VIP 等级
       is_sticky:
         type: boolean
         default: false
-        description: 鏄惁缃《
+        description: 是否置顶
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
   AuthorSimple:
     type: schema
-    description: 浣滆€呯畝鍖栦俊鎭?
+    description: 作者简化信息
     properties:
       id:
         type: bigint
-        description: 鐢ㄦ埛 ID
+        description: 用户 ID
       username:
         type: string
-        description: 鐢ㄦ埛鍚?
+        description: 用户名
   ArticleCreateUpdate:
     type: schema
-    description: 鏂囩珷鍒涘缓/鏇存柊璇锋眰妯″瀷
+    description: 文章创建/更新请求模型
     properties:
       title:
         type: string
         minLength: 1
         maxLength: 255
-        description: 鏍囬
+        description: 标题
       slug:
         type: string
         maxLength: 255
-        description: 鏂囩珷 slug
+        description: 文章 slug
       excerpt:
         type: string
         nullable: true
-        description: 鎽樿
+        description: 摘要
       cover_image:
         type: string
         nullable: true
-        description: 灏侀潰鍥?URL
+        description: 封面图 URL
       category_id:
         type: bigint
         nullable: true
-        description: 鍒嗙被 ID
+        description: 分类 ID
       tags:
         type: string
         nullable: true
-        description: 鏍囩 (閫楀彿鍒嗛殧)
+        description: 标签 (逗号分隔)
       status:
         type: bigint
         enum:
@@ -748,95 +748,95 @@ models:
           - 0
           - 1
         default: 1
-        description: 鐘舵€?
+        description: 状态
       hidden:
         type: boolean
         default: false
-        description: 鏄惁闅愯棌
+        description: 是否隐藏
       is_featured:
         type: boolean
         default: false
-        description: 鏄惁鎺ㄨ崘
+        description: 是否推荐
       is_vip_only:
         type: boolean
         default: false
-        description: 鏄惁浠?VIP 鍙
+        description: 是否仅 VIP 可见
       required_vip_level:
         type: bigint
         default: 0
-        description: 鎵€闇€ VIP 绛夌骇
+        description: 所需 VIP 等级
       article_ad:
         type: string
         nullable: true
-        description: 骞垮憡鍐呭
+        description: 广告内容
       scheduled_publish_at:
         type: string
         format: date-time
         nullable: true
-        description: 瀹氭椂鍙戝竷鏃堕棿
+        description: 定时发布时间
       is_sticky:
         type: boolean
         default: false
-        description: 鏄惁缃《
+        description: 是否置顶
       sticky_until:
         type: string
         format: date-time
         nullable: true
-        description: 缃《杩囨湡鏃堕棿
+        description: 置顶过期时间
     required:
       - title
   Category:
-    description: 鍒嗙被妯″瀷
+    description: 分类模型
     status: active
     frontend_page: /admin/categories
     properties:
       id:
         type: bigint
-        description: 鍒嗙被 ID
+        description: 分类 ID
       name:
         type: string
         maxLength: 100
-        description: 鍒嗙被鍚?
+        description: 分类名
       slug:
         type: string
         nullable: true
-        description: 鍒嗙被 slug
+        description: 分类 slug
       description:
         type: string
         nullable: true
-        description: 鍒嗙被鎻忚堪
+        description: 分类描述
       parent_id:
         type: bigint
         nullable: true
-        description: 鐖跺垎绫?ID
+        description: 父分类 ID
       sort_order:
         type: bigint
         default: 0
-        description: 鎺掑簭
+        description: 排序
       icon:
         type: string
         nullable: true
-        description: 鍥炬爣
+        description: 图标
       color:
         type: string
         nullable: true
-        description: 棰滆壊
+        description: 颜色
       is_visible:
         type: boolean
         default: true
-        description: 鏄惁鍙
+        description: 是否可见
       articles_count:
         type: bigint
         readOnly: true
-        description: 鍒嗙被涓嬬殑鏂囩珷鏁伴噺
+        description: 分类下的文章数量
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: categories
     indexes:
@@ -844,95 +844,95 @@ models:
         columns:
           - slug
         unique: true
-        comment: 鍒嗙被slug鍞竴绱㈠紩
+        comment: 分类slug唯一索引
       - name: idx_categories_parent
         columns:
           - parent_id
-        comment: 鐖跺垎绫荤储寮曪紙鐢ㄤ簬灞傜骇鏌ヨ锛?
+        comment: 父分类索引（用于层级查询）
       - name: idx_categories_sort_order
         columns:
           - sort_order
-        comment: 鎺掑簭绱㈠紩
+        comment: 排序索引
       - name: idx_categories_is_visible
         columns:
           - is_visible
-        comment: 鍙鎬х储寮?
+        comment: 可见性索引
   CategoryCreateUpdate:
     type: schema
-    description: 鍒嗙被鍒涘缓/鏇存柊璇锋眰妯″瀷
+    description: 分类创建/更新请求模型
     properties:
       name:
         type: string
         minLength: 1
         maxLength: 100
-        description: 鍒嗙被鍚?
+        description: 分类名
       slug:
         type: string
         nullable: true
-        description: 鍒嗙被 slug
+        description: 分类 slug
       description:
         type: string
         nullable: true
-        description: 鍒嗙被鎻忚堪
+        description: 分类描述
       parent_id:
         type: bigint
         nullable: true
-        description: 鐖跺垎绫?ID
+        description: 父分类 ID
       sort_order:
         type: bigint
         default: 0
-        description: 鎺掑簭
+        description: 排序
       icon:
         type: string
         nullable: true
-        description: 鍥炬爣
+        description: 图标
       color:
         type: string
         nullable: true
-        description: 棰滆壊
+        description: 颜色
       is_visible:
         type: boolean
         default: true
-        description: 鏄惁鍙
+        description: 是否可见
     required:
       - name
 
   Media:
-    description: 濯掍綋鏂囦欢妯″瀷
+    description: 媒体文件模型
     status: active
     frontend_page: /admin/media
     properties:
       id:
         type: bigint
-        description: 濯掍綋 ID
+        description: 媒体 ID
       user:
         type: bigint
-        description: 涓婁紶鐢ㄦ埛
+        description: 上传用户
         foreignKey: User
       hash:
         type: string
         maxLength: 64
-        description: 鏂囦欢鍝堝笇
+        description: 文件哈希
       filename:
         type: string
         maxLength: 255
-        description: 鏂囦欢鍚?
+        description: 文件名
       original_filename:
         type: string
         nullable: true
-        description: 鍘熷鏂囦欢鍚?
+        description: 原始文件名
       file_path:
         type: string
         maxLength: 500
-        description: 鏂囦欢璺緞
+        description: 文件路径
       file_url:
         type: string
         maxLength: 500
-        description: 鏂囦欢 URL
+        description: 文件 URL
       file_size:
         type: bigint
         default: 0
-        description: 鏂囦欢澶у皬 (瀛楄妭)
+        description: 文件大小 (字节)
       file_type:
         type: string
         enum:
@@ -942,145 +942,145 @@ models:
           - document
           - other
         default: other
-        description: 鏂囦欢绫诲瀷
+        description: 文件类型
       mime_type:
         type: string
         nullable: true
-        description: MIME 绫诲瀷
+        description: MIME 类型
       width:
         type: bigint
         nullable: true
-        description: 瀹藉害
+        description: 宽度
       height:
         type: bigint
         nullable: true
-        description: 楂樺害
+        description: 高度
       duration:
         type: bigint
         nullable: true
-        description: 鏃堕暱 (绉?
+        description: 时长 (秒)
       thumbnail_path:
         type: string
         nullable: true
-        description: 缂╃暐鍥捐矾寰?
+        description: 缩略图路径
       thumbnail_url:
         type: string
         nullable: true
-        description: 缂╃暐鍥?URL
+        description: 缩略图 URL
       description:
         type: string
         nullable: true
-        description: 鎻忚堪
+        description: 描述
       alt_text:
         type: string
         nullable: true
-        description: 鏇夸唬鏂囨湰
+        description: 替代文本
       is_public:
         type: boolean
         default: true
-        description: 鏄惁鍏紑
+        description: 是否公开
       download_count:
         type: bigint
         default: 0
-        description: 涓嬭浇娆℃暟
+        description: 下载次数
       category:
         type: string
         nullable: true
         maxLength: 100
-        description: 濯掍綋鍒嗙被
+        description: 媒体分类
       tags:
         type: string
         nullable: true
         maxLength: 500
-        description: 鏍囩(閫楀彿鍒嗛殧)
+        description: 标签(逗号分隔)
       folder_id:
         type: bigint
         nullable: true
-        description: 鎵€灞炴枃浠跺す ID
+        description: 所属文件夹 ID
         foreignKey: MediaFolder
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: media
     indexes:
       - name: idx_media_user
         columns:
           - user
-        comment: 鐢ㄦ埛濯掍綋鏌ヨ绱㈠紩
+        comment: 用户媒体查询索引
       - name: idx_media_hash
         columns:
           - hash
         unique: true
-        comment: 鏂囦欢鍝堝笇鍞竴绱㈠紩锛堝幓閲嶏級
+        comment: 文件哈希唯一索引（去重）
       - name: idx_media_file_type
         columns:
           - file_type
-        comment: 鏂囦欢绫诲瀷绱㈠紩
+        comment: 文件类型索引
       - name: idx_media_is_public
         columns:
           - is_public
-        comment: 鍏紑鐘舵€佺储寮?
+        comment: 公开状态索引
       - name: idx_media_created_at
         columns:
           - created_at
         order: DESC
-        comment: 鍒涘缓鏃堕棿绱㈠紩
+        comment: 创建时间索引
       - name: idx_media_folder
         columns:
           - folder_id
-        comment: 鏂囦欢澶圭储寮?
+        comment: 文件夹索引
   MediaFolder:
-    description: 濯掍綋鏂囦欢澶规ā鍨?
+    description: 媒体文件夹模型
     status: active
     frontend_page: /admin/media
     properties:
       id:
         type: bigint
-        description: 鏂囦欢澶?ID
+        description: 文件夹 ID
       name:
         type: string
         maxLength: 255
-        description: 鏂囦欢澶瑰悕绉?
+        description: 文件夹名称
       parent_id:
         type: bigint
         nullable: true
-        description: 鐖舵枃浠跺す ID
+        description: 父文件夹 ID
         foreignKey: MediaFolder
       user:
         type: bigint
-        description: 鎵€灞炵敤鎴?
+        description: 所属用户
         foreignKey: User
       description:
         type: string
         nullable: true
-        description: 鏂囦欢澶规弿杩?
+        description: 文件夹描述
       sort_order:
         type: bigint
         default: 0
-        description: 鎺掑簭椤哄簭
+        description: 排序顺序
       is_public:
         type: boolean
         default: true
-        description: 鏄惁鍏紑
+        description: 是否公开
       media_count:
         type: bigint
         default: 0
         readOnly: true
-        description: 鏂囦欢澶瑰唴濯掍綋鏁伴噺
+        description: 文件夹内媒体数量
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: media_folders
     indexes:
@@ -1097,26 +1097,26 @@ models:
           - name
         unique: true
   MediaOptimization:
-    description: 濯掍綋浼樺寲閰嶇疆妯″瀷锛堟敮鎸?WebP 杞崲銆佸灏哄鐢熸垚銆丆DN 闆嗘垚锛?
+    description: 媒体优化配置模型（支持 WebP 转换、多尺寸生成、CDN 集成）
     status: active
     frontend_page: /admin/search-media
     properties:
       id:
         type: bigint
-        description: 閰嶇疆 ID
+        description: 配置 ID
       media_id:
         type: bigint
         foreignKey: Media
-        description: 濯掍綋 ID
+        description: 媒体 ID
       webp_url:
         type: string
         nullable: true
         maxLength: 500
-        description: WebP 鏍煎紡 URL
+        description: WebP 格式 URL
       sizes_json:
         type: text
         nullable: true
-        description: 澶氬昂瀵?JSON (thumbnail, medium, large)
+        description: 多尺寸 JSON (thumbnail, medium, large)
       cdn_url:
         type: string
         nullable: true
@@ -1126,71 +1126,71 @@ models:
         type: string
         maxLength: 20
         default: pending
-        description: 浼樺寲鐘舵€?(pending, processing, completed, failed)
+        description: 优化状态 (pending, processing, completed, failed)
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: media_optimizations
     indexes:
       - name: idx_media_optimization_media
         columns:
           - media_id
-        comment: 濯掍綋ID绱㈠紩
+        comment: 媒体ID索引
       - name: idx_media_optimization_status
         columns:
           - optimization_status
-        comment: 浼樺寲鐘舵€佺储寮?
+        comment: 优化状态索引
   ArticleRevisionNote:
-    description: 鏂囩珷淇娉ㄩ噴妯″瀷锛堜负姣忔淇娣诲姞璇存槑鍜屽娉級
+    description: 文章修订注释模型（为每次修订添加说明和备注）
     status: active
     frontend_page: /admin/content-ext
     properties:
       id:
         type: bigint
-        description: 娉ㄩ噴 ID
+        description: 注释 ID
       revision_id:
         type: bigint
         foreignKey: ArticleRevision
-        description: 鍏宠仈鐨勪慨璁㈢増鏈?ID
+        description: 关联的修订版本 ID
       user_id:
         type: bigint
         foreignKey: User
-        description: 娣诲姞娉ㄩ噴鐨勭敤鎴?ID
+        description: 添加注释的用户 ID
       note_content:
         type: text
-        description: 娉ㄩ噴鍐呭
+        description: 注释内容
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     orm: true
     table: article_revision_notes
     indexes:
       - name: idx_revision_notes_revision
         columns:
           - revision_id
-        comment: 淇鐗堟湰绱㈠紩
+        comment: 修订版本索引
   SystemSettings:
-    description: 绯荤粺璁剧疆妯″瀷
+    description: 系统设置模型
     status: active
     frontend_page: /admin/settings
     properties:
       id:
         type: integer
-        description: 璁剧疆 ID
+        description: 设置 ID
       setting_key:
         type: string
         maxLength: 100
-        description: 璁剧疆閿?
+        description: 设置键
       setting_value:
         type: string
-        description: 璁剧疆鍊?
+        description: 设置值
       setting_type:
         type: string
         enum:
@@ -1200,51 +1200,51 @@ models:
           - json
           - text
         default: string
-        description: 璁剧疆绫诲瀷
+        description: 设置类型
       description:
         type: string
         nullable: true
-        description: 鎻忚堪
+        description: 描述
       is_public:
         type: boolean
         default: false
-        description: 鏄惁鍏紑
+        description: 是否公开
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: system_settings
   AdminSettings:
-    description: 绠＄悊鍛樿缃ā鍨?
+    description: 管理员设置模型
     status: active
     frontend_page: /admin/settings
     properties:
       id:
         type: bigint
-        description: 璁剧疆 ID
+        description: 设置 ID
       user:
         type: bigint
-        description: 鐢ㄦ埛
+        description: 用户
         foreignKey: User
       settings_data:
         type: object
         additionalProperties: true
-        description: 璁剧疆鏁版嵁
+        description: 设置数据
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
   ArticleContent:
-    description: 鏂囩珷鍐呭妯″瀷
+    description: 文章内容模型
     status: active
     frontend_page: /admin/articles
     properties:
@@ -1253,122 +1253,121 @@ models:
         description: ID
       article:
         type: bigint
-        description: 鏂囩珷
+        description: 文章
         foreignKey: Article
       passwd:
         type: string
         nullable: true
-        description: 璁块棶瀵嗙爜
+        description: 访问密码
       content:
         type: text
-        description: 鏂囩珷鍐呭
+        description: 文章内容
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
       language_code:
         type: string
         default: zh-CN
-        description: 璇█浠ｇ爜锛堟枃绔犲浗闄呭寲锛?
+        description: 语言代码（文章国际化）
     orm: true
     table: article_content
   ArticleLike:
-    description: 鏂囩珷鐐硅禐妯″瀷
+    description: 文章点赞模型
     status: active
     frontend_page: /admin/articles
     properties:
       id:
         type: bigint
-        description: 鐐硅禐 ID
+        description: 点赞 ID
       user:
         type: bigint
-        description: 鐢ㄦ埛
+        description: 用户
         foreignKey: User
       article:
         type: bigint
-        description: 鏂囩珷
+        description: 文章
         foreignKey: Article
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     orm: true
     table: article_likes
   FileHash:
-    description: 鏂囦欢鍝堝笇妯″瀷
+    description: 文件哈希模型
     status: active
     frontend_page: /admin/media
     properties:
       id:
         type: bigint
-        description: 鍝堝笇 ID
+        description: 哈希 ID
       hash:
         type: string
         maxLength: 64
-        description: 鏂囦欢鍝堝笇
+        description: 文件哈希
       filename:
         type: string
         maxLength: 255
-        description: 鏂囦欢鍚?
+        description: 文件名
       created_at:
         type: datetime
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: datetime
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
       reference_count:
         type: bigint
         default: 1
-        description: 寮曠敤璁℃暟
+        description: 引用计数
       file_size:
         type: bigint
-        description: 鏂囦欢澶у皬
+        description: 文件大小
       mime_type:
         type: string
         maxLength: 100
-        description: MIME 绫诲瀷
+        description: MIME 类型
       storage_path:
         type: string
         maxLength: 512
-        description: 瀛樺偍璺緞
+        description: 存储路径
     orm: true
     table: file_hashs
   Menus:
-    description: 鑿滃崟妯″瀷
+    description: 菜单模型
     status: active
     frontend_page: /admin/settings
     properties:
       id:
         type: integer
-        description: 鑿滃崟 ID
+        description: 菜单 ID
       name:
         type: string
         maxLength: 100
-        description: 鑿滃崟鍚?
+        description: 菜单名
       slug:
         type: string
         maxLength: 100
-        description: 鑿滃崟 slug
+        description: 菜单 slug
       description:
         type: string
         nullable: true
-        description: 鑿滃崟鎻忚堪
-      is_active:
-        type: boolean
-        default: true
-        description: 鏄惁婵€娲?
+        is_active:
+          type: boolean
+          default: true
+          description: 是否激活
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     indexes:
       - name: idx_menus_slug
@@ -1380,24 +1379,24 @@ models:
           - is_active
     table: menus
   MenuItems:
-    description: 鑿滃崟椤规ā鍨?
+    description: 菜单项模型
     status: active
     frontend_page: /admin/settings
     properties:
       id:
         type: integer
-        description: 鑿滃崟椤?ID
+        description: 菜单项 ID
       menu_id:
         type: integer
-        description: 鑿滃崟 ID
+        description: 菜单 ID
       parent_id:
         type: integer
         nullable: true
-        description: 鐖惰彍鍗曢」 ID
+        description: 父菜单项 ID
       title:
         type: string
         maxLength: 255
-        description: 鏍囬
+        description: 标题
       url:
         type: string
         maxLength: 500
@@ -1405,19 +1404,19 @@ models:
       target:
         type: string
         default: _self
-        description: 鎵撳紑鏂瑰紡
+        description: 打开方式
       order_index:
         type: integer
         default: 0
-        description: 鎺掑簭绱㈠紩
+        description: 排序索引
       is_active:
         type: boolean
         default: true
-        description: 鏄惁婵€娲?
+        description: 是否激活
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     orm: true
     indexes:
       - name: idx_menu_items_menu_id
@@ -1431,38 +1430,38 @@ models:
           - order_index
     table: menu_items
   MenuLocation:
-    description: 鑿滃崟浣嶇疆妯″瀷锛堜富鑿滃崟銆侀〉鑴氳彍鍗曠瓑锛?
+    description: 菜单位置模型（主菜单、页脚菜单等）
     status: active
     frontend_page: /admin/content-ext
     properties:
       id:
         type: integer
-        description: 浣嶇疆 ID
+        description: 位置 ID
       name:
         type: string
         maxLength: 100
-        description: 浣嶇疆鏄剧ず鍚嶇О
+        description: 位置显示名称
       slug:
         type: string
         maxLength: 100
         unique: true
-        description: 浣嶇疆鏍囪瘑锛坧rimary-menu, footer-menu绛夛級
+        description: 位置标识（primary-menu, footer-menu等）
       description:
         type: string
         nullable: true
-        description: 浣嶇疆鎻忚堪
+        description: 位置描述
       theme_supports:
         type: string
         nullable: true
-        description: 鏀寔鐨勪富棰樺垪琛紙JSON鏍煎紡锛?
+        description: 支持的主题列表（JSON格式）
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: menu_locations
     indexes:
@@ -1471,25 +1470,25 @@ models:
           - slug
         unique: true
   MenuLocationAssignment:
-    description: 鑿滃崟-浣嶇疆鍏宠仈琛?
+    description: 菜单-位置关联表
     status: active
     frontend_page: /admin/content-ext
     properties:
       id:
         type: bigint
-        description: 鍏宠仈 ID
+        description: 关联 ID
       menu_id:
         type: bigint
-        description: 鑿滃崟 ID
+        description: 菜单 ID
         foreignKey: Menus
       location_id:
         type: bigint
-        description: 浣嶇疆 ID
+        description: 位置 ID
         foreignKey: MenuLocation
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     orm: true
     table: menu_location_assignments
     indexes:
@@ -1505,73 +1504,73 @@ models:
           - location_id
         unique: true
   Pages:
-    description: 椤甸潰妯″瀷
+    description: 页面模型
     status: active
     frontend_page: /admin/settings
     properties:
       id:
         type: bigint
-        description: 椤甸潰 ID
+        description: 页面 ID
       title:
         type: string
         maxLength: 255
-        description: 鏍囬
+        description: 标题
       slug:
         type: string
         maxLength: 255
-        description: 椤甸潰 slug
+        description: 页面 slug
       content:
         type: string
-        description: 椤甸潰鍐呭
+        description: 页面内容
       excerpt:
         type: string
         nullable: true
-        description: 鎽樿
+        description: 摘要
       template:
         type: string
         nullable: true
-        description: 妯℃澘
+        description: 模板
       status:
         type: bigint
         default: 0
-        description: 鐘舵€?
+        description: 状态
       author_id:
         type: bigint
         nullable: true
-        description: 浣滆€?ID
+        description: 作者 ID
       parent_id:
         type: bigint
         nullable: true
-        description: 鐖堕〉闈?ID
+        description: 父页面 ID
       order_index:
         type: integer
         default: 0
-        description: 鎺掑簭绱㈠紩
+        description: 排序索引
       meta_title:
         type: string
         nullable: true
-        description: 鍏冩爣棰?
+        description: 元标题
       meta_description:
         type: string
         nullable: true
-        description: 鍏冩弿杩?
+        description: 元描述
       meta_keywords:
         type: string
         nullable: true
-        description: 鍏冨叧閿瘝
+        description: 元关键词
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
       published_at:
         type: string
         format: date-time
         nullable: true
-        description: 鍙戝竷鏃堕棿
+        description: 发布时间
     orm: true
     indexes:
       - name: idx_pages_slug
@@ -1591,36 +1590,36 @@ models:
         columns:
           - order_index
   UploadTask:
-    description: 涓婁紶浠诲姟妯″瀷
+    description: 上传任务模型
     status: active
     frontend_page: /admin/media
     properties:
       id:
         type: string
         maxLength: 36
-        description: 浠诲姟 ID (UUID)
+        description: 任务 ID (UUID)
       user_id:
         type: bigint
-        description: 鐢ㄦ埛 ID
+        description: 用户 ID
       filename:
         type: string
         maxLength: 255
-        description: 鏂囦欢鍚?
+        description: 文件名
       total_size:
         type: bigint
-        description: 鏂囦欢鎬诲ぇ灏?
+        description: 文件总大小
       total_chunks:
         type: bigint
-        description: 鎬诲垎鍧楁暟
+        description: 总分块数
       uploaded_chunks:
         type: bigint
         default: 0
-        description: 宸蹭笂浼犲垎鍧楁暟
+        description: 已上传分块数
       file_hash:
         type: string
         nullable: true
         maxLength: 64
-        description: 鏂囦欢鍝堝笇
+        description: 文件哈希
       status:
         type: string
         default: initialized
@@ -1629,68 +1628,68 @@ models:
           - uploading
           - completed
           - canceled
-        description: 鐘舵€?
+        description: 状态
       created_at:
         type: string
         format: date-time
         default: datetime.utcnow
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
         default: datetime.utcnow
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: upload_tasks
   UploadChunk:
-    description: 涓婁紶鍒嗗潡妯″瀷
+    description: 上传分块模型
     status: active
     frontend_page: /admin/media
     properties:
       id:
         type: bigint
-        description: 鍒嗗潡 ID
+        description: 分块 ID
       upload_id:
         type: string
         maxLength: 36
-        description: 涓婁紶浠诲姟 ID
+        description: 上传任务 ID
       chunk_index:
         type: bigint
-        description: 鍒嗗潡绱㈠紩
+        description: 分块索引
       chunk_hash:
         type: string
         maxLength: 64
-        description: 鍒嗗潡鍝堝笇
+        description: 分块哈希
       chunk_size:
         type: bigint
-        description: 鍒嗗潡澶у皬
+        description: 分块大小
       chunk_path:
         type: string
         maxLength: 500
-        description: 鍒嗗潡璺緞
+        description: 分块路径
       created_at:
         type: string
         format: date-time
         default: datetime.utcnow
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     orm: true
     table: upload_chunks
   DownloadTask:
-    description: 澶栭儴璧勬簮涓嬭浇浠诲姟妯″瀷
+    description: 外部资源下载任务模型
     status: active
     frontend_page: /admin/media
     properties:
       id:
         type: bigint
-        description: 浠诲姟ID
+        description: 任务ID
       user_id:
         type: bigint
-        description: 鐢ㄦ埛ID
+        description: 用户ID
         foreignKey: User
       source_url:
         type: string
         maxLength: 2048
-        description: 婧怳RL鍦板潃
+        description: 源URL地址
       resource_type:
         type: string
         maxLength: 50
@@ -1701,24 +1700,24 @@ models:
           - audio
           - document
           - other
-        description: 璧勬簮绫诲瀷
+        description: 资源类型
       filename:
         type: string
         nullable: true
         maxLength: 255
-        description: 鏂囦欢鍚?
+        description: 文件名
       total_size:
         type: bigint
         nullable: true
-        description: 鏂囦欢鎬诲ぇ灏?瀛楄妭)
+        description: 文件总大小(字节)
       downloaded_size:
         type: bigint
         default: 0
-        description: 宸蹭笅杞藉ぇ灏?瀛楄妭)
+        description: 已下载大小(字节)
       progress:
         type: integer
         default: 0
-        description: 涓嬭浇杩涘害(0-100)
+        description: 下载进度(0-100)
       status:
         type: string
         maxLength: 50
@@ -1729,183 +1728,183 @@ models:
           - completed
           - failed
           - cancelled
-        description: 浠诲姟鐘舵€?
+        description: 任务状态
       error_message:
         type: text
         nullable: true
-        description: 閿欒淇℃伅
+        description: 错误信息
       media_id:
         type: bigint
         nullable: true
-        description: 鍏宠仈鐨勫獟浣揑D
+        description: 关联的媒体ID
         foreignKey: Media
       retry_count:
         type: bigint
         default: 0
-        description: 閲嶈瘯娆℃暟
+        description: 重试次数
       max_retries:
         type: bigint
         default: 3
-        description: 鏈€澶ч噸璇曟鏁?
+        description: 最大重试次数
       priority:
         type: bigint
         default: 0
-        description: 浼樺厛绾?鏁板瓧瓒婂皬浼樺厛绾ц秺楂?
+        description: 优先级（数字越小优先级越高）
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
       started_at:
         type: string
         format: date-time
         nullable: true
-        description: 寮€濮嬩笅杞芥椂闂?
+        description: 开始下载时间
       completed_at:
         type: string
         format: date-time
         nullable: true
-        description: 瀹屾垚鏃堕棿
+        description: 完成时间
     orm: true
     table: download_tasks
     indexes:
       - name: idx_download_tasks_user
         columns:
           - user_id
-        comment: 鐢ㄦ埛绱㈠紩
+        comment: 用户索引
       - name: idx_download_tasks_status
         columns:
           - status
-        comment: 鐘舵€佽繃婊ょ储寮?
+        comment: 状态过滤索引
       - name: idx_download_tasks_priority
         columns:
           - priority
           - created_at
-        comment: 浼樺厛绾ф帓搴忕储寮?
+        comment: 优先级排序索引
       - name: idx_download_tasks_created
         columns:
           - created_at
         order: DESC
-        comment: 鍒涘缓鏃堕棿绱㈠紩
+        comment: 创建时间索引
   Notification:
-    description: 閫氱煡妯″瀷
+    description: 通知模型
     status: active
     frontend_page: /admin/notifications
     properties:
       id:
         type: bigint
-        description: 閫氱煡 ID
+        description: 通知 ID
       recipient:
         type: bigint
-        description: 鎺ユ敹鑰?
+        description: 接收者
         foreignKey: User
       type:
         type: string
         maxLength: 100
-        description: 閫氱煡绫诲瀷
+        description: 通知类型
       title:
         type: string
         maxLength: 200
-        description: 鏍囬
+        description: 标题
       message:
         type: string
-        description: 娑堟伅鍐呭
+        description: 消息内容
       is_read:
         type: boolean
         default: false
-        description: 鏄惁宸茶
+        description: 是否已读
       read_at:
         type: string
         format: date-time
         nullable: true
-        description: 闃呰鏃堕棿
+        description: 阅读时间
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: notifications
   SearchHistory:
-    description: 鎼滅储鍘嗗彶妯″瀷
+    description: 搜索历史模型
     status: active
     frontend_page: /admin/seo
     properties:
       id:
         type: bigint
-        description: 鎼滅储鍘嗗彶 ID
+        description: 搜索历史 ID
       user:
         type: bigint
-        description: 鐢ㄦ埛
+        description: 用户
         foreignKey: User
       keyword:
         type: string
         maxLength: 255
-        description: 鎼滅储鍏抽敭璇?
+        description: 搜索关键词
       results_count:
         type: bigint
-        description: 缁撴灉鏁伴噺
+        description: 结果数量
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     orm: true
     table: search_history
     indexes:
       - name: idx_search_history_user
         columns:
           - user
-        comment: 鐢ㄦ埛鎼滅储鍘嗗彶绱㈠紩
+        comment: 用户搜索历史索引
       - name: idx_search_history_created
         columns:
           - created_at
         order: DESC
-        comment: 鍒涘缓鏃堕棿绱㈠紩
+        comment: 创建时间索引
       - name: idx_search_history_keyword
         columns:
           - keyword
-        comment: 鍏抽敭璇嶇储寮?
+        comment: 关键词索引
   SearchIndex:
-    description: 鎼滅储绱㈠紩鐘舵€佹ā鍨?
+    description: 搜索索引状态模型
     status: active
     frontend_page: /admin/search-media
     properties:
       id:
         type: bigint
-        description: 绱㈠紩璁板綍ID
+        description: 索引记录ID
       article_id:
         type: bigint
         unique: true
-        description: 鏂囩珷ID
+        description: 文章ID
         foreignKey: Article
       indexed:
         type: boolean
         default: false
-        description: 鏄惁宸茬储寮?
+        description: 是否已索引
       last_indexed_at:
         type: string
         format: date-time
         nullable: true
-        description: 鏈€鍚庣储寮曟椂闂?
+        description: 最后索引时间
       index_hash:
         type: string
         maxLength: 64
         nullable: true
-        description: 绱㈠紩鍐呭鍝堝笇(鐢ㄤ簬妫€娴嬪彉鏇?
+        description: 索引内容哈希(用于检测变更)
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: search_index
     indexes:
@@ -1913,117 +1912,117 @@ models:
         columns:
           - article_id
         unique: true
-        comment: 鏂囩珷ID鍞竴绱㈠紩
+        comment: 文章ID唯一索引
       - name: idx_search_index_indexed
         columns:
           - indexed
-        comment: 绱㈠紩鐘舵€佽繃婊?
+        comment: 索引状态过滤
       - name: idx_search_index_last_indexed
         columns:
           - last_indexed_at
         order: DESC
-        comment: 绱㈠紩鏃堕棿绱㈠紩
+        comment: 索引时间索引
   CustomField:
-    description: 鑷畾涔夊瓧娈垫ā鍨?
+    description: 自定义字段模型
     status: active
     frontend_page: /admin/integrations
     properties:
       id:
         type: bigint
-        description: 瀛楁 ID
+        description: 字段 ID
       user:
         type: bigint
-        description: 鐢ㄦ埛
+        description: 用户
         foreignKey: User
       field_name:
         type: string
         maxLength: 100
-        description: 瀛楁鍚嶇О
+        description: 字段名称
       field_value:
         type: string
-        description: 瀛楁鍊?
+        description: 字段值
     orm: true
     table: custom_fields
   ArticleRevision:
-    description: 鏂囩珷淇鍘嗗彶妯″瀷
+    description: 文章修订历史模型
     status: active
     frontend_page: /admin/articles
     properties:
       id:
         type: bigint
-        description: 淇ID
+        description: 修订ID
       article_id:
         type: bigint
-        description: 鍏宠仈鐨勬枃绔營D
+        description: 关联的文章ID
         foreignKey: Article
       revision_number:
         type: bigint
-        description: 淇鐗堟湰鍙?
+        description: 修订版本号
       title:
         type: string
         maxLength: 255
-        description: 淇鏃剁殑鏍囬
+        description: 修订时的标题
       excerpt:
         type: string
         nullable: true
-        description: 淇鏃剁殑鎽樿
+        description: 修订时的摘要
       content:
         type: text
-        description: 淇鏃剁殑鏂囩珷鍐呭
+        description: 修订时的文章内容
       cover_image:
         type: string
         nullable: true
         maxLength: 255
-        description: 淇鏃剁殑灏侀潰鍥?
+        description: 修订时的封面图
       tags_list:
         type: string
         nullable: true
         maxLength: 255
-        description: 淇鏃剁殑鏍囩
+        description: 修订时的标签
       category_id:
         type: bigint
         nullable: true
-        description: 淇鏃剁殑鍒嗙被ID
+        description: 修订时的分类ID
       status:
         type: bigint
         default: 0
-        description: 淇鏃剁殑鏂囩珷鐘舵€?
+        description: 修订时的文章状态
       hidden:
         type: boolean
         default: false
-        description: 淇鏃剁殑闅愯棌鐘舵€?
+        description: 修订时的隐藏状态
       is_featured:
         type: boolean
         default: false
-        description: 淇鏃剁殑绮鹃€夌姸鎬?
+        description: 修订时的精选状态
       is_vip_only:
         type: boolean
         default: false
-        description: 淇鏃剁殑VIP闄愬埗
+        description: 修订时的VIP限制
       required_vip_level:
         type: bigint
         default: 0
-        description: 淇鏃剁殑VIP绛夌骇瑕佹眰
+        description: 修订时的VIP等级要求
       author_id:
         type: bigint
         nullable: true
-        description: 鎵ц淇鐨勭敤鎴稩D
+        description: 执行修订的用户ID
         foreignKey: User
       change_summary:
         type: string
         nullable: true
         maxLength: 500
-        description: 淇璇存槑/鍙樻洿鎽樿
+        description: 修订说明/变更摘要
       hash_code:
         type: string
         nullable: true
         maxLength: 64
-        description: 鍐呭鍝堝笇鐮侊紙鐢ㄤ簬鍘婚噸锛?
+        description: 内容哈希码（用于去重）
         index: true
       created_at:
         type: string
         format: date-time
-        description: 淇鍒涘缓鏃堕棿
+        description: 修订创建时间
     orm: true
     table: article_revisions
     relationships:
@@ -2045,52 +2044,50 @@ models:
       - name: idx_article_revisions_hash
         columns:
           - hash_code
-
-
   WidgetInstance:
-    description: Widget瀹炰緥妯″瀷锛堟寔涔呭寲瀛樺偍锛?
+    description: Widget实例模型（持久化存储）
     status: active
     frontend_page: /admin/widgets
     properties:
       id:
         type: bigint
-        description: Widget瀹炰緥 ID
+        description: Widget实例 ID
       widget_type:
         type: string
         maxLength: 50
-        description: Widget绫诲瀷锛坰earch, recent_posts, categories绛夛級
+        description: Widget类型（search, recent_posts, categories等）
       area:
         type: string
         maxLength: 50
-        description: 鏄剧ず鍖哄煙锛坰idebar_primary, footer_1绛夛級
+        description: 显示区域（sidebar_primary, footer_1等）
       title:
         type: string
         nullable: true
         maxLength: 255
-        description: Widget鏍囬
+        description: Widget标题
       config:
         type: string
-        description: Widget閰嶇疆锛圝SON鏍煎紡锛?
+        description: Widget配置（JSON格式）
       order_index:
         type: bigint
         default: 0
-        description: 鏄剧ず椤哄簭
+        description: 显示顺序
       is_active:
         type: boolean
         default: true
-        description: 鏄惁鍚敤
+        description: 是否启用
       conditions:
         type: string
         nullable: true
-        description: 鏄剧ず鏉′欢锛圝SON鏍煎紡锛?
+        description: 显示条件（JSON格式）
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: widget_instances
     indexes:
@@ -2104,64 +2101,64 @@ models:
         columns:
           - widget_type
   BlockPattern:
-    description: 鑷畾涔夊潡妯″紡妯″瀷
+    description: 自定义块模式模型
     status: active
     frontend_page: /admin/page-builder
     properties:
       id:
         type: bigint
-        description: 妯″紡ID
+        description: 模式ID
       name:
         type: string
         maxLength: 100
         unique: true
-        description: 妯″紡鍚嶇О锛堝敮涓€鏍囪瘑锛?
+        description: 模式名称（唯一标识）
       title:
         type: string
         maxLength: 255
-        description: 妯″紡鏍囬锛堟樉绀哄悕绉帮級
+        description: 模式标题（显示名称）
       description:
         type: text
         nullable: true
-        description: 妯″紡鎻忚堪
+        description: 模式描述
       category:
         type: string
         maxLength: 50
         default: custom
-        description: 鍒嗙被锛坈ustom, hero, features绛夛級
+        description: 分类（custom, hero, features等）
       blocks:
         type: text
-        description: 鍧楁暟鎹紙JSON鏍煎紡锛?
+        description: 块数据（JSON格式）
       keywords:
         type: text
         nullable: true
-        description: 鍏抽敭璇嶏紙閫楀彿鍒嗛殧锛?
+        description: 关键词（逗号分隔）
       thumbnail:
         type: string
         maxLength: 500
         nullable: true
-        description: 缂╃暐鍥綰RL
+        description: 缩略图URL
       is_public:
         type: boolean
         default: false
-        description: 鏄惁鍏紑锛坒alse=绉佹湁锛宼rue=鍏紑锛?
+        description: 是否公开（false=私有，true=公开）
       user_id:
         type: bigint
         nullable: true
-        description: 鍒涘缓鑰呯敤鎴稩D
+        description: 创建者用户ID
         foreignKey: User
       viewport_width:
         type: bigint
         default: 800
-        description: 棰勮瀹藉害
+        description: 预览宽度
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: block_patterns
     indexes:
@@ -2184,54 +2181,54 @@ models:
       - to_pattern_dict
     defs_target: block_pattern_defs.py
   CustomPostType:
-    description: 鑷畾涔夊唴瀹圭被鍨嬫ā鍨?
+    description: 自定义内容类型模型
     status: active
     frontend_page: /admin/content-ext
     properties:
       id:
         type: bigint
-        description: 鍐呭绫诲瀷ID
+        description: 内容类型ID
       name:
         type: string
         maxLength: 100
-        description: 鍐呭绫诲瀷鍚嶇О
+        description: 内容类型名称
       slug:
         type: string
         maxLength: 100
         unique: true
-        description: 鍐呭绫诲瀷鏍囪瘑
+        description: 内容类型标识
       description:
         type: string
         nullable: true
-        description: 鎻忚堪
+        description: 描述
       supports:
         type: string
         nullable: true
-        description: 鏀寔鐨勫姛鑳?JSON鏁扮粍)
+        description: 支持的功能(JSON数组)
       has_archive:
         type: boolean
         default: false
-        description: 鏄惁鏈夊綊妗ｉ〉
+        description: 是否有归档页
       menu_icon:
         type: string
         nullable: true
-        description: 鑿滃崟鍥炬爣
+        description: 菜单图标
       menu_position:
         type: integer
         default: 5
-        description: 鑿滃崟浣嶇疆
+        description: 菜单位置
       is_active:
         type: boolean
         default: true
-        description: 鏄惁婵€娲?
+        description: 是否激活
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: custom_post_types
     indexes:
@@ -2243,37 +2240,37 @@ models:
         columns:
           - is_active
   CommentVote:
-    description: 璇勮鎶曠エ妯″瀷
+    description: 评论投票模型
     status: active
     frontend_page: /admin/comments
     properties:
       id:
         type: bigint
-        description: 鎶曠エ ID
+        description: 投票 ID
       comment_id:
         type: bigint
-        description: 璇勮 ID
+        description: 评论 ID
         index: true
       user:
         type: bigint
         nullable: true
-        description: 鐢ㄦ埛 ID锛堝尶鍚嶆姇绁ㄥ彲涓虹┖锛?
+        description: 用户 ID（匿名投票可为空）
         foreignKey: User
       vote_type:
         type: integer
         enum:
           - 1
           - -1
-        description: '鎶曠エ绫诲瀷 (1: 璧? -1: 韪?'
+        description: '投票类型 (1: 赞, -1: 踩)'
       ip_address:
         type: string
         nullable: true
         maxLength: 45
-        description: IP 鍦板潃锛堢敤浜庨槻鍒凤級
+        description: IP 地址（用于防刷）
       created_at:
         type: string
         format: date-time
-        description: 鎶曠エ鏃堕棿
+        description: 投票时间
     orm: true
     table: comment_votes
     indexes:
@@ -2283,26 +2280,26 @@ models:
           - user
         unique: true
   CommentSubscription:
-    description: 璇勮璁㈤槄妯″瀷
+    description: 评论订阅模型
     status: active
     frontend_page: /admin/comments
     properties:
       id:
         type: bigint
-        description: 璁㈤槄 ID
+        description: 订阅 ID
       article_id:
         type: bigint
-        description: 鏂囩珷 ID
+        description: 文章 ID
         index: true
       user_id:
         type: bigint
         nullable: true
-        description: 鐢ㄦ埛 ID锛堣瀹㈣闃呭彲涓虹┖锛?
+        description: 用户 ID（访客订阅可为空）
         foreignKey: User
       email:
         type: string
         maxLength: 255
-        description: 璁㈤槄閭
+        description: 订阅邮箱
       notify_type:
         type: string
         default: new_comment
@@ -2310,29 +2307,29 @@ models:
           - new_comment
           - reply_to_me
           - all_replies
-        description: '閫氱煡绫诲瀷 (new_comment: 鏂拌瘎璁? reply_to_me: 鍥炲鎴? all_replies: 鎵€鏈夊洖澶?'
+        description: '通知类型 (new_comment: 新评论, reply_to_me: 回复我, all_replies: 所有回复)'
       is_active:
         type: boolean
         default: true
-        description: 鏄惁婵€娲?
+        description: 是否激活
       confirm_token:
         type: string
         nullable: true
         maxLength: 64
-        description: 纭token锛堢敤浜庤瀹㈤獙璇侊級
+        description: 确认token（用于访客验证）
       confirmed_at:
         type: string
         format: date-time
         nullable: true
-        description: 纭鏃堕棿
+        description: 确认时间
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: comment_subscriptions
     indexes:
@@ -2351,82 +2348,82 @@ models:
           - email
         unique: true
   Comment:
-    description: 璇勮妯″瀷
+    description: 评论模型
     status: active
     frontend_page: /admin/comments
     properties:
       id:
         type: bigint
-        description: 璇勮 ID
+        description: 评论 ID
       article_id:
         type: bigint
-        description: 鏂囩珷 ID
+        description: 文章 ID
         foreignKey: Article
         index: true
       user_id:
         type: bigint
         nullable: true
-        description: 鐢ㄦ埛 ID锛堣瀹㈣瘎璁哄彲涓虹┖锛?
+        description: 用户 ID（访客评论可为空）
         foreignKey: User
         index: true
       parent_id:
         type: bigint
         nullable: true
-        description: 鐖惰瘎璁?ID锛堢敤浜庡洖澶嶏級
+        description: 父评论 ID（用于回复）
         foreignKey: Comment
         index: true
       content:
         type: text
-        description: 璇勮鍐呭
+        description: 评论内容
       author_name:
         type: string
         nullable: true
         maxLength: 100
-        description: 浣滆€呭鍚嶏紙璁垮濉啓锛?
+        description: 作者姓名（访客填写）
       author_email:
         type: string
         nullable: true
         maxLength: 255
-        description: 浣滆€呴偖绠憋紙璁垮濉啓锛?
+        description: 作者邮箱（访客填写）
       author_url:
         type: string
         nullable: true
         maxLength: 500
-        description: 浣滆€呯綉绔欙紙璁垮濉啓锛?
+        description: 作者网站（访客填写）
       author_ip:
         type: string
         nullable: true
         maxLength: 45
-        description: 浣滆€?IP 鍦板潃
+        description: 作者 IP 地址
       user_agent:
         type: string
         nullable: true
         maxLength: 500
-        description: 鐢ㄦ埛浠ｇ悊
+        description: 用户代理
       is_approved:
         type: boolean
         default: true
-        description: 鏄惁宸插鏍搁€氳繃
+        description: 是否已审核通过
       likes:
         type: bigint
         default: 0
-        description: 鐐硅禐鏁?
+        description: 点赞数
       spam_score:
         type: float
         nullable: true
-        description: 鍨冨溇璇勫垎
+        description: 垃圾评分
       spam_reasons:
         type: string
         nullable: true
-        description: 鍨冨溇妫€娴嬪師鍥狅紙JSON鏍煎紡锛?
+        description: 垃圾检测原因（JSON格式）
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: comments
     indexes:
@@ -2452,69 +2449,69 @@ models:
           - is_approved
           - created_at
         order: DESC
-        comment: 鏂囩珷璇勮鍒楄〃鏌ヨ绱㈠紩锛堟渶甯哥敤锛?
+        comment: 文章评论列表查询索引（最常用）
       - name: idx_comments_user_created
         columns:
           - user_id
           - created_at
         order: DESC
-        comment: 鐢ㄦ埛璇勮鍘嗗彶鏌ヨ绱㈠紩
+        comment: 用户评论历史查询索引
       - name: idx_comments_email
         columns:
           - author_email
-        comment: 閭鏌ヨ绱㈠紩锛堢敤浜庤闃呴€氱煡锛?
+        comment: 邮箱查询索引（用于订阅通知）
       - name: idx_comments_spam_score
         columns:
           - spam_score
-        comment: 鍨冨溇璇勮妫€娴嬬储寮?
+        comment: 垃圾评论检测索引
   OAuthAccount:
-    description: OAuth 绗笁鏂圭櫥褰曡处鍙峰叧鑱旀ā鍨?
+    description: OAuth 第三方登录账号关联模型
     status: active
     frontend_page: /admin/integrations
     properties:
       id:
         type: bigint
-        description: 涓婚敭ID
+        description: 主键ID
       user_id:
         type: bigint
-        description: 鍏宠仈鐨勭敤鎴稩D
+        description: 关联的用户ID
         foreignKey: User
         index: true
       provider:
         type: string
         maxLength: 50
-        description: OAuth鎻愪緵鍟?github/google/wechat/qq/weibo)
+        description: OAuth提供商 (github/google/wechat/qq/weibo)
         index: true
       provider_user_id:
         type: string
         maxLength: 255
-        description: 绗笁鏂瑰钩鍙扮殑鐢ㄦ埛ID
+        description: 第三方平台的用户ID
         index: true
       access_token:
         type: string
         nullable: true
-        description: 璁块棶浠ょ墝锛堝姞瀵嗗瓨鍌級
+        description: 访问令牌（加密存储）
       refresh_token:
         type: string
         nullable: true
-        description: 鍒锋柊浠ょ墝锛堝姞瀵嗗瓨鍌級
+        description: 刷新令牌（加密存储）
       token_expires_at:
         type: string
         format: date-time
         nullable: true
-        description: Token杩囨湡鏃堕棿
+        description: Token过期时间
       extra_data:
         type: string
         nullable: true
-        description: 棰濆鏁版嵁锛圝SON鏍煎紡锛屽瓨鍌ㄥご鍍忋€佹樀绉扮瓑锛?
+        description: 额外数据（JSON格式，存储头像、昵称等）
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: oauth_accounts
     indexes:
@@ -2529,16 +2526,16 @@ models:
           - provider
         unique: true
   ArticleSEO:
-    description: 鏂囩珷SEO鍏冩暟鎹ā鍨?
+    description: 文章SEO元数据模型
     status: active
     frontend_page: /admin/seo
     properties:
       id:
         type: bigint
-        description: SEO璁板綍ID
+        description: SEO记录ID
       article_id:
         type: bigint
-        description: 鍏宠仈鐨勬枃绔營D
+        description: 关联的文章ID
         foreignKey: Article
         unique: true
         index: true
@@ -2546,81 +2543,81 @@ models:
         type: string
         nullable: true
         maxLength: 255
-        description: SEO鏍囬
+        description: SEO标题
       seo_description:
         type: text
         nullable: true
-        description: SEO鎻忚堪
+        description: SEO描述
       seo_keywords:
         type: string
         nullable: true
         maxLength: 500
-        description: SEO鍏抽敭璇?
+        description: SEO关键词
       og_title:
         type: string
         nullable: true
         maxLength: 255
-        description: Open Graph鏍囬
+        description: Open Graph标题
       og_description:
         type: text
         nullable: true
-        description: Open Graph鎻忚堪
+        description: Open Graph描述
       og_image:
         type: string
         nullable: true
         maxLength: 500
-        description: Open Graph鍥剧墖
+        description: Open Graph图片
       og_type:
         type: string
         default: article
         maxLength: 50
-        description: Open Graph绫诲瀷
+        description: Open Graph类型
       twitter_title:
         type: string
         nullable: true
         maxLength: 255
-        description: Twitter Card鏍囬
+        description: Twitter Card标题
       twitter_description:
         type: text
         nullable: true
-        description: Twitter Card鎻忚堪
+        description: Twitter Card描述
       twitter_image:
         type: string
         nullable: true
         maxLength: 500
-        description: Twitter Card鍥剧墖
+        description: Twitter Card图片
       twitter_card:
         type: string
         default: summary_large_image
         maxLength: 50
-        description: Twitter Card绫诲瀷
+        description: Twitter Card类型
       canonical_url:
         type: string
         nullable: true
         maxLength: 500
-        description: 瑙勮寖URL
+        description: 规范URL
       robots_meta:
         type: string
         default: index,follow
         maxLength: 100
-        description: Robots鍏冩爣绛?
+        description: Robots元标签
       schema_org_enabled:
         type: boolean
         default: true
-        description: 鏄惁鍚敤Schema.org
+        description: 是否启用Schema.org
       schema_org_type:
         type: string
         default: BlogPosting
         maxLength: 50
-        description: Schema.org绫诲瀷
+        description: Schema.org类型
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: article_seo
     relationships:
@@ -2634,43 +2631,42 @@ models:
           - article_id
         unique: true
   ShareStat:
-    description: 鍒嗕韩缁熻妯″瀷
+    description: 分享统计模型
     status: active
     frontend_page: /admin/seo
     properties:
       id:
         type: bigint
-        description: 缁熻 ID
+        description: 统计 ID
       article_id:
         type: bigint
-        description: 鏂囩珷 ID
+        description: 文章 ID
         foreignKey: Article
         index: true
       platform:
         type: string
         maxLength: 50
-        description: 鍒嗕韩骞冲彴 (wechat, weibo, twitter, facebook, linkedin, zhihu, juejin,
-          segmentfault, telegram, copy)
+        description: 分享平台 (wechat, weibo, twitter, facebook, linkedin, zhihu, juejin, segmentfault, telegram, copy)
         index: true
       shared_by:
         type: bigint
         nullable: true
-        description: 鍒嗕韩鑰呯敤鎴?ID
+        description: 分享者用户 ID
         foreignKey: User
       ip_address:
         type: string
         nullable: true
         maxLength: 45
-        description: 鍒嗕韩鑰?IP 鍦板潃
+        description: 分享者 IP 地址
       user_agent:
         type: string
         nullable: true
         maxLength: 500
-        description: 鐢ㄦ埛浠ｇ悊
+        description: 用户代理
       created_at:
         type: string
         format: date-time
-        description: 鍒嗕韩鏃堕棿
+        description: 分享时间
     orm: true
     table: share_stats
     indexes:
@@ -2678,32 +2674,32 @@ models:
         columns:
           - article_id
           - platform
-        comment: 鏂囩珷鍜屽钩鍙拌仈鍚堢储寮?
+        comment: 文章和平台联合索引
       - name: idx_share_stats_created
         columns:
           - created_at
         order: DESC
-        comment: 鍒涘缓鏃堕棿绱㈠紩
+        comment: 创建时间索引
       - name: idx_share_stats_article_created
         columns:
           - article_id
           - created_at
         order: DESC
-        comment: 鏂囩珷鍒嗕韩鏃堕棿绱㈠紩
+        comment: 文章分享时间索引
   SensitiveWord:
-    description: 鏁忔劅璇嶆ā鍨?
+    description: 敏感词模型
     status: active
     frontend_page: /admin/sensitive-words
     properties:
       id:
         type: bigint
-        description: 鏁忔劅璇?ID
+        description: 敏感词 ID
       word:
         type: string
         maxLength: 100
         unique: true
         index: true
-        description: 鏁忔劅璇嶅唴瀹?
+        description: 敏感词内容
       level:
         type: integer
         default: 1
@@ -2711,7 +2707,7 @@ models:
           - 1
           - 2
           - 3
-        description: 鏁忔劅绾у埆 (1:浣? 2:涓? 3:楂?
+        description: 敏感级别 (1:低, 2:中, 3:高)
       action:
         type: string
         maxLength: 50
@@ -2720,142 +2716,142 @@ models:
           - block
           - replace
           - warn
-        description: 澶勭悊鏂瑰紡 (block:鎷︽埅, replace:鏇挎崲, warn:璀﹀憡)
+        description: 处理方式 (block:拦截, replace:替换, warn:警告)
       replacement:
         type: string
         nullable: true
         maxLength: 100
-        description: 鏇挎崲璇嶏紙褰揳ction涓簉eplace鏃朵娇鐢級
+        description: 替换词（当action为replace时使用）
       category:
         type: string
         nullable: true
         maxLength: 50
-        description: 鍒嗙被锛堟斂娌汇€佽壊鎯呫€佹毚鍔涚瓑锛?
+        description: 分类（政治、色情、暴力等）
       is_active:
         type: boolean
         default: true
-        description: 鏄惁婵€娲?
+        description: 是否激活
       created_by:
         type: bigint
         nullable: true
-        description: 鍒涘缓鑰呯敤鎴稩D
+        description: 创建者用户ID
         foreignKey: User
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: sensitive_words
     indexes:
       - name: idx_sensitive_word_level
         columns:
           - level
-        comment: 鏁忔劅绾у埆绱㈠紩
+        comment: 敏感级别索引
       - name: idx_sensitive_word_category
         columns:
           - category
-        comment: 鍒嗙被绱㈠紩
+        comment: 分类索引
       - name: idx_sensitive_word_active
         columns:
           - is_active
-        comment: 婵€娲荤姸鎬佺储寮?
+        comment: 激活状态索引
   UserSession:
-    description: 鐢ㄦ埛浼氳瘽妯″瀷
+    description: 用户会话模型
     status: active
     frontend_page: /admin/user-security
     properties:
       id:
         type: bigint
-        description: 浼氳瘽 ID
+        description: 会话 ID
       user_id:
         type: bigint
         index: true
-        description: 鐢ㄦ埛ID
+        description: 用户ID
         foreignKey: User
       access_token:
         type: string
         maxLength: 255
         unique: true
         index: true
-        description: 浼氳瘽浠ょ墝
+        description: 会话令牌
       refresh_token:
         type: string
         maxLength: 255
         index: true
-        description: 浼氳瘽鍒锋柊浠ょ墝锛堜笉鍞竴 鎵爜鐨勭櫥褰曚緷璧栵級
+        description: 会话刷新令牌（不唯一，扫码的登录依赖）
       device_info:
         type: string
         nullable: true
         maxLength: 500
-        description: 璁惧淇℃伅锛圲ser-Agent锛?
+        description: 设备信息（User-Agent）
       ip_address:
         type: string
         nullable: true
         maxLength: 45
-        description: IP鍦板潃
+        description: IP地址
       location:
         type: string
         nullable: true
         maxLength: 100
-        description: 鍦扮悊浣嶇疆
+        description: 地理位置
       is_active:
         type: boolean
         default: true
-        description: 鏄惁娲昏穬
+        description: 是否活跃
       last_activity:
         type: string
         format: date-time
-        description: 鏈€鍚庢椿鍔ㄦ椂闂?
+        description: 最后活动时间
       expires_at:
         type: string
         format: date-time
-        description: 杩囨湡鏃堕棿
+        description: 过期时间
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     orm: true
     table: user_sessions
     indexes:
       - name: idx_user_sessions_user_id
         columns:
           - user_id
-        comment: 鐢ㄦ埛ID绱㈠紩
+        comment: 用户ID索引
       - name: idx_user_access_token
         columns:
           - access_token
         unique: true
-        comment: 浼氳瘽浠ょ墝鍞竴绱㈠紩
+        comment: 会话令牌唯一索引
       - name: idx_user_sessions_is_active
         columns:
           - is_active
-        comment: 娲昏穬鐘舵€佺储寮?
+        comment: 活跃状态索引
       - name: idx_user_sessions_expires
         columns:
           - expires_at
-        comment: 杩囨湡鏃堕棿绱㈠紩
+        comment: 过期时间索引
   LoginAttempt:
-    description: 鐧诲綍灏濊瘯璁板綍妯″瀷
+    description: 登录尝试记录模型
     status: active
     frontend_page: /admin/security
     properties:
       id:
         type: bigint
-        description: 璁板綍 ID
+        description: 记录 ID
       username:
         type: string
         maxLength: 255
         index: true
-        description: 灏濊瘯鐧诲綍鐨勭敤鎴峰悕
+        description: 尝试登录的用户名
       ip_address:
         type: string
         maxLength: 45
         index: true
-        description: IP鍦板潃
+        description: IP地址
       user_agent:
         type: string
         nullable: true
@@ -2864,34 +2860,34 @@ models:
       is_success:
         type: boolean
         default: false
-        description: 鏄惁鎴愬姛
+        description: 是否成功
       failure_reason:
         type: string
         nullable: true
         maxLength: 255
-        description: 澶辫触鍘熷洜
+        description: 失败原因
       created_at:
         type: string
         format: date-time
-        description: 灏濊瘯鏃堕棿
+        description: 尝试时间
     orm: true
     table: login_attempts
     indexes:
       - name: idx_login_attempts_username
         columns:
           - username
-        comment: 鐢ㄦ埛鍚嶇储寮?
+        comment: 用户名索引
       - name: idx_login_attempts_ip
         columns:
           - ip_address
-        comment: IP鍦板潃绱㈠紩
+        comment: IP地址索引
       - name: idx_login_attempts_created
         columns:
           - created_at
         order: DESC
-        comment: 鍒涘缓鏃堕棿绱㈠紩
+        comment: 创建时间索引
   TokenBlacklist:
-    description: Token 榛戝悕鍗曟ā鍨嬶紙UNLOGGED 琛紝鐢ㄤ簬瀛樺偍琚挙閿€鐨?JWT Token锛?
+    description: Token 黑名单模型（UNLOGGED 表，用于存储被撤销的 JWT Token）
     status: active
     frontend_page: /admin/security
     properties:
@@ -2902,25 +2898,25 @@ models:
         type: string
         maxLength: 64
         unique: true
-        description: Token 鍞竴鏍囪瘑绗︼紙token 鍓?2涓瓧绗︼級
+        description: Token 唯一标识符（token 前12个字符）
       token_hash:
         type: string
         maxLength: 128
         nullable: true
-        description: Token 鍝堝笇鍊硷紙鐢ㄤ簬璋冭瘯鍜屽璁★級
+        description: Token 哈希值（用于调试和审计）
       expires_at:
         type: string
         format: date-time
-        description: Token 杩囨湡鏃堕棿
+        description: Token 过期时间
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       reason:
         type: string
         maxLength: 255
         nullable: true
-        description: 鎾ら攢鍘熷洜
+        description: 撤销原因
     orm: true
     table: token_blacklist
     unlogged: true
@@ -2928,78 +2924,78 @@ models:
       - name: idx_token_blacklist_expires
         columns:
           - expires_at
-        comment: 杩囨湡鏃堕棿绱㈠紩
+        comment: 过期时间索引
       - name: idx_token_blacklist_created
         columns:
           - created_at
         order: DESC
-        comment: 鍒涘缓鏃堕棿绱㈠紩
+        comment: 创建时间索引
   ArticleAnnotation:
-    description: 鏂囩珷鎵规敞妯″瀷锛堟敮鎸佸崗浣滅紪杈戞椂鐨勮瘎璁哄拰鎵规敞锛?
+    description: 文章批注模型（支持协作编辑时的评论和批注）
     status: active
     frontend_page: /admin/articles
     properties:
       id:
         type: bigint
-        description: 鎵规敞 ID
+        description: 批注 ID
       article:
         type: bigint
-        description: 鏂囩珷 ID
+        description: 文章 ID
         foreignKey: Article
       user:
         type: bigint
-        description: 鍒涘缓鑰?
+        description: 创建者
         foreignKey: User
       parent:
         type: bigint
         nullable: true
-        description: 鐖舵壒娉?ID锛堢敤浜庡洖澶嶏級
+        description: 父批注 ID（用于回复）
         foreignKey: ArticleAnnotation
       content:
         type: text
-        description: 鎵规敞鍐呭
+        description: 批注内容
       position:
         type: text
         nullable: true
-        description: 鎵规敞浣嶇疆锛圝SON鏍煎紡锛屽寘鍚玸tart/end绛夛級
+        description: 批注位置（JSON格式，包含start/end等）
       selection_text:
         type: string
         maxLength: 500
         nullable: true
-        description: 閫変腑鐨勬枃鏈墖娈?
+        description: 选中的文本片段
       is_resolved:
         type: boolean
         default: false
-        description: 鏄惁宸茶В鍐?
+        description: 是否已解决
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: article_annotations
     indexes:
       - name: idx_article_annotations_article
         columns:
           - article
-        comment: 鏂囩珷ID绱㈠紩
+        comment: 文章ID索引
       - name: idx_article_annotations_user
         columns:
           - user
-        comment: 鐢ㄦ埛ID绱㈠紩
+        comment: 用户ID索引
       - name: idx_article_annotations_parent
         columns:
           - parent
-        comment: 鐖舵壒娉↖D绱㈠紩
+        comment: 父批注ID索引
       - name: idx_article_annotations_resolved
         columns:
           - is_resolved
-        comment: 瑙ｅ喅鐘舵€佺储寮?
+        comment: 解决状态索引
   Webhook:
-    description: Webhook閰嶇疆妯″瀷
+    description: Webhook配置模型
     status: active
     frontend_page: /admin/webhooks
     properties:
@@ -3009,7 +3005,7 @@ models:
       name:
         type: string
         maxLength: 255
-        description: Webhook鍚嶇О
+        description: Webhook名称
       url:
         type: string
         maxLength: 2048
@@ -3018,37 +3014,37 @@ models:
         type: string
         maxLength: 255
         nullable: true
-        description: 绛惧悕瀵嗛挜锛堢敤浜嶩MAC楠岃瘉锛?
+        description: 签名密钥（用于HMAC验证）
       events:
         type: text
-        description: 璁㈤槄鐨勪簨浠跺垪琛紙JSON鏁扮粍锛?
+        description: 订阅的事件列表（JSON数组）
       is_active:
         type: boolean
         default: true
-        description: 鏄惁婵€娲?
+        description: 是否激活
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     orm: true
     table: webhooks
     indexes:
       - name: idx_webhooks_is_active
         columns:
           - is_active
-        comment: 婵€娲荤姸鎬佺储寮?
+        comment: 激活状态索引
   WebhookDelivery:
-    description: Webhook鎶曢€掕褰曟ā鍨?
+    description: Webhook投递记录模型
     status: active
     frontend_page: /admin/webhooks
     properties:
       id:
         type: bigint
-        description: 鎶曢€掕褰旾D
+        description: 投递记录ID
       webhook:
         type: bigint
         foreignKey: Webhook
@@ -3056,57 +3052,57 @@ models:
       event:
         type: string
         maxLength: 100
-        description: 浜嬩欢绫诲瀷
+        description: 事件类型
       payload:
         type: text
-        description: 璇锋眰payload锛圝SON锛?
+        description: 请求payload（JSON）
       response_status:
         type: integer
         nullable: true
-        description: 鍝嶅簲鐘舵€佺爜
+        description: 响应状态码
       response_body:
         type: text
         nullable: true
-        description: 鍝嶅簲鍐呭
+        description: 响应内容
       success:
         type: boolean
         default: false
-        description: 鏄惁鎴愬姛
+        description: 是否成功
       retry_count:
         type: integer
         default: 0
-        description: 閲嶈瘯娆℃暟
+        description: 重试次数
       next_retry_at:
         type: string
         format: date-time
         nullable: true
-        description: 涓嬫閲嶈瘯鏃堕棿
+        description: 下次重试时间
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     orm: true
     table: webhook_deliveries
     indexes:
       - name: idx_webhook_deliveries_webhook
         columns:
           - webhook
-        comment: Webhook ID绱㈠紩
+        comment: Webhook ID索引
       - name: idx_webhook_deliveries_event
         columns:
           - event
-        comment: 浜嬩欢绫诲瀷绱㈠紩
+        comment: 事件类型索引
       - name: idx_webhook_deliveries_success
         columns:
           - success
-        comment: 鎴愬姛鐘舵€佺储寮?
+        comment: 成功状态索引
       - name: idx_webhook_deliveries_created
         columns:
           - created_at
         order: DESC
-        comment: 鍒涘缓鏃堕棿绱㈠紩
+        comment: 创建时间索引
   DataSource:
-    description: 鏁版嵁婧愰厤缃?
+    description: 数据源配置
     status: active
     module: intel
     orm: true
@@ -3114,59 +3110,59 @@ models:
     properties:
       id:
         type: bigint
-        description: 鏁版嵁婧?ID
+        description: 数据源 ID
       name:
         type: string
         maxLength: 200
-        description: 鏁版嵁婧愬悕绉?
+        description: 数据源名称
       source_type:
         type: string
         maxLength: 50
         nullable: true
-        description: '婧愮被鍨?(rss/web/api/search/social)'
+        description: '源类型 (rss/web/api/search/social)'
       url:
         type: text
         nullable: true
-        description: 婧?URL
+        description: 源 URL
       config:
         type: text
         nullable: true
-        description: '閲囬泦閰嶇疆 (JSON: 閫夋嫨鍣ㄣ€侀鐜囩瓑)'
+        description: '采集配置 (JSON: 选择器、频率等)'
       schedule_cron:
         type: string
         maxLength: 100
         nullable: true
-        description: 閲囬泦璋冨害 Cron 琛ㄨ揪寮?
+        description: 采集调度 Cron 表达式
       is_active:
         type: boolean
         default: true
-        description: 鏄惁鍚敤
+        description: 是否启用
       last_collected_at:
         type: string
         format: date-time
         nullable: true
-        description: 鏈€鍚庨噰闆嗘椂闂?
+        description: 最后采集时间
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       created_by:
         type: bigint
         nullable: true
-        description: 鍒涘缓鐢ㄦ埛
+        description: 创建用户
         foreignKey: User
     indexes:
       - name: idx_intel_ds_type
         columns:
           - source_type
-        comment: 婧愮被鍨嬬储寮?
+        comment: 源类型索引
       - name: idx_intel_ds_active
         columns:
           - is_active
-        comment: 鍚敤鐘舵€佺储寮?
+        comment: 启用状态索引
 
   CollectedItem:
-    description: 閲囬泦鍒扮殑鍘熷鏁版嵁鏉＄洰
+    description: 采集到的原始数据条目
     status: active
     module: intel
     orm: true
@@ -3174,70 +3170,70 @@ models:
     properties:
       id:
         type: bigint
-        description: 鏉＄洰 ID
+        description: 条目 ID
       source_id:
         type: bigint
         nullable: true
-        description: 鏁版嵁婧?ID
+        description: 数据源 ID
         foreignKey: DataSource
       url:
         type: text
         nullable: true
-        description: 鍘熷 URL
+        description: 原始 URL
       title:
         type: string
         maxLength: 500
         nullable: true
-        description: 鏍囬
+        description: 标题
       content_raw:
         type: text
         nullable: true
-        description: 鍘熷鍐呭
+        description: 原始内容
       content_cleaned:
         type: text
         nullable: true
-        description: 娓呮礂鍚庡唴瀹?
+        description: 清洗后内容
       content_hash:
         type: string
         maxLength: 64
         nullable: true
         index: true
-        description: 鍐呭鍝堝笇 (鐢ㄤ簬鍘婚噸)
+        description: 内容哈希 (用于去重)
       metadata_json:
         type: text
         nullable: true
-        description: '鍏冩暟鎹?(JSON: 浣滆€呫€佸彂甯冩椂闂寸瓑)'
+        description: '元数据 (JSON: 作者、发布时间等)'
       status:
         type: string
         maxLength: 20
         default: raw
-        description: '鐘舵€?(raw/cleaned/analyzed/archived)'
+        description: '状态 (raw/cleaned/analyzed/archived)'
       collected_at:
         type: string
         format: date-time
         nullable: true
-        description: 閲囬泦鏃堕棿
+        description: 采集时间
       analyzed_at:
         type: string
         format: date-time
         nullable: true
-        description: 鍒嗘瀽鏃堕棿
+        description: 分析时间
     indexes:
       - name: idx_intel_ci_source
         columns:
           - source_id
-        comment: 鏁版嵁婧愮储寮?
+        comment: 数据源索引
       - name: idx_intel_ci_status
         columns:
           - status
-        comment: 鐘舵€佺储寮?
+        comment: 状态索引
       - name: idx_intel_ci_hash
         columns:
           - content_hash
-        comment: 鍐呭鍝堝笇绱㈠紩
+        comment: 内容哈希索引
 
   Intelligence:
-    description: AI 鍒嗘瀽鍚庣殑鎯呮姤鏉＄洰
+    description: AI 分析后的情报条目
     status: active
     module: intel
     orm: true
@@ -3245,62 +3241,62 @@ models:
     properties:
       id:
         type: bigint
-        description: 鎯呮姤 ID
+        description: 情报 ID
       title:
         type: string
         maxLength: 500
         nullable: true
-        description: 鎯呮姤鏍囬
+        description: 情报标题
       summary:
         type: text
         nullable: true
-        description: AI 鐢熸垚鐨勬憳瑕?
+        description: AI 生成的摘要
       sentiment:
         type: string
         maxLength: 20
         nullable: true
-        description: '鎯呮劅鍊惧悜 (positive/negative/neutral)'
+        description: '情感倾向 (positive/negative/neutral)'
       category:
         type: string
         maxLength: 100
         nullable: true
-        description: AI 鍒嗙被
+        description: AI 分类
       importance_score:
         type: float
         nullable: true
-        description: 閲嶈鎬ц瘎鍒?(0-1)
+        description: 重要性评分 (0-1)
       item_ids:
         type: text
         nullable: true
-        description: 鍏宠仈鐨勯噰闆嗘潯鐩?ID 鍒楄〃 (JSON)
+        description: 关联的采集条目 ID 列表 (JSON)
       tags:
         type: text
         nullable: true
-        description: AI 鎻愬彇鐨勬爣绛?(JSON)
+        description: AI 提取的标签 (JSON)
       source_urls:
         type: text
         nullable: true
-        description: 鏉ユ簮閾炬帴 (JSON)
+        description: 来源链接 (JSON)
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     indexes:
       - name: idx_intel_intel_sentiment
         columns:
           - sentiment
-        comment: 鎯呮劅绱㈠紩
+        comment: 情感索引
       - name: idx_intel_intel_category
         columns:
           - category
-        comment: 鍒嗙被绱㈠紩
+        comment: 分类索引
       - name: idx_intel_intel_score
         columns:
           - importance_score
-        comment: 閲嶈鎬х储寮?
+        comment: 重要性索引
 
   Briefing:
-    description: 鎯呮姤绠€鎶?
+    description: 情报简报
     status: active
     module: intel
     orm: true
@@ -3308,41 +3304,41 @@ models:
     properties:
       id:
         type: bigint
-        description: 绠€鎶?ID
+        description: 简报 ID
       title:
         type: string
         maxLength: 500
         nullable: true
-        description: 绠€鎶ユ爣棰?
+        description: 简报标题
       content:
         type: text
         nullable: true
-        description: Markdown 鏍煎紡绠€鎶ュ唴瀹?
+        description: Markdown 格式简报内容
       briefing_type:
         type: string
         maxLength: 50
         nullable: true
-        description: '绠€鎶ョ被鍨?(daily/weekly/alert/custom)'
+        description: '简报类型 (daily/weekly/alert/custom)'
       intelligence_ids:
         type: text
         nullable: true
-        description: 鍖呭惈鐨勬儏鎶?ID 鍒楄〃 (JSON)
+        description: 包含的情报 ID 列表 (JSON)
       channels_sent:
         type: text
         nullable: true
-        description: 宸叉帹閫佹笭閬?(JSON)
+        description: 已推送渠道 (JSON)
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     indexes:
       - name: idx_intel_brief_type
         columns:
           - briefing_type
-        comment: 绠€鎶ョ被鍨嬬储寮?
+        comment: 简报类型索引
 
   AlertRule:
-    description: 棰勮瑙勫垯
+    description: 预警规则
     status: active
     module: intel
     orm: true
@@ -3350,59 +3346,59 @@ models:
     properties:
       id:
         type: bigint
-        description: 瑙勫垯 ID
+        description: 规则 ID
       name:
         type: string
         maxLength: 200
         nullable: true
-        description: 瑙勫垯鍚嶇О
+        description: 规则名称
       conditions:
         type: text
         nullable: true
-        description: 瑙﹀彂鏉′欢 (JSON)
+        description: 触发条件 (JSON)
       keywords:
         type: text
         nullable: true
-        description: 鍏抽敭璇嶅垪琛?(JSON)
+        description: 关键词列表 (JSON)
       severity:
         type: string
         maxLength: 20
         nullable: true
-        description: '涓ラ噸绋嬪害 (low/medium/high/critical)'
+        description: '严重程度 (low/medium/high/critical)'
       actions:
         type: text
         nullable: true
-        description: 瑙﹀彂鍔ㄤ綔 (JSON)
+        description: 触发动作 (JSON)
       is_active:
         type: boolean
         default: true
-        description: 鏄惁鍚敤
+        description: 是否启用
       created_by:
         type: bigint
         nullable: true
-        description: 鍒涘缓鐢ㄦ埛
+        description: 创建用户
         foreignKey: User
       last_triggered_at:
         type: string
         format: date-time
         nullable: true
-        description: 鏈€鍚庤Е鍙戞椂闂?
+        description: 最后触发时间
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     indexes:
       - name: idx_intel_ar_severity
         columns:
           - severity
-        comment: 涓ラ噸绋嬪害绱㈠紩
+        comment: 严重程度索引
       - name: idx_intel_ar_active
         columns:
           - is_active
-        comment: 鍚敤鐘舵€佺储寮?
+        comment: 启用状态索引
 
   AlertEvent:
-    description: 棰勮浜嬩欢璁板綍
+    description: 预警事件记录
     status: active
     module: intel
     orm: true
@@ -3410,51 +3406,51 @@ models:
     properties:
       id:
         type: bigint
-        description: 浜嬩欢 ID
+        description: 事件 ID
       rule_id:
         type: bigint
         nullable: true
-        description: 瑙﹀彂鐨勮鍒?ID
+        description: 触发的规则 ID
         foreignKey: AlertRule
       intelligence_id:
         type: bigint
         nullable: true
-        description: 鍏宠仈鐨勬儏鎶?ID
+        description: 关联的情报 ID
         foreignKey: Intelligence
       severity:
         type: string
         maxLength: 20
         nullable: true
-        description: 浜嬩欢涓ラ噸绋嬪害
+        description: 事件严重程度
       message:
         type: text
         nullable: true
-        description: 鍛婅娑堟伅
+        description: 告警消息
       status:
         type: string
         maxLength: 20
         default: pending
-        description: '鐘舵€?(pending/acknowledged/resolved)'
+        description: '状态 (pending/acknowledged/resolved)'
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     indexes:
       - name: idx_intel_ae_rule
         columns:
           - rule_id
-        comment: 瑙勫垯绱㈠紩
+        comment: 规则索引
       - name: idx_intel_ae_status
         columns:
           - status
-        comment: 鐘舵€佺储寮?
+        comment: 状态索引
 
   # ============================================================================
-  # 鐭ヨ瘑寮曟搸妯″瀷 (shared/models/knowledge/)
+  # 知识引擎模型 (shared/models/knowledge/)
   # ============================================================================
 
   KnowledgeBase:
-    description: 鐭ヨ瘑搴?
+    description: 知识库
     status: active
     module: knowledge
     orm: true
@@ -3462,64 +3458,64 @@ models:
     properties:
       id:
         type: bigint
-        description: 鐭ヨ瘑搴?ID
+        description: 知识库 ID
       name:
         type: string
         maxLength: 200
         nullable: true
-        description: 鐭ヨ瘑搴撳悕绉?
+        description: 知识库名称
       description:
         type: text
         nullable: true
-        description: 鐭ヨ瘑搴撴弿杩?
+        description: 知识库描述
       embedding_model:
         type: string
         maxLength: 100
         nullable: true
-        description: 浣跨敤鐨?Embedding 妯″瀷
+        description: 使用的 Embedding 模型
       chunk_size:
         type: integer
         default: 512
-        description: 鍒囩墖澶у皬
+        description: 切片大小
       chunk_overlap:
         type: integer
         default: 50
-        description: 鍒囩墖閲嶅彔
+        description: 切片重叠
       vector_collection:
         type: string
         maxLength: 100
         nullable: true
-        description: 鍚戦噺闆嗗悎鍚嶇О
+        description: 向量集合名称
       document_count:
         type: integer
         default: 0
-        description: 鏂囨。鏁伴噺
+        description: 文档数量
       chunk_count:
         type: integer
         default: 0
-        description: 鍒囩墖鏁伴噺
+        description: 切片数量
       created_by:
         type: bigint
         nullable: true
-        description: 鍒涘缓鐢ㄦ埛
+        description: 创建用户
         foreignKey: User
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
         nullable: true
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     indexes:
       - name: idx_kb_name
         columns:
           - name
-        comment: 鍚嶇О绱㈠紩
+        comment: 名称索引
 
   KnowledgeDocument:
-    description: 鐭ヨ瘑搴撴枃妗?
+    description: 知识库文档
     status: active
     module: knowledge
     orm: true
@@ -3527,59 +3523,59 @@ models:
     properties:
       id:
         type: bigint
-        description: 鏂囨。 ID
+        description: 文档 ID
       knowledge_base_id:
         type: bigint
         nullable: true
-        description: 鎵€灞炵煡璇嗗簱 ID
+        description: 所属知识库 ID
         foreignKey: KnowledgeBase
       title:
         type: string
         maxLength: 500
         nullable: true
-        description: 鏂囨。鏍囬
+        description: 文档标题
       file_path:
         type: text
         nullable: true
-        description: 鏂囦欢瀛樺偍璺緞
+        description: 文件存储路径
       file_type:
         type: string
         maxLength: 50
         nullable: true
-        description: '鏂囦欢绫诲瀷 (pdf/docx/txt/html/url)'
+        description: '文件类型 (pdf/docx/txt/html/url)'
       content_text:
         type: text
         nullable: true
-        description: 鎻愬彇鐨勭函鏂囨湰
+        description: 提取的纯文本
       chunk_count:
         type: integer
         default: 0
-        description: 鍒囩墖鏁伴噺
+        description: 切片数量
       status:
         type: string
         maxLength: 20
         default: uploading
-        description: '鐘舵€?(uploading/parsing/indexed/failed)'
+        description: '状态 (uploading/parsing/indexed/failed)'
       metadata_json:
         type: text
         nullable: true
-        description: 鏂囨。鍏冩暟鎹?(JSON)
+        description: 文档元数据 (JSON)
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     indexes:
       - name: idx_kd_kb
         columns:
           - knowledge_base_id
-        comment: 鐭ヨ瘑搴撶储寮?
+        comment: 知识库索引
       - name: idx_kd_status
         columns:
           - status
-        comment: 鐘舵€佺储寮?
+        comment: 状态索引
 
   DocumentChunk:
-    description: 鏂囨。鍒囩墖
+    description: 文档切片
     status: active
     module: knowledge
     orm: true
@@ -3587,54 +3583,54 @@ models:
     properties:
       id:
         type: bigint
-        description: 鍒囩墖 ID
+        description: 切片 ID
       document_id:
         type: bigint
         nullable: true
-        description: 鎵€灞炴枃妗?ID
+        description: 所属文档 ID
         foreignKey: KnowledgeDocument
       knowledge_base_id:
         type: bigint
         nullable: true
-        description: 鎵€灞炵煡璇嗗簱 ID
+        description: 所属知识库 ID
         foreignKey: KnowledgeBase
       chunk_index:
         type: integer
         nullable: true
-        description: 鍒囩墖搴忓彿
+        description: 切片序号
       content:
         type: text
         nullable: true
-        description: 鍒囩墖鍐呭
+        description: 切片内容
       embedding_id:
         type: string
         maxLength: 100
         nullable: true
-        description: 鍚戦噺鏁版嵁搴撲腑鐨?ID
+        description: 向量数据库中的 ID
       metadata_json:
         type: text
         nullable: true
-        description: '鍏冩暟鎹?(JSON: 椤电爜銆佺珷鑺傜瓑)'
+        description: '元数据 (JSON: 页码、章节等)'
       token_count:
         type: integer
         nullable: true
-        description: Token 鏁伴噺
+        description: Token 数量
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     indexes:
       - name: idx_dc_doc
         columns:
           - document_id
-        comment: 鏂囨。绱㈠紩
+        comment: 文档索引
       - name: idx_dc_kb
         columns:
           - knowledge_base_id
-        comment: 鐭ヨ瘑搴撶储寮?
+        comment: 知识库索引
 
   ReportTemplate:
-    description: 鎶ュ憡妯℃澘
+    description: 报告模板
     status: active
     module: knowledge
     orm: true
@@ -3642,41 +3638,41 @@ models:
     properties:
       id:
         type: bigint
-        description: 妯℃澘 ID
+        description: 模板 ID
       name:
         type: string
         maxLength: 200
         nullable: true
-        description: 妯℃澘鍚嶇О
+        description: 模板名称
       description:
         type: text
         nullable: true
-        description: 妯℃澘鎻忚堪
+        description: 模板描述
       template_content:
         type: text
         nullable: true
-        description: 妯℃澘鍐呭 (Markdown/Jinja2)
+        description: 模板内容 (Markdown/Jinja2)
       sections:
         type: text
         nullable: true
-        description: 妯℃澘绔犺妭瀹氫箟 (JSON)
+        description: 模板章节定义 (JSON)
       created_by:
         type: bigint
         nullable: true
-        description: 鍒涘缓鐢ㄦ埛
+        description: 创建用户
         foreignKey: User
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
         nullable: true
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
 
   GeneratedReport:
-    description: 鐢熸垚鐨勬姤鍛?
+    description: 生成的报告
     status: active
     module: knowledge
     orm: true
@@ -3684,55 +3680,55 @@ models:
     properties:
       id:
         type: bigint
-        description: 鎶ュ憡 ID
+        description: 报告 ID
       template_id:
         type: bigint
         nullable: true
-        description: 浣跨敤鐨勬ā鏉?ID
+        description: 使用的模板 ID
         foreignKey: ReportTemplate
       title:
         type: string
         maxLength: 500
         nullable: true
-        description: 鎶ュ憡鏍囬
+        description: 报告标题
       content:
         type: text
         nullable: true
-        description: 鐢熸垚鐨勬姤鍛婂唴瀹?(Markdown)
+        description: 生成的报告内容 (Markdown)
       knowledge_base_ids:
         type: text
         nullable: true
-        description: 寮曠敤鐨勭煡璇嗗簱 ID 鍒楄〃 (JSON)
+        description: 引用的知识库 ID 列表 (JSON)
       status:
         type: string
         maxLength: 20
         default: generating
-        description: '鐘舵€?(generating/completed/failed)'
+        description: '状态 (generating/completed/failed)'
       created_by:
         type: bigint
         nullable: true
-        description: 鍒涘缓鐢ㄦ埛
+        description: 创建用户
         foreignKey: User
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     indexes:
       - name: idx_gr_template
         columns:
           - template_id
-        comment: 妯℃澘绱㈠紩
+        comment: 模板索引
       - name: idx_gr_status
         columns:
           - status
-        comment: 鐘舵€佺储寮?
+        comment: 状态索引
 
   # ============================================================================
-  # 鑷姩鍖栧伐浣滄祦妯″瀷 (shared/models/workflow/)
+  # 自动化工作流模型 (shared/models/workflow/)
   # ============================================================================
 
   WorkflowDefinition:
-    description: 宸ヤ綔娴佸畾涔?
+    description: 工作流定义
     status: active
     module: workflow
     orm: true
@@ -3740,54 +3736,54 @@ models:
     properties:
       id:
         type: bigint
-        description: 宸ヤ綔娴?ID
+        description: 工作流 ID
       name:
         type: string
         maxLength: 200
         nullable: true
-        description: 宸ヤ綔娴佸悕绉?
+        description: 工作流名称
       description:
         type: text
         nullable: true
-        description: 宸ヤ綔娴佹弿杩?
+        description: 工作流描述
       version:
         type: integer
         default: 1
-        description: 鐗堟湰鍙?
+        description: 版本号
       graph:
         type: text
         nullable: true
-        description: 'DAG 鍥剧粨鏋?(JSON: {nodes, edges})'
+        description: 'DAG 图结构 (JSON: {nodes, edges})'
       trigger_config:
         type: text
         nullable: true
-        description: '瑙﹀彂閰嶇疆 (JSON: {type, cron, event})'
+        description: '触发配置 (JSON: {type, cron, event})'
       is_active:
         type: boolean
         default: false
-        description: 鏄惁鍚敤
+        description: 是否启用
       created_by:
         type: bigint
         nullable: true
-        description: 鍒涘缓鐢ㄦ埛
+        description: 创建用户
         foreignKey: User
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
       updated_at:
         type: string
         format: date-time
         nullable: true
-        description: 鏇存柊鏃堕棿
+        description: 更新时间
     indexes:
       - name: idx_wfd_active
         columns:
           - is_active
-        comment: 鍚敤鐘舵€佺储寮?
+        comment: 启用状态索引
 
   WorkflowExecution:
-    description: 宸ヤ綔娴佹墽琛屽疄渚?
+    description: 工作流执行实例
     status: active
     module: workflow
     orm: true
@@ -3795,48 +3791,48 @@ models:
     properties:
       id:
         type: bigint
-        description: 鎵ц ID
+        description: 执行 ID
       workflow_id:
         type: bigint
         nullable: true
-        description: 宸ヤ綔娴佸畾涔?ID
+        description: 工作流定义 ID
         foreignKey: WorkflowDefinition
       status:
         type: string
         maxLength: 20
         default: pending
-        description: '鐘舵€?(pending/running/completed/failed/cancelled)'
+        description: '状态 (pending/running/completed/failed/cancelled)'
       trigger_type:
         type: string
         maxLength: 50
         nullable: true
-        description: '瑙﹀彂绫诲瀷 (manual/scheduled/event)'
+        description: '触发类型 (manual/scheduled/event)'
       input_data:
         type: text
         nullable: true
-        description: 杈撳叆鏁版嵁 (JSON)
+        description: 输入数据 (JSON)
       output_data:
         type: text
         nullable: true
-        description: 杈撳嚭鏁版嵁 (JSON)
+        description: 输出数据 (JSON)
       error_message:
         type: text
         nullable: true
-        description: 閿欒淇℃伅
+        description: 错误信息
       started_at:
         type: string
         format: date-time
         nullable: true
-        description: 寮€濮嬫椂闂?
+        description: 开始时间
       completed_at:
         type: string
         format: date-time
         nullable: true
-        description: 瀹屾垚鏃堕棿
+        description: 完成时间
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     relationships:
       node_executions:
         target: NodeExecution
@@ -3845,14 +3841,14 @@ models:
       - name: idx_wfe_workflow
         columns:
           - workflow_id
-        comment: 宸ヤ綔娴佺储寮?
+        comment: 工作流索引
       - name: idx_wfe_status
         columns:
           - status
-        comment: 鐘舵€佺储寮?
+        comment: 状态索引
 
   NodeExecution:
-    description: 宸ヤ綔娴佽妭鐐规墽琛岃褰?
+    description: 工作流节点执行记录
     status: active
     module: workflow
     orm: true
@@ -3860,65 +3856,65 @@ models:
     properties:
       id:
         type: bigint
-        description: 鑺傜偣鎵ц ID
+        description: 节点执行 ID
       execution_id:
         type: bigint
         nullable: true
-        description: 鎵€灞炴墽琛屽疄渚?ID
+        description: 所属执行实例 ID
         foreignKey: WorkflowExecution
       node_id:
         type: string
         maxLength: 100
         nullable: true
-        description: 鑺傜偣鍦?DAG 涓殑 ID
+        description: 节点在 DAG 中的 ID
       node_type:
         type: string
         maxLength: 50
         nullable: true
-        description: '鑺傜偣绫诲瀷 (llm/collector/rag/transform/condition/notify)'
+        description: '节点类型 (llm/collector/rag/transform/condition/notify)'
       status:
         type: string
         maxLength: 20
         nullable: true
-        description: '鐘舵€?(pending/running/completed/failed/skipped)'
+        description: '状态 (pending/running/completed/failed/skipped)'
       input_data:
         type: text
         nullable: true
-        description: 杈撳叆鏁版嵁 (JSON)
+        description: 输入数据 (JSON)
       output_data:
         type: text
         nullable: true
-        description: 杈撳嚭鏁版嵁 (JSON)
+        description: 输出数据 (JSON)
       error_message:
         type: text
         nullable: true
-        description: 閿欒淇℃伅
+        description: 错误信息
       duration_ms:
         type: integer
         nullable: true
-        description: 鎵ц鑰楁椂 (姣)
+        description: 执行耗时 (毫秒)
       started_at:
         type: string
         format: date-time
         nullable: true
-        description: 寮€濮嬫椂闂?
+        description: 开始时间
       completed_at:
         type: string
         format: date-time
         nullable: true
-        description: 瀹屾垚鏃堕棿
+        description: 完成时间
     indexes:
       - name: idx_ne_execution
         columns:
           - execution_id
-        comment: 鎵ц瀹炰緥绱㈠紩
+        comment: 执行实例索引
       - name: idx_ne_status
         columns:
           - status
-        comment: 鐘舵€佺储寮?
+        comment: 状态索引
 
   Trigger:
-    description: 宸ヤ綔娴佽Е鍙戝櫒
+    description: 工作流触发器
     status: active
     module: workflow
     orm: true
@@ -3926,42 +3922,42 @@ models:
     properties:
       id:
         type: bigint
-        description: 瑙﹀彂鍣?ID
+        description: 触发器 ID
       workflow_id:
         type: bigint
         nullable: true
-        description: 鍏宠仈鐨勫伐浣滄祦 ID
+        description: 关联的工作流 ID
         foreignKey: WorkflowDefinition
       trigger_type:
         type: string
         maxLength: 50
         nullable: true
-        description: '瑙﹀彂绫诲瀷 (cron/event/webhook/manual)'
+        description: '触发类型 (cron/event/webhook/manual)'
       config:
         type: text
         nullable: true
-        description: 瑙﹀彂鍣ㄩ厤缃?(JSON)
+        description: 触发器配置 (JSON)
       is_active:
         type: boolean
         default: true
-        description: 鏄惁鍚敤
+        description: 是否启用
       last_fired_at:
         type: string
         format: date-time
         nullable: true
-        description: 鏈€鍚庤Е鍙戞椂闂?
+        description: 最后触发时间
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     indexes:
       - name: idx_trigger_workflow
         columns:
           - workflow_id
-        comment: 宸ヤ綔娴佺储寮?
+        comment: 工作流索引
 
   AgentTool:
-    description: AI Agent 宸ュ叿娉ㄥ唽
+    description: AI Agent 工具注册
     status: active
     module: workflow
     orm: true
@@ -3969,45 +3965,45 @@ models:
     properties:
       id:
         type: bigint
-        description: 宸ュ叿 ID
+        description: 工具 ID
       name:
         type: string
         maxLength: 200
         nullable: true
-        description: 宸ュ叿鍚嶇О
+        description: 工具名称
       description:
         type: text
         nullable: true
-        description: 宸ュ叿鎻忚堪
+        description: 工具描述
       tool_type:
         type: string
         maxLength: 50
         nullable: true
-        description: '宸ュ叿绫诲瀷 (api/function/collector/transformer)'
+        description: '工具类型 (api/function/collector/transformer)'
       schema:
         type: text
         nullable: true
-        description: 宸ュ叿鍙傛暟 JSON Schema
+        description: 工具参数 JSON Schema
       config:
         type: text
         nullable: true
-        description: 宸ュ叿閰嶇疆 (JSON)
+        description: 工具配置 (JSON)
       is_active:
         type: boolean
         default: true
-        description: 鏄惁鍚敤
+        description: 是否启用
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     indexes:
       - name: idx_tool_type
         columns:
           - tool_type
-        comment: 宸ュ叿绫诲瀷绱㈠紩
+        comment: 工具类型索引
 
   AgentMemory:
-    description: AI Agent 璁板繂瀛樺偍
+    description: AI Agent 记忆存储
     status: active
     module: workflow
     orm: true
@@ -4015,45 +4011,44 @@ models:
     properties:
       id:
         type: bigint
-        description: 璁板繂 ID
+        description: 记忆 ID
       agent_id:
         type: string
         maxLength: 100
         nullable: true
-        description: Agent 鏍囪瘑
+        description: Agent 标识
       session_id:
         type: string
         maxLength: 100
         nullable: true
-        description: 浼氳瘽 ID
+        description: 会话 ID
       memory_type:
         type: string
         maxLength: 50
         nullable: true
-        description: '璁板繂绫诲瀷 (short_term/long_term/episodic)'
+        description: '记忆类型 (short_term/long_term/episodic)'
       content:
         type: text
         nullable: true
-        description: 璁板繂鍐呭
+        description: 记忆内容
       metadata_json:
         type: text
         nullable: true
-        description: 鍏冩暟鎹?(JSON)
+        description: 元数据 (JSON)
       created_at:
         type: string
         format: date-time
-        description: 鍒涘缓鏃堕棿
+        description: 创建时间
     indexes:
       - name: idx_mem_agent
         columns:
           - agent_id
-        comment: Agent 绱㈠紩
+        comment: Agent 索引
       - name: idx_mem_session
         columns:
           - session_id
-        comment: 浼氳瘽绱㈠紩
+        comment: 会话索引
       - name: idx_mem_type
         columns:
           - memory_type
-        comment: 璁板繂绫诲瀷绱㈠紩
-
+        comment: 记忆类型索引

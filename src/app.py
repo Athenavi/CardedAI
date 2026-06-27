@@ -347,18 +347,6 @@ def register_all_routes(app: FastAPI, worker_info: str):
         print(f"{worker_info} [ERROR] API v2 模块未找到: {e}\n")
         raise
 
-    # 注册 v3 路由（移动端专用）
-    print(f"\n{worker_info} {'=' * 60}")
-    print(f"{worker_info} 开始注册 API v3 路由（移动端）...")
-    try:
-        from src.api.v3 import register_v3_routes
-        register_v3_routes(app)
-        print(f"{worker_info} ✅ API v3 路由注册完成\n")
-    except ImportError as e:
-        print(f"{worker_info} [Warning] API v3 模块未找到，跳过: {e}\n")
-    except Exception as e:
-        print(f"{worker_info} [Warning] API v3 路由注册失败: {e}\n")
-
 
 # ---------- 生命周期 ----------
 @asynccontextmanager

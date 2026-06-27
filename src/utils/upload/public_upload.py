@@ -20,7 +20,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models import FileHash, Media, UploadChunk, UploadTask
 from src.extensions import get_async_db_session as get_async_db
-from src.utils.storage import s3_storage
 from src.utils.image.video_processor import video_processor
 
 from src.unified_logger import default_logger as logger
