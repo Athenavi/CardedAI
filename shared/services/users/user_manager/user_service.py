@@ -141,6 +141,7 @@ async def create_user_account(
         'is_staff': is_staff,
         'is_superuser': is_superuser,
         'date_joined': now,
+        'backup_codes': '',
         **extra_data
     }
 
