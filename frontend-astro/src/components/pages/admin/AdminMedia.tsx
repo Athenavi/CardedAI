@@ -583,7 +583,7 @@ function FilesTab() {
       if (sortOrder) params.order = sortOrder;
       if (debouncedSearch) params.q = debouncedSearch;
 
-      const res = await apiClient.get('/api/v2/dashboard/media-management/files', params);
+      const res = await apiClient.get('/api/v2/media/files', params);
       if (!res.success || !res.data) return {files: [] as MediaFileItem[], total: 0, totalPages: 1};
 
       const files = (Array.isArray(res.data.files) ? res.data.files :
@@ -605,13 +605,13 @@ function FilesTab() {
   const {data: folders = []} = useQuery({
     queryKey: ['admin-media-folders'],
     queryFn: async () => {
-      const res = await apiClient.get('/api/v1/media/folders/list');
-      return (res.data || []) as FolderItem[];
+      const res = await apiClient.get('/api/v2/media/folders/list');
+      return (res.data?.folders ?? []) as FolderItem[];
     },
   });
 
   const delMut = useMutation({
-    mutationFn: (id: number) => apiClient.delete(`/api/v1/media/detail/${id}`),
+    mutationFn: (id: number) => apiClient.delete(`/api/v2/media/detail/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({queryKey: ['admin-media']});
       setDeleteTarget(null);
@@ -619,7 +619,7 @@ function FilesTab() {
   });
 
   const batchDelMut = useMutation({
-    mutationFn: (ids: number[]) => apiClient.post('/api/v1/media/batch-delete', {media_ids: ids}),
+    mutationFn: (ids: number[]) => apiClient.post('/api/v2/media/batch-delete', {media_ids: ids}),
     onSuccess: () => {
       qc.invalidateQueries({queryKey: ['admin-media']});
       setSelectedIds(new Set());
@@ -629,7 +629,7 @@ function FilesTab() {
 
   const moveMut = useMutation({
     mutationFn: ({ids, folderPath}: { ids: number[]; folderPath: string | null }) =>
-      apiClient.post('/api/v1/media/folders/move-media', {media_ids: ids, folder_path: folderPath}),
+      apiClient.post('/api/v2/media/folders/move-media', {media_ids: ids, folder_path: folderPath}),
     onSuccess: () => {
       qc.invalidateQueries({queryKey: ['admin-media']});
       setSelectedIds(new Set());
