@@ -496,6 +496,10 @@ def register_middleware(app: FastAPI):
             "http://127.0.0.1:3000",
             "http://localhost:4321",
             "http://127.0.0.1:4321",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:8080",
+            "http://127.0.0.1:8080",
             "http://localhost:9421",
             "http://127.0.0.1:9421",
             "http://localhost"  # Capacitor Android 模拟器

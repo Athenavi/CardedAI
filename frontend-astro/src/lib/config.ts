@@ -49,7 +49,7 @@ export const loadRuntimeConfig = async (): Promise<{ API_BASE_URL: string; API_P
 
     // 默认配置（构建时配置）
     runtimeApiConfig = {
-        API_BASE_URL: 'http://localhost:9421',
+        API_BASE_URL: '',
         API_PREFIX: '/api/v2'
     };
 
@@ -59,7 +59,7 @@ export const loadRuntimeConfig = async (): Promise<{ API_BASE_URL: string; API_P
 // 同步获取配置（如果已加载）
 export const getConfig = (): { API_BASE_URL: string; API_PREFIX: string } => {
     const config = runtimeApiConfig || {
-        API_BASE_URL: 'http://localhost:9421',
+        API_BASE_URL: '',
         API_PREFIX: '/api/v2'
     };
     return config;

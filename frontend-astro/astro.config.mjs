@@ -62,6 +62,14 @@ export default defineConfig({
         '@': path.resolve(__dirname, 'src'),
       },
     },
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:9421',
+          changeOrigin: true,
+        },
+      },
+    },
       build: {
           // chunk 大小警告阈值（RichEditor 已经懒加载，564kB 可接受）
           chunkSizeWarningLimit: 600,
