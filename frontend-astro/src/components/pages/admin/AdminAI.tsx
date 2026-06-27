@@ -255,7 +255,7 @@ function WelcomeScreen({onExample}: { onExample: (text: string) => void }) {
 }
 
 // ═══ Chat Area ═══
-function ChatArea() {
+export function ChatArea() {
   const [config, setConfig] = useState<LLMConfig>(() => {
     try {
       const saved = localStorage.getItem('ai-llm-config');
