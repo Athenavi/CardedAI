@@ -636,10 +636,10 @@ function KnowledgeWorkbenchInner() {
 
       {/* Stats Dashboard */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard label="知识库" value={stats?.total_bases ?? stats?.bases ?? '-'} icon={Database} color="blue"/>
-        <StatCard label="文档" value={stats?.total_documents ?? stats?.documents ?? '-'} icon={FileText} color="green"/>
-        <StatCard label="文档切片" value={stats?.total_chunks ?? stats?.chunks ?? '-'} icon={BarChart3} color="purple"/>
-        <StatCard label="报告" value={stats?.total_reports ?? stats?.reports ?? '-'} icon={Rss} color="orange"/>
+        <StatCard label="知识库" value={stats?.knowledge_bases?.total ?? 0} icon={Database} color="blue"/>
+        <StatCard label="文档" value={stats?.documents?.total ?? 0} icon={FileText} color="green"/>
+        <StatCard label="文档切片" value={stats?.chunks?.total ?? 0} icon={BarChart3} color="purple"/>
+        <StatCard label="报告" value={stats?.reports?.total ?? 0} icon={Rss} color="orange"/>
       </div>
 
       {/* Tabs */}

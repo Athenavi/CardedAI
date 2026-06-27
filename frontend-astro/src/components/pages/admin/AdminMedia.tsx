@@ -857,7 +857,7 @@ function DownloadTasksTab() {
       if (statusFilter) params.status = statusFilter;
       const res = await apiClient.get('/api/v2/system/transfer/tasks', params);
       return {
-        tasks: (res.data || []) as DownloadTaskItem[],
+        tasks: Array.isArray(res.data) ? res.data as DownloadTaskItem[] : [],
         total: res.pagination?.total || 0,
         totalPages: res.pagination?.total_pages || 1,
       };
@@ -999,7 +999,7 @@ function UploadTasksTab() {
       try {
         const res = await apiClient.get('/api/v2/dashboard/media-management/upload-tasks', params);
         return {
-          tasks: (res.data || []) as {
+          tasks: Array.isArray(res.data) ? res.data as {
             id: string;
             filename: string;
             total_size: number;
@@ -1007,7 +1007,7 @@ function UploadTasksTab() {
             uploaded_chunks: number;
             status: string;
             created_at: string
-          }[],
+          }[] : [],
           total: res.pagination?.total || 0,
           totalPages: res.pagination?.total_pages || 1,
         };

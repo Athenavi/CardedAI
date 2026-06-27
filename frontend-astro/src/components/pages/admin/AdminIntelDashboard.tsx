@@ -815,23 +815,26 @@ const AlertsPanel: React.FC = () => {
 function IntelDashboardInner() {
   const [activeTab, setActiveTab] = useState<TabKey>('sources');
 
-  // Stats
-  const {data: sourcesData} = useQuery({
-    queryKey: ['intel-sources-count'],
-    queryFn: async () => { const r = await apiClient.get('/intel/sources', {per_page: 1}); return r.data?.total || 0; }
+  // Stats — 单次调用 /stats 替代 4 次独立查询
+  const {data: stats} = useQuery({
+    queryKey: ['intel-stats'],
+    queryFn: async () => {
+      const r = await apiClient.get('/intel/stats');
+      if (!r.success) throw new Error(r.error || '获取统计失败');
+      return r.data as {
+        sources: { total: number; active: number };
+        collected_items: { total: number };
+        intelligence: { total: number };
+        briefings: { total: number };
+        alert_rules: { total: number; active: number };
+      };
+    },
   });
-  const {data: intelData} = useQuery({
-    queryKey: ['intel-count'],
-    queryFn: async () => { const r = await apiClient.get('/intel/intelligence', {per_page: 1}); return r.data?.total || 0; }
-  });
-  const {data: briefingsData} = useQuery({
-    queryKey: ['intel-briefings-count'],
-    queryFn: async () => { const r = await apiClient.get('/intel/briefings', {per_page: 1}); return r.data?.total || 0; }
-  });
-  const {data: alertsData} = useQuery({
-    queryKey: ['intel-alerts-count'],
-    queryFn: async () => { const r = await apiClient.get('/intel/alerts/rules', {per_page: 1}); return r.data?.total || 0; }
-  });
+
+  const sourcesCount = stats?.sources?.total ?? 0;
+  const intelCount = stats?.intelligence?.total ?? 0;
+  const briefingsCount = stats?.briefings?.total ?? 0;
+  const alertsCount = stats?.alert_rules?.total ?? 0;
 
   const renderTab = () => {
     switch (activeTab) {
@@ -856,10 +859,10 @@ function IntelDashboardInner() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="数据源" value={sourcesData ?? '—'} icon={Database} color="blue"/>
-        <StatCard label="情报数" value={intelData ?? '—'} icon={TrendingUp} color="green"/>
-        <StatCard label="简报数" value={briefingsData ?? '—'} icon={Newspaper} color="purple"/>
-        <StatCard label="预警规则" value={alertsData ?? '—'} icon={AlertTriangle} color="orange"/>
+        <StatCard label="数据源" value={sourcesCount} icon={Database} color="blue"/>
+        <StatCard label="情报数" value={intelCount} icon={TrendingUp} color="green"/>
+        <StatCard label="简报数" value={briefingsCount} icon={Newspaper} color="purple"/>
+        <StatCard label="预警规则" value={alertsCount} icon={AlertTriangle} color="orange"/>
       </div>
 
       {/* Tabs */}
