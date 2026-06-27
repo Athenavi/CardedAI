@@ -26,17 +26,14 @@ class LoginSecurityService:
         self.failure_window_minutes = 15  # 失败时间窗口(分钟)
 
     async def record_login_attempt_async(self, username: str, ip_address: str,
-                                         user_agent: str = '', is_success: bool = False,
-                                         failure_reason: str = '', db: AsyncSession = None) -> Dict:
+                                         is_success: bool = False, db: AsyncSession = None) -> Dict:
         """
         异步记录登录尝试
         
         Args:
             username: 用户名
             ip_address: IP地址
-            user_agent: User-Agent
             is_success: 是否成功
-            failure_reason: 失败原因
             db: 数据库会话
             
         Returns:
@@ -50,7 +47,6 @@ class LoginSecurityService:
                 username=username,
                 ip_address=ip_address,
                 is_success=is_success,
-                failure_reason=failure_reason if not is_success else None,
                 created_at=now
             )
 

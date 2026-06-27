@@ -2843,11 +2843,6 @@ models:
         type: boolean
         default: false
         description: 是否成功
-      failure_reason:
-        type: string
-        nullable: true
-        maxLength: 255
-        description: 失败原因
       created_at:
         type: string
         format: date-time

@@ -270,9 +270,7 @@ async def login_api(
             await login_security_service.record_login_attempt_async(
                 username=username,
                 ip_address=ip_address,
-                user_agent=user_agent,
                 is_success=False,
-                failure_reason="Account locked due to too many failed attempts",
                 db=db
             )
 
@@ -293,9 +291,7 @@ async def login_api(
             await login_security_service.record_login_attempt_async(
                 username=username,
                 ip_address=ip_address,
-                user_agent=user_agent,
                 is_success=False,
-                failure_reason="Invalid credentials",
                 db=db
             )
 
@@ -316,9 +312,7 @@ async def login_api(
             await login_security_service.record_login_attempt_async(
                 username=username,
                 ip_address=ip_address,
-                user_agent=user_agent,
                 is_success=False,
-                failure_reason="Account disabled",
                 db=db
             )
 
@@ -379,7 +373,6 @@ async def login_api(
         await login_security_service.record_login_attempt_async(
             username=username,
             ip_address=ip_address,
-            user_agent=user_agent,
             is_success=True,
             db=db
         )

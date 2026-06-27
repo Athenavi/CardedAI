@@ -30,9 +30,6 @@ class LoginAttempt(Base):
 
     is_success = Column('success', Boolean, default=False, doc='是否成功')
 
-
-    failure_reason = Column(String(255), nullable=True, doc='失败原因')
-
     created_at = Column(DateTime, doc='尝试时间')
 
 
@@ -47,7 +44,6 @@ class LoginAttempt(Base):
             'username': self.username,
             'ip_address': self.ip_address,
             'is_success': self.is_success,
-            'failure_reason': self.failure_reason,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 
