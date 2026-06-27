@@ -45,7 +45,7 @@ interface KnowledgeBase {
 
 interface KDocument {
   id: number;
-  filename: string;
+  title: string;
   file_type: string;
   status: string;
   chunk_count: number;
@@ -337,20 +337,20 @@ const BasesPanel: React.FC = () => {
                       <FileText className="w-4 h-4 text-purple-500"/>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">{doc.filename}</h4>
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white">{doc.title}</h4>
                       <p className="text-xs text-gray-500">
-                        {doc.file_type?.toUpperCase()} - {doc.chunk_count} 切片 - {doc.file_size ? `${(doc.file_size / 1024).toFixed(1)} KB` : ''}
+                        {doc.file_type?.toUpperCase()} - {doc.chunk_count} 切片{doc.file_size ? ` - ${(doc.file_size / 1024).toFixed(1)} KB` : ''}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`px-2 py-0.5 rounded-full text-xs ${
-                      doc.status === 'completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                      doc.status === 'indexed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
                       doc.status === 'processing' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
                       doc.status === 'failed' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
                       'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
                     }`}>
-                      {doc.status === 'completed' ? '已完成' : doc.status === 'processing' ? '处理中' : doc.status === 'failed' ? '失败' : doc.status}
+                      {doc.status === 'indexed' ? '已完成' : doc.status === 'processing' ? '处理中' : doc.status === 'failed' ? '失败' : doc.status}
                     </span>
                     <button onClick={() => { if (confirm('确定删除文档及所有切片？')) deleteDocMutation.mutate(doc.id); }}
                       className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-colors">

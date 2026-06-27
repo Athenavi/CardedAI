@@ -575,7 +575,7 @@ function WorkflowEditorInner() {
 
   const executeMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiClient.post(`/workflow/definitions/${id}/execute`, {input_data: '{}'});
+      return apiClient.post(`/workflow/definitions/${id}/execute`, {input_data: {}});
     },
     onSuccess: () => {
       setActiveTab('executions');

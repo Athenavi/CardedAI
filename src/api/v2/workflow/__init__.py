@@ -242,7 +242,7 @@ async def activate_definition(def_id: int):
                 from src.unified_logger import default_logger as logger
                 logger.warning(f"[WorkflowAPI] 注册触发器失败: {exc}")
 
-            return ApiResponse.ok(message="工作流已激")
+        return ApiResponse.ok(message="工作流已激活")
 
 
 @router.post("/definitions/{def_id}/deactivate", summary="停用工作")
@@ -334,7 +334,7 @@ async def get_execution(exec_id: int):
         for ne in (ex.node_executions or []):
             node_execs.append(ne.to_dict())
 
-        data["node_executions"] = node_exec
+        data["node_executions"] = node_execs
 
     return ApiResponse.ok(data=data)
 
