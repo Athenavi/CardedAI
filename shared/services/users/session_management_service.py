@@ -5,6 +5,7 @@
 
 
 import hashlib
+import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 from collections import defaultdict
@@ -29,7 +30,10 @@ class SessionManagementService:
     def create_session(self, user_id: int, device_info: Dict,
                        ip_address: str = None, user_agent: str = None) -> str:
         """
-        创建新会话
+        创建或复用会话
+        
+        如果同一用户从同一设备（相同设备指纹）已有活跃会话，则复用该会话。
+        否则创建新会话。
         
         Args:
             user_id: 用户ID
@@ -40,11 +44,26 @@ class SessionManagementService:
         Returns:
             会话ID
         """
-        # 生成会话ID
-        session_id = self._generate_session_id(user_id, device_info, ip_address)
-
         # 检查并清理旧会话
         self._cleanup_old_sessions(user_id)
+
+        # 计算设备指纹
+        device_fingerprint = self._generate_device_fingerprint(device_info, user_agent)
+
+        # 查找同一设备的活跃会话
+        existing_session = self._find_session_by_device(user_id, device_fingerprint)
+        if existing_session:
+            # 复用已有会话：更新时间戳
+            now = datetime.now()
+            existing_session['last_active'] = now
+            existing_session['expires_at'] = now + timedelta(hours=self.session_timeout_hours)
+            existing_session['ip_address'] = ip_address
+            existing_session['device_info'] = device_info
+            logger.info(f"Reused session {existing_session['session_id']} for user {user_id}")
+            return existing_session['session_id']
+
+        # 生成会话ID
+        session_id = self._generate_session_id(user_id, device_info, ip_address)
 
         # 检查会话数量限制
         if len(self._user_sessions[user_id]) >= self.max_sessions_per_user:
@@ -305,6 +324,25 @@ class SessionManagementService:
         """
         data = f"{device_info}:{user_agent}"
         return hashlib.sha256(data.encode()).hexdigest()
+
+    def _find_session_by_device(self, user_id: int,
+                                 device_fingerprint: str) -> Optional[Dict]:
+        """
+        查找同一设备的活跃会话
+        
+        Args:
+            user_id: 用户ID
+            device_fingerprint: 设备指纹
+            
+        Returns:
+            匹配的会话，无则返回None
+        """
+        for session in self._user_sessions.get(user_id, []):
+            if (session['is_active']
+                    and session['expires_at'] > datetime.now()
+                    and session.get('device_fingerprint') == device_fingerprint):
+                return session
+        return None
 
     def _estimate_location(self, ip_address: str = None) -> str:
         """
