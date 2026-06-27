@@ -4,9 +4,11 @@
 import hashlib
 
 from datetime import datetime
+from typing import Optional
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.services.notifications.webhook_service import webhook_service
@@ -325,3 +327,47 @@ async def chunked_upload_cancel(
     processor = ChunkedUploadProcessor(current_user_obj.id)
     result = await processor.cancel_upload(upload_id, db)
     return JSONResponse(result, status_code=200 if result.get('success') else 400)
+
+
+# ---------- 上传任务列表 ----------
+@router.get('/upload-tasks')
+async def list_upload_tasks(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    status: Optional[str] = Query(None),
+    current_user_obj=Depends(jwt_required),
+    db: AsyncSession = Depends(get_async_db)
+):
+    """获取当前用户的上传任务列表"""
+    from shared.models.upload_task import UploadTask
+
+    base_query = select(UploadTask).where(UploadTask.user_id == current_user_obj.id)
+    if status:
+        base_query = base_query.where(UploadTask.status == status)
+
+    count_query = select(func.count()).select_from(base_query.subquery())
+    total = (await db.execute(count_query)).scalar() or 0
+
+    offset = (page - 1) * per_page
+    tasks_query = base_query.order_by(UploadTask.created_at.desc()).offset(offset).limit(per_page)
+    tasks = (await db.execute(tasks_query)).scalars().all()
+
+    return {
+        "success": True,
+        "data": [{
+            "id": t.id,
+            "filename": t.filename,
+            "total_size": t.total_size,
+            "total_chunks": t.total_chunks,
+            "uploaded_chunks": t.uploaded_chunks,
+            "status": t.status,
+            "created_at": t.created_at.isoformat() if t.created_at else None,
+            "error_message": getattr(t, 'error_message', None),
+        } for t in tasks],
+        "pagination": {
+            "current_page": page,
+            "total": total,
+            "total_pages": max(1, (total + per_page - 1) // per_page),
+            "per_page": per_page,
+        }
+    }

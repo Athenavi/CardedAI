@@ -997,7 +997,7 @@ function UploadTasksTab() {
       const params: Record<string, string | number> = {page, per_page: 20};
       if (statusFilter) params.status = statusFilter;
       try {
-        const res = await apiClient.get('/api/v2/dashboard/media-management/upload-tasks', params);
+        const res = await apiClient.get('/api/v2/media/upload-tasks', params);
         return {
           tasks: Array.isArray(res.data) ? res.data as {
             id: string;

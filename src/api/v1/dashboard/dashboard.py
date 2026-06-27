@@ -33,7 +33,7 @@ async def get_activities(
     request: Request,
     page: int = Query(1, ge=1),
     per_page: int = Query(8, ge=1, le=50),
-    current_user: User = Depends(admin_required_api),
+    current_user: User = Depends(jwt_required),
     db: AsyncSession = Depends(get_async_db)
 ):
     """获取最近用户活动列表（UserActivity 模型已移除，返回空数据）"""
@@ -43,7 +43,7 @@ async def get_activities(
 @router.get("/stats")
 async def get_dashboard_stats(
         request: Request,
-        current_user: User = Depends(admin_required_api),
+        current_user: User = Depends(jwt_required),
         db: AsyncSession = Depends(get_async_db)
 ):
     """
