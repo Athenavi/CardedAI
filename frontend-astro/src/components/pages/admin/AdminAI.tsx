@@ -258,9 +258,15 @@ function ChatArea() {
   const [loading, setLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const fullTextRef = useRef('');
+  const typingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const typingIndexRef = useRef(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { chatEndRef.current?.scrollIntoView({behavior: 'smooth'}); }, [messages, toolResults]);
+  useEffect(() => { chatEndRef.current?.scrollIntoView({behavior: 'smooth'}); }, [messages, toolResults, streamingContent]);
+
+  // Cleanup typewriter timer on unmount
+  useEffect(() => () => { if (typingTimerRef.current) clearInterval(typingTimerRef.current); }, []);
 
   const saveConfig = useCallback((c: LLMConfig) => {
     setConfig(c);
@@ -313,7 +319,21 @@ function ChatArea() {
 
       const decoder = new TextDecoder();
       let buffer = '';
-      let finalReply = '';
+      fullTextRef.current = '';
+      typingIndexRef.current = 0;
+      setStreamingContent('');
+
+      // Start typewriter timer: reveals ~2 chars every 30ms
+      if (typingTimerRef.current) clearInterval(typingTimerRef.current);
+      typingTimerRef.current = setInterval(() => {
+        const full = fullTextRef.current;
+        const idx = typingIndexRef.current;
+        if (idx < full.length) {
+          const step = idx < 10 ? 1 : idx < 50 ? 2 : 3; // faster as text grows
+          typingIndexRef.current = Math.min(idx + step, full.length);
+          setStreamingContent(full.slice(0, typingIndexRef.current));
+        }
+      }, 30);
 
       while (true) {
         const {done, value} = await reader.read();
@@ -328,22 +348,32 @@ function ChatArea() {
           try {
             const data = JSON.parse(line.slice(6));
             if (data.type === 'token') {
-              finalReply += data.content;
-              setStreamingContent(finalReply);
+              fullTextRef.current += data.content;
+              // Immediately reveal if timer hasn't started showing yet
+              if (typingIndexRef.current === 0 && fullTextRef.current.length < 10) {
+                setStreamingContent(fullTextRef.current);
+              }
             } else if (data.type === 'tool_result') {
               setToolResults(prev => [...prev, {
                 tool: data.tool, arguments: {}, result: {data: data.result},
               }]);
             } else if (data.type === 'done') {
-              if (data.reply) finalReply = data.reply;
-              const results = data.tool_results || [];
-              const assistantMsg: ChatMessage = {role: 'assistant', content: finalReply};
-              if (results.length > 0) {
-                assistantMsg.tool_calls = results.map(() => ({type: 'function'}));
-              }
-              setMessages(prev => [...prev, assistantMsg]);
-              setToolResults(prev => [...prev, ...results]);
-              setStreamingContent(null);
+              // Reveal all remaining text immediately
+              const reply = data.reply || fullTextRef.current;
+              fullTextRef.current = reply;
+              typingIndexRef.current = reply.length;
+              setStreamingContent(reply);
+              // Small delay then commit as final message
+              setTimeout(() => {
+                const results = data.tool_results || [];
+                const assistantMsg: ChatMessage = {role: 'assistant', content: reply};
+                if (results.length > 0) {
+                  assistantMsg.tool_calls = results.map(() => ({type: 'function'}));
+                }
+                setMessages(prev => [...prev, assistantMsg]);
+                setToolResults(prev => [...prev, ...results]);
+                setStreamingContent(null);
+              }, 300);
             } else if (data.type === 'error') {
               setMessages(prev => [...prev, {role: 'assistant', content: `❌ ${data.content}`}]);
               setStreamingContent(null);
@@ -360,12 +390,19 @@ function ChatArea() {
     } finally {
       setLoading(false);
       abortRef.current = null;
-      setStreamingContent(prev => {
-        if (prev) {
-          setMessages(msgs => [...msgs, {role: 'assistant', content: prev}]);
-        }
-        return null;
-      });
+      if (typingTimerRef.current) {
+        clearInterval(typingTimerRef.current);
+        typingTimerRef.current = null;
+      }
+      // Commit any remaining uncommitted text
+      if (fullTextRef.current && typingIndexRef.current > 0 && !messages.some(m => m.content === fullTextRef.current)) {
+        setMessages(msgs => {
+          // Avoid duplicates
+          if (msgs.some(m => m.content === fullTextRef.current)) return msgs;
+          return [...msgs, {role: 'assistant', content: fullTextRef.current}];
+        });
+        setStreamingContent(null);
+      }
     }
   }, [config, messages, loading]);
 
