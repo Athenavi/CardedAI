@@ -18,6 +18,8 @@ from fastapi import Depends, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.utils.storage.s3_storage import s3_storage
+
 from shared.models import FileHash, Media, UploadChunk, UploadTask
 from src.extensions import get_async_db_session as get_async_db
 from src.utils.image.video_processor import video_processor
