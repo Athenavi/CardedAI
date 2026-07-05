@@ -1018,3 +1018,68 @@ body {
     content-visibility: auto;
     contain-intrinsic-size: auto 200px;
 }
+
+/* ═══════════════════════════════════════════
+   Accessibility: User-configurable classes
+   Applied via AdminAccessibility.tsx useEffect
+   ═══════════════════════════════════════════ */
+
+/* ── High Contrast Mode ── */
+.a11y-high-contrast {
+    --a11y-bg: #000000;
+    --a11y-text: #ffffff;
+    --a11y-link: #ffff00;
+    --a11y-border: #ffffff;
+    --a11y-focus: #00ff00;
+}
+.a11y-high-contrast body {
+    background-color: var(--a11y-bg) !important;
+    color: var(--a11y-text) !important;
+}
+.a11y-high-contrast a {
+    color: var(--a11y-link) !important;
+    text-decoration: underline !important;
+}
+.a11y-high-contrast a:focus,
+.a11y-high-contrast button:focus,
+.a11y-high-contrast input:focus {
+    outline: 3px solid var(--a11y-focus) !important;
+    outline-offset: 2px !important;
+}
+
+/* ── Reduce Motion ── */
+.a11y-reduce-motion * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+}
+
+/* ── Font Size ── */
+.a11y-font-small body { font-size: 0.875rem; }
+.a11y-font-large body { font-size: 1.125rem; }
+.a11y-font-x-large body { font-size: 1.25rem; }
+
+/* ── Focus Visible ── */
+.a11y-focus-visible *:focus {
+    outline: 3px solid #3b82f6 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.3) !important;
+}
+
+/* ── Skip Links ── */
+.a11y-skip-links .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    z-index: 9999;
+    padding: 8px 16px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 14px;
+    border-radius: 0 0 4px 0;
+    transition: top 0.1s;
+}
+.a11y-skip-links .skip-link:focus {
+    top: 0;
+    outline: none;
+}

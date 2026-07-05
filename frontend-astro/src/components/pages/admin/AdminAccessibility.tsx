@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { QueryProvider } from '@/components/QueryProvider';
 import { AdminShell } from '@/components/admin/AdminShell';
@@ -123,6 +123,38 @@ function AccessContent() {
       showError('保存失败', err.message || '无法保存配置');
     },
   });
+
+  // ── Apply accessibility config to DOM ──
+  useEffect(() => {
+    if (!userConfig) return;
+    const root = document.documentElement;
+    const cl = root.classList;
+
+    // High contrast
+    cl.toggle('a11y-high-contrast', !!userConfig.high_contrast_mode);
+
+    // Reduce motion
+    cl.toggle('a11y-reduce-motion', !!userConfig.reduce_motion);
+
+    // Font size
+    const sizes = ['small', 'medium', 'large', 'x-large'];
+    sizes.forEach(s => cl.remove(`a11y-font-${s}`));
+    if (userConfig.font_size && userConfig.font_size !== 'medium') {
+      cl.add(`a11y-font-${userConfig.font_size}`);
+    }
+
+    // Focus visible
+    cl.toggle('a11y-focus-visible', !!userConfig.focus_visible);
+
+    // Skip links
+    cl.toggle('a11y-skip-links', !!userConfig.skip_links);
+
+    // Keyboard navigation
+    cl.toggle('a11y-keyboard-nav', !!userConfig.keyboard_navigation);
+
+    // Screen reader support
+    cl.toggle('a11y-screen-reader', !!userConfig.screen_reader_support);
+  }, [userConfig]);
 
   // ── WCAG Checklist ──
   const {

@@ -61,7 +61,64 @@ async def audit_batch(
 @router.get("/guidelines", summary="WCAG指南", description="获取WCAG 2.1指南说明")
 async def get_wcag_guidelines():
     """获取WCAG指南"""
-    guidelines = accessibility_auditor.get_wcag_guidelines()
+    guidelines = {
+        "version": "2.1",
+        "principles": {
+            "perceivable": {
+                "name": "可感知",
+                "description": "信息和用户界面组件必须以用户可感知的方式呈现",
+                "guidelines": [
+                    "1.1 文本替代：为所有非文本内容提供文本替代",
+                    "1.2 时间基媒体：为音频和视频内容提供替代",
+                    "1.3 适应性：内容应以不同方式呈现而不丢失信息",
+                    "1.4 可辨别：使用户更容易看到和听到内容"
+                ]
+            },
+            "operable": {
+                "name": "可操作",
+                "description": "用户界面组件和导航必须可操作",
+                "guidelines": [
+                    "2.1 键盘可访问：所有功能均可通过键盘操作",
+                    "2.2 充足时间：为用户提供充足的时间阅读和使用内容",
+                    "2.3 癫痫发作：内容不应导致癫痫发作",
+                    "2.4 可导航：提供帮助用户导航的方法"
+                ]
+            },
+            "understandable": {
+                "name": "可理解",
+                "description": "信息和用户界面操作必须可理解",
+                "guidelines": [
+                    "3.1 可读性：使文本内容可读和可理解",
+                    "3.2 可预测：网页以可预测的方式呈现和操作",
+                    "3.3 输入辅助：帮助用户避免和纠正错误"
+                ]
+            },
+            "robust": {
+                "name": "健壮性",
+                "description": "内容必须有足够的健壮性以适应各种用户代理",
+                "guidelines": [
+                    "4.1 兼容性：最大化与当前和未来用户代理的兼容性"
+                ]
+            }
+        },
+        "conformance_levels": {
+            "A": {
+                "name": "A级",
+                "description": "最低级别合规",
+                "requirement": "满足所有A级成功标准"
+            },
+            "AA": {
+                "name": "AA级",
+                "description": "中级合规（推荐）",
+                "requirement": "满足所有A级和AA级成功标准"
+            },
+            "AAA": {
+                "name": "AAA级",
+                "description": "最高级别合规",
+                "requirement": "满足所有A级、AA级和AAA级成功标准"
+            }
+        }
+    }
 
     return ApiResponse(
         success=True,
