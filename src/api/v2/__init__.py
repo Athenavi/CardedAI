@@ -146,10 +146,6 @@ ROUTE_REGISTRY_V2 = [
     ("src.api.v2.accessibility", "/api/v2/accessibility", ["accessibility-v2"], True),
     # V1 accessibility 各子模块已废弃，功能已迁移到 V2 聚合路由器
     # ==================== 社交（V2 聚合路由器）====================
-    # V2 Social 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
-    ("src.api.v2.social", "/api/v2/social", ["social-v2"], True),
-    # V1 social 各子模块已废弃，功能已迁移到 V2 聚合路由器
-    # ("src.api.v1.social.share_stats", "/api/v2/social/share-stats", ["share-stats"], False),
 
     # ==================== 示例和工具端点（集中管理）====================
     ("src.api.v2.examples_tools", "/api/v2/examples", ["examples-tools"], False),

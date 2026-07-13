@@ -1,10 +1,11 @@
 """
 SQLAlchemy 模型定义 - NodeExecution
 由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-07-13 10:19:38
+生成时间：2026-07-13 11:50:46
 """
 
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, ForeignKey, Index
+from sqlalchemy.orm import relationship
 
 from shared.models import Base  # 使用统一的 Base（跨子包引用）
 
@@ -48,6 +49,8 @@ class NodeExecution(Base):
 
     completed_at = Column(DateTime, nullable=True, doc='完成时间')
 
+    # 关系定义
+    execution = relationship('WorkflowExecution', back_populates='node_executions')
 
     def to_dict(self, exclude_sensitive=True):
         """转换为字典

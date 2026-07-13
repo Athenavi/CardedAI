@@ -1437,6 +1437,10 @@ models:
         type: integer
         default: 0
         description: 下载进度(0-100)
+      priority:
+        type: integer
+        default: 0
+        description: 任务优先级（数字越小优先级越高）
       status:
         type: string
         maxLength: 50
@@ -2999,6 +3003,10 @@ models:
         format: date-time
         nullable: true
         description: 完成时间
+    relationships:
+      execution:
+        target: WorkflowExecution
+        back_populates: node_executions
     indexes:
       - name: idx_ne_execution
         columns:

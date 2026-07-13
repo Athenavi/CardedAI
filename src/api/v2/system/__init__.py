@@ -25,7 +25,6 @@ def _build_router():
     from src.api.v1.system.maintenance import router as maintenance_router
     from src.api.v1.system.migrations import router as migrations_router
     from src.api.v1.system.resource_transfer import router as resource_transfer_router
-    from src.api.v1.system.screen_options import router as screen_options_router
     from src.api.v1.system.webhook_management import router as webhook_management_router
     from src.api.v1.system.workflow import router as workflow_router
     from src.api.v2.system.accessibility import router as accessibility_router
@@ -40,7 +39,6 @@ def _build_router():
     router.include_router(maintenance_router, prefix="/maintenance")
     router.include_router(migrations_router, prefix="/migrations")
     router.include_router(resource_transfer_router, prefix="/transfer")
-    router.include_router(screen_options_router, prefix="/screen-options")
     router.include_router(workflow_router, prefix="/workflow")
     router.include_router(accessibility_router)
 

@@ -1,7 +1,7 @@
 """
 SQLAlchemy 模型定义 - DownloadTask
 由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-07-13 10:19:38
+生成时间：2026-07-13 11:50:46
 """
 
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, ForeignKey, Index
@@ -43,6 +43,9 @@ class DownloadTask(Base):
     progress = Column(Integer, default=0, doc='下载进度(0-100)')
 
 
+    priority = Column(Integer, default=0, doc='任务优先级（数字越小优先级越高）')
+
+
     status = Column(String(50), default='pending', doc='任务状态')
 
     error_message = Column(Text, nullable=True, doc='错误信息')
@@ -71,6 +74,7 @@ class DownloadTask(Base):
             'total_size': self.total_size,
             'downloaded_size': self.downloaded_size,
             'progress': self.progress,
+            'priority': self.priority,
             'status': self.status,
             'error_message': self.error_message,
             'media_id': self.media_id,
