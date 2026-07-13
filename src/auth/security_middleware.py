@@ -14,6 +14,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from src.unified_logger import default_logger as logger
+from src.utils.security.ip_utils import get_client_ip
 
 
 class XSSFilterMiddleware(BaseHTTPMiddleware):
@@ -239,7 +240,7 @@ class XSSFilterMiddleware(BaseHTTPMiddleware):
         if not self.enable_logging:
             return
 
-        client_ip = request.client.host if request.client else 'unknown'
+        client_ip = get_client_ip(request)
         pattern = result.get('pattern', 'unknown')
         severity = result.get('severity', 'medium')
 
@@ -400,17 +401,9 @@ class RateLimiterMiddleware(BaseHTTPMiddleware):
         return response
 
     def _get_client_ip(self, request: Request) -> str:
-        """获取客户端真实 IP"""
-        # 检查代理头
-        forwarded_for = request.headers.get('X-Forwarded-For')
-        if forwarded_for:
-            return forwarded_for.split(',')[0].strip()
-
-        real_ip = request.headers.get('X-Real-IP')
-        if real_ip:
-            return real_ip
-
-        return request.client.host if request.client else "unknown"
+        """获取客户端真实 IP（委托给 ip_utils）"""
+        ip = get_client_ip(request)
+        return ip if ip != '127.0.0.1' else "unknown"
 
     def _get_rate_limit_for_path(self, path: str) -> tuple:
         """
@@ -582,7 +575,7 @@ class SQLInjectionFilterMiddleware(BaseHTTPMiddleware):
         if not self.enable_logging:
             return
 
-        client_ip = request.client.host if request.client else 'unknown'
+        client_ip = get_client_ip(request)
         pattern = result.get('pattern', 'unknown')
         is_critical = result.get('is_critical', False)
 

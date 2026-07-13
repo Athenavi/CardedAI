@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import List
+import warnings
 
 from fastapi import HTTPException, status
 from fastapi import Request, Depends
@@ -7,6 +8,14 @@ from fastapi import Request, Depends
 from shared.models.user import User
 from src.auth import jwt_required_page_dependency as jwt_required
 from src.extensions import get_sync_db
+
+
+warnings.warn(
+    "src.utils.security.security.py 已废弃，请使用 src.auth.auth_deps 中的 "
+    "require_permission / require_role (异步实现)。此模块将在未来版本中移除。",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 # 定义角色枚举
@@ -53,7 +62,11 @@ def create_permission(roles: List[RoleEnum]):
 # 权限依赖函数
 async def permission_required(roles: List[RoleEnum], request: Request,
                               current_user=Depends(jwt_required)):
-    """权限检查依赖函数"""
+    """
+    权限检查依赖函数
+
+    警告：已废弃，请使用 src.auth.auth_deps.require_permission(code) 替代。
+    """
     # 获取当前用户
     current_user_id = current_user.id
     # 从数据库获取用户信息
@@ -75,7 +88,11 @@ async def permission_required(roles: List[RoleEnum], request: Request,
 
 
 async def role_required(role_name: RoleEnum, request: Request, current_user=Depends(jwt_required)):
-    """角色检查依赖函数"""
+    """
+    角色检查依赖函数
+
+    警告：已废弃，请使用 src.auth.auth_deps.require_role(name) 替代。
+    """
     # 获取当前用户ID
     current_user_id = current_user.id
 
@@ -100,7 +117,11 @@ async def role_required(role_name: RoleEnum, request: Request, current_user=Depe
 
 
 def init_security_headers(app):
-    """初始化安全头配置"""
+    """
+    初始化安全头配置
+
+    警告：已废弃，安全响应头已由 XSSFilterMiddleware 统一设置。此函数将在未来版本中移除。
+    """
 
     # 为FastAPI应用添加安全中间件
     @app.middleware("http")
