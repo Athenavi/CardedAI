@@ -68,6 +68,9 @@ frontend-astro/dist/
 frontend-astro/.astro/
 frontend-astro/*.tsbuildinfo
 frontend-next/.next/
+# Reasonix agent workspace files
+.reasonix/
+
 static_generated/.cache/
 frontend-next/node_modules/
 
