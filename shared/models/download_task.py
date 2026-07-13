@@ -1,7 +1,7 @@
 """
 SQLAlchemy 模型定义 - DownloadTask
 由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-06-04 16:28:03
+生成时间：2026-07-13 10:19:38
 """
 
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, ForeignKey, Index
@@ -51,22 +51,9 @@ class DownloadTask(Base):
     media_id = Column(BigInteger, ForeignKey('media.id'), nullable=True, doc='关联的媒体ID')
 
 
-    retry_count = Column(BigInteger, default=0, doc='重试次数')
-
-
-    max_retries = Column(BigInteger, default=3, doc='最大重试次数')
-
-
-    priority = Column(BigInteger, default=0, doc='优先级(数字越小优先级越高)')
-
-
     created_at = Column(DateTime, doc='创建时间')
 
     updated_at = Column(DateTime, doc='更新时间')
-
-    started_at = Column(DateTime, nullable=True, doc='开始下载时间')
-
-    completed_at = Column(DateTime, nullable=True, doc='完成时间')
 
 
     def to_dict(self, exclude_sensitive=True):
@@ -87,13 +74,8 @@ class DownloadTask(Base):
             'status': self.status,
             'error_message': self.error_message,
             'media_id': self.media_id,
-            'retry_count': self.retry_count,
-            'max_retries': self.max_retries,
-            'priority': self.priority,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
-            'started_at': self.started_at.isoformat() if self.started_at else None,
-            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
         }
 
         if not exclude_sensitive:

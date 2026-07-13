@@ -1,7 +1,7 @@
 """
 SQLAlchemy 模型定义 - Notification
 由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-06-04 16:28:03
+生成时间：2026-07-13 10:19:38
 """
 
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, ForeignKey

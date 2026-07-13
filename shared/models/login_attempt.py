@@ -1,7 +1,7 @@
 """
 SQLAlchemy 模型定义 - LoginAttempt
 由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-06-04 16:28:03
+生成时间：2026-07-13 10:19:38
 """
 
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, Index
@@ -28,7 +28,8 @@ class LoginAttempt(Base):
 
     ip_address = Column(String(45), index=True, nullable=True, doc='IP地址')
 
-    is_success = Column('success', Boolean, default=False, doc='是否成功')
+    is_success = Column(Boolean, default=False, doc='是否成功')
+
 
     created_at = Column(DateTime, doc='尝试时间')
 

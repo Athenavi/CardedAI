@@ -1,7 +1,7 @@
 """
 SQLAlchemy 模型定义 - OAuthAccount
 由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-06-04 16:28:03
+生成时间：2026-07-13 10:19:38
 """
 
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, ForeignKey, Index
@@ -26,7 +26,7 @@ class OAuthAccount(Base):
     user_id = Column(BigInteger, ForeignKey('users.id'), doc='关联的用户ID')
 
 
-    provider = Column(String(50), index=True, nullable=True, doc='OAuth提供商(github/google/wechat/qq/weibo)')
+    provider = Column(String(50), index=True, nullable=True, doc='OAuth提供商 (github/google/wechat/qq/weibo)')
 
     provider_user_id = Column(String(255), index=True, nullable=True, doc='第三方平台的用户ID')
 

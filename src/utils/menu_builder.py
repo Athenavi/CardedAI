@@ -6,7 +6,7 @@ from typing import List, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
-from shared.models import Menus, MenuItems, SystemSettings
+from shared.models import Menus, SystemSettings
 
 
 # from src.models.system import Menus, MenuItems, SystemSettings
@@ -35,12 +35,7 @@ def get_menu_tree_by_slug(db: Session, menu_slug: str) -> List[Dict]:
 
         # 获取该菜单下的所有菜单项，按order_index排序
         from sqlalchemy import select
-        menu_items_query = select(MenuItems).where(
-            MenuItems.menu_id == menu.id,
-            MenuItems.is_active == True
-        ).order_by(MenuItems.order_index)
-        menu_items_result = db.execute(menu_items_query)
-        menu_items = menu_items_result.scalars().all()
+        menu_items = []
 
         # 构建菜单树
         menu_tree = []
@@ -157,12 +152,7 @@ def get_all_menus_with_items(db: Session) -> Dict:
         for menu in menus:
             # 获取该菜单下的所有菜单项
             from sqlalchemy import select
-            menu_items_query = select(MenuItems).where(
-                MenuItems.menu_id == menu.id,
-                MenuItems.is_active == True
-            ).order_by(MenuItems.order_index)
-            menu_items_result = db.execute(menu_items_query)
-            menu_items = menu_items_result.scalars().all()
+                menu_items = []
 
             # 构建菜单树
             menu_tree = []
@@ -270,13 +260,7 @@ async def get_all_menus_with_items_async(db: AsyncSession) -> Dict:
         result_dict = {}
         for menu in menus:
             # 获取该菜单下的所有菜单项
-            menu_items_result = await db.execute(
-                select(MenuItems).where(
-                    MenuItems.menu_id == menu.id,
-                    MenuItems.is_active == True
-                ).order_by(MenuItems.order_index)
-            )
-            menu_items = menu_items_result.scalars().all()
+            menu_items = []
 
             # 构建菜单树
             menu_tree = []

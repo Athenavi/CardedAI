@@ -66,6 +66,7 @@
     "articles": "Articles",
     "categories": "Categories",
     "media": "Media Library",
+    "oauth": "Login Integrations",
     "comments": "Comments",
     "users": "Users",
     "roles": "Roles & Permissions",

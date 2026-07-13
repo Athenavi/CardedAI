@@ -65,6 +65,8 @@ class DownloadQueueProcessor:
         while self.is_running:
             try:
                 await self._process_queue()
+            except ConnectionRefusedError:
+                logger.warning("下载队列处理: 数据库连接被拒绝, 跳过本轮处理")
             except Exception as e:
                 logger.error(f"Error in download queue processor: {e}", exc_info=True)
 
@@ -109,6 +111,8 @@ class DownloadQueueProcessor:
                     success_count = sum(1 for r in results if isinstance(r, bool) and r)
                     logger.info(f"Processed {len(tasks)} tasks, {success_count} succeeded")
 
+        except ConnectionRefusedError:
+            logger.warning("下载队列处理: 数据库连接被拒绝, 跳过本轮处理")
         except Exception as e:
             logger.error(f"Failed to process queue: {e}", exc_info=True)
 
@@ -127,6 +131,9 @@ class DownloadQueueProcessor:
                         logger.warning(f"Task {task_id} failed")
                         return False
 
+            except ConnectionRefusedError:
+                logger.warning(f"任务 {task_id}: 数据库连接被拒绝, 跳过")
+                return False
             except Exception as e:
                 logger.error(f"Task {task_id} processing error: {e}", exc_info=True)
                 return False

@@ -136,9 +136,9 @@ function DashboardInner() {
     queryKey: ['admin-dashboard'],
     queryFn: async () => {
       const res = await apiClient.get<{
-          articles: number; users: number; comments: number;
+          articles: number; users: number;
           visitors: number; views_today: number; views_trend?: number;
-          users_trend?: number; articles_trend?: number; comments_trend?: number;
+          users_trend?: number; articles_trend?: number;
       }>('/dashboard/stats');
         return res.success && res.data ? res.data : {} as any;
     },
@@ -214,13 +214,7 @@ function DashboardInner() {
               color="green"
               trend={stats?.users_trend ?? 8}
           />
-          <StatCard
-              label="评论数"
-              value={stats?.comments ?? '—'}
-              icon={MessageSquare}
-              color="purple"
-              trend={stats?.comments_trend ?? 5}
-          />
+
           <StatCard
               label="今日访问"
               value={stats?.views_today ?? stats?.visitors ?? '—'}

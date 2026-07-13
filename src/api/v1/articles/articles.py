@@ -146,7 +146,6 @@ async def _get_article_detail(
         "cover_image": article.cover_image,
         "tags": _split_tags(article.tags_list),
         "views": article.views or 0,
-        "likes": article.likes or 0,
         "status": article.status,
         "hidden": article.hidden,
         "is_vip_only": article.is_vip_only,
@@ -253,8 +252,7 @@ async def get_articles_api(
                 "category_name": categories_dict[
                     article.category].name if article.category in categories_dict else None,
                 "views": article.views or 0,
-                "likes": article.likes or 0,
-                "status": article.status,
+                        "status": article.status,
                 "created_at": article.created_at.isoformat() if article.created_at else None,
                 "updated_at": article.updated_at.isoformat() if article.updated_at else None
             })
@@ -344,8 +342,7 @@ async def get_home_articles_api(
                 "category_name": categories_dict[
                     article.category].name if article.category in categories_dict else None,
                 "views": article.views or 0,
-                "likes": article.likes or 0,
-                "created_at": article.created_at.isoformat() if article.created_at else None,
+                        "created_at": article.created_at.isoformat() if article.created_at else None,
                 "updated_at": article.updated_at.isoformat() if article.updated_at else None
             })
 
@@ -408,8 +405,7 @@ async def get_user_articles_api(
                 "category_name": categories_dict[
                     article.category].name if article.category in categories_dict else None,
                 "views": article.views or 0,
-                "likes": article.likes or 0,
-                "status": article.status,
+                        "status": article.status,
                 "created_at": article.created_at.isoformat() if article.created_at else None,
                 "updated_at": article.updated_at.isoformat() if article.updated_at else None
             })
@@ -909,30 +905,6 @@ async def delete_article_api(
         if article.user != current_user.id and not getattr(current_user, 'is_superuser', False):
             raise HTTPException(status_code=403, detail="Permission denied")
 
-        # 级联删除评论投票（先于评论删除，避免孤立记录）
-        from shared.models.comment import Comment
-        from shared.models.comment_vote import CommentVote
-        from shared.models.comment_subscription import CommentSubscription
-
-        comment_ids_result = await db.execute(
-            select(Comment.id).where(Comment.article_id == article_id)
-        )
-        comment_ids = [row[0] for row in comment_ids_result.all()]
-        if comment_ids:
-            await db.execute(
-                delete(CommentVote).where(CommentVote.comment_id.in_(comment_ids))
-            )
-
-        # 级联删除评论订阅
-        await db.execute(
-            delete(CommentSubscription).where(CommentSubscription.article_id == article_id)
-        )
-
-        # 级联删除评论
-        await db.execute(
-            delete(Comment).where(Comment.article_id == article_id)
-        )
-
         # 级联删除修订历史
         revisions_query = select(ArticleRevision).where(ArticleRevision.article_id == article_id)
         revisions_result = await db.execute(revisions_query)
@@ -1028,8 +1000,7 @@ async def get_articles_by_tag_api(
                 "category_name": categories_dict[
                     article.category].name if article.category in categories_dict else None,
                 "views": article.views or 0,
-                "likes": article.likes or 0,
-                "created_at": article.created_at.isoformat() if article.created_at else None,
+                        "created_at": article.created_at.isoformat() if article.created_at else None,
             })
         return ApiResponse(success=True, data={"tag_name": tag_name, "articles": articles_data})
     except Exception as e:
@@ -1081,8 +1052,7 @@ async def get_featured_articles_api(
                 "category_name": categories_dict[
                     article.category].name if article.category in categories_dict else None,
                 "views": article.views or 0,
-                "likes": article.likes or 0,
-                "created_at": article.created_at.isoformat() if article.created_at else None,
+                        "created_at": article.created_at.isoformat() if article.created_at else None,
             })
         return ApiResponse(success=True, data={"featured_articles": articles_data})
     except Exception as e:

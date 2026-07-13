@@ -103,9 +103,7 @@ class ReportGenerator:
             'summary': {
                 'total_articles': total_articles,
                 'total_views': total_views,
-                'total_likes': total_likes,
-                'total_comments': total_comments,
-                'avg_views_per_article': avg_views,
+                                                'avg_views_per_article': avg_views,
             },
             'top_articles': top_articles,
             'generated_at': now.isoformat(),

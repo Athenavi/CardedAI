@@ -64,10 +64,6 @@ async def get_dashboard_stats(
         total_articles = total_articles_result.scalar()
 
         # 计算总点赞数 (使用Article模型中的likes字段)
-        total_likes_query = select(func.sum(Article.likes))
-        total_likes_result = await db.execute(total_likes_query)
-        total_likes = total_likes_result.scalar() or 0
-
         # 计算总浏览量
         total_views_query = select(func.sum(Article.views))
         total_views_result = await db.execute(total_views_query)
@@ -857,30 +853,6 @@ async def delete_blog_management_article(
         if not current_user.is_superuser and article.user != current_user.id:
             from fastapi import HTTPException
             raise HTTPException(status_code=403, detail="Permission denied")
-
-        # 级联删除评论投票（先于评论删除，避免孤立记录）
-        from shared.models.comment import Comment
-        from shared.models.comment_vote import CommentVote
-        from shared.models.comment_subscription import CommentSubscription
-
-        comment_ids_result = await db.execute(
-            select(Comment.id).where(Comment.article_id == article_id)
-        )
-        comment_ids = [row[0] for row in comment_ids_result.all()]
-        if comment_ids:
-            await db.execute(
-                delete(CommentVote).where(CommentVote.comment_id.in_(comment_ids))
-            )
-
-        # 级联删除评论订阅
-        await db.execute(
-            delete(CommentSubscription).where(CommentSubscription.article_id == article_id)
-        )
-
-        # 级联删除评论
-        await db.execute(
-            delete(Comment).where(Comment.article_id == article_id)
-        )
 
         # 级联删除修订历史
         revisions_query = select(ArticleRevision).where(ArticleRevision.article_id == article_id)

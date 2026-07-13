@@ -1,7 +1,7 @@
 """
 SQLAlchemy 模型定义 - UserSession
 由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-06-04 16:28:03
+生成时间：2026-07-13 10:19:38
 """
 
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, ForeignKey, Index
@@ -30,7 +30,7 @@ class UserSession(Base):
 
     access_token = Column(String(255), unique=True, nullable=True, doc='会话令牌')
 
-    refresh_token = Column(String(255), index=True, nullable=True, doc='会话刷新令牌（不唯一 扫码的登录依赖）')
+    refresh_token = Column(String(255), index=True, nullable=True, doc='会话刷新令牌（不唯一，扫码的登录依赖）')
 
     device_info = Column(String(500), nullable=True, doc='设备信息（User-Agent）')
 

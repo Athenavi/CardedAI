@@ -1,7 +1,7 @@
 """
 SQLAlchemy 模型定义 - TokenBlacklist
 由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-06-04 16:28:03
+生成时间：2026-07-13 10:19:38
 """
 
 from sqlalchemy import event
@@ -24,7 +24,7 @@ class TokenBlacklist(Base):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True, doc='ID')
 
-    token_identifier = Column(String(64), unique=True, nullable=True, doc='Token 唯一标识符（token 前32个字符）')
+    token_identifier = Column(String(64), unique=True, nullable=True, doc='Token 唯一标识符（token 前12个字符）')
 
     token_hash = Column(String(128), nullable=True, doc='Token 哈希值（用于调试和审计）')
 

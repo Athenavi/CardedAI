@@ -1,4 +1,4 @@
-﻿# ============================================================================
+# ============================================================================
 #   模型定义配置文件
 # ============================================================================
 #
@@ -77,10 +77,6 @@ models:
         type: text
         nullable: true
         description: 用户代理字符串
-      request_data:
-        type: text
-        nullable: true
-        description: 请求数据快照 (JSON)
       status:
         type: string
         maxLength: 20
@@ -477,10 +473,6 @@ models:
         type: bigint
         description: 用户
         foreignKey: User
-      likes:
-        type: bigint
-        default: 0
-        description: 点赞数
       status:
         type: integer
         enum:
@@ -542,61 +534,89 @@ models:
         type: string
         format: date-time
         description: 更新时间
+      seo_title:
+        type: string
+        nullable: true
+        maxLength: 255
+        description: SEO标题
+      seo_description:
+        type: text
+        nullable: true
+        description: SEO描述
+      seo_keywords:
+        type: string
+        nullable: true
+        maxLength: 500
+        description: SEO关键词
+      og_title:
+        type: string
+        nullable: true
+        maxLength: 255
+        description: Open Graph标题
+      og_description:
+        type: text
+        nullable: true
+        description: Open Graph描述
+      og_image:
+        type: string
+        nullable: true
+        maxLength: 500
+        description: Open Graph图片
+      og_type:
+        type: string
+        default: article
+        maxLength: 50
+        description: Open Graph类型
+      twitter_title:
+        type: string
+        nullable: true
+        maxLength: 255
+        description: Twitter Card标题
+      twitter_description:
+        type: text
+        nullable: true
+        description: Twitter Card描述
+      twitter_image:
+        type: string
+        nullable: true
+        maxLength: 500
+        description: Twitter Card图片
+      twitter_card:
+        type: string
+        default: summary_large_image
+        maxLength: 50
+        description: Twitter Card类型
+      canonical_url:
+        type: string
+        nullable: true
+        maxLength: 500
+        description: 规范URL
+      robots_meta:
+        type: string
+        default: index,follow
+        maxLength: 100
+        description: Robots元标签
+      schema_org_enabled:
+        type: boolean
+        default: true
+        description: 是否启用Schema.org
+      schema_org_type:
+        type: string
+        default: BlogPosting
+        maxLength: 50
+        description: Schema.org类型
     table: articles
     indexes:
-      - name: idx_articles_status
-        columns:
-          - status
-      - name: idx_articles_category
-        columns:
-          - category
-      - name: idx_articles_user_id
-        columns:
-          - user
-      - name: idx_articles_created_at
-        columns:
-          - created_at
-        order: DESC
-      - name: idx_articles_scheduled_publish
-        columns:
-          - scheduled_publish_at
-      - name: idx_articles_status_created
-        columns:
-          - status
-          - created_at
-        order: DESC
-      - name: idx_articles_is_sticky
-        columns:
-          - is_sticky
-      - name: idx_articles_sticky_until
-        columns:
-          - sticky_until
-      - name: idx_articles_published_at
-        columns:
-          - created_at
-        order: DESC
-        comment: 文章发布时间索引（用于最新文章查询）
-      - name: idx_articles_status_featured
-        columns:
-          - status
-          - is_featured
-        comment: 推荐文章查询索引
-      - name: idx_articles_status_views
-        columns:
-          - status
-          - views
-        order: DESC
-        comment: 热门文章查询索引
       - name: idx_articles_slug
         columns:
           - slug
         unique: true
         comment: 文章slug唯一索引
-      - name: idx_articles_post_type_status
+      - name: idx_articles_status_created
         columns:
-          - post_type
           - status
-        comment: 按类型和状态查询索引
+          - created_at
+        order: DESC
       - name: idx_articles_category_status_created
         columns:
           - category
@@ -617,11 +637,6 @@ models:
         target: ArticleRevision
         back_populates: article
         primaryjoin: Article.id == ArticleRevision.article_id
-      seo_data:
-        target: ArticleSEO
-        back_populates: article
-        primaryjoin: Article.id == ArticleSEO.article_id
-        uselist: false
   ArticleList:
     type: schema
     description: 文章列表模型
@@ -658,10 +673,6 @@ models:
         type: bigint
         default: 0
         description: 浏览数
-      likes:
-        type: bigint
-        default: 0
-        description: 点赞数
       status:
         type: integer
         description: 状态
@@ -1083,86 +1094,6 @@ models:
           - parent_id
           - name
         unique: true
-  MediaOptimization:
-    description: 媒体优化配置模型（支持 WebP 转换、多尺寸生成、CDN 集成）
-    status: active
-    frontend_page: /admin/search-media
-    properties:
-      id:
-        type: bigint
-        description: 配置 ID
-      media_id:
-        type: bigint
-        foreignKey: Media
-        description: 媒体 ID
-      webp_url:
-        type: string
-        nullable: true
-        maxLength: 500
-        description: WebP 格式 URL
-      sizes_json:
-        type: text
-        nullable: true
-        description: 多尺寸 JSON (thumbnail, medium, large)
-      cdn_url:
-        type: string
-        nullable: true
-        maxLength: 500
-        description: CDN URL
-      optimization_status:
-        type: string
-        maxLength: 20
-        default: pending
-        description: 优化状态 (pending, processing, completed, failed)
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-      updated_at:
-        type: string
-        format: date-time
-        description: 更新时间
-    orm: true
-    table: media_optimizations
-    indexes:
-      - name: idx_media_optimization_media
-        columns:
-          - media_id
-        comment: 媒体ID索引
-      - name: idx_media_optimization_status
-        columns:
-          - optimization_status
-        comment: 优化状态索引
-  ArticleRevisionNote:
-    description: 文章修订注释模型（为每次修订添加说明和备注）
-    status: active
-    frontend_page: /admin/content-ext
-    properties:
-      id:
-        type: bigint
-        description: 注释 ID
-      revision_id:
-        type: bigint
-        foreignKey: ArticleRevision
-        description: 关联的修订版本 ID
-      user_id:
-        type: bigint
-        foreignKey: User
-        description: 添加注释的用户 ID
-      note_content:
-        type: text
-        description: 注释内容
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-    orm: true
-    table: article_revision_notes
-    indexes:
-      - name: idx_revision_notes_revision
-        columns:
-          - revision_id
-        comment: 修订版本索引
   SystemSettings:
     description: 系统设置模型
     status: active
@@ -1263,28 +1194,6 @@ models:
         description: 语言代码（文章国际化）
     orm: true
     table: article_content
-  ArticleLike:
-    description: 文章点赞模型
-    status: active
-    frontend_page: /admin/articles
-    properties:
-      id:
-        type: bigint
-        description: 点赞 ID
-      user:
-        type: bigint
-        description: 用户
-        foreignKey: User
-      article:
-        type: bigint
-        description: 文章
-        foreignKey: Article
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-    orm: true
-    table: article_likes
   FileHash:
     description: 文件哈希模型
     status: active
@@ -1325,28 +1234,52 @@ models:
     orm: true
     table: file_hashs
   Menus:
-    description: 菜单模型
+    description: 菜单模型（合并菜单项和菜单位置）
     status: active
     frontend_page: /admin/settings
     properties:
       id:
         type: integer
         description: 菜单 ID
+      parent_id:
+        type: integer
+        nullable: true
+        description: 父级 ID（用于层级结构）
       name:
         type: string
         maxLength: 100
-        description: 菜单名
+        description: 菜单/项名称
       slug:
         type: string
         maxLength: 100
-        description: 菜单 slug
+        nullable: true
+        description: 菜单标识
+      location:
+        type: string
+        maxLength: 100
+        nullable: true
+        description: 菜单位置（primary-menu, footer-menu等）
+      url:
+        type: string
+        maxLength: 500
+        nullable: true
+        description: 链接地址
+      target:
+        type: string
+        default: _self
+        description: 打开方式（_self, _blank）
+      order_index:
+        type: integer
+        default: 0
+        description: 排序索引
+      is_active:
+        type: boolean
+        default: true
+        description: 是否启用
       description:
         type: string
         nullable: true
-        is_active:
-          type: boolean
-          default: true
-          description: 是否激活
+        description: 描述
       created_at:
         type: string
         format: date-time
@@ -1361,221 +1294,20 @@ models:
         columns:
           - slug
         unique: true
+      - name: idx_menus_location
+        columns:
+          - location
+      - name: idx_menus_parent_id
+        columns:
+          - parent_id
+      - name: idx_menus_order
+        columns:
+          - order_index
       - name: idx_menus_is_active
         columns:
           - is_active
     table: menus
-  MenuItems:
-    description: 菜单项模型
-    status: active
-    frontend_page: /admin/settings
-    properties:
-      id:
-        type: integer
-        description: 菜单项 ID
-      menu_id:
-        type: integer
-        description: 菜单 ID
-      parent_id:
-        type: integer
-        nullable: true
-        description: 父菜单项 ID
-      title:
-        type: string
-        maxLength: 255
-        description: 标题
-      url:
-        type: string
-        maxLength: 500
-        description: URL
-      target:
-        type: string
-        default: _self
-        description: 打开方式
-      order_index:
-        type: integer
-        default: 0
-        description: 排序索引
-      is_active:
-        type: boolean
-        default: true
-        description: 是否激活
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-    orm: true
-    indexes:
-      - name: idx_menu_items_menu_id
-        columns:
-          - menu_id
-      - name: idx_menu_items_parent_id
-        columns:
-          - parent_id
-      - name: idx_menu_items_order
-        columns:
-          - order_index
-    table: menu_items
-  MenuLocation:
-    description: 菜单位置模型（主菜单、页脚菜单等）
-    status: active
-    frontend_page: /admin/content-ext
-    properties:
-      id:
-        type: integer
-        description: 位置 ID
-      name:
-        type: string
-        maxLength: 100
-        description: 位置显示名称
-      slug:
-        type: string
-        maxLength: 100
-        unique: true
-        description: 位置标识（primary-menu, footer-menu等）
-      description:
-        type: string
-        nullable: true
-        description: 位置描述
-      theme_supports:
-        type: string
-        nullable: true
-        description: 支持的主题列表（JSON格式）
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-      updated_at:
-        type: string
-        format: date-time
-        description: 更新时间
-    orm: true
-    table: menu_locations
-    indexes:
-      - name: idx_menu_locations_slug
-        columns:
-          - slug
-        unique: true
-  MenuLocationAssignment:
-    description: 菜单-位置关联表
-    status: active
-    frontend_page: /admin/content-ext
-    properties:
-      id:
-        type: bigint
-        description: 关联 ID
-      menu_id:
-        type: bigint
-        description: 菜单 ID
-        foreignKey: Menus
-      location_id:
-        type: bigint
-        description: 位置 ID
-        foreignKey: MenuLocation
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-    orm: true
-    table: menu_location_assignments
-    indexes:
-      - name: idx_menu_location_menu_id
-        columns:
-          - menu_id
-      - name: idx_menu_location_location_id
-        columns:
-          - location_id
-      - name: idx_menu_location_unique
-        columns:
-          - menu_id
-          - location_id
-        unique: true
-  Pages:
-    description: 页面模型
-    status: active
-    frontend_page: /admin/settings
-    properties:
-      id:
-        type: bigint
-        description: 页面 ID
-      title:
-        type: string
-        maxLength: 255
-        description: 标题
-      slug:
-        type: string
-        maxLength: 255
-        description: 页面 slug
-      content:
-        type: string
-        description: 页面内容
-      excerpt:
-        type: string
-        nullable: true
-        description: 摘要
-      template:
-        type: string
-        nullable: true
-        description: 模板
-      status:
-        type: bigint
-        default: 0
-        description: 状态
-      author_id:
-        type: bigint
-        nullable: true
-        description: 作者 ID
-      parent_id:
-        type: bigint
-        nullable: true
-        description: 父页面 ID
-      order_index:
-        type: integer
-        default: 0
-        description: 排序索引
-      meta_title:
-        type: string
-        nullable: true
-        description: 元标题
-      meta_description:
-        type: string
-        nullable: true
-        description: 元描述
-      meta_keywords:
-        type: string
-        nullable: true
-        description: 元关键词
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-      updated_at:
-        type: string
-        format: date-time
-        description: 更新时间
-      published_at:
-        type: string
-        format: date-time
-        nullable: true
-        description: 发布时间
-    orm: true
-    indexes:
-      - name: idx_pages_slug
-        columns:
-          - slug
-        unique: true
-      - name: idx_pages_status
-        columns:
-          - status
-      - name: idx_pages_author_id
-        columns:
-          - author_id
-      - name: idx_pages_parent_id
-        columns:
-          - parent_id
-      - name: idx_pages_order
-        columns:
-          - order_index
+
   UploadTask:
     description: 上传任务模型
     status: active
@@ -1725,18 +1457,6 @@ models:
         nullable: true
         description: 关联的媒体ID
         foreignKey: Media
-      retry_count:
-        type: bigint
-        default: 0
-        description: 重试次数
-      max_retries:
-        type: bigint
-        default: 3
-        description: 最大重试次数
-      priority:
-        type: bigint
-        default: 0
-        description: 优先级（数字越小优先级越高）
       created_at:
         type: string
         format: date-time
@@ -1745,16 +1465,6 @@ models:
         type: string
         format: date-time
         description: 更新时间
-      started_at:
-        type: string
-        format: date-time
-        nullable: true
-        description: 开始下载时间
-      completed_at:
-        type: string
-        format: date-time
-        nullable: true
-        description: 完成时间
     orm: true
     table: download_tasks
     indexes:
@@ -1857,79 +1567,6 @@ models:
         columns:
           - keyword
         comment: 关键词索引
-  SearchIndex:
-    description: 搜索索引状态模型
-    status: active
-    frontend_page: /admin/search-media
-    properties:
-      id:
-        type: bigint
-        description: 索引记录ID
-      article_id:
-        type: bigint
-        unique: true
-        description: 文章ID
-        foreignKey: Article
-      indexed:
-        type: boolean
-        default: false
-        description: 是否已索引
-      last_indexed_at:
-        type: string
-        format: date-time
-        nullable: true
-        description: 最后索引时间
-      index_hash:
-        type: string
-        maxLength: 64
-        nullable: true
-        description: 索引内容哈希(用于检测变更)
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-      updated_at:
-        type: string
-        format: date-time
-        description: 更新时间
-    orm: true
-    table: search_index
-    indexes:
-      - name: idx_search_index_article
-        columns:
-          - article_id
-        unique: true
-        comment: 文章ID唯一索引
-      - name: idx_search_index_indexed
-        columns:
-          - indexed
-        comment: 索引状态过滤
-      - name: idx_search_index_last_indexed
-        columns:
-          - last_indexed_at
-        order: DESC
-        comment: 索引时间索引
-  CustomField:
-    description: 自定义字段模型
-    status: active
-    frontend_page: /admin/integrations
-    properties:
-      id:
-        type: bigint
-        description: 字段 ID
-      user:
-        type: bigint
-        description: 用户
-        foreignKey: User
-      field_name:
-        type: string
-        maxLength: 100
-        description: 字段名称
-      field_value:
-        type: string
-        description: 字段值
-    orm: true
-    table: custom_fields
   ArticleRevision:
     description: 文章修订历史模型
     status: active
@@ -2167,290 +1804,6 @@ models:
       - is_custom_pattern
       - to_pattern_dict
     defs_target: block_pattern_defs.py
-  CustomPostType:
-    description: 自定义内容类型模型
-    status: active
-    frontend_page: /admin/content-ext
-    properties:
-      id:
-        type: bigint
-        description: 内容类型ID
-      name:
-        type: string
-        maxLength: 100
-        description: 内容类型名称
-      slug:
-        type: string
-        maxLength: 100
-        unique: true
-        description: 内容类型标识
-      description:
-        type: string
-        nullable: true
-        description: 描述
-      supports:
-        type: string
-        nullable: true
-        description: 支持的功能(JSON数组)
-      has_archive:
-        type: boolean
-        default: false
-        description: 是否有归档页
-      menu_icon:
-        type: string
-        nullable: true
-        description: 菜单图标
-      menu_position:
-        type: integer
-        default: 5
-        description: 菜单位置
-      is_active:
-        type: boolean
-        default: true
-        description: 是否激活
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-      updated_at:
-        type: string
-        format: date-time
-        description: 更新时间
-    orm: true
-    table: custom_post_types
-    indexes:
-      - name: idx_cpt_slug
-        columns:
-          - slug
-        unique: true
-      - name: idx_cpt_is_active
-        columns:
-          - is_active
-  CommentVote:
-    description: 评论投票模型
-    status: active
-    frontend_page: /admin/comments
-    properties:
-      id:
-        type: bigint
-        description: 投票 ID
-      comment_id:
-        type: bigint
-        description: 评论 ID
-        index: true
-      user:
-        type: bigint
-        nullable: true
-        description: 用户 ID（匿名投票可为空）
-        foreignKey: User
-      vote_type:
-        type: integer
-        enum:
-          - 1
-          - -1
-        description: '投票类型 (1: 赞, -1: 踩)'
-      ip_address:
-        type: string
-        nullable: true
-        maxLength: 45
-        description: IP 地址（用于防刷）
-      created_at:
-        type: string
-        format: date-time
-        description: 投票时间
-    orm: true
-    table: comment_votes
-    indexes:
-      - name: idx_comment_votes_comment_user
-        columns:
-          - comment_id
-          - user
-        unique: true
-  CommentSubscription:
-    description: 评论订阅模型
-    status: active
-    frontend_page: /admin/comments
-    properties:
-      id:
-        type: bigint
-        description: 订阅 ID
-      article_id:
-        type: bigint
-        description: 文章 ID
-        index: true
-      user_id:
-        type: bigint
-        nullable: true
-        description: 用户 ID（访客订阅可为空）
-        foreignKey: User
-      email:
-        type: string
-        maxLength: 255
-        description: 订阅邮箱
-      notify_type:
-        type: string
-        default: new_comment
-        enum:
-          - new_comment
-          - reply_to_me
-          - all_replies
-        description: '通知类型 (new_comment: 新评论, reply_to_me: 回复我, all_replies: 所有回复)'
-      is_active:
-        type: boolean
-        default: true
-        description: 是否激活
-      confirm_token:
-        type: string
-        nullable: true
-        maxLength: 64
-        description: 确认token（用于访客验证）
-      confirmed_at:
-        type: string
-        format: date-time
-        nullable: true
-        description: 确认时间
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-      updated_at:
-        type: string
-        format: date-time
-        description: 更新时间
-    orm: true
-    table: comment_subscriptions
-    indexes:
-      - name: idx_comment_subscriptions_article
-        columns:
-          - article_id
-      - name: idx_comment_subscriptions_email
-        columns:
-          - email
-      - name: idx_comment_subscriptions_user
-        columns:
-          - user_id
-      - name: idx_comment_subscriptions_unique
-        columns:
-          - article_id
-          - email
-        unique: true
-  Comment:
-    description: 评论模型
-    status: active
-    frontend_page: /admin/comments
-    properties:
-      id:
-        type: bigint
-        description: 评论 ID
-      article_id:
-        type: bigint
-        description: 文章 ID
-        foreignKey: Article
-        index: true
-      user_id:
-        type: bigint
-        nullable: true
-        description: 用户 ID（访客评论可为空）
-        foreignKey: User
-        index: true
-      parent_id:
-        type: bigint
-        nullable: true
-        description: 父评论 ID（用于回复）
-        foreignKey: Comment
-        index: true
-      content:
-        type: text
-        description: 评论内容
-      author_name:
-        type: string
-        nullable: true
-        maxLength: 100
-        description: 作者姓名（访客填写）
-      author_email:
-        type: string
-        nullable: true
-        maxLength: 255
-        description: 作者邮箱（访客填写）
-      author_url:
-        type: string
-        nullable: true
-        maxLength: 500
-        description: 作者网站（访客填写）
-      author_ip:
-        type: string
-        nullable: true
-        maxLength: 45
-        description: 作者 IP 地址
-      user_agent:
-        type: string
-        nullable: true
-        maxLength: 500
-        description: 用户代理
-      is_approved:
-        type: boolean
-        default: true
-        description: 是否已审核通过
-      likes:
-        type: bigint
-        default: 0
-        description: 点赞数
-      spam_score:
-        type: float
-        nullable: true
-        description: 垃圾评分
-      spam_reasons:
-        type: string
-        nullable: true
-        description: 垃圾检测原因（JSON格式）
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-      updated_at:
-        type: string
-        format: date-time
-        description: 更新时间
-    orm: true
-    table: comments
-    indexes:
-      - name: idx_comments_article_id
-        columns:
-          - article_id
-      - name: idx_comments_user_id
-        columns:
-          - user_id
-      - name: idx_comments_parent_id
-        columns:
-          - parent_id
-      - name: idx_comments_is_approved
-        columns:
-          - is_approved
-      - name: idx_comments_created_at
-        columns:
-          - created_at
-        order: DESC
-      - name: idx_comments_article_approved_created
-        columns:
-          - article_id
-          - is_approved
-          - created_at
-        order: DESC
-        comment: 文章评论列表查询索引（最常用）
-      - name: idx_comments_user_created
-        columns:
-          - user_id
-          - created_at
-        order: DESC
-        comment: 用户评论历史查询索引
-      - name: idx_comments_email
-        columns:
-          - author_email
-        comment: 邮箱查询索引（用于订阅通知）
-      - name: idx_comments_spam_score
-        columns:
-          - spam_score
-        comment: 垃圾评论检测索引
   OAuthAccount:
     description: OAuth 第三方登录账号关联模型
     status: active
@@ -2512,240 +1865,6 @@ models:
           - user_id
           - provider
         unique: true
-  ArticleSEO:
-    description: 文章SEO元数据模型
-    status: active
-    frontend_page: /admin/seo
-    properties:
-      id:
-        type: bigint
-        description: SEO记录ID
-      article_id:
-        type: bigint
-        description: 关联的文章ID
-        foreignKey: Article
-        unique: true
-        index: true
-      seo_title:
-        type: string
-        nullable: true
-        maxLength: 255
-        description: SEO标题
-      seo_description:
-        type: text
-        nullable: true
-        description: SEO描述
-      seo_keywords:
-        type: string
-        nullable: true
-        maxLength: 500
-        description: SEO关键词
-      og_title:
-        type: string
-        nullable: true
-        maxLength: 255
-        description: Open Graph标题
-      og_description:
-        type: text
-        nullable: true
-        description: Open Graph描述
-      og_image:
-        type: string
-        nullable: true
-        maxLength: 500
-        description: Open Graph图片
-      og_type:
-        type: string
-        default: article
-        maxLength: 50
-        description: Open Graph类型
-      twitter_title:
-        type: string
-        nullable: true
-        maxLength: 255
-        description: Twitter Card标题
-      twitter_description:
-        type: text
-        nullable: true
-        description: Twitter Card描述
-      twitter_image:
-        type: string
-        nullable: true
-        maxLength: 500
-        description: Twitter Card图片
-      twitter_card:
-        type: string
-        default: summary_large_image
-        maxLength: 50
-        description: Twitter Card类型
-      canonical_url:
-        type: string
-        nullable: true
-        maxLength: 500
-        description: 规范URL
-      robots_meta:
-        type: string
-        default: index,follow
-        maxLength: 100
-        description: Robots元标签
-      schema_org_enabled:
-        type: boolean
-        default: true
-        description: 是否启用Schema.org
-      schema_org_type:
-        type: string
-        default: BlogPosting
-        maxLength: 50
-        description: Schema.org类型
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-      updated_at:
-        type: string
-        format: date-time
-        description: 更新时间
-    orm: true
-    table: article_seo
-    relationships:
-      article:
-        target: Article
-        back_populates: seo_data
-        primaryjoin: ArticleSEO.article_id == Article.id
-    indexes:
-      - name: idx_article_seo_article_id
-        columns:
-          - article_id
-        unique: true
-  ShareStat:
-    description: 分享统计模型
-    status: active
-    frontend_page: /admin/seo
-    properties:
-      id:
-        type: bigint
-        description: 统计 ID
-      article_id:
-        type: bigint
-        description: 文章 ID
-        foreignKey: Article
-        index: true
-      platform:
-        type: string
-        maxLength: 50
-        description: 分享平台 (wechat, weibo, twitter, facebook, linkedin, zhihu, juejin, segmentfault, telegram, copy)
-        index: true
-      shared_by:
-        type: bigint
-        nullable: true
-        description: 分享者用户 ID
-        foreignKey: User
-      ip_address:
-        type: string
-        nullable: true
-        maxLength: 45
-        description: 分享者 IP 地址
-      user_agent:
-        type: string
-        nullable: true
-        maxLength: 500
-        description: 用户代理
-      created_at:
-        type: string
-        format: date-time
-        description: 分享时间
-    orm: true
-    table: share_stats
-    indexes:
-      - name: idx_share_stats_article_platform
-        columns:
-          - article_id
-          - platform
-        comment: 文章和平台联合索引
-      - name: idx_share_stats_created
-        columns:
-          - created_at
-        order: DESC
-        comment: 创建时间索引
-      - name: idx_share_stats_article_created
-        columns:
-          - article_id
-          - created_at
-        order: DESC
-        comment: 文章分享时间索引
-  SensitiveWord:
-    description: 敏感词模型
-    status: active
-    frontend_page: /admin/sensitive-words
-    properties:
-      id:
-        type: bigint
-        description: 敏感词 ID
-      word:
-        type: string
-        maxLength: 100
-        unique: true
-        index: true
-        description: 敏感词内容
-      level:
-        type: integer
-        default: 1
-        enum:
-          - 1
-          - 2
-          - 3
-        description: 敏感级别 (1:低, 2:中, 3:高)
-      action:
-        type: string
-        maxLength: 50
-        default: block
-        enum:
-          - block
-          - replace
-          - warn
-        description: 处理方式 (block:拦截, replace:替换, warn:警告)
-      replacement:
-        type: string
-        nullable: true
-        maxLength: 100
-        description: 替换词（当action为replace时使用）
-      category:
-        type: string
-        nullable: true
-        maxLength: 50
-        description: 分类（政治、色情、暴力等）
-      is_active:
-        type: boolean
-        default: true
-        description: 是否激活
-      created_by:
-        type: bigint
-        nullable: true
-        description: 创建者用户ID
-        foreignKey: User
-      created_at:
-        type: string
-        format: date-time
-        description: 创建时间
-      updated_at:
-        type: string
-        format: date-time
-        description: 更新时间
-    orm: true
-    table: sensitive_words
-    indexes:
-      - name: idx_sensitive_word_level
-        columns:
-          - level
-        comment: 敏感级别索引
-      - name: idx_sensitive_word_category
-        columns:
-          - category
-        comment: 分类索引
-      - name: idx_sensitive_word_active
-        columns:
-          - is_active
-        comment: 激活状态索引
   UserSession:
     description: 用户会话模型
     status: active

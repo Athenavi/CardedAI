@@ -7,6 +7,7 @@ import {QueryProvider} from '@/components/QueryProvider';
 import {AdminShell} from '@/components/admin/AdminShell';
 import {StatCard} from '@/components/admin/shared-ui';
 import {apiClient} from '@/lib/api/base-client';
+import AdminIntegrations from './AdminIntegrations';
 import {getConfig} from '@/lib/config';
 import {getFullMediaUrl} from '@/lib/utils';
 import {type Locale, locales, useTranslation} from '@/lib/i18n';
@@ -63,7 +64,7 @@ const TABS = [
   {key: 'home', label: '首页配置', icon: Home, desc: '首页展示与布局', gradient: 'from-purple-500 to-pink-500'},
   {key: 'system', label: '系统选项', icon: Shield, desc: '系统功能开关', gradient: 'from-emerald-500 to-teal-500'},
   {key: 'menus', label: '菜单管理', icon: Menu, desc: '导航菜单配置', gradient: 'from-amber-500 to-orange-500'},
-  {key: 'pages', label: '页面管理', icon: FileText, desc: '独立页面管理', gradient: 'from-rose-500 to-red-500'},
+  {key: 'integrations', label: '第三方登录', icon: Globe, desc: 'OAuth 登录配置', gradient: 'from-indigo-500 to-purple-500'},
 ];
 
 // ─── Settings field registry ──────────────────────────
@@ -553,7 +554,14 @@ const DeleteConfirm: React.FC<{
 function SettingsInner() {
   const qc = useQueryClient();
   const {locale, setLocale, t} = useTranslation();
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab && TABS.some(t => t.key === tab)) return tab;
+    }
+    return 'basic';
+  });
   const [localSettings, setLocalSettings] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<{type:'ok'|'err'; text:string}|null>(null);
@@ -581,22 +589,18 @@ function SettingsInner() {
         setLocalSettings(prev => Object.keys(norm).length > 0 ? norm : prev);
         return r.data;
       }
-      return {settings:{}, menus:[], menu_items:{}, pages:[]};
+      return {settings:{}, menus:[]};
     },
   });
 
   const settings: Record<string, string> = localSettings;
   const menus: Menu[] = Array.isArray(fullData?.menus) ? fullData.menus : [];
-  const menuItems: Record<string, MenuItem[]> = fullData?.menu_items || {};
-  const pages: Page[] = Array.isArray(fullData?.pages) ? fullData.pages : [];
 
   // ── Stats ──
   const stats = useMemo(() => ({
     totalSettings: Object.keys(settings).filter(k => settings[k]).length,
     activeMenus: menus.filter(m => m.is_active).length,
-    totalPages: pages.length,
-    publishedPages: pages.filter(p => p.status === 1).length,
-  }), [settings, menus, pages]);
+  }), [settings, menus]);
 
   // ── Save settings ──
   const saveSettings = async () => {
@@ -621,7 +625,7 @@ function SettingsInner() {
 
   // ── Export settings ──
   const exportSettings = useCallback(() => {
-    const data = {settings: localSettings, menus, menuItems, pages, exportedAt: new Date().toISOString()};
+    const data = {settings: localSettings, menus, exportedAt: new Date().toISOString()};
     const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -629,7 +633,7 @@ function SettingsInner() {
     a.download = `Carded AI-settings-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [localSettings, menus, menuItems, pages]);
+  }, [localSettings, menus]);
 
   // ── Menu mutations ──
   const createMenuMut = useMutation({mutationFn:(d:any)=>apiClient.post('/system/settings/menus', d), onSuccess:()=>qc.invalidateQueries({queryKey:['admin-system-settings']})});
@@ -638,9 +642,7 @@ function SettingsInner() {
   const createMenuItemMut = useMutation({mutationFn:(d:any)=>apiClient.post('/system/settings/menu-items', d), onSuccess:()=>qc.invalidateQueries({queryKey:['admin-system-settings']})});
   const delMenuItemMut = useMutation({mutationFn:(id:number)=>apiClient.delete(`/system/settings/menu-items/${id}`), onSuccess:()=>qc.invalidateQueries({queryKey:['admin-system-settings']})});
 
-  // ── Page mutations ──
-  const createPageMut = useMutation({mutationFn:(d:any)=>apiClient.post('/system/settings/pages', d), onSuccess:()=>qc.invalidateQueries({queryKey:['admin-system-settings']})});
-  const delPageMut = useMutation({mutationFn:(id:number)=>apiClient.delete(`/system/settings/pages/${id}`), onSuccess:()=>qc.invalidateQueries({queryKey:['admin-system-settings']})});
+  // ── Page mutations ── 已移除（使用 PageBuilder 管理页面）
 
   // ── Menus dialog state ──
   const [menuModal, setMenuModal] = useState<{mode:'create'|'edit'; menu?: Menu} | null>(null);
@@ -648,9 +650,7 @@ function SettingsInner() {
   const [itemModal, setItemModal] = useState<{menuId: number|null} | null>(null);
   const [itemForm, setItemForm] = useState({title: '', url: '', menu_id: 0, target: '_self', parent_id: ''});
 
-  // ── Pages dialog state ──
-  const [pageModal, setPageModal] = useState<{mode:'create'|'edit'; page?: Page} | null>(null);
-  const [pageForm, setPageForm] = useState({title:'', slug:'', content:'', excerpt:'', template:'default', status:'0'});
+  // ── Pages dialog state ── 已移除（使用 PageBuilder 管理页面）
 
   // ── Filtered settings fields ──
   const filteredFields = useMemo(() => {
@@ -670,12 +670,9 @@ function SettingsInner() {
       case 'menuItem':
         delMenuItemMut.mutate(deleteTarget.id);
         break;
-      case 'page':
-        delPageMut.mutate(deleteTarget.id);
-        break;
     }
     setDeleteTarget(null);
-  }, [deleteTarget, delMenuMut, delMenuItemMut, delPageMut]);
+  }, [deleteTarget, delMenuMut, delMenuItemMut]);
 
   // ── Render tab content ──
   const renderTabContent = () => {
@@ -1046,193 +1043,19 @@ function SettingsInner() {
             </Modal>
           </div>
         );
+      // ── Pages ── 已移除（使用 PageBuilder 管理页面）
 
-      // ── Pages ──
-      case 'pages':
+      // ── Integrations ──
+      case 'integrations':
         return (
-            <div
-                className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 overflow-hidden">
-              <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800">
-                <SectionTitle icon={FileText} title="独立页面" subtitle={`共 ${pages.length} 个页面`}
-                              action={
-                                <button onClick={() => {
-                                  setPageForm({
-                                    title: '',
-                                    slug: '',
-                                    content: '',
-                                    excerpt: '',
-                                    template: 'default',
-                                    status: '0'
-                                  });
-                                  setPageModal({mode: 'create'});
-                                }}
-                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40">
-                                  <Plus className="w-4 h-4"/>新建页面
-                                </button>
-                              }
-                />
-            </div>
-
-              {isLoading ? (
-                  <PageSkeleton/>
-              ) : pages.length === 0 ? (
-                  <EmptyState icon={FileText} title="暂无页面" desc="创建您的第一个独立页面"
-                              action={
-                                <button onClick={() => {
-                                  setPageForm({
-                                    title: '',
-                                    slug: '',
-                                    content: '',
-                                    excerpt: '',
-                                    template: 'default',
-                                    status: '0'
-                                  });
-                                  setPageModal({mode: 'create'});
-                                }}
-                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-xl transition-colors">
-                                  <Plus className="w-4 h-4"/>新建页面
-                                </button>
-                              }
-                  />
-            ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead
-                          className="bg-gray-50/80 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
-                      <tr>
-                        <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-left">标题</th>
-                        <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-left hidden sm:table-cell">别名</th>
-                        <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-left hidden lg:table-cell">模板</th>
-                        <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-left hidden md:table-cell">状态</th>
-                        <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase text-right">操作</th>
-                      </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
-                      {pages.map(p => (
-                          <tr key={p.id}
-                              className="group hover:bg-gray-50/80 dark:hover:bg-gray-800/30 transition-colors">
-                            <td className="px-5 py-4">
-                              <div className="flex items-center gap-3">
-                                <div
-                                    className="w-8 h-8 rounded-lg bg-gradient-to-br from-rose-500 to-red-500 flex items-center justify-center shadow-sm">
-                                  <FileCode className="w-4 h-4 text-white"/>
-                                </div>
-                                <span className="text-sm font-medium text-gray-900 dark:text-white">{p.title}</span>
-                              </div>
-                            </td>
-                            <td
-                              className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400 font-mono hidden sm:table-cell">
-                              <span
-                                  className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs">/{p.slug}</span>
-                            </td>
-                            <td className="px-5 py-4 hidden lg:table-cell">
-                              <TemplateBadge template={p.template}/>
-                            </td>
-                            <td className="px-5 py-4 hidden md:table-cell">
-                              <StatusBadge active={p.status === 1} label={p.status === 1 ? '已发布' : '草稿'}/>
-                            </td>
-                            <td className="px-5 py-4 text-right">
-                              <div
-                                  className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <a href={`/p/${p.slug}`} target="_blank" rel="noopener"
-                                   className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors"
-                                   title="预览">
-                                  <Eye className="w-4 h-4"/>
-                                </a>
-                                <button onClick={() => setDeleteTarget({type: 'page', id: p.id, name: p.title})}
-                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
-                                        title="删除">
-                                  <Trash2 className="w-4 h-4"/>
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                      ))}
-                      </tbody>
-                    </table>
-                  </div>
-            )}
-
-              {/* Page modal */}
-            <Modal open={!!pageModal} onClose={() => setPageModal(null)}
-                   title={pageModal?.mode === 'create' ? '新建页面' : '编辑页面'}
-                   subtitle={pageModal?.mode === 'create' ? '创建一个新的独立页面' : `编辑页面「${pageModal?.page?.title}」`}
-                   maxWidth="max-w-2xl">
-              <div className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">标题</label>
-                    <input value={pageForm.title} onChange={e => setPageForm(p => ({...p, title: e.target.value}))}
-                           className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
-                           placeholder="页面标题"/>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">别名
-                      (slug)</label>
-                    <input value={pageForm.slug} onChange={e => setPageForm(p => ({...p, slug: e.target.value}))}
-                           className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all font-mono"
-                           placeholder="about"/>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">摘要</label>
-                  <input value={pageForm.excerpt} onChange={e => setPageForm(p=>({...p,excerpt:e.target.value}))}
-                         className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
-                         placeholder="页面摘要（可选）"/>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">模板</label>
-                    <div className="relative">
-                      <select value={pageForm.template}
-                              onChange={e => setPageForm(p => ({...p, template: e.target.value}))}
-                              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 appearance-none pr-10 transition-all">
-                        <option value="default">默认</option>
-                        <option value="full-width">全宽</option>
-                        <option value="sidebar">侧边栏</option>
-                      </select>
-                      <ChevronDown
-                          className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"/>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">状态</label>
-                    <div className="relative">
-                      <select value={pageForm.status} onChange={e => setPageForm(p => ({...p, status: e.target.value}))}
-                              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 appearance-none pr-10 transition-all">
-                        <option value="0">草稿</option>
-                        <option value="1">已发布</option>
-                      </select>
-                      <ChevronDown
-                          className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"/>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">内容
-                    (Markdown)</label>
-                  <textarea value={pageForm.content} onChange={e => setPageForm(p => ({...p, content: e.target.value}))}
-                            rows={8}
-                            className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 resize-none font-mono transition-all"
-                            placeholder="使用 Markdown 格式编写页面内容..."/>
-                </div>
-                <div className="flex justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                  <button onClick={() => setPageModal(null)}
-                          className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors">
-                    取消
-                  </button>
-                  <button onClick={() => {
-                    createPageMut.mutate(pageForm);
-                    setPageModal(null);
-                  }}
-                          className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-xl transition-all shadow-lg shadow-blue-500/25">
-                    {pageModal?.mode === 'create' ? '创建页面' : '保存更改'}
-                  </button>
-                </div>
-              </div>
-            </Modal>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-6">
+            <AdminIntegrations settings={settings} onSave={async (s) => {
+              setLocalSettings(prev => ({...prev, ...s}));
+            }}/>
           </div>
         );
+
+
     }
   };
 
@@ -1253,13 +1076,11 @@ function SettingsInner() {
         </div>
       }>
         {/* ═══ Stats Cards ═══ */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
           <StatCard icon={SettingsIcon} label="已配置项" value={stats.totalSettings}
                     gradient="from-blue-500 to-blue-600"/>
           <StatCard icon={Menu} label="激活菜单" value={stats.activeMenus} gradient="from-amber-500 to-amber-600"/>
-          <StatCard icon={FileText} label="总页面数" value={stats.totalPages} gradient="from-purple-500 to-purple-600"/>
-          <StatCard icon={CheckCircle2} label="已发布页面" value={stats.publishedPages}
-                    gradient="from-emerald-500 to-emerald-600"/>
+
         </div>
 
       {/* ═══ Tabs ═══ */}
@@ -1290,11 +1111,11 @@ function SettingsInner() {
         <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="确认删除">
           {deleteTarget && (
               <DeleteConfirm
-                  title={`删除${deleteTarget.type === 'menu' ? '菜单' : deleteTarget.type === 'menuItem' ? '菜单项' : '页面'}`}
+                  title={`删除${deleteTarget.type === 'menu' ? '菜单' : '菜单项'}`}
                   desc={`确定要删除「${deleteTarget.name}」吗？此操作不可撤销。`}
                   onConfirm={handleDeleteConfirm}
                   onCancel={() => setDeleteTarget(null)}
-                  isPending={delMenuMut.isPending || delMenuItemMut.isPending || delPageMut.isPending}
+                  isPending={delMenuMut.isPending || delMenuItemMut.isPending}
               />
           )}
         </Modal>

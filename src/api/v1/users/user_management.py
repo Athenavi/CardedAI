@@ -199,7 +199,6 @@ def _create_article_response(article):
         "cover_image": article.cover_image,
         "tags": [],
         "views": article.views or 0,
-        "likes": article.likes or 0,
         "created_at": article.created_at.isoformat() if hasattr(article.created_at,
                                                                 "isoformat") else article.created_at,
         "updated_at": article.updated_at.isoformat() if hasattr(article.updated_at,

@@ -213,7 +213,7 @@ class BackupService:
 async def create_full_backup(db: AsyncSession) -> Dict[str, Any]:
     """创建完整数据库备份"""
     try:
-        from shared.models import Article, Category, User, Pages, Menus, MenuItems, Media
+        from shared.models import Article, Category, User, Menus, Media
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         backup_filename = f"backup_{timestamp}.json"
@@ -231,7 +231,7 @@ async def create_full_backup(db: AsyncSession) -> Dict[str, Any]:
         # 导出各表数据
         for model_name, model in [
             ('articles', Article), ('categories', Category), ('users', User),
-            ('pages', Pages), ('menus', Menus), ('menu_items', MenuItems), ('media', Media)
+            ('menus', Menus), ('media', Media)
         ]:
             result = await db.execute(select(model))
             items = result.scalars().all()
@@ -250,7 +250,7 @@ async def create_full_backup(db: AsyncSession) -> Dict[str, Any]:
             'backup_filename': backup_filename,
             'stats': {model_name: len(items) for model_name, _ in [
                 ('articles', Article), ('categories', Category), ('users', User),
-                ('pages', Pages), ('menus', Menus), ('menu_items', MenuItems), ('media', Media)
+                ('menus', Menus), ('media', Media)
             ]}
         }
     except Exception as e:
@@ -295,7 +295,7 @@ async def restore_from_backup(
 ) -> Dict[str, Any]:
     """从备份文件恢复数据"""
     try:
-        from shared.models import Article, Category, User, Pages, Menus, MenuItems, Media
+        from shared.models import Article, Category, User, Menus, Media
 
         backup_path = backup_service.backup_dir / backup_filename
 
@@ -319,7 +319,7 @@ async def restore_from_backup(
 
         model_map = {
             'articles': Article, 'categories': Category, 'users': User,
-            'pages': Pages, 'menus': Menus, 'menu_items': MenuItems, 'media': Media
+            'menus': Menus, 'media': Media
         }
 
         for key, model in model_map.items():
@@ -376,7 +376,7 @@ async def get_database_stats(db: AsyncSession) -> Dict[str, Any]:
         for key, model in [
             ('total_articles', Article, Article.status == 1),
             ('total_categories', Category, None),
-            ('total_pages', Pages, None),
+            
             ('total_menus', Menus, None),
             ('total_media', Media, None),
             ('total_users', User, None),

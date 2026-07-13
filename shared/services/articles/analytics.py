@@ -155,7 +155,6 @@ class AnalyticsService:
             概览数据
         """
         from shared.models.article import Article
-        from shared.models.comment import Comment
         from shared.models.user import User
 
         cutoff_date = datetime.now() - timedelta(days=days)
@@ -174,19 +173,11 @@ class AnalyticsService:
         )
         new_articles = new_articles_result.scalar()
 
-        # 总评论数
-        total_comments_result = await self.db.execute(
-            select(func.count(Comment.id))
-        )
-        total_comments = total_comments_result.scalar()
+        # 总评论数 - 评论功能已移除
+        total_comments = 0
 
-        # 新增评论数
-        new_comments_result = await self.db.execute(
-            select(func.count(Comment.id)).filter(
-                Comment.created_at >= cutoff_date
-            )
-        )
-        new_comments = new_comments_result.scalar()
+        # 新增评论数 - 评论功能已移除
+        new_comments = 0
 
         # 总用户数
         total_users_result = await self.db.execute(
@@ -203,10 +194,16 @@ class AnalyticsService:
         new_users = new_users_result.scalar()
 
         return {
-            'total_views': total_articles * 10,  # 模拟浏览量
-            'unique_visitors': total_users * 5,  # 模拟独立访客
+            'total_articles': total_articles or 0,
+            'new_articles': new_articles or 0,
+            'total_users': total_users or 0,
+            'new_users': new_users or 0,
+            'total_comments': total_comments or 0,
+            'total_views': total_articles * 10 if total_articles else 0,  # 模拟浏览量
+            'unique_visitors': total_users * 5 if total_users else 0,  # 模拟独立访客
             'avg_duration': 185,  # 平均停留时间（秒）
             'bounce_rate': 32.5,  # 跳出率
+            'views_change': 12.5,
             'page_views_change': 12.5,
             'visitors_change': 8.3,
             'period_days': days,
@@ -332,7 +329,6 @@ class AnalyticsService:
             用户活动数据
         """
         from shared.models.article import Article
-        from shared.models.comment import Comment
         from shared.models.user import User
 
         cutoff_date = datetime.now() - timedelta(days=days)
@@ -345,14 +341,8 @@ class AnalyticsService:
         )
         active_authors = aa_result.scalar()
 
-        # 活跃评论者
-        ac_result = await self.db.execute(
-            select(func.count(func.distinct(Comment.user_id))).where(
-                Comment.created_at >= cutoff_date,
-                Comment.user_id.isnot(None),
-            )
-        )
-        active_commenters = ac_result.scalar()
+        # 活跃评论者 - 评论功能已移除
+        active_commenters = 0
 
         # 新用户
         nu_result = await self.db.execute(
@@ -380,7 +370,6 @@ class AnalyticsService:
             内容表现数据
         """
         from shared.models.article import Article
-        from shared.models.comment import Comment
 
         # 平均浏览量（基于内存 tracker）
         total_views = view_tracker.get_total_views(days=days)
@@ -389,17 +378,12 @@ class AnalyticsService:
         )
         total_articles = ar_result.scalar() or 1
 
-        # 平均评论数
-        cr_result = await self.db.execute(
-            select(func.count(Comment.id)).where(
-                Comment.created_at >= (datetime.now() - timedelta(days=days))
-            )
-        )
-        total_comments = cr_result.scalar() or 0
+        # 评论功能已移除
+        total_comments = 0
 
         return {
             'avg_views_per_article': round(total_views / total_articles, 2),
-            'avg_comments_per_article': round(total_comments / total_articles, 2),
+            'avg_comments_per_article': 0,
             'period_days': days,
         }
 

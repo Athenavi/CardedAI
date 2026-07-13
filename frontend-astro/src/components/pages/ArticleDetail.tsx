@@ -5,7 +5,6 @@ import {AnimatePresence, motion} from 'framer-motion';
 import {apiClient} from '@/lib/api/base-client';
 import {getFullMediaUrl} from '@/lib/utils';
 import type {Article} from '@/lib/api/base-types';
-import ArticleComments from './ArticleComments';
 import {
   ArrowUp,
   Bookmark,
@@ -661,8 +660,6 @@ const ArticleDetail: React.FC<Props> = ({slug: propSlug}) => {
                           </div>
                       )}
 
-                      {/* ── Comments ── */}
-                      {article.id && <ArticleComments articleId={article.id}/>}
                   </article>
 
                   {/* ── Right Sidebar ── */}

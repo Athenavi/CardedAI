@@ -424,20 +424,12 @@ class WidgetService:
         Dict[str, Any]]:
         """获取最新评论数据"""
         try:
-            from shared.models.comment import Comment
             from shared.models.article import Article
             from shared.models.user import User
             from sqlalchemy import desc
 
-            stmt = (
-                select(Comment)
-                .where(Comment.is_approved == True)
-                .order_by(desc(Comment.created_at))
-                .limit(count)
-            )
-            result = await db.execute(stmt)
-            comments = result.scalars().all()
-
+            # 评论功能已移除，返回空列表
+            comments = []
             comments_data = []
             for comment in comments:
                 article_stmt = select(Article).where(Article.id == comment.article_id)

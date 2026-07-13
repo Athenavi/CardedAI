@@ -343,36 +343,12 @@ async def delete_article(db: AsyncSession, article_id: int) -> bool:
         是否成功
     """
     from shared.models.article_revision import ArticleRevision
-    from shared.models.comment import Comment
-    from shared.models.comment_vote import CommentVote
-    from shared.models.comment_subscription import CommentSubscription
-
     article = await get_article_by_id(db, article_id)
     if not article:
         return False
 
     # 保存文章信息用于事件触发
     article_title = article.title
-
-    # 删除评论投票（先于评论删除，避免孤立记录）
-    comment_ids_result = await db.execute(
-        select(Comment.id).where(Comment.article_id == article_id)
-    )
-    comment_ids = [row[0] for row in comment_ids_result.all()]
-    if comment_ids:
-        await db.execute(
-            delete(CommentVote).where(CommentVote.comment_id.in_(comment_ids))
-        )
-
-    # 删除评论订阅
-    await db.execute(
-        delete(CommentSubscription).where(CommentSubscription.article_id == article_id)
-    )
-
-    # 删除评论
-    await db.execute(
-        delete(Comment).where(Comment.article_id == article_id)
-    )
 
     # 删除修订历史
     await db.execute(

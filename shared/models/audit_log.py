@@ -1,7 +1,7 @@
 """
 SQLAlchemy 模型定义 - AuditLog
 由代码生成器自动生成 (基于 models.yaml / routes.yaml) - 请勿手动修改
-生成时间：2026-06-04 16:28:03
+生成时间：2026-07-13 10:19:38
 """
 
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, ForeignKey, Index
@@ -28,9 +28,9 @@ class AuditLog(Base):
     user_id = Column(BigInteger, ForeignKey('users.id'), nullable=True, doc='操作用户 ID')
 
 
-    action = Column(String(100), nullable=True, doc='操作动作 (如: create_article, update_settings)')
+    action = Column(String(100), nullable=True, doc='操作动作 (如 create_article, update_settings)')
 
-    resource_type = Column(String(50), nullable=True, doc='资源类型 (如: Article, User)')
+    resource_type = Column(String(50), nullable=True, doc='资源类型 (如 Article, User)')
 
     resource_id = Column(BigInteger, nullable=True, doc='资源 ID')
 
@@ -38,9 +38,6 @@ class AuditLog(Base):
     ip_address = Column(String(45), nullable=True, doc='操作 IP 地址')
 
     user_agent = Column(Text, nullable=True, doc='用户代理字符串')
-
-
-    request_data = Column(Text, nullable=True, doc='请求数据快照 (JSON)')
 
 
     status = Column(String(20), default='success', doc='操作状态 (success, failure)')
@@ -65,7 +62,6 @@ class AuditLog(Base):
             'resource_id': self.resource_id,
             'ip_address': self.ip_address,
             'user_agent': self.user_agent,
-            'request_data': self.request_data,
             'status': self.status,
             'error_message': self.error_message,
             'created_at': self.created_at.isoformat() if self.created_at else None,

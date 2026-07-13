@@ -80,29 +80,31 @@ class ScheduledPublishScheduler:
         """检查并发布到期文章"""
         from shared.services.articles.scheduled_publish import create_scheduled_publish_service
 
-        # 创建数据库会话
-        async with self.db_session_factory() as db:
-            try:
-                service = create_scheduled_publish_service(db)
-                result = await service.publish_due_articles()
+        try:
+            async with self.db_session_factory() as db:
+                try:
+                    service = create_scheduled_publish_service(db)
+                    result = await service.publish_due_articles()
 
-                if result['published_count'] > 0:
-                    logger.info(
-                        f"Published {result['published_count']} scheduled articles "
-                        f"(failed: {result['failed_count']})"
-                    )
+                    if result['published_count'] > 0:
+                        logger.info(
+                            f"Published {result['published_count']} scheduled articles "
+                            f"(failed: {result['failed_count']})"
+                        )
 
-                    if result['failed_articles']:
-                        for failed in result['failed_articles']:
-                            logger.error(
-                                f"Failed to publish article {failed['article_id']}: "
-                                f"{failed['error']}"
-                            )
+                        if result['failed_articles']:
+                            for failed in result['failed_articles']:
+                                logger.error(
+                                    f"Failed to publish article {failed['article_id']}: "
+                                    f"{failed['error']}"
+                                )
 
-                await db.commit()
-            except Exception as e:
-                logger.error(f"Error checking scheduled publishes: {e}")
-                await db.rollback()
+                    await db.commit()
+                except Exception as e:
+                    logger.error(f"Error checking scheduled publishes: {e}")
+                    await db.rollback()
+        except ConnectionRefusedError:
+            logger.warning("定时发布检查: 数据库连接被拒绝, 跳过本轮检查")
 
 
 # 全局调度器实例

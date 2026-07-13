@@ -409,8 +409,6 @@ function AnalyticsInner() {
                         gradient="from-green-500 to-emerald-600" change={overview?.visitors_change}/>
               <StatCard icon={FileText} label="文章总数" value={fmt(overview?.total_articles)}
                         gradient="from-purple-500 to-violet-600" change={overview?.page_views_change}/>
-              <StatCard icon={MessageSquare} label="评论总数" value={fmt(overview?.total_comments)}
-                        gradient="from-orange-500 to-amber-600"/>
               <StatCard icon={UserPlus} label="新增用户" value={fmt(overview?.new_users || overview?.total_users)}
                         gradient="from-teal-500 to-cyan-600"/>
               <StatCard icon={Clock} label="跳出率" value={pct(overview?.bounce_rate)}
@@ -442,12 +440,6 @@ function AnalyticsInner() {
           <div className="space-y-0">
             {[
               {label: '活跃作者', value: activity?.active_authors, icon: Users, color: 'from-blue-500 to-blue-600'},
-              {
-                label: '活跃评论者',
-                value: activity?.active_commenters,
-                icon: MessageSquare,
-                color: 'from-green-500 to-emerald-600'
-              },
               {
                 label: '新增文章',
                 value: overview?.new_articles,
@@ -513,7 +505,6 @@ function AnalyticsInner() {
                     </p>
                     <p className="text-xs text-gray-400 dark:text-gray-500 dark:text-gray-400 flex items-center gap-2">
                       <span className="flex items-center gap-0.5"><Eye className="w-3 h-3"/>{fmt(a.views)}</span>
-                      <span className="flex items-center gap-0.5"><MessageSquare className="w-3 h-3"/>{a.comments || 0}</span>
                     </p>
                   </div>
                   </div>

@@ -142,9 +142,7 @@ async def get_download_tasks(
                 "downloaded_size": task.downloaded_size,
                 "error_message": task.error_message,
                 "media_id": task.media_id,
-                "retry_count": task.retry_count,
                 "created_at": task.created_at.isoformat() if task.created_at else None,
-                "completed_at": task.completed_at.isoformat() if task.completed_at else None,
             })
 
         return ApiResponse(
@@ -294,7 +292,7 @@ async def process_download_queue(
         result = await db.execute(
             select(DownloadTask)
             .where(DownloadTask.status == "pending")
-            .order_by(DownloadTask.priority, DownloadTask.created_at)
+            .order_by(DownloadTask.created_at)
             .limit(limit)
         )
         pending_tasks = result.scalars().all()

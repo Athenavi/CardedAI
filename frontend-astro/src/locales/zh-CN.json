@@ -66,6 +66,7 @@
     "articles": "文章管理",
     "categories": "分类管理",
     "media": "媒体库",
+    "oauth": "第三方登录",
     "comments": "评论管理",
     "users": "用户管理",
     "roles": "角色权限",
