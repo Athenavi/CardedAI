@@ -68,6 +68,7 @@ frontend-astro/dist/
 frontend-astro/.astro/
 frontend-astro/*.tsbuildinfo
 frontend-next/.next/
+static_generated/.cache/
 frontend-next/node_modules/
 
 # Thumbnails and uploads
