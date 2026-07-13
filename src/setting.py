@@ -32,8 +32,27 @@ def _get_worker_info():
 
 
 def get_sqlalchemy_uri(db_config):
-    """获取SQLAlchemy数据库URI，仅支持PostgreSQL"""
+    """获取SQLAlchemy数据库URI，支持 PostgreSQL 和 SQLite"""
     db_engine = db_config.get('db_engine', 'postgresql').lower()
+    db_path = db_config.get('db_path')
+
+    # SQLite 模式：从文件路径构建 URI
+    if db_engine in ('sqlite', 'sqlite3'):
+        if not db_path:
+            db_path = os.environ.get('DB_PATH', 'data/cardedai.db')
+        # 确保目录存在
+        db_path_obj = Path(db_path)
+        db_path_obj.parent.mkdir(parents=True, exist_ok=True)
+        sqlalchemy_uri = f"sqlite:///{db_path_obj.as_posix()}"
+        worker_info = _get_worker_info()
+        env_key = f"DB_INFO_PRINTED_{os.getpid()}"
+        if not os.environ.get(env_key):
+            print(f"{worker_info} 数据库引擎：SQLite")
+            print(f"{worker_info} 数据库路径：{db_path_obj.resolve()}")
+            os.environ[env_key] = "1"
+        return sqlalchemy_uri
+
+    # PostgreSQL 模式（原有逻辑）
     db_host = db_config.get('db_host')
     db_user = db_config.get('db_user')
     db_port = db_config.get('db_port')
@@ -95,7 +114,7 @@ class BaseConfig:
     sitename = os.getenv('TITLE') or 'zyblog'
     beian = os.getenv('BEIAN') or '京ICP备12345678号'
 
-    # 数据库引擎配置（仅支持 PostgreSQL）
+    # 数据库引擎配置（支持 postgresql / sqlite）
     DB_ENGINE = 'postgresql'
 
     # 注意：这里暂时设为None，在子类中具体设置
@@ -227,6 +246,7 @@ class AppConfig(BaseConfig):
         self.SQLALCHEMY_DATABASE_URI = self.database_url
 
     db_engine = os.environ.get('DB_ENGINE') or os.getenv('DB_ENGINE', 'postgresql')
+    db_path = os.environ.get('DB_PATH') or os.getenv('DB_PATH', 'data/cardedai.db')
     db_host = os.environ.get('DB_HOST') or os.getenv('DATABASE_HOST', 'localhost')
     db_user = os.environ.get('DB_USER') or os.getenv('DATABASE_USER', 'postgres')
     db_name = os.environ.get('DB_NAME') or os.getenv('DATABASE_NAME')
@@ -241,10 +261,16 @@ class AppConfig(BaseConfig):
     db_pool_timeout = int(db_pool_timeout_env) if db_pool_timeout_env is not None else 60
     db_table_prefix = os.environ.get('DB_TABLE_PREFIX') or os.getenv('DB_TABLE_PREFIX', '')
 
+    @property
+    def is_sqlite(self):
+        """是否为 SQLite 模式"""
+        return self.db_engine.lower() in ('sqlite', 'sqlite3')
+
     def _get_database_uri(self):
         """获取数据库URI"""
         return get_sqlalchemy_uri({
             'db_engine': self.db_engine,
+            'db_path': self.db_path,
             'db_host': self.db_host,
             'db_user': self.db_user,
             'db_port': self.db_port,
@@ -269,7 +295,10 @@ class AppConfig(BaseConfig):
 
     @property
     def pool_config(self):
-        """动态获取连接池配置（PostgreSQL）"""
+        """动态获取连接池配置"""
+        if self.is_sqlite:
+            # SQLite 使用 NullPool，不需要连接池参数
+            return {}
         return {
             "pool_size": int(self.db_pool_size),
             "max_overflow": int(self.db_pool_overflow),
@@ -431,7 +460,12 @@ class ProductionConfig(AppConfig):
     def _validate_required_env(self):
         """校验生产环境必需的数据库配置，使用 AppConfig 已解析的属性（带默认值）。
         仅发出警告而不终止进程——应用设计为在数据库未配置时仍能启动（安装向导）。
+        SQLite 模式下跳过 PostgreSQL 特定的校验。
         """
+        # SQLite 模式不需要校验 DB_HOST/DB_USER/DB_NAME
+        if self.is_sqlite:
+            return
+
         missing = []
         # 使用 AppConfig 解析后的属性（有 fallback 默认值），而非原始 os.environ.get()
         if not self.db_name:

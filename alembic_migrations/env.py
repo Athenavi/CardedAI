@@ -46,7 +46,7 @@ if config.config_file_name is not None:
 # Dynamically set database URL from environment variables
 def get_database_url():
     """
-    从环境变量构建数据库URL（仅支持 PostgreSQL）
+    从环境变量构建数据库URL（支持 PostgreSQL 和 SQLite）
 
     优先级:
     1. DATABASE_URL 环境变量 (完整URL)
@@ -57,6 +57,14 @@ def get_database_url():
     database_url = os.getenv('DATABASE_URL')
     if database_url:
         return database_url
+
+    # SQLite 模式：从文件路径构建
+    db_engine = (os.getenv('DB_ENGINE') or 'postgresql').lower()
+    if db_engine in ('sqlite', 'sqlite3'):
+        db_path = os.getenv('DB_PATH', 'data/cardedai.db')
+        # 确保目录存在
+        Path(db_path).parent.mkdir(parents=True, exist_ok=True)
+        return f"sqlite:///{db_path}"
 
     # 从单独的环境变量构建（PostgreSQL）
     db_name = os.getenv('DB_NAME', 'fast_blog')

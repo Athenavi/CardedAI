@@ -53,13 +53,19 @@ class UnifiedDatabaseManager:
     def _get_pool_config(self) -> dict:
         """
         获取连接池配置
-        
+
+        SQLite 模式：返回空字典（使用 NullPool，不需要连接池参数）
+
         Windows + asyncpg 特殊处理：
         - 使用适中的连接池大小支持并发
         - 设置合理的超时时间避免长时间阻塞
         - 禁用 pre-ping 避免 Proactor 事件循环问题
         """
         from src.setting import settings
+
+        # SQLite 模式：连接池不适用，返回空配置
+        if getattr(settings, 'is_sqlite', False):
+            return {}
 
         if sys.platform == 'win32':
             # Windows: 优化配置以平衡性能和稳定性
@@ -121,49 +127,61 @@ class UnifiedDatabaseManager:
 
             # 获取连接池配置
             pool_config = self._get_pool_config()
+            is_sqlite = 'sqlite' in async_url
 
-            # Windows + asyncpg 特殊处理
-            use_pre_ping = True
-            if sys.platform == 'win32' and 'asyncpg' in async_url:
-                use_pre_ping = False
-                logger.warning(
-                    "Windows + asyncpg detected. Disabling pool_pre_ping to avoid "
-                    "Proactor event loop issues."
-                )
-
-            logger.info(
-                f"Initializing async database engine with config: "
-                f"pool_size={pool_config['pool_size']}, "
-                f"max_overflow={pool_config['max_overflow']}, "
-                f"timeout={pool_config['pool_timeout']}"
-            )
-
-            # 创建异步引擎
-            engine_kwargs = {
-                'pool_pre_ping': use_pre_ping,
-                'pool_recycle': pool_config['pool_recycle'],
-                'pool_size': pool_config['pool_size'],
-                'max_overflow': pool_config['max_overflow'],
-                'pool_timeout': pool_config['pool_timeout'],
-                'echo': getattr(__import__('src.setting', fromlist=['settings']).settings,
-                                'database_echo', False),
-            }
-
-            # Windows + asyncpg: 添加额外的连接参数
-            if sys.platform == 'win32' and 'asyncpg' in async_url:
-                engine_kwargs['connect_args'] = {
-                    'statement_cache_size': 0,  # 禁用语句缓存，避免 prepared statement 问题
-                    'command_timeout': 60,  # 命令超时
-                    'server_settings': {
-                        'jit': 'off',  # 禁用 JIT 编译，提高性能
-                    },
-                }
+            # SQLite 模式：跳过连接池配置，使用 NullPool
+            if is_sqlite:
                 logger.info(
-                    f"Windows + asyncpg detected. Using optimized settings: "
+                    f"Initializing async database engine: SQLite mode, "
+                    f"url={async_url}"
+                )
+                engine_kwargs = {
+                    'echo': getattr(__import__('src.setting', fromlist=['settings']).settings,
+                                    'database_echo', False),
+                }
+            else:
+                # Windows + asyncpg 特殊处理
+                use_pre_ping = True
+                if sys.platform == 'win32' and 'asyncpg' in async_url:
+                    use_pre_ping = False
+                    logger.warning(
+                        "Windows + asyncpg detected. Disabling pool_pre_ping to avoid "
+                        "Proactor event loop issues."
+                    )
+
+                logger.info(
+                    f"Initializing async database engine with config: "
                     f"pool_size={pool_config['pool_size']}, "
                     f"max_overflow={pool_config['max_overflow']}, "
-                    f"statement_cache_size=0, jit=off"
+                    f"timeout={pool_config['pool_timeout']}"
                 )
+
+                # 创建异步引擎
+                engine_kwargs = {
+                    'pool_pre_ping': use_pre_ping,
+                    'pool_recycle': pool_config['pool_recycle'],
+                    'pool_size': pool_config['pool_size'],
+                    'max_overflow': pool_config['max_overflow'],
+                    'pool_timeout': pool_config['pool_timeout'],
+                    'echo': getattr(__import__('src.setting', fromlist=['settings']).settings,
+                                    'database_echo', False),
+                }
+
+                # Windows + asyncpg: 添加额外的连接参数
+                if sys.platform == 'win32' and 'asyncpg' in async_url:
+                    engine_kwargs['connect_args'] = {
+                        'statement_cache_size': 0,  # 禁用语句缓存，避免 prepared statement 问题
+                        'command_timeout': 60,  # 命令超时
+                        'server_settings': {
+                            'jit': 'off',  # 禁用 JIT 编译，提高性能
+                        },
+                    }
+                    logger.info(
+                        f"Windows + asyncpg detected. Using optimized settings: "
+                        f"pool_size={pool_config['pool_size']}, "
+                        f"max_overflow={pool_config['max_overflow']}, "
+                        f"statement_cache_size=0, jit=off"
+                    )
 
             self._async_engine = create_async_engine(async_url, **engine_kwargs)
 
