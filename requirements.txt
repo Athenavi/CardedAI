@@ -87,7 +87,7 @@ beautifulsoup4==4.13.4
 selectolax==0.3.27
 
 # Vector Database
-pymilvus==2.5.8
+pymilvus==2.6.16
 
 # Embedding
 sentence-transformers>=2.3.0

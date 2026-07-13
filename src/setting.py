@@ -81,7 +81,6 @@ def get_sqlalchemy_uri(db_config):
         safe_uri = sqlalchemy_uri
 
     # 使用环境变量标记当前进程是否已输出数据库信息
-    import os
     worker_info = _get_worker_info()
     env_key = f"DB_INFO_PRINTED_{os.getpid()}"
 
