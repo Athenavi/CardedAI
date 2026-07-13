@@ -1,1 +1,1 @@
-CardedAI-CMS V0.1.26.0608
+CardedAI-CMS V0.2.26.0713

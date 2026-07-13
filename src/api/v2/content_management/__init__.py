@@ -20,21 +20,18 @@ def _build_router():
     from src.api.v1.content_management.block_patterns import router as block_patterns_router
     from src.api.v1.content_management.category_management import router as category_management_router
     from src.api.v1.content_management.custom_block_patterns import router as custom_block_patterns_router
-    from src.api.v1.content_management.custom_post_types import router as custom_post_types_router
     from src.api.v1.content_management.feed import router as feed_router
     # [\u4e3b\u9898\u7cfb\u7edf\u5df2\u79fb\u9664] global_styles
-    from src.api.v1.content_management.menu_management import router as menu_management_router
+    #from src.api.v1.content_management.menu_management import router as menu_management_router
     from src.api.v1.content_management.page_builder_routes import router as page_builder_router
     from src.api.v1.content_management.shortcode import router as shortcode_router
     from src.api.v1.content_management.widgets import router as widgets_router
 
     router.include_router(category_management_router, prefix="/categories")
-    router.include_router(menu_management_router, prefix="/admin/menu")
     router.include_router(custom_block_patterns_router, prefix="/pattern")
     router.include_router(block_patterns_router, prefix="/block-patterns")
     # [主题系统已移除] global_styles
     router.include_router(block_editor_router, prefix="/editor")
-    router.include_router(custom_post_types_router, prefix="/post-types")
     router.include_router(feed_router, prefix="")
     router.include_router(shortcode_router, prefix="/shortcodes")
     router.include_router(widgets_router, prefix="/widgets")

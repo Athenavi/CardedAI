@@ -4,8 +4,6 @@ SEO 模块 - 统一入口
 """
 from fastapi import APIRouter
 
-from src.api.v1.seo.batch_seo import router as batch_seo_router
-from src.api.v1.seo.breadcrumbs import router as breadcrumbs_router
 from src.api.v1.seo.content_quality import router as content_quality_router
 from src.api.v1.seo.hreflang_api import router as hreflang_router
 from src.api.v1.seo.internal_links import router as internal_links_router

@@ -55,7 +55,7 @@ ROUTE_REGISTRY_V2 = [
 
     # ==================== 评论系统（V2 聚合路由器）====================
     # V2 Comments 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
-    ("src.api.v2.comments", "/api/v2/comments", ["comments-v2"], True),
+    #("src.api.v2.comments", "/api/v2/comments", ["comments-v2"], True),
     # V1 comments 各子模块已废弃，功能已迁移到 V2 聚合路由器
     # [已删除] 聊天与消息模块（PrivateMessage, ChatGroup 等模型已移除）
     # ==================== 通知消息（V2 聚合路由器）====================
