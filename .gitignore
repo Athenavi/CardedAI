@@ -140,3 +140,4 @@ tools/ffmpeg/
 *.tfstate
 *.tfstate.*
 .terraform/
+/.reasonix/

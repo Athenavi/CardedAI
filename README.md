@@ -7,20 +7,27 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Athenavi/fast_blog/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="License"></a>
-  <a href="https://github.com/Athenavi/fast_blog/releases"><img src="https://img.shields.io/badge/version-V0.1.26.0608-green" alt="Version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="License"></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-V0.2.26.0713-green" alt="Version"></a>
   <a href="https://python.org"><img src="https://img.shields.io/badge/python-3.14+-blue" alt="Python"></a>
   <a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/FastAPI-0.136-009688" alt="FastAPI"></a>
   <a href="https://astro.build"><img src="https://img.shields.io/badge/Astro-5.x-FF5D01" alt="Astro"></a>
 </p>
 
-> **CardedAI** 基于 [fast_blog V0.3.26.0530](https://github.com/Athenavi/fast_blog) 开发，增加了 AI CMS 个人站长场景的深度优化。
-  <a href="#-快速开始">快速开始</a> &bull;
-  <a href="#-核心功能">核心功能</a> &bull;
-  <a href="#-系统架构">系统架构</a> &bull;
-  <a href="#-api-文档">API 文档</a> &bull;
-  <a href="https://github.com/Athenavi/fast_blog/blob/main/CONTRIBUTING.md">贡献指南</a>
-</p>
+> **CardedAI** 基于 [fast_blog](https://github.com/Athenavi/fast_blog) 开发，增加了 AI CMS 个人站长场景的深度优化。
+
+---
+
+- [为什么选择 CardedAI？](#-为什么选择-cardedai)
+- [快速开始](#-快速开始)
+- [核心功能](#-核心功能)
+- [系统架构](#-系统架构)
+- [技术栈](#-技术栈)
+- [API 文档](#-api-文档)
+- [项目结构](#-项目结构)
+- [贡献指南](#-贡献指南)
+- [安全策略](#-安全策略)
+- [更新日志](#-更新日志)
 
 ---
 
@@ -35,6 +42,30 @@
 | 知识利用 | 无 | **RAG 知识引擎** — 向量检索 + LLM 问答 + 报告生成 |
 | 工作流 | 手动操作 | **DAG 自动化引擎** — 可视化编排 + 定时/事件触发 |
 | AI 集成 | 无 | **MCP Server** — Claude Desktop/Cursor IDE 直接操作站点 |
+
+## 快速开始
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/Athenavi/fast_blog.git
+cd fast_blog
+
+# 2. 配置环境变量
+cp .env.example .env
+# 编辑 .env 设置 SECRET_KEY、数据库密码等
+
+# 3. 启动后端
+pip install -r requirements.txt
+python main.py --port 9421 --env dev
+
+# 4. 启动前端（另一个终端）
+cd frontend-astro
+npm install
+npm run dev
+
+# 访问: http://localhost:4321/admin
+# API:  http://localhost:9421/api/v2/docs
+```
 
 ## 核心功能
 
@@ -90,7 +121,6 @@
 支持 Claude Desktop、Cursor IDE 等 MCP 客户端通过 stdio 直接连接：
 
 ```json
-// Claude Desktop 配置
 {
   "mcpServers": {
     "fastblog": {
@@ -144,30 +174,6 @@
         └──────────────┘  └──────────────┘  └──────────────┘
 ```
 
-## 快速开始
-
-```bash
-# 1. 克隆仓库
-git clone https://github.com/Athenavi/fast_blog.git
-cd fast_blog
-
-# 2. 配置环境变量
-cp .env.example .env
-# 编辑 .env 设置 SECRET_KEY、数据库密码等
-
-# 3. 启动后端
-pip install -r requirements.txt
-python main.py --port 9421 --env dev
-
-# 4. 启动前端（另一个终端）
-cd frontend-astro
-npm install
-npm run dev
-
-# 访问: http://localhost:4321/admin
-# API:  http://localhost:9421/api/v2/docs
-```
-
 ## 技术栈
 
 **后端:** FastAPI + SQLAlchemy 2.0 + PostgreSQL + Redis + Milvus/Qdrant
@@ -178,11 +184,9 @@ npm run dev
 
 ## API 文档
 
-启动后端后访问:
+启动后端后访问：
 - Swagger UI: `http://localhost:9421/api/v2/docs`
 - ReDoc: `http://localhost:9421/api/v2/redoc`
-
-### API 模块
 
 | 模块 | 前缀 | 端点数 | 说明 |
 |------|------|--------|------|
@@ -206,7 +210,7 @@ CardedAI/
 │   ├── auth/                     # 认证 & 安全
 │   └── middleware/               # 中间件
 ├── shared/                       # 共享层
-│   ├── models/                   # 数据模型 (65 ORM 表)
+│   ├── models/                   # 数据模型 (45+ ORM 表)
 │   └── services/                 # 业务服务
 │       ├── intel/                #   情报引擎
 │       ├── knowledge/            #   知识引擎 (RAG)
@@ -216,8 +220,84 @@ CardedAI/
 │   └── src/
 │       ├── pages/admin/          # 管理后台页面 (35+)
 │       └── components/           # React 组件
-├── sdk/                          # SDK
-│   ├── python/                   # Python SDK
-│   └── javascript/               # JavaScript SDK
+├── config/                       # 项目配置
+│   ├── models.yaml               #   ORM 模型定义
+│   └── .env                      #   环境变量
 ├── tests/                        # 测试套件
+├── scripts/                      # 开发/管理脚本
 └── Makefile                      # 开发命令
+```
+
+## 贡献指南
+
+### 开发环境
+
+- Python 3.14+, Node.js 18+, PostgreSQL 16+, Redis 7+
+- 使用 Conventional Commits：`feat(scope): description`
+- 分支前缀：`feature/`, `fix/`, `docs/`, `refactor/`, `test/`, `chore/`
+
+### 提交 PR 前
+
+- [ ] 代码遵循 PEP 8 （Python） / TypeScript 规范
+- [ ] 为新增功能添加了测试
+- [ ] 所有测试通过：`python -m pytest tests/`
+- [ ] 提交信息遵循 Conventional Commits
+- [ ] 分支保持与 `main` 同步
+
+### 编码规范
+
+- 使用类型注解，行宽 120 字符
+- 使用 `async/await` 处理 I/O 操作
+- 不提交注释掉的代码或 `print()` 语句（使用 logging）
+- 无硬编码值（使用配置）
+
+## 安全策略
+
+### 报告漏洞
+
+**请勿通过公开 GitHub Issue 报告安全漏洞。** 请发送邮件至 **security@fastblog.dev**，48 小时内回复。
+
+| 严重程度 | 修复时间 |
+|----------|---------|
+| 🔴 严重 | 24-48 小时 |
+| 🟠 高 | 7 天内 |
+| 🟡 中 | 30 天内 |
+| 🟢 低 | 下个版本发布 |
+
+### 安全特性
+
+JWT 认证 + 刷新令牌、TOTP 双因素认证、CSRF 防护、ORM 防 SQL 注入、输出清洗防 XSS、可配置限流、bcrypt 密码哈希、RBAC 权限控制、操作审计日志。
+
+### 生产部署检查清单
+
+- [ ] 已修改所有默认密码和密钥
+- [ ] 已设置 `DEBUG=False`
+- [ ] 已配置 HTTPS
+- [ ] 已配置 CORS 允许来源
+- [ ] 已启用限流
+- [ ] 已配置审计日志
+
+## 更新日志
+
+### [Unreleased]
+
+#### 情报引擎 (Phase 2)
+数据采集管道（RSS/Web/API）、文本清洗管道、AI 分析（情感分析/分类/摘要）、告警规则引擎、情报简报生成器、Intel API 端点。
+
+#### 知识引擎 (Phase 3)
+文档解析器（PDF/Word/TXT/MD）、智能文本分块、Embedding 服务（sentence-transformers + OpenAI）、向量存储（Milvus/Qdrant/Chroma）、RAG 链（语义搜索 + LLM QA + 引用）、AI 报告生成器、Knowledge API。
+
+#### 自动化引擎 (Phase 4)
+DAG 工作流引擎（拓扑排序 + 并发执行）、节点执行器（LLM/Collector/RAG/Condition/Notify）、触发服务（Cron/Webhook/Event）、Agent 工具注册表、Workflow API。
+
+#### 性能优化 (Phase 6)
+RAG 搜索缓存、工作流并发管理器、批量 Embedding 处理器、Redis Streams 任务队列、全局性能统计端点。
+
+### [V0.3.26.0521] - 2026-05-21
+MCP Server、多站点支持、零信任安全中间件、移动端 API V3、更新服务器、统一数据库管理器、SEO 流量追踪、Token 黑名单、限流中间件。**重大变更**：从 Django 迁移到纯 FastAPI，升级至 Python 3.14+ / PostgreSQL 16+ / Astro 5.7。
+
+### [V0.2.0] - 2025-06-01
+FastAPI 作为主要后端框架、Astro 前端、插件系统、主题引擎、RESTful API V2、JWT 认证、2FA、RBAC、文章管理系统、评论系统、媒体管理、全文搜索、SEO 工具包、Docker Compose、Nginx 反向代理。
+
+### [0.1.0] - 2025-01-01
+初始项目搭建、基础博客功能、用户认证、文章 CRUD、基本管理后台。

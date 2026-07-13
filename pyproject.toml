@@ -7,7 +7,7 @@ name = "fastblog"
 version = "0.1.0"
 description = "A modern, high-performance blog platform built with FastAPI and Astro"
 readme = "README.md"
-license = { text = "Apache-2.0" }
+license = { text = "AGPL-3.0" }
 requires-python = ">=3.11"
 authors = [
     { name = "FastBlog Team", email = "team@fastblog.dev" },
@@ -17,7 +17,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Framework :: FastAPI",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
@@ -29,12 +29,15 @@ classifiers = [
 ]
 dynamic = ["dependencies"]
 
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
 [project.urls]
 Homepage = "https://github.com/Athenavi/fast_blog"
 Documentation = "https://github.com/Athenavi/fast_blog/tree/main/docs"
 Repository = "https://github.com/Athenavi/fast_blog"
 Issues = "https://github.com/Athenavi/fast_blog/issues"
-Changelog = "https://github.com/Athenavi/fast_blog/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/Athenavi/fast_blog/blob/main/README.md#%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97"
 
 [project.optional-dependencies]
 dev = [
