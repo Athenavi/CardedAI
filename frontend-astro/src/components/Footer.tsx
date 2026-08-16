@@ -47,15 +47,14 @@ const Footer: React.FC = () => {
                 {name: '文章', href: '/articles'},
                 {name: '分类', href: '/categories'},
                 {name: '搜索', href: '/search'},
-                {name: 'VIP 会员', href: '/vip'},
             ]
         },
         resources: {
             title: '资源',
             links: [
                 {name: '关于我们', href: '/about'},
-                {name: 'RSS 订阅', href: '/api/v2/feed/rss', external: true},
-                {name: 'Atom 订阅', href: '/api/v2/feed/atom', external: true},
+                {name: 'RSS 订阅', href: '/api/v2/cms/feed?format=rss', external: true},
+                {name: 'Atom 订阅', href: '/api/v2/cms/feed?format=atom', external: true},
                 {name: '版本日志', href: '/version'},
             ]
         },
@@ -73,7 +72,7 @@ const Footer: React.FC = () => {
     const socialLinks = [
         {name: 'GitHub', href: '#', icon: GitBranch},
         {name: 'Twitter', href: '#', icon: Share2},
-        {name: 'RSS', href: '/api/v2/feed/rss', icon: Rss, external: true},
+        {name: 'RSS', href: '/api/v2/cms/feed?format=rss', icon: Rss, external: true},
     ];
 
     return (

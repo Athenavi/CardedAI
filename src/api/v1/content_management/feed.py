@@ -88,8 +88,8 @@ async def get_rss_feed(
 
     # 站点配置
     site_url = str(request.base_url).rstrip('/')
-    site_title = AppConfig.site_title or "FastBlog"
-    site_description = AppConfig.site_description or "FastBlog - 现代化博客系统"
+    site_title = AppConfig.sitename or "FastBlog"
+    site_description = "FastBlog - 现代化博客系统"
 
     # 创建 Feed 生成器
     generator = RSSFeedGenerator(

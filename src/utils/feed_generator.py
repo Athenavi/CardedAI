@@ -72,7 +72,11 @@ class RSSFeedGenerator(FeedGenerator):
 
     def generate_rss(self) -> str:
         """生成 RSS 2.0 XML"""
-        rss = Element('rss', {'version': '2.0'})
+        rss = Element('rss', {
+            'version': '2.0',
+            'xmlns:atom': 'http://www.w3.org/2005/Atom',
+            'xmlns:content': 'http://purl.org/rss/1.0/modules/content/',
+        })
         channel = SubElement(rss, 'channel')
 
         # 频道信息
