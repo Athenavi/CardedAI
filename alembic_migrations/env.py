@@ -106,6 +106,9 @@ import sys
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+# SQLite 方言兼容（BigInteger 主键自增等），必须在模型/DDL 之前加载
+import src.utils.database.sqlite_compat  # noqa: F401
+
 # 导入 Base
 from shared.models import Base
 target_metadata = Base.metadata

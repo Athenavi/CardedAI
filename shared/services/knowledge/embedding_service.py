@@ -1,13 +1,15 @@
 """
 Embedding 服务
 
-支持两种后端：
-1. sentence-transformers 本地模型（默认）
+支持三种后端：
+1. sentence-transformers 本地模型（默认，需安装 requirements-ai.txt）
 2. OpenAI text-embedding-3-small API
+3. 轻量哈希 Embedding（零依赖降级，自动启用或显式指定）
 
 通过环境变量 EMBEDDING_PROVIDER 切换：
-- local（默认）：使用 sentence-transformers 本地模型
+- local（默认）：优先 sentence-transformers；未安装时自动降级为哈希
 - openai：使用 OpenAI API
+- hash：强制使用轻量哈希
 
 通过环境变量 EMBEDDING_MODEL 指定模型名称：
 - 本地默认: all-MiniLM-L6-v2
@@ -16,6 +18,7 @@ Embedding 服务
 
 import asyncio
 import os
+import re
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
@@ -131,6 +134,61 @@ class OpenAIEmbeddingBackend(EmbeddingBackend):
         return self._dimension
 
 
+class HashEmbeddingBackend(EmbeddingBackend):
+    """
+    基于字符 n-gram 哈希的轻量 Embedding（零依赖降级方案）
+
+    特点：
+    - 无需第三方库、无需 API key、无需下载模型
+    - 确定性：同一文本始终得到同一向量
+    - 维度固定（默认 1024），多哈希投射 n-gram 特征（带符号）
+
+    限制：
+    - 无语义泛化，仅词面近似（字面重叠度高的文本相似度高）
+    - 适合零外部依赖环境下的 RAG 兜底；有 API key 或安装了
+      sentence-transformers 时建议使用更强后端
+    """
+
+    def __init__(self, dimension: int = 1024, ngram_range: tuple = (1, 3), num_hashes: int = 2):
+        self._dimension = dimension
+        self._ngram_range = ngram_range
+        self._num_hashes = num_hashes
+        self._space_re = re.compile(r"\s+")
+
+    @staticmethod
+    def _hash(token: str, seed: int) -> int:
+        """确定性字符串散列（FNV-1a 风格）"""
+        h = 0x811C9DC5 ^ seed
+        for byte in token.encode("utf-8"):
+            h ^= byte
+            h = (h * 0x01000193) & 0xFFFFFFFF
+        return h
+
+    def _embed_one(self, text: str) -> List[float]:
+        norm_text = self._space_re.sub(" ", (text or "").lower().strip())
+        vec = [0.0] * self._dimension
+        lo, hi = self._ngram_range
+        for n in range(lo, hi + 1):
+            for i in range(len(norm_text) - n + 1):
+                token = norm_text[i:i + n]
+                for seed in range(self._num_hashes):
+                    h = self._hash(token, seed * 131 + 17)
+                    idx = h % self._dimension
+                    sign = 1.0 if (h // self._dimension) % 2 == 0 else -1.0
+                    vec[idx] += sign
+        # L2 归一化
+        norm = sum(v * v for v in vec) ** 0.5
+        if norm > 0:
+            vec = [v / norm for v in vec]
+        return vec
+
+    async def embed(self, texts: List[str]) -> List[List[float]]:
+        return [self._embed_one(t) for t in texts]
+
+    def get_dimension(self) -> int:
+        return self._dimension
+
+
 class EmbeddingService:
     """
     Embedding 服务
@@ -145,10 +203,22 @@ class EmbeddingService:
             model_name = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
             self._backend = OpenAIEmbeddingBackend(model_name)
             logger.info(f"Embedding 服务: OpenAI ({model_name})")
+        elif provider == "hash":
+            self._backend = HashEmbeddingBackend()
+            logger.info("Embedding 服务: 轻量哈希 (hash)")
         else:
-            model_name = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
-            self._backend = LocalEmbeddingBackend(model_name)
-            logger.info(f"Embedding 服务: 本地 ({model_name})")
+            # local（默认）：sentence-transformers 可用则用，否则自动降级为哈希
+            import importlib.util
+            if importlib.util.find_spec("sentence_transformers") is not None:
+                model_name = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
+                self._backend = LocalEmbeddingBackend(model_name)
+                logger.info(f"Embedding 服务: 本地 ({model_name})")
+            else:
+                self._backend = HashEmbeddingBackend()
+                logger.warning(
+                    "sentence-transformers 未安装，使用轻量哈希 Embedding 降级。"
+                    "如需更强效果：pip install -r requirements-ai.txt 或设置 EMBEDDING_PROVIDER=openai"
+                )
 
     async def embed(self, texts: List[str]) -> List[List[float]]:
         """

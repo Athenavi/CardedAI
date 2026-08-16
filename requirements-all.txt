@@ -1,0 +1,10 @@
+# ============================================================================
+# CardedAI: 全部依赖（核心 + 所有可选扩展）
+# 安装：pip install -r requirements-all.txt
+# ============================================================================
+-r requirements.txt
+-r requirements-postgres.txt
+-r requirements-redis.txt
+-r requirements-vector.txt
+-r requirements-search.txt
+-r requirements-ai.txt

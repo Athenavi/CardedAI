@@ -1,0 +1,8 @@
+# ============================================================================
+# CardedAI Optional: 外部向量数据库（Milvus / Qdrant）
+# 本机检测到 Milvus / Qdrant 时由 run.sh 推荐启用；未安装时使用内置本地向量存储
+# （VECTOR_DB_TYPE=local，SQLite + 余弦相似度）。
+# 安装：pip install -r requirements-vector.txt
+# ============================================================================
+pymilvus==2.6.16
+qdrant-client>=1.9.0

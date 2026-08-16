@@ -1,0 +1,7 @@
+# ============================================================================
+# CardedAI Optional: PostgreSQL 支持
+# 本机检测到 PostgreSQL 时由 run.sh 推荐启用；未安装时使用内置 SQLite。
+# 安装：pip install -r requirements-postgres.txt
+# ============================================================================
+asyncpg==0.31.0
+psycopg2-binary==2.9.12

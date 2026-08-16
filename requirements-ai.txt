@@ -1,0 +1,7 @@
+# ============================================================================
+# CardedAI Optional: 本地 Embedding 模型（sentence-transformers + PyTorch）
+# ⚠️ 体积最大（数百 MB）。不安装时自动降级为内置 HashEmbedding（零依赖），
+#    或通过 OpenAI 兼容 API（LLM_API_KEY）使用远程 Embedding。
+# 安装：pip install -r requirements-ai.txt
+# ============================================================================
+sentence-transformers>=2.3.0

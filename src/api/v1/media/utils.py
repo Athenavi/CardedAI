@@ -6,9 +6,16 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
-import aioboto3
+try:
+    import aioboto3
+    from botocore.exceptions import ClientError
+    _S3_AVAILABLE = True
+except ImportError:
+    # aioboto3 未安装（精简模式）：S3 存储不可用，本地存储不受影响
+    aioboto3 = None
+    ClientError = None
+    _S3_AVAILABLE = False
 import aiofiles
-from botocore.exceptions import ClientError
 from fastapi import HTTPException
 from fastapi.responses import FileResponse, StreamingResponse, Response
 
@@ -119,6 +126,8 @@ async def stream_s3_range(
         range_header: str,
         headers: dict
 ) -> Response:
+    if not _S3_AVAILABLE:
+        raise HTTPException(status_code=503, detail="S3 存储不可用（未安装 aioboto3）")
     try:
         session = aioboto3.Session()
         async with session.client('s3') as s3_client:
@@ -170,6 +179,8 @@ async def stream_and_cache_s3(
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     temp_file = tempfile.NamedTemporaryFile(delete=False, dir=cache_path.parent)
     temp_path = Path(temp_file.name)
+    if not _S3_AVAILABLE:
+        raise HTTPException(status_code=503, detail="S3 存储不可用（未安装 aioboto3）")
     try:
         s3_config = {
             'endpoint_url': getattr(app_config, 'S3_ENDPOINT_URL', None),

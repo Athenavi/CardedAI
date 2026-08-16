@@ -4,9 +4,18 @@ import os
 from contextlib import contextmanager
 from typing import Generator, AsyncGenerator
 
-import redis
-from slowapi import _rate_limit_exceeded_handler, Limiter
-from slowapi.util import get_remote_address
+try:
+    import redis
+except ImportError:
+    # redis 库未安装（精简模式）：下方自动降级为 SimpleCache 内存缓存
+    redis = None
+try:
+    from slowapi import _rate_limit_exceeded_handler, Limiter
+    from slowapi.util import get_remote_address
+except ImportError:
+    _rate_limit_exceeded_handler = None
+    Limiter = None
+    get_remote_address = None
 from sqlalchemy.ext.declarative import declarative_base
 
 from src.unified_logger import default_logger as logger
@@ -193,8 +202,8 @@ try:
 
     cache = RedisCacheWrapper(_redis_client)
 
-except (redis.ConnectionError, redis.TimeoutError, redis.RedisError, OSError, ImportError):
-    # 如果 Redis 不可用（连接拒绝、超时、其他错误），使用简单内存缓存
+except Exception:
+    # Redis 不可用（未安装 / 连接拒绝 / 超时等）：使用简单内存缓存
     class SimpleCache:
         def __init__(self):
             self._cache = {}
@@ -593,10 +602,13 @@ def init_extensions(app):
 
     print("Using unified database manager (created in lifespan event)")
 
-    # 限流中间件
+    # 限流中间件（slowapi 未安装时跳过）
     try:
-        app.state.limiter = Limiter(key_func=get_remote_address)
-        app.add_exception_handler(429, _rate_limit_exceeded_handler)
+        if Limiter is not None:
+            app.state.limiter = Limiter(key_func=get_remote_address)
+            app.add_exception_handler(429, _rate_limit_exceeded_handler)
+        else:
+            print("slowapi 未安装，限流已禁用")
     except Exception as e:
         print(f"Failed to initialize rate limiter: {e}")
 

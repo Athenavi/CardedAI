@@ -63,22 +63,25 @@ pip install -q --upgrade pip
 pip install -q -r requirements.txt
 ok "依赖安装完成"
 
-# ---------- 4. 创建 .env 文件（SQLite 模式） ----------
+# ---------- 4. 创建 .env 文件（环境检测推荐 + SQLite 本地降级） ----------
 if [ ! -f "$PROJECT_DIR/.env" ]; then
-    info "创建 .env 配置文件（SQLite 模式）..."
+    info "检测本机运行环境并生成推荐配置..."
 
     # 生成随机 SECRET_KEY
     SECRET_KEY=$("$PYTHON" -c "import secrets; print(secrets.token_hex(32))")
 
+    # 环境检测：检测 PostgreSQL/Redis/Milvus/Qdrant/Meilisearch 是否可用并给出推荐
+    # （纯标准库实现，零依赖；推荐仅用于首次生成 .env，已存在的配置不会被覆盖）
+    RECOMMEND=$("$PYTHON" "$PROJECT_DIR/src/utils/environment_detector.py" --recommend 2>/dev/null) || RECOMMEND=""
+
     cat > "$PROJECT_DIR/.env" << EOF
 # ============================================================================
-# CardedAI - SQLite 开发环境配置（由 run.sh 自动生成）
-# 如需要使用 PostgreSQL，请参考 .env.example 手动配置
+# CardedAI - 零外部服务配置（由 run.sh 自动生成）
+# 已根据本机环境自动推荐最优配置（见下方"环境自动检测推荐配置"段）
+# 如需手动调整，直接修改对应键值后重启即可
+# 如检测到本机有 PostgreSQL/Redis/Milvus/Qdrant/Meilisearch，将自动优先使用；
+# 未检测到则全部使用内置本地方案（SQLite + 内存缓存 + 本地向量 + 内置搜索）
 # ============================================================================
-
-# Database - SQLite（无需外部数据库）
-DB_ENGINE=sqlite
-DB_PATH=data/cardedai.db
 
 # Application
 DOMAIN=http://localhost:9421
@@ -92,12 +95,11 @@ DEBUG=True
 JWT_EXPIRATION_DELTA=86400
 REFRESH_TOKEN_EXPIRATION_DELTA=64800
 
-# Caching（无 Redis 时自动降级为内存缓存）
-CACHE_TYPE=simple
+$RECOMMEND
 EOF
-    ok ".env 文件已创建（SQLite 模式）"
+    ok ".env 文件已创建（环境检测推荐配置）"
 else
-    ok ".env 文件已存在，跳过创建"
+    ok ".env 文件已存在，跳过生成（如需重新检测推荐，删除 .env 后重跑）"
 fi
 
 # ---------- 5. 确保 data 目录存在 ----------
@@ -119,7 +121,13 @@ print('Tables created successfully')
 " 2>/dev/null || warn "自动建表跳过，服务启动后会自动处理"
 }
 
-# ---------- 7. 启动服务 ----------
+# ---------- 7. 配置摘要 ----------
+echo ""
+info "当前生效配置："
+grep -E "^(DB_ENGINE|DB_PATH|CACHE_TYPE|VECTOR_DB_TYPE|MEILISEARCH_HOST|EMBEDDING_PROVIDER)=" "$PROJECT_DIR/.env" 2>/dev/null | sed 's/^/  /' || echo "  （.env 中未找到，使用默认值）"
+echo ""
+
+# ---------- 8. 启动服务 ----------
 echo ""
 echo -e "${GREEN}============================================${NC}"
 echo -e "${GREEN}  CardedAI 启动中...${NC}"

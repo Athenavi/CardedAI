@@ -429,6 +429,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 async def _init_database():
     from src.utils.database.unified_manager import db_manager
     db_manager.initialize()
+    # 确保所有模型表已创建（首次部署/空库时建表；已有表时 checkfirst 跳过，不重复）
+    try:
+        from shared.models import Base
+        from src.utils.database.main import _import_models_once
+        _import_models_once()
+        async with db_manager.async_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("[lifespan] 数据库表已确保存在（create_all）")
+    except Exception as e:
+        print(f"[lifespan] 建表跳过/失败: {e}")
 
 
 async def _start_scheduled_publisher():
@@ -465,14 +475,26 @@ def _make_lazy_middleware(module_path: str, class_name: str):
 
     class _LazyProxy:
         def __init__(self, app, **kwargs):
+            self._app = app
             if 'cls' not in _cache:
                 import importlib
-                mod = importlib.import_module(module_path)
-                _cache['cls'] = getattr(mod, class_name)
-            self._impl = _cache['cls'](app=app, **kwargs)
+                try:
+                    mod = importlib.import_module(module_path)
+                    _cache['cls'] = getattr(mod, class_name)
+                except (ImportError, AttributeError) as e:
+                    # 中间件模块缺失（如精简模式下未安装对应依赖）：跳过该中间件
+                    print(f"[Middleware] 中间件 {module_path}.{class_name} 不可用，已跳过: {e}")
+                    _cache['cls'] = None
+            if _cache['cls'] is not None:
+                self._impl = _cache['cls'](app=app, **kwargs)
+            else:
+                self._impl = None
 
         async def __call__(self, scope, receive, send):
-            return await self._impl(scope, receive, send)
+            if self._impl is None:
+                await self._app(scope, receive, send)
+                return
+            await self._impl(scope, receive, send)
 
     _LazyProxy.__name__ = f"Lazy_{class_name}"
     _LazyProxy.__qualname__ = f"_make_lazy_middleware.<locals>.Lazy_{class_name}"
@@ -644,7 +666,7 @@ def register_error_handlers(app: FastAPI):
                              'api/v2/health']
         if not any(path.lstrip('/').startswith(prefix) for prefix in excluded_prefixes):
             try:
-                frontend_index = os.path.join(os.path.dirname(__file__), "..", "frontend", "index.html")
+                frontend_index = os.path.join(os.path.dirname(__file__), "..", "frontend-astro", "dist", "index.html")
                 if os.path.exists(frontend_index):
                     with open(frontend_index, "r", encoding="utf-8") as f:
                         return HTMLResponse(content=f.read())
@@ -731,6 +753,14 @@ def create_app(config=None):
     themes_dir = os.path.join(os.path.dirname(__file__), "..", "themes")
     if os.path.exists(themes_dir):
         app.mount("/api/v2/assets/themes", StaticFiles(directory=themes_dir), name="themes")
+
+    # 前端静态资源（同源部署）：Astro 构建产物，挂载到根路径（须在所有路由/挂载之后）
+    frontend_dist = os.path.join(os.path.dirname(__file__), "..", "frontend-astro", "dist")
+    if os.path.isdir(frontend_dist):
+        app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
+        print(f"[Frontend] 前端静态资源已挂载: {frontend_dist}")
+    else:
+        print(f"[Frontend] 未找到前端构建产物: {frontend_dist}（可先运行 npm run build 构建）")
 
     app_elapsed = _time.monotonic() - app_start
     print(f"{worker_info} [create_app] 🏭 应用工厂完成，总耗时: {app_elapsed:.2f}s")

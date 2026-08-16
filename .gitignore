@@ -64,7 +64,7 @@ yarn-error.log*
 .vite/
 cache/
 frontend/dist/
-frontend-astro/dist/
+# 注意：frontend-astro/dist/ 需随仓库分发（Linux 零依赖部署无需 Node.js 构建）
 frontend-astro/.astro/
 frontend-astro/*.tsbuildinfo
 frontend-next/.next/

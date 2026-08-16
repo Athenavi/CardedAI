@@ -33,9 +33,10 @@ def _import_models_once():
         if hasattr(settings, 'MODELS_PATH'):
             models_path = Path(settings.MODELS_PATH)
         else:
-            # 默认路径：shared/models
-            current_dir = Path(__file__).parent.parent
-            models_path = current_dir.parent / "shared" / "models"
+            # 默认路径：项目根目录下的 shared/models
+            # 本文件位于 src/utils/database/main.py，向上四级到项目根
+            project_root = Path(__file__).resolve().parent.parent.parent.parent
+            models_path = project_root / "shared" / "models"
 
         if not models_path.exists():
             logger.warning(f"模型目录不存在: {models_path}")

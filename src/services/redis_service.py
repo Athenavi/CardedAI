@@ -1,14 +1,140 @@
 """
 Redis 缓存服务
-提供异步 Redis 操作和缓存管理
+提供异步 Redis 操作和缓存管理。
+redis 库不可用时自动降级为内置内存缓存。
 """
+from __future__ import annotations
+
 import json
 from datetime import timedelta
 from typing import Optional, Any, Union
 
-import redis.asyncio as aioredis
+try:
+    import redis.asyncio as aioredis
+except ImportError:
+    # redis 库未安装（精简模式）：使用内置内存缓存降级
+    aioredis = None
 
 from src.unified_logger import default_logger as logger
+
+
+class _MemoryRedis:
+    """Redis 接口的内存实现（零依赖降级，进程内有效）"""
+
+    def __init__(self):
+        self._data = {}
+        self._expiry = {}
+
+    def _is_expired(self, key):
+        import time
+        exp = self._expiry.get(key)
+        if exp is not None and time.time() > exp:
+            self._data.pop(key, None)
+            self._expiry.pop(key, None)
+            return True
+        return False
+
+    async def ping(self):
+        return True
+
+    async def close(self):
+        self._data.clear()
+        self._expiry.clear()
+
+    async def get(self, key):
+        if self._is_expired(key):
+            return None
+        return self._data.get(key)
+
+    async def set(self, key, value, ex=None):
+        import time
+        self._data[key] = value
+        if ex:
+            self._expiry[key] = time.time() + ex
+        return True
+
+    async def setex(self, key, seconds, value):
+        return await self.set(key, value, ex=seconds)
+
+    async def delete(self, *keys):
+        n = 0
+        for k in keys:
+            if k in self._data:
+                del self._data[k]
+                n += 1
+        return n
+
+    async def exists(self, key):
+        return 1 if (not self._is_expired(key) and key in self._data) else 0
+
+    async def expire(self, key, seconds):
+        import time
+        if key in self._data:
+            self._expiry[key] = time.time() + seconds
+            return True
+        return False
+
+    async def mget(self, *keys):
+        return [await self.get(k) for k in keys]
+
+    async def mset(self, mapping):
+        for k, v in mapping.items():
+            await self.set(k, v)
+        return True
+
+    async def incr(self, key, amount=1):
+        cur = int(self._data.get(key, 0) or 0)
+        self._data[key] = cur + amount
+        return self._data[key]
+
+    async def decr(self, key, amount=1):
+        cur = int(self._data.get(key, 0) or 0)
+        self._data[key] = cur - amount
+        return self._data[key]
+
+    async def lpush(self, key, *values):
+        lst = self._data.setdefault(key, [])
+        for v in values:
+            lst.insert(0, v)
+        return len(lst)
+
+    async def rpush(self, key, *values):
+        lst = self._data.setdefault(key, [])
+        lst.extend(values)
+        return len(lst)
+
+    async def lrange(self, key, start=0, end=-1):
+        lst = self._data.get(key, [])
+        if end == -1:
+            return lst[start:]
+        return lst[start:end + 1]
+
+    async def sadd(self, key, *members):
+        st = self._data.setdefault(key, set())
+        if not isinstance(st, set):
+            st = set(st)
+            self._data[key] = st
+        before = len(st)
+        st.update(members)
+        return len(st) - before
+
+    async def smembers(self, key):
+        return set(self._data.get(key, set()))
+
+    async def scan(self, cursor=0, match=None, count=10):
+        import fnmatch
+        keys = [k for k in self._data if not self._is_expired(k)]
+        if match:
+            keys = [k for k in keys if fnmatch.fnmatch(k, match)]
+        return 0, keys
+
+    async def info(self):
+        return {}
+
+    async def flushdb(self):
+        self._data.clear()
+        self._expiry.clear()
+        return True
 
 
 class RedisService:
@@ -19,7 +145,11 @@ class RedisService:
         self._redis: Optional[aioredis.Redis] = None
 
     async def connect(self):
-        """连接到 Redis"""
+        """连接到 Redis；redis 库不可用或连接失败时降级为内置内存缓存"""
+        if aioredis is None:
+            logger.warning("redis 库未安装，使用内置内存缓存降级（仅进程内有效）")
+            self._redis = _MemoryRedis()
+            return
         try:
             self._redis = aioredis.from_url(
                 self.url,
@@ -35,7 +165,8 @@ class RedisService:
             logger.info(f"Redis 连接成功: {self.url}")
         except Exception as e:
             logger.error(f"Redis 连接失败: {e}")
-            raise
+            logger.warning("降级为内置内存缓存（仅进程内有效）")
+            self._redis = _MemoryRedis()
 
     async def disconnect(self):
         """断开 Redis 连接"""

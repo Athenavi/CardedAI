@@ -12,6 +12,9 @@ import sys
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+# SQLite 方言兼容（BigInteger 主键自增等），必须在模型/DDL 之前加载
+import src.utils.database.sqlite_compat  # noqa: F401
+
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.unified_logger import default_logger as logger

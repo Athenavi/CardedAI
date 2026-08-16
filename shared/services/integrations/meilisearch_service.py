@@ -11,10 +11,19 @@ Meilisearch 全文搜索引擎集成服务
 7. 增量索引更新
 """
 import hashlib
+import os
 from datetime import datetime
 from typing import List, Dict, Optional, Any
 
-from meilisearch_python_sdk import Client
+try:
+    from meilisearch_python_sdk import Client
+    from meilisearch_python_sdk.models.settings import MeiliSearchIndexSettings
+    _MEILISEARCH_AVAILABLE = True
+except ImportError:
+    # meilisearch SDK 未安装（精简模式）：使用内置 SQLAlchemy 搜索降级
+    Client = None
+    MeiliSearchIndexSettings = None
+    _MEILISEARCH_AVAILABLE = False
 
 from src.unified_logger import default_logger as logger
 
@@ -23,20 +32,24 @@ class MeilisearchService:
     """
     Meilisearch 搜索引擎服务
 
-    提供完整的全文搜索功能，包括索引管理、搜索、高亮等
+    提供完整的全文搜索功能，包括索引管理、搜索、高亮等。
+    未安装 SDK 或未配置 MEILISEARCH_HOST 时，自动降级为内置 SQLAlchemy 搜索
+    （local 模式），接口保持一致，调用方无需改动。
     注意：客户端采用懒加载模式，首次使用时才创建连接，避免启动时阻塞
     """
 
-    def __init__(self, host: str = "http://localhost:7700", api_key: str = ""):
+    def __init__(self, host: str = "", api_key: str = ""):
         """
         初始化 Meilisearch 客户端（懒加载）
 
         Args:
-            host: Meilisearch 服务器地址
-            api_key: API密钥（可选）
+            host: Meilisearch 服务器地址（默认读取 MEILISEARCH_HOST）
+            api_key: API密钥（可选，默认读取 MEILISEARCH_API_KEY）
         """
-        self.host = host
-        self.api_key = api_key
+        self.host = host or os.getenv("MEILISEARCH_HOST", "") or "http://localhost:7700"
+        self.api_key = api_key or os.getenv("MEILISEARCH_API_KEY", "")
+        # local 模式：SDK 未安装 或 未显式配置 MEILISEARCH_HOST
+        self._local_mode = (not _MEILISEARCH_AVAILABLE) or (not os.getenv("MEILISEARCH_HOST"))
         self._client = None  # 懒加载：首次访问时才创建
         self.index_name = "articles"
         self.index = None
@@ -45,11 +58,16 @@ class MeilisearchService:
     def client(self):
         """懒加载 Meilisearch 客户端，首次访问时才创建"""
         if self._client is None:
+            if Client is None:
+                raise RuntimeError("meilisearch-python-sdk 未安装，请使用内置搜索降级（local 模式）")
             self._client = Client(self.host, self.api_key) if self.api_key else Client(self.host)
         return self._client
 
     async def initialize(self):
-        """初始化搜索引擎和索引配置"""
+        """初始化搜索引擎和索引配置（local 模式直接跳过）"""
+        if self._local_mode:
+            logger.info("Meilisearch 未启用，使用内置 SQLAlchemy 搜索（local 降级模式）")
+            return True
         try:
             # 获取或创建索引
             self.index = self.client.index(self.index_name)
@@ -139,6 +157,8 @@ class MeilisearchService:
         Returns:
             是否成功
         """
+        if self._local_mode:
+            return True  # local 模式：数据实时存于数据库，搜索直接查库
         try:
             # 添加文档到索引
             task = await self.index.add_documents([article_data])
@@ -160,6 +180,8 @@ class MeilisearchService:
         Returns:
             是否成功
         """
+        if self._local_mode:
+            return True
         try:
             # 更新文档
             task = await self.index.update_documents([article_data])
@@ -181,6 +203,8 @@ class MeilisearchService:
         Returns:
             是否成功
         """
+        if self._local_mode:
+            return True
         try:
             # 删除文档
             task = await self.index.delete_document(article_id)
@@ -202,6 +226,8 @@ class MeilisearchService:
         Returns:
             是否成功
         """
+        if self._local_mode:
+            return True
         try:
             if not articles:
                 return True
@@ -245,6 +271,12 @@ class MeilisearchService:
         Returns:
             搜索结果和分页信息
         """
+        if self._local_mode:
+            return await self._search_local(
+                query=query, category_id=category_id, author_id=author_id,
+                date_from=date_from, date_to=date_to, status=status,
+                page=page, per_page=per_page, sort_by=sort_by,
+            )
         try:
             # 确保索引已初始化
             if self.index is None:
@@ -346,6 +378,129 @@ class MeilisearchService:
                 'error': str(e)
             }
 
+    async def _search_local(
+            self,
+            query: str,
+            category_id: Optional[int] = None,
+            author_id: Optional[int] = None,
+            date_from: Optional[datetime] = None,
+            date_to: Optional[datetime] = None,
+            status: str = "published",
+            page: int = 1,
+            per_page: int = 20,
+            sort_by: str = "relevance"
+    ) -> Dict[str, Any]:
+        """内置 SQLAlchemy 搜索（local 降级模式），返回结构与 Meilisearch 一致"""
+        try:
+            from sqlalchemy import func, or_, select
+            from src.utils.database.main import _import_models_once
+            _import_models_once()
+            from shared.models import Article
+            from src.utils.database.unified_manager import db_manager
+
+            status_map = {"published": 1, "draft": 0, "deleted": -1}
+            status_value = status_map.get(status) if status else None
+
+            async with db_manager.get_session() as session:
+                conds = []
+                if status_value is not None:
+                    conds.append(Article.status == status_value)
+                if category_id:
+                    conds.append(Article.category == category_id)
+                if author_id:
+                    conds.append(Article.user == author_id)
+                if date_from:
+                    conds.append(Article.created_at >= date_from)
+                if date_to:
+                    conds.append(Article.created_at <= date_to)
+                if query:
+                    like = f"%{query}%"
+                    conds.append(or_(
+                        Article.title.like(like),
+                        Article.excerpt.like(like),
+                        Article.seo_keywords.like(like),
+                    ))
+
+                base = select(Article).where(*conds) if conds else select(Article)
+                total = (await session.execute(
+                    select(func.count()).select_from(base.subquery())
+                )).scalar() or 0
+
+                if sort_by == "date":
+                    base = base.order_by(Article.created_at.desc())
+                elif sort_by == "views":
+                    base = base.order_by(Article.views.desc())
+                else:  # relevance
+                    base = base.order_by(Article.updated_at.desc())
+
+                rows = (await session.execute(
+                    base.offset((page - 1) * per_page).limit(per_page)
+                )).scalars().all()
+
+                articles = []
+                for a in rows:
+                    articles.append({
+                        'id': a.id,
+                        'title': a.title,
+                        'slug': a.slug,
+                        'excerpt': a.excerpt,
+                        'cover_image': a.cover_image,
+                        'category_id': a.category,
+                        'author_id': a.user,
+                        'tags': [t for t in (a.tags_list or "").split(",") if t],
+                        'views': a.views or 0,
+                        'likes': 0,
+                        'status': a.status,
+                        'is_featured': bool(a.is_featured),
+                        'created_at': a.created_at,
+                        'updated_at': a.updated_at,
+                        'highlighted_title': a.title,
+                        'highlighted_excerpt': a.excerpt,
+                    })
+
+                return {
+                    'articles': articles,
+                    'total': total,
+                    'page': page,
+                    'per_page': per_page,
+                    'total_pages': (total + per_page - 1) // per_page if total else 0,
+                    'query': query,
+                    'processing_time_ms': 0,
+                    'local_search': True,
+                }
+        except Exception as e:
+            logger.error(f"Local search failed: {e}")
+            return {
+                'articles': [],
+                'total': 0,
+                'page': page,
+                'per_page': per_page,
+                'total_pages': 0,
+                'query': query,
+                'error': str(e),
+            }
+
+    async def _suggestions_local(self, query: str, limit: int = 5) -> List[str]:
+        """内置 SQLAlchemy 搜索建议（local 降级模式）"""
+        try:
+            from sqlalchemy import select
+            from src.utils.database.main import _import_models_once
+            _import_models_once()
+            from shared.models import Article
+            from src.utils.database.unified_manager import db_manager
+
+            like = f"%{query}%"
+            async with db_manager.get_session() as session:
+                rows = (await session.execute(
+                    select(Article.title)
+                    .where(Article.status == 1, Article.title.like(like))
+                    .limit(limit)
+                )).scalars().all()
+                return [t for t in rows if t][:limit]
+        except Exception as e:
+            logger.error(f"Local search suggestions failed: {e}")
+            return []
+
     async def get_search_suggestions(
             self,
             query: str,
@@ -361,6 +516,8 @@ class MeilisearchService:
         Returns:
             搜索建议列表
         """
+        if self._local_mode:
+            return await self._suggestions_local(query, limit)
         try:
             # 使用 Meilisearch 的 facet search 功能
             result = await self.index.search(
@@ -386,6 +543,8 @@ class MeilisearchService:
         Returns:
             是否成功
         """
+        if self._local_mode:
+            return True
         try:
             # 清空索引
             await self.index.delete_all_documents()
@@ -408,6 +567,24 @@ class MeilisearchService:
         Returns:
             统计信息
         """
+        if self._local_mode:
+            try:
+                from sqlalchemy import func, select
+                from src.utils.database.main import _import_models_once
+                _import_models_once()
+                from shared.models import Article
+                from src.utils.database.unified_manager import db_manager
+                async with db_manager.get_session() as session:
+                    count = (await session.execute(select(func.count()).select_from(Article))).scalar() or 0
+                return {
+                    'number_of_documents': count,
+                    'index_size_in_bytes': 0,
+                    'field_distribution': {},
+                    'local_search': True,
+                }
+            except Exception as e:
+                logger.error(f"Local index stats failed: {e}")
+                return {}
         try:
             stats = await self.index.get_stats()
 

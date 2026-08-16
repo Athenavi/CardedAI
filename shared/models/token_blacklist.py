@@ -61,8 +61,9 @@ class TokenBlacklist(Base):
         """字符串表示"""
         return f'<TokenBlacklist id={self.id}>'
 
-# UNLOGGED 表监听器（PostgreSQL 专用）
+# UNLOGGED 表监听器（PostgreSQL 专用，其他数据库跳过）
 @event.listens_for(TokenBlacklist.__table__, "after_create")
 def _set_tokenblacklist_unlogged(target, connection, **kw):
-    connection.execute(f"ALTER TABLE {target.name} SET UNLOGGED")
+    if connection.dialect.name == "postgresql":
+        connection.execute(f"ALTER TABLE {target.name} SET UNLOGGED")
 

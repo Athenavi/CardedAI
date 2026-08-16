@@ -1,39 +1,36 @@
 # ============================================================================
-# FastBlog Python Dependencies
+# CardedAI Core Dependencies
+# 零外部服务（PostgreSQL / Redis / Milvus / Meilisearch 均不需要）所需的最小依赖集。
+# 安装：pip install -r requirements.txt
+# 可选扩展见 requirements-*.txt（PostgreSQL / Redis / 向量库 / 搜索 / 本地AI）
 # ============================================================================
-# Pin major versions for stability; use >= for flexibility
 
 # Web Framework
 fastapi==0.136.3
 uvicorn[standard]==0.48.0
 python-multipart==0.0.30
 
-# Template Engine
+# Template & Markdown
 jinja2==3.1.6
-
-# Markdown & Content
 mdit-py-plugins==0.6.1
 mdit-py-toc==1.0.0
 mdit-py-emoji==0.1.1
 pygments==2.20.0
 
-# Database
+# Database —— SQLite 默认（无需外部数据库）
 sqlalchemy==2.0.50
 alembic==1.18.4
-asyncpg==0.31.0
-psycopg2-binary==2.9.12
 aiosqlite>=0.20.0
 
 # Authentication & Security
 pyjwt==2.13.0
-httpx-oauth==0.17.0
 fastapi-users[sqlalchemy]
 argon2-cffi==25.1.0
+bcrypt>=4.0.0
 pyotp==2.9.0
 qrcode[pil]
 
-# Caching
-redis==8.0.0
+# Caching —— Redis 不可用时自动降级为内存缓存
 cachetools==7.1.4
 
 # HTTP Client
@@ -42,60 +39,37 @@ httpx==0.28.1
 # Rate Limiting
 slowapi==0.1.9
 
-# Environment & Configuration
-python-dotenv==1.2.2
-
-# Scheduling
-apscheduler==3.11.2
-
 # Forms
 wtforms==3.2.2
 
-# Validation
-pydantic==2.13.4
+# Configuration
+python-dotenv==1.2.2
 
-# API Documentation
+# Scheduling（定时采集 / 定时发布）
+apscheduler==3.11.2
+
+# Validation & API Docs
+pydantic==2.13.4
 openapi-spec-validator==0.9.0
 fastapi-versioning==0.10.0
 
-# Media Processing
-mutagen==1.47.0
-
-# System Monitoring
+# Monitoring
 psutil==7.2.2
 
-# Error Tracking
-sentry-sdk[fastapi]==2.61.1
-
-# Search Engine
-meilisearch-python-sdk==7.2.1
-
-# File Handling
-python-magic==0.4.27
+# File & Async I/O
+aiofiles==25.1.0
+aiohttp==3.14.0
+aioitertools>=0.11.0
 humanize==4.15.0
 
-# Async File I/O
-aiofiles==25.1.0
-
-# HTTP & Async
-aiohttp==3.14.0
-aioboto3==15.5.0
-
-# Data Collection
+# Data Collection（情报引擎）
 feedparser==6.0.11
 beautifulsoup4==4.13.4
 selectolax==0.3.27
 
-# Vector Database
-pymilvus==2.6.16
-
-# Embedding
-sentence-transformers>=2.3.0
-
-# Document Parsing
+# Document Parsing（知识引擎）
 pypdf==5.6.0
 python-docx==1.1.2
-unstructured==0.18.18
 
 # Utilities
 secure-python-utils==0.1.4
