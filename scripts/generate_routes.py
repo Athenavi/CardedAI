@@ -21,21 +21,21 @@ class RouteGenerator:
 
     # Module 名称到 FastAPI 模块路径的映射
     MODULE_MAPPING = {
-        'articles': 'src.api.v1.articles',
-        'blog': 'src.api.v1.blog',
-        'media': 'src.api.v1.media',
-        'category_management': 'src.api.v1.category_management',
-        'user_management': 'src.api.v1.user_management',
-        'dashboard': 'src.api.v1.dashboard',
-        'admin_settings': 'src.api.v1.admin_settings',
-        'users': 'src.api.v1.users',
-        'notifications': 'src.api.v1.notifications',
-        'backup': 'src.api.v1.backup',
-        'misc': 'src.api.v1.misc',
-        'home': 'src.api.v1.home',
-        'category_ext': 'src.api.v1.category_ext',
-        'comment_config': 'src.api.v1.comment_config',
-        'user_settings': 'src.api.v1.user_settings',
+        'articles': 'src.api.v2.articles',
+        'blog': 'src.api.v2.blog',
+        'media': 'src.api.v2.media',
+        'category_management': 'src.api.v2.category_management',
+        'user_management': 'src.api.v2.user_management',
+        'dashboard': 'src.api.v2.dashboard',
+        'admin_settings': 'src.api.v2.admin_settings',
+        'users': 'src.api.v2.users',
+        'notifications': 'src.api.v2.notifications',
+        'backup': 'src.api.v2.backup',
+        'misc': 'src.api.v2.misc',
+        'home': 'src.api.v2.home',
+        'category_ext': 'src.api.v2.category_ext',
+        'comment_config': 'src.api.v2.comment_config',
+        'user_settings': 'src.api.v2.user_settings',
     }
 
     def __init__(self, config_path: str = None):
@@ -82,7 +82,7 @@ class RouteGenerator:
         register_filters(self.jinja_env)
 
         # 提取配置信息
-        self.api_version = self.config.get('api_version', 'v1')
+        self.api_version = self.config.get('api_version', 'v2')
         self.base_path = self.config.get('base_path', f'/api/{self.api_version}')
         # 合并 models: routes.yaml 中的 + models.yaml 中的
         self.models = {**self.config.get('models', {}), **self.extra_models}

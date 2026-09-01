@@ -57,7 +57,7 @@ def cmd_create(args):
     env_example = project_dir / ".env.example"
     env_example.write_text("""# FastBlog Environment Configuration
 SECRET_KEY=your-secret-key-here
-DATABASE_URL=postgresql://user:password@localhost:5432/fastblog
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/fastblog
 REDIS_URL=redis://localhost:6379/0
 CORS_ORIGINS=http://localhost:3000
 """)
@@ -172,8 +172,9 @@ def cmd_dev(args):
     # 启动主应用
     try:
         import uvicorn
+        from src.app import app
         uvicorn.run(
-            "main:app",
+            app,
             host=args.host or "0.0.0.0",
             port=int(args.port) or 9421,
             reload=True,

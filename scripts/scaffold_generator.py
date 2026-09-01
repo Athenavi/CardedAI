@@ -89,7 +89,7 @@ class PluginScaffold(ScaffoldGenerator):
             "homepage": "",
             "repository": "",
             "tags": [],
-            "min_fastblog_version": "0.1.0",
+            "min_fastblog_version": "1.0.0",
             "dependencies": [],
             "hooks": [],
             "settings_schema": {}
@@ -118,57 +118,38 @@ from typing import Dict, Any
 from src.unified_logger import default_logger as logger
 
 
-class {class_name}Plugin(BasePlugin):
+class {class_name}Plugin:
     """{name} Plugin Implementation"""
 
     def __init__(self):
-        super().__init__(
-            plugin_id=0,  # Will be set by plugin manager
-            name="{name}",
-            slug="{slug}",
-            version="1.0.0"
-        )
+        self.name = "{name}"
+        self.slug = "{slug}"
+        self.version = "1.0.0"
+        self._active = False
+        self.settings = {{}}
 
-    def register_hooks(self):
-        """Register plugin hooks"""
-        # Example: Register a hook
-        # @plugin_hooks.register('article.created')
-        # def on_article_created(article):
-        #     logger.info(f"Article created: {{article.title}}")
-        pass
+    @property
+    def is_active(self):
+        return self._active
 
     def activate(self):
         """Activate plugin"""
-        super().activate()
+        self._active = True
         logger.info(f"[{name}] Plugin activated")
-        # Activation logic can be added here (e.g., create database tables)
 
     def deactivate(self):
         """Deactivate plugin"""
-        super().deactivate()
+        self._active = False
         logger.info(f"[{name}] Plugin deactivated")
-        # Deactivation logic can be added here (e.g., cleanup resources)
 
-    def uninstall(self):
-        """Uninstall plugin"""
-        super().uninstall()
-        logger.info(f"[{name}] Plugin uninstalled")
-        # Uninstallation logic can be added here (e.g., drop database tables)
-
-    def get_settings_ui(self) -> str:
-        """Return settings UI HTML (optional)"""
-        return """
-        <div class="plugin-settings">
-            <h3>{name} Settings</h3>
-            <p>Configure your plugin settings here.</p>
-        </div>
-        """
-
-    def save_settings(self, settings: Dict[str, Any]):
-        """Save plugin settings (optional)"""
-        # Save settings to database or config file
-        # Example: self.settings.update(settings)
-        pass
+    def get_info(self) -> Dict[str, Any]:
+        """Return plugin info"""
+        return {{
+            'name': self.name,
+            'slug': self.slug,
+            'version': self.version,
+            'is_active': self._active,
+        }}
 
 
 # Plugin instance (required)
@@ -258,17 +239,15 @@ def test_plugin_activation():
     from plugins.{slug}.plugin import plugin_instance
 
     plugin_instance.activate()
-    assert plugin_instance.is_active()
+    assert plugin_instance.is_active
 
     plugin_instance.deactivate()
-    assert not plugin_instance.is_active()
+    assert not plugin_instance.is_active
 
 
 def test_plugin_feature():
     """Test plugin core functionality - customize for your plugin"""
-    from plugins.
-    {slug}.plugin
-    import plugin_instance
+    from plugins.{slug}.plugin import plugin_instance
 
     plugin_instance.activate()
 
@@ -279,17 +258,12 @@ def test_plugin_feature():
     assert 'slug' in info
     assert 'version' in info
 
-    # Verify hooks are registered
-    assert hasattr(plugin_instance, 'register_hooks')
-
     # Add more tests for your specific plugin features below
 
 
 def test_plugin_settings():
     """测试插件设置"""
-    from plugins.
-    {slug}.plugin
-    import plugin_instance
+    from plugins.{slug}.plugin import plugin_instance
 
     # 检查默认设置是否存在
     assert hasattr(plugin_instance, 'settings')
@@ -303,16 +277,13 @@ def test_plugin_settings():
 
 def test_plugin_hooks():
     """测试插件钩子注册"""
-    from plugins.
-    {slug}.plugin
-    import plugin_instance
+    from plugins.{slug}.plugin import plugin_instance
 
     # 激活插件
     plugin_instance.activate()
 
-    # 检查钩子是否已注册
-    from shared.services.plugins.plugin_manager.core import plugin_hooks
-    # 这里可以添加钩子注册的验证逻辑
+    # 检查插件是否已激活
+    assert plugin_instance.is_active
 
     # 停用插件
     plugin_instance.deactivate()
@@ -320,27 +291,23 @@ def test_plugin_hooks():
 
 def test_plugin_activation_deactivation():
     """测试插件的激活和停用"""
-    from plugins.
-    {slug}.plugin
-    import plugin_instance
+    from plugins.{slug}.plugin import plugin_instance
 
     # 初始状态应该是未激活
-    assert not plugin_instance.is_active()
+    assert not plugin_instance.is_active
 
     # 激活插件
     plugin_instance.activate()
-    assert plugin_instance.is_active()
+    assert plugin_instance.is_active
 
     # 停用插件
     plugin_instance.deactivate()
-    assert not plugin_instance.is_active()
+    assert not plugin_instance.is_active
 
 
 def test_plugin_info():
     """测试插件信息"""
-    from plugins.
-    {slug}.plugin
-    import plugin_instance
+    from plugins.{slug}.plugin import plugin_instance
 
     # 检查插件基本信息
     assert hasattr(plugin_instance, 'name')
@@ -408,7 +375,7 @@ class ThemeScaffold(ScaffoldGenerator):
             "homepage": "",
             "screenshot": "screenshot.png",
             "tags": ["modern", "responsive"],
-            "min_fastblog_version": "0.1.0",
+            "min_fastblog_version": "1.0.0",
             "settings": {
                 "primary_color": "#3b82f6",
                 "secondary_color": "#10b981",

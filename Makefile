@@ -153,7 +153,7 @@ clean: ## Clean temporary files
 	@echo "✅ Cleaned temporary files"
 
 backup: ## Create a backup
-	python scripts/backup.sh
+	bash scripts/backup.sh
 	@echo "✅ Backup created"
 
 # ============================================================================
