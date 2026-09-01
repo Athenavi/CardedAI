@@ -13,9 +13,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.email_service_config import EmailServiceConfig
-from shared.utils.logger import get_logger
-
-logger = get_logger(__name__)
+from src.unified_logger import default_logger as logger
 
 # 尝试导入可选依赖
 try:

@@ -2,7 +2,7 @@
 存储相关的工具函数
 """
 from decimal import Decimal
-
+from src.unified_logger import default_logger as logger
 
 def convert_storage_size(total_bytes):
     """

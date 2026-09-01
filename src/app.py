@@ -15,35 +15,35 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.staticfiles import StaticFiles
 
+from src.unified_logger import default_logger as logger
+
 
 # ---------- 工具函数 ----------
 def safe_run(func_name: str, func, *args, **kwargs):
     """安全执行同步/异步初始化，统一日志输出"""
-    print(f"\n{'=' * 60}\n[{func_name}] 开始初始化...")
+    logger.info(f"[{func_name}] 开始初始化...")
     try:
         result = func(*args, **kwargs)
-        print(f"[{func_name}] ✅ 完成")
+        logger.info(f"[{func_name}] 完成")
         return result
     except Exception as e:
-        print(f"[{func_name}] ❌ 失败: {e}")
-        traceback.print_exc()
+        logger.error(f"[{func_name}] 失败: {e}", exc_info=True)
         return None
 
 
 async def safe_run_async(func_name: str, func, *args, **kwargs):
     """安全执行异步初始化"""
-    print(f"\n{'=' * 60}\n[{func_name}] 开始初始化...")
+    logger.info(f"[{func_name}] 开始初始化...")
     try:
         # 直接调用函数，如果是协程函数会自动返回协程对象
         result = func(*args, **kwargs)
         # 如果结果是协程，则等待它
         if hasattr(result, '__await__'):
             await result
-        print(f"[{func_name}] ✅ 完成")
+        logger.info(f"[{func_name}] 完成")
         return result
     except Exception as e:
-        print(f"[{func_name}] ❌ 失败: {e}")
-        traceback.print_exc()
+        logger.error(f"[{func_name}] 失败: {e}", exc_info=True)
         return None
 
 
@@ -53,13 +53,10 @@ def check_installation() -> bool:
         from shared.services.install.install_manager import installation_wizard_service
         installed = installation_wizard_service.is_installed()
         if not installed:
-            print("\n" + "=" * 60)
-            print("⚠️  系统尚未安装")
-            print("👉 请启动前端进程后访问 http://localhost:4321/install 完成安装向导")
-            print("=" * 60 + "\n")
+            logger.warning("系统尚未安装 - 请启动前端进程后访问 http://localhost:4321/install 完成安装向导")
         return installed
     except Exception as e:
-        print(f"Warning: Failed to check installation status: {e}")
+        logger.warning(f"Failed to check installation status: {e}")
         return False
 
 

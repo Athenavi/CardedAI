@@ -6,15 +6,13 @@ import os
 import time
 from typing import Dict
 
-from shared.utils.logger import get_logger
-
-logger = get_logger(__name__)
+from src.unified_logger import default_logger as logger
 
 
 class NotificationRateLimiter:
     """
     通知频率限制器
-    
+
     功能：
     1. 限制同一用户接收通知的频率
     2. 限制同一文章的通知总数
@@ -41,10 +39,10 @@ class NotificationRateLimiter:
     def can_send_email(self, user_email: str) -> tuple:
         """
         检查是否可以给用户发送邮件通知
-        
+
         Args:
             user_email: 用户邮箱
-            
+
         Returns:
             tuple: (can_send: bool, reason: str, pending_count: int)
         """
@@ -78,10 +76,10 @@ class NotificationRateLimiter:
     def can_add_inbox_notification(self, user_id: int) -> tuple:
         """
         检查是否可以添加站内通知
-        
+
         Args:
             user_id: 用户ID
-            
+
         Returns:
             tuple: (can_add: bool, should_aggregate: bool, reason: str)
         """
@@ -95,10 +93,10 @@ class NotificationRateLimiter:
     def can_notify_for_article(self, article_id: int) -> tuple:
         """
         检查是否可以给文章发送通知（已废弃，保留兼容）
-        
+
         Args:
             article_id: 文章ID
-            
+
         Returns:
             tuple: (can_send: bool, reason: str)
         """
@@ -107,7 +105,7 @@ class NotificationRateLimiter:
     def record_email_sent(self, user_email: str):
         """
         记录已发送的邮件
-        
+
         Args:
             user_email: 用户邮箱
         """
@@ -122,7 +120,7 @@ class NotificationRateLimiter:
     def add_pending_notification(self, user_email: str, notification_data: dict):
         """
         添加待聚合的通知
-        
+
         Args:
             user_email: 用户邮箱
             notification_data: 通知数据
@@ -140,10 +138,10 @@ class NotificationRateLimiter:
     def get_and_clear_pending(self, user_email: str) -> list:
         """
         获取并清除待聚合通知
-        
+
         Args:
             user_email: 用户邮箱
-            
+
         Returns:
             list: 待聚合通知列表
         """
@@ -153,7 +151,7 @@ class NotificationRateLimiter:
     def increment_inbox_count(self, user_id: int):
         """
         增加站内信计数
-        
+
         Args:
             user_id: 用户ID
         """
@@ -164,7 +162,7 @@ class NotificationRateLimiter:
     def reset_inbox_count(self, user_id: int):
         """
         重置站内信计数（当用户查看后）
-        
+
         Args:
             user_id: 用户ID
         """
@@ -190,7 +188,7 @@ class NotificationRateLimiter:
     def reset_limits(self, user_email: str = None):
         """
         重置限制（管理员功能）
-        
+
         Args:
             user_email: 用户邮箱（可选）
         """

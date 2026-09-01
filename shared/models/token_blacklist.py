@@ -4,7 +4,7 @@ SQLAlchemy 模型定义 - TokenBlacklist
 生成时间：2026-07-13 11:50:46
 """
 
-from sqlalchemy import event
+from sqlalchemy import event, text
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, Index
 
 from . import Base  # 使用统一的 Base
@@ -65,5 +65,5 @@ class TokenBlacklist(Base):
 @event.listens_for(TokenBlacklist.__table__, "after_create")
 def _set_tokenblacklist_unlogged(target, connection, **kw):
     if connection.dialect.name == "postgresql":
-        connection.execute(f"ALTER TABLE {target.name} SET UNLOGGED")
+        connection.execute(text(f'ALTER TABLE "{target.name}" SET UNLOGGED'))
 

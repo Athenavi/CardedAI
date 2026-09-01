@@ -8,9 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import List, Optional
 
-from shared.utils.logger import get_logger
-
-logger = get_logger(__name__)
+from src.unified_logger import default_logger as logger
 
 
 class EmailService:
@@ -34,13 +32,13 @@ class EmailService:
     ) -> bool:
         """
         发送邮件
-        
+
         Args:
             to_email: 收件人邮箱
             subject: 邮件主题
             html_content: HTML内容
             text_content: 纯文本内容（可选）
-            
+
         Returns:
             bool: 是否发送成功
         """
@@ -87,13 +85,13 @@ class EmailService:
     ) -> dict:
         """
         批量发送邮件
-        
+
         Args:
             emails: 收件人邮箱列表
             subject: 邮件主题
             html_content: HTML内容
             text_content: 纯文本内容
-            
+
         Returns:
             dict: {success: int, failed: int, details: list}
         """

@@ -6,9 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from shared.services.media.image_tool.image_processor import ImageProcessor
-from shared.utils.logger import get_logger
-
-logger = get_logger(__name__)
+from src.unified_logger import default_logger as logger
 
 
 class CoverImageService:
@@ -32,12 +30,12 @@ class CoverImageService:
     def generate_cover_filename(self, media_id: int | str, file_hash: str, extension: str = '.jpg') -> str:
         """
         生成封面文件名
-        
+
         Args:
             media_id: 媒体ID（可以是整数或字符串）
             file_hash: 文件哈希值
             extension: 文件扩展名（默认 .jpg）
-        
+
         Returns:
             格式化的文件名，如: 123_abc123def456.jpg 或 ext_urlhash_abc123def456.jpg
         """
@@ -57,7 +55,7 @@ class CoverImageService:
     ) -> Optional[str]:
         """
         优化图片并保存为封面
-        
+
         Args:
             media_id: 媒体ID（可以是整数或字符串）
             image_data: 原始图片数据
@@ -67,7 +65,7 @@ class CoverImageService:
             max_height: 最大高度
             quality: JPEG质量 (1-100)
             filename: 可选的自定义文件名，如果提供则直接使用
-        
+
         Returns:
             封面文件的URL路径，失败返回None
         """
@@ -132,14 +130,14 @@ class CoverImageService:
     ) -> tuple[bytes, str]:
         """
         优化图片（调整大小、压缩等）
-        
+
         Args:
             image_data: 原始图片数据
             max_width: 最大宽度
             max_height: 最大高度
             quality: 质量参数
             output_format: 输出格式
-        
+
         Returns:
             (优化后的图片数据, MIME类型)
         """
@@ -154,11 +152,11 @@ class CoverImageService:
     def delete_cover(self, media_id: int, file_hash: str) -> bool:
         """
         删除封面图片
-        
+
         Args:
             media_id: 媒体ID
             file_hash: 文件哈希值
-        
+
         Returns:
             是否成功删除
         """
@@ -183,12 +181,12 @@ class CoverImageService:
     def get_cover_url(self, media_id: int, file_hash: str, extension: str = '.jpg') -> str:
         """
         获取封面图片的URL
-        
+
         Args:
             media_id: 媒体ID
             file_hash: 文件哈希值
             extension: 文件扩展名
-        
+
         Returns:
             封面图片的URL
         """

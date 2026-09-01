@@ -12,7 +12,7 @@ from src.auth import jwt_required_dependency as jwt_required
 from src.extensions import get_async_db_session as get_async_db
 from src.utils.security.safe import valid_language_codes
 from src.utils.send_email import request_email_change
-
+from src.unified_logger import default_logger as logger
 
 class ProfileUpdateRequest(BaseModel):
     username: Optional[str] = None

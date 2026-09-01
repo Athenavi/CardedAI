@@ -5,10 +5,24 @@
 """
 
 import re
+import string
 from typing import Dict, List, Any, Optional
 
 from sqlalchemy import text, inspect
 from sqlalchemy.ext.asyncio import AsyncSession
+
+
+def _validate_identifier(name: str, max_len: int = 128) -> str:
+    """
+    验证书/表标识符，防止 SQL 注入。
+    只允许字母、数字、下划线、连字符，且长度有限制。
+    """
+    if not name or len(name) > max_len:
+        raise ValueError(f"Invalid identifier: length out of range")
+    # PostgreSQL 标识符只允许字母、数字、下划线；拒绝其他所有字符
+    if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', name):
+        raise ValueError(f"Invalid identifier '{name}': only alphanumeric and underscore allowed")
+    return name
 
 
 class DatabaseURLReplacer:
@@ -220,25 +234,29 @@ class DatabaseURLReplacer:
     ) -> Dict[str, Any]:
         """处理单个列"""
         try:
+            # 验证标识符，防止 SQL 注入
+            table_name = _validate_identifier(table_name)
+            column_name = _validate_identifier(column_name)
+
             # 构建查询
             if use_regex:
                 # PostgreSQL 正则表达式替换
                 flags = '' if case_sensitive else 'i'
-                query = text(f"""
+                query = text("""
                     SELECT COUNT(*) as count
-                    FROM "{table_name}"
-                    WHERE "{column_name}" ~ :pattern
-                """)
+                    FROM :table_id
+                    WHERE :col_id ~ :pattern
+                """).bindparams(table_id=table_name, col_id=column_name)
                 params = {'pattern': search}
             else:
                 # 普通LIKE查询
                 like_pattern = f'%{search}%'
                 operator = 'LIKE' if case_sensitive else 'ILIKE'
-                query = text(f"""
+                query = text("""
                     SELECT COUNT(*) as count
-                    FROM "{table_name}"
-                    WHERE "{column_name}" {operator} :pattern
-                """)
+                    FROM :table_id
+                    WHERE :col_id op :pattern
+                """).bindparams(table_id=table_name, col_id=column_name, op=operator)
                 params = {'pattern': like_pattern}
 
             # 执行查询获取匹配数量
@@ -259,23 +277,24 @@ class DatabaseURLReplacer:
                 if use_regex:
                     # PostgreSQL regex replace
                     flags = 'gi' if not case_sensitive else 'g'
-                    replace_query = text(f"""
-                        UPDATE "{table_name}"
-                        SET "{column_name}" = regexp_replace(
-                            "{column_name}",
+                    replace_query = text("""
+                        UPDATE :table_id
+                        SET :col_id = regexp_replace(
+                            :col_id,
                             :pattern,
                             :replacement,
-                            '{flags}'
+                            :flags
                         )
-                        WHERE "{column_name}" ~ :pattern
-                    """)
+                        WHERE :col_id ~ :pattern
+                    """).bindparams(table_id=table_name, col_id=column_name)
+                    params = {'pattern': search, 'replacement': replace, 'flags': flags}
                 else:
                     # 普通替换
-                    replace_query = text(f"""
-                        UPDATE "{table_name}"
-                        SET "{column_name}" = REPLACE("{column_name}", :search, :replace)
-                        WHERE "{column_name}" LIKE :pattern
-                    """)
+                    replace_query = text("""
+                        UPDATE :table_id
+                        SET :col_id = REPLACE(:col_id, :search, :replace)
+                        WHERE :col_id LIKE :pattern
+                    """).bindparams(table_id=table_name, col_id=column_name)
                     params = {'search': search, 'replace': replace, 'pattern': like_pattern}
 
                 result = await db.execute(replace_query, params)
@@ -358,12 +377,16 @@ class DatabaseURLReplacer:
             samples = []
             for table_name, column_name in columns[:20]:  # 只检查前20个列
                 try:
-                    sample_query = text(f"""
-                        SELECT "{column_name}"
-                        FROM "{table_name}"
-                        WHERE "{column_name}" LIKE :pattern
+                    # 验证标识符，防止 SQL 注入
+                    table_name = _validate_identifier(table_name)
+                    column_name = _validate_identifier(column_name)
+
+                    sample_query = text("""
+                        SELECT :col_id
+                        FROM :table_id
+                        WHERE :col_id LIKE :pattern
                         LIMIT :limit
-                    """)
+                    """).bindparams(table_id=table_name, col_id=column_name)
 
                     sample_result = await db.execute(
                         sample_query,
