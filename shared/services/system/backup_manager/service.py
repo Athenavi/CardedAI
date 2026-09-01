@@ -11,6 +11,7 @@ from typing import Dict, Any, List, Optional
 
 from sqlalchemy import select, func, text
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.unified_logger import default_logger as logger
 
 
 # 注意: 不要在这里导入 backup_service，会导致循环依赖

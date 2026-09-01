@@ -8,7 +8,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, Body
 
-from api.v1.users.user_management import jwt_required
+from src.api.v1.users.user_management import jwt_required
 from shared.services.ai.content_creator import ai_writing_assistant, seo_optimizer
 from src.api.v1.core.responses import ApiResponse
 
@@ -25,7 +25,7 @@ async def generate_outline(
 ):
     """
     生成文章大纲
-    
+
     根据主题自动生成结构化的文章大纲
     """
     try:
@@ -56,7 +56,7 @@ async def expand_paragraph(
 ):
     """
     扩写段落
-    
+
     将简短的段落扩展为更详细的内容
     """
     try:
@@ -85,7 +85,7 @@ async def optimize_title(
 ):
     """
     优化标题
-    
+
     生成多个标题优化建议，包括 SEO、吸引力、专业性等维度
     """
     try:
@@ -113,7 +113,7 @@ async def extract_keywords(
 ):
     """
     提取关键词
-    
+
     从文章内容中提取重要关键词
     """
     try:
@@ -142,7 +142,7 @@ async def generate_meta_description(
 ):
     """
     生成 Meta 描述
-    
+
     为文章自动生成 SEO 友好的 Meta 描述
     """
     try:
@@ -171,7 +171,7 @@ async def analyze_keyword_density(
 ):
     """
     分析关键词密度
-    
+
     检查文章中关键词的使用频率和密度
     """
     try:
@@ -198,7 +198,7 @@ async def check_readability(
 ):
     """
     检查可读性
-    
+
     评估文章的可读性评分并提供改进建议
     """
     try:
@@ -223,7 +223,7 @@ async def suggest_internal_links(
 ):
     """
     建议内部链接
-    
+
     基于文章内容推荐相关的内部链接
     """
     try:
@@ -252,7 +252,7 @@ async def full_seo_analysis(
 ):
     """
     完整 SEO 分析
-    
+
     对文章进行全面的 SEO 分析和优化建议
     """
     try:
@@ -308,7 +308,7 @@ async def get_generation_history(
 ):
     """
     获取生成历史
-    
+
     查看最近的 AI 生成记录
     """
     history = ai_writing_assistant.generation_history[-limit:]

@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from collections import defaultdict, Counter
+from src.unified_logger import default_logger as logger
 
 
 class SiteAnalyticsService:

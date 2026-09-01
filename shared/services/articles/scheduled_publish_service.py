@@ -10,7 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.article import Article
-
+from src.unified_logger import default_logger as logger
 
 async def check_and_publish_scheduled_articles(db: AsyncSession) -> Dict[str, Any]:
     """
