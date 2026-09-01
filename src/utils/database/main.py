@@ -255,25 +255,6 @@ db = unified_db_manager
 
 
 # 会话管理 - 完全委托给统一管理器
-@contextmanager
-def get_session():
-    """
-    同步会话上下文管理器（已废弃）
-
-    ⚠️ 警告：这个方法已被弃用，请使用异步会话
-    推荐使用：from src.utils.database.unified_manager import db_manager
-    """
-    logger.warning(
-        "get_session() is deprecated. Please use async sessions via "
-        "unified_manager.get_db_session() instead."
-    )
-    # 由于项目已全面转向异步，这里抛出异常引导用户使用正确的方法
-    raise RuntimeError(
-        "Sync sessions are no longer supported. "
-        "Please use async sessions: from src.utils.database.unified_manager import get_db_session"
-    )
-
-
 from contextlib import asynccontextmanager
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
@@ -304,24 +285,6 @@ async def get_async_session_context() -> AsyncGenerator[AsyncSession, None]:
     """
     # 委托给统一管理器
     async with unified_db_manager.get_session_no_auto_commit() as session:
-        yield session
-
-
-# FastAPI依赖注入
-def get_db():
-    """同步数据库依赖"""
-    with get_session() as session:
-        yield session
-
-
-async def get_async_db():
-    """
-    异步数据库依赖（已迁移到统一管理器）
-
-    推荐使用：from src.utils.database.unified_manager import get_db_session
-    """
-    # 委托给统一管理器 - 使用 async with 而不是 async for
-    async with unified_db_manager.get_session() as session:
         yield session
 
 
@@ -373,28 +336,7 @@ def test_connection() -> bool:
         return False
 
 
-def get_table_count() -> int:
-    """获取表数量（已废弃，使用 Alembic 管理迁移）"""
-    logger.warning("get_table_count() is deprecated. Please use Alembic for migration management.")
-    return 0
 
-
-def check_consistency() -> Tuple[List[Dict], List[str]]:
-    """快速一致性检查（已废弃，使用 Alembic 管理迁移）"""
-    logger.warning("check_consistency() is deprecated. Please use Alembic for migration management.")
-    return [], []
-
-
-def create_tables():
-    """创建所有表（已废弃，使用 Alembic 管理迁移）"""
-    logger.warning("create_tables() is deprecated. Please use Alembic for migration management.")
-    return False
-
-
-def drop_tables():
-    """删除所有表（已废弃，使用 Alembic 管理迁移）"""
-    logger.warning("drop_tables() is deprecated. Please use Alembic for migration management.")
-    return False
 
 
 # 初始化函数

@@ -29,11 +29,10 @@ def event_loop() -> Generator:
 @pytest.fixture(scope="session")
 def test_config() -> dict:
     """Test configuration dictionary."""
+    # 默认使用 SQLite 测试（无外部依赖），可通过 DATABASE_URL 环境变量覆盖为 PostgreSQL
+    default_db_url = "sqlite+aiosqlite:///./test_fast_blog.db"
     return {
-        "database_url": os.getenv(
-            "DATABASE_URL",
-            "postgresql+asyncpg://postgres:postgres@localhost:5432/fast_blog_test"
-        ),
+        "database_url": os.getenv("DATABASE_URL", default_db_url),
         "redis_url": os.getenv("REDIS_URL", "redis://localhost:6379/1"),
         "secret_key": "test-secret-key-for-testing-only",
     }

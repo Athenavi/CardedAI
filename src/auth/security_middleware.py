@@ -70,14 +70,14 @@ class XSSFilterMiddleware(BaseHTTPMiddleware):
 
     # 排除的路径（如富文本编辑器、登录接口、文件上传等）
     EXCLUDED_PATHS = [
-        '/api/v1/articles/content',  # 文章内容可能包含 HTML
-        '/api/v1/pages/content',  # 页面内容可能包含 HTML
-        '/api/v1/auth/login',  # 登录接口（避免消耗请求体）
-        '/api/v1/auth/register',  # 注册接口（避免消耗请求体）
-        '/api/v1/users/auth/login',  # 用户管理模块的登录接口
-        '/api/v1/users/auth/register',  # 用户管理模块的注册接口
-        '/api/v1/user-settings/profile/avatar',  # 头像上传（避免消耗 multipart/form-data）
-        '/api/v1/media/upload',  # 媒体文件上传（避免消耗 multipart/form-data）
+        '/api/v2/articles/content',  # 文章内容可能包含 HTML
+        '/api/v2/pages/content',  # 页面内容可能包含 HTML
+        '/api/v2/auth/login',  # 登录接口（避免消耗请求体）
+        '/api/v2/auth/register',  # 注册接口（避免消耗请求体）
+        '/api/v2/users/auth/login',  # 用户管理模块的登录接口
+        '/api/v2/users/auth/register',  # 用户管理模块的注册接口
+        '/api/v2/user-settings/profile/avatar',  # 头像上传（避免消耗 multipart/form-data）
+        '/api/v2/media/upload',  # 媒体文件上传（避免消耗 multipart/form-data）
     ]
 
     # 允许的 HTML 标签（白名单）
@@ -175,6 +175,10 @@ class XSSFilterMiddleware(BaseHTTPMiddleware):
         )
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        # 生产环境启用 HSTS (Strict-Transport-Security)
+        import os
+        if os.environ.get('ENVIRONMENT', 'development').lower() != 'development':
+            response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
 
         return response
 
@@ -327,17 +331,17 @@ class RateLimiterMiddleware(BaseHTTPMiddleware):
 
     # 不需要速率限制的路径
     EXCLUDED_PATHS = [
-        '/api/v1/thumbnail',  # 缩略图接口（频繁访问，需要豁免）
-        '/api/v1/media/',  # 媒体文件接口（图片加载需要豁免）
+        '/api/v2/thumbnail',  # 缩略图接口（频繁访问，需要豁免）
+        '/api/v2/media/',  # 媒体文件接口（图片加载需要豁免）
         '/api/v2/health',  # 健康检查接口
         '/api/v2/static/',  # 静态文件
     ]
 
     # 敏感端点的更严格限制 {path_prefix: (max_requests, window_seconds)}
     STRICT_LIMITS = {
-        '/api/v1/auth/login': (5, 60),  # 登录：5次/分钟
-        '/api/v1/auth/register': (3, 300),  # 注册：3次/5分钟
-        '/api/v1/users/password': (3, 300),  # 密码重置：3次/5分钟
+        '/api/v2/auth/login': (5, 60),  # 登录：5次/分钟
+        '/api/v2/auth/register': (3, 300),  # 注册：3次/5分钟
+        '/api/v2/users/password': (3, 300),  # 密码重置：3次/5分钟
     }
 
     # 默认限制

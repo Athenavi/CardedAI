@@ -197,7 +197,7 @@ async function syncDrafts() {
 
     for (const draft of drafts) {
       try {
-        const response = await fetch('/api/v1/articles', {
+        const response = await fetch('/api/v2/articles', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify(draft),
@@ -243,8 +243,8 @@ self.addEventListener('push', (event) => {
     const title = data.title || 'FastBlog 通知';
     const options = {
         body: data.body || '您有新的消息',
-        icon: '/icon-192.png',
-        badge: '/badge-72.png',
+        icon: '/icons/icon-192x192.png',
+        badge: '/icons/icon-192x192.png',
         data: data.url || '/',
     };
 
