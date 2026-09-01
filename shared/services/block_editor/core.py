@@ -16,7 +16,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, Any, List, Optional, Callable
 
-# 安全的类型映射表，替代 eval()
+# 类型字符串到实际类型的映射（替代 eval()）
 _TYPE_MAP = {
     "str": str,
     "int": int,

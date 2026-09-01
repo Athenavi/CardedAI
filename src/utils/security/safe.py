@@ -2,6 +2,8 @@
 安全工具模块
 包含输入验证、SQL注入防护、XSS防护等功能
 """
+import re
+from urllib.parse import urlparse
 
 
 def validate_input(input_string, allowed_pattern=None):
@@ -339,6 +341,9 @@ def is_valid_iso_language_code(iso_code: str) -> bool:
 
 
 def random_string(param):
+    """生成指定长度的随机字符串（仅由字母和数字组成）"""
+    import random
+    import string
     return ''.join(random.sample(string.ascii_letters + string.digits, param))
 
 

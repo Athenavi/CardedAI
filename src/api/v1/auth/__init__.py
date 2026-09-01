@@ -8,10 +8,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-import jwt
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request, status
 from fastapi.responses import JSONResponse
-from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,7 +22,6 @@ from shared.services.users.sms_verification_service import sms_verification_serv
 from shared.services.users.user_manager import create_user_account
 from src.api.v1.core.responses import ApiResponse
 from src.auth.auth_deps import jwt_required_dependency as jwt_required
-from src.utils.token_blacklist import get_token_blacklist
 from src.extensions import get_async_db_session as get_async_db
 from src.setting import settings
 from src.unified_logger import default_logger as logger
@@ -103,32 +100,9 @@ def create_jwt_token(
 
 
 def decode_jwt_token(token: str) -> dict:
-    """解码并验证 JWT（委托给 auth_deps 的逻辑）"""
-    try:
-        payload = jwt.decode(
-            token,
-            settings.JWT_SECRET_KEY,
-            algorithms=[settings.JWT_ALGORITHM],
-            options={"verify_exp": True},
-        )
-
-        # 黑名单检查
-        jti = payload.get("jti")
-        _tb = get_token_blacklist()
-        if jti and _tb.is_available and _tb.is_blacklisted(jti):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token has been revoked",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-        return payload
-    except InvalidTokenError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid token: {str(e)}",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    """解码并验证 JWT（委托给 auth_deps.verify_token）"""
+    from src.auth.auth_deps import verify_token
+    return verify_token(token)
 
 
 def extract_token_from_request(request: Request) -> Optional[str]:

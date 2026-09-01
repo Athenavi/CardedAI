@@ -15,7 +15,7 @@ from src.extensions import get_async_db_session as get_async_db
 from src.setting import settings
 
 # 统一使用 auth_deps 的认证依赖
-from src.auth.auth_deps import _get_token_blacklist, _get_token_from_request, _authenticate_user
+from src.auth.auth_deps import _get_token_from_request, _authenticate_user
 from src.utils.token_blacklist import get_token_blacklist
 
 
@@ -46,7 +46,7 @@ def decode_jwt_token(token: str) -> dict:
 
         # 黑名单检查
         jti = payload.get("jti")
-        _tb = _get_token_blacklist()
+        _tb = get_token_blacklist()
         if jti and _tb.is_available and _tb.is_blacklisted(jti):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

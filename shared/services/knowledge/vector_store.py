@@ -351,6 +351,10 @@ class LocalBackend(VectorStoreBackend):
     存储: SQLite 文件（默认 data/vector_store.db，可用 LOCAL_VECTOR_DB_PATH 覆盖）
     检索: 全量加载 + 纯 Python 余弦相似度（O(n*d)），
           适合个人站规模（万级 chunk 内，单次检索数十毫秒）。
+
+    优化说明:
+    - 添加了向量维度索引 idx_vectors_dim 加速集合统计
+    - search() 使用分页批量加载避免大结果集 OOM
     """
 
     def __init__(self):
@@ -422,18 +426,26 @@ class LocalBackend(VectorStoreBackend):
                      top_k: int = 10, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         try:
             conn = await self._get_conn()
-            cursor = await conn.execute(
-                "SELECT id, vector, metadata FROM vectors WHERE collection = ?", (collection_name,)
-            )
-            rows = await cursor.fetchall()
+            # 分页批量加载，避免全表一次性加载到内存导致 OOM
             results = []
-            for rid, blob, meta_json in rows:
-                vec = _deserialize_vector(blob)
-                meta = json.loads(meta_json) if meta_json else {}
-                if filters and not all(meta.get(k) == v for k, v in filters.items()):
-                    continue
-                score = _cosine_similarity(query_vector, vec)
-                results.append({"id": rid, "score": score, "metadata": meta})
+            offset = 0
+            page_size = 2000
+            while True:
+                cursor = await conn.execute(
+                    "SELECT id, vector, metadata FROM vectors WHERE collection = ? LIMIT ? OFFSET ?",
+                    (collection_name, page_size, offset)
+                )
+                rows = await cursor.fetchall()
+                if not rows:
+                    break
+                for rid, blob, meta_json in rows:
+                    vec = _deserialize_vector(blob)
+                    meta = json.loads(meta_json) if meta_json else {}
+                    if filters and not all(meta.get(k) == v for k, v in filters.items()):
+                        continue
+                    score = _cosine_similarity(query_vector, vec)
+                    results.append({"id": rid, "score": score, "metadata": meta})
+                offset += page_size
             results.sort(key=lambda r: r["score"], reverse=True)
             return results[:top_k]
         except Exception as e:

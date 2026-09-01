@@ -56,6 +56,39 @@ def create_access_token(
 
 
 # ---------- 提取与验证 Token ----------
+def verify_token(token: str) -> dict:
+    """
+    纯验证 JWT token 并解码 payload（不含数据库查询）。
+    包含黑名单检查，失败时抛出 HTTPException。
+    """
+    try:
+        payload = jwt.decode(
+            token,
+            getattr(settings, "JWT_SECRET_KEY", settings.SECRET_KEY),
+            algorithms=[getattr(settings, "JWT_ALGORITHM", "HS256")],
+            options={"verify_exp": True},
+        )
+    except InvalidTokenError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid token: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # 黑名单检查
+    jti = payload.get("jti")
+    if jti:
+        _tb = _get_token_blacklist()
+        if _tb.is_available and _tb.is_blacklisted(jti):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has been revoked",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    return payload
+
+
 async def _get_token_from_request(request: Request) -> Optional[str]:
     """
     从 Authorization Header 或 Cookie 中提取 JWT token

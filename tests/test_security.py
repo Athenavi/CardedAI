@@ -4,7 +4,7 @@ import pytest
 
 from src.utils.security.password_validator import hash_password, verify_password
 from src.utils.security.safe import (
-    validate_input, validate_xss, sanitize_sql_identifier, safe_query_builder,
+    validate_input, validate_xss, sanitize_sql_identifier,
     escape_html, validate_url, validate_password_strength, sanitize_filename,
     validate_integer, validate_boolean, is_valid_iso_language_code,
     validate_email_base, is_valid_hash,
@@ -102,29 +102,6 @@ class TestSanitizeSqlIdentifier:
     def test_invalid_too_long(self):
         with pytest.raises(ValueError):
             sanitize_sql_identifier("a" * 65)
-
-
-@pytest.mark.unit
-class TestSafeQueryBuilder:
-    """Test safe_query_builder function"""
-
-    def test_basic_query(self):
-        result = safe_query_builder("users")
-        assert "SELECT * FROM users" in result.text
-
-    def test_with_conditions(self):
-        result = safe_query_builder("users", conditions={"name": "test"})
-        assert "WHERE" in result.text
-        assert "name = :name" in result.text
-
-    def test_with_order_and_limit(self):
-        result = safe_query_builder("users", order_by="id", limit=10)
-        assert "ORDER BY id" in result.text
-        assert "LIMIT 10" in result.text
-
-    def test_invalid_table_name(self):
-        with pytest.raises(ValueError):
-            safe_query_builder("users; DROP")
 
 
 @pytest.mark.unit

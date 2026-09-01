@@ -228,10 +228,33 @@ class TokenBlacklistManager:
             logger.warning(f"ORM 黑名单查询失败：{e}")
             return False
 
-    def clear_expired(self):
-        """清理本地缓存中的过期记录"""
-        # Redis 通过 TTL 自动清理，无需操作
-        pass
+    def clear_expired_entries(self):
+        """清理本地缓存中的过期记录（Redis 通过 TTL 自动清理，无需操作）"""
+        # 如果使用 ORM 持久化，定期清理 DB 中的过期记录
+        if not self.redis_enabled:
+            try:
+                from src.utils.database.unified_manager import db_manager
+                from shared.models.token_blacklist import TokenBlacklist
+                from sqlalchemy import delete
+
+                async def _do_clean():
+                    async with db_manager.get_async_session() as session:
+                        await session.execute(
+                            delete(TokenBlacklist).where(
+                                TokenBlacklist.expires_at <= datetime.now()
+                            )
+                        )
+                        await session.commit()
+
+                import asyncio
+                try:
+                    loop = asyncio.get_event_loop()
+                    if loop.is_running():
+                        asyncio.ensure_future(_do_clean())
+                except RuntimeError:
+                    pass
+            except Exception:
+                pass
 
     @property
     def is_available(self) -> bool:
