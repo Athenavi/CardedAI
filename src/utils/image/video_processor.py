@@ -6,6 +6,7 @@
 
 import os
 import subprocess
+from fractions import Fraction
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
@@ -105,7 +106,7 @@ class VideoProcessor:
                 'width': int(video_stream.get('width', 0)),
                 'height': int(video_stream.get('height', 0)),
                 'codec': video_stream.get('codec_name', ''),
-                'fps': eval(video_stream.get('r_frame_rate', '0/1')),
+                'fps': float(Fraction(video_stream.get('r_frame_rate', '0/1'))),
                 'bitrate': int(format_info.get('bit_rate', 0)),
                 'file_size': int(format_info.get('size', 0)),
             }

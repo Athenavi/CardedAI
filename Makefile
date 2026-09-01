@@ -37,7 +37,7 @@ setup: ## Initial project setup (copy env, install deps)
 # ============================================================================
 
 dev: ## Start development server (backend)
-	python main.py --backend fastapi --env dev
+	python main.py --env dev
 
 dev-frontend: ## Start frontend development server
 	cd frontend-astro && npm run dev
@@ -46,7 +46,7 @@ dev-all: ## Start both backend and frontend (requires two terminals)
 	@echo "Starting backend on port 9421..."
 	@echo "Starting frontend on port 4321..."
 	@echo "Press Ctrl+C to stop"
-	python main.py --backend fastapi --env dev &
+	python main.py --env dev &
 	cd frontend-astro && npm run dev
 
 # ============================================================================

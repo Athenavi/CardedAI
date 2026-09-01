@@ -63,17 +63,11 @@ yarn-error.log*
 # Frontend build artifacts
 .vite/
 cache/
-frontend/dist/
 # 注意：frontend-astro/dist/ 需随仓库分发（Linux 零依赖部署无需 Node.js 构建）
 frontend-astro/.astro/
 frontend-astro/*.tsbuildinfo
-frontend-next/.next/
-# Reasonix agent workspace files
 .reasonix/
-
 static_generated/.cache/
-frontend-next/node_modules/
-
 # Thumbnails and uploads
 thumbnails/
 static/uploads/site_images/
@@ -124,14 +118,9 @@ coverage.xml
 .dmypy.json
 dmypy.json
 
-# Django Migrations (auto-generated)
-apps/*/migrations/*.py
-!apps/*/migrations/.gitkeep
-
 # Release & build artifacts
 /release/
 /upload_chunks/*
-/alembic_migrations/versions/*
 /plugins_data/*
 /mobile-app/node_modules/
 /frontend-astro/node_modules/
