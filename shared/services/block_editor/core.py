@@ -16,6 +16,20 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, Any, List, Optional, Callable
 
+# 安全的类型映射表，替代 eval()
+_TYPE_MAP = {
+    "str": str,
+    "int": int,
+    "float": float,
+    "bool": bool,
+    "list": list,
+    "dict": dict,
+    "tuple": tuple,
+    "set": set,
+    "bytes": bytes,
+    "Any": Any,
+}
+
 
 class BlockType(Enum):
     """Block 类型枚举"""
@@ -95,7 +109,8 @@ class BlockSchema:
             # 类型检查
             if attr_name in data:
                 expected_type = attr_schema.get("type")
-                if expected_type and not isinstance(data[attr_name], eval(expected_type)):
+                type_class = _TYPE_MAP.get(expected_type)
+                if expected_type and type_class is not None and not isinstance(data[attr_name], type_class):
                     errors.append(f"Invalid type for {attr_name}: expected {expected_type}")
 
         return len(errors) == 0, errors

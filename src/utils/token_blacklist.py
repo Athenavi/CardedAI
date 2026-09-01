@@ -229,8 +229,9 @@ class TokenBlacklistManager:
             return False
 
     def clear_expired(self):
-        """清理过期的黑名单记录（Redis 会自动处理 TTL）"""
-        pass  # Redis 会自动清理，ORM 的过期清理由定时任务处理
+        """清理本地缓存中的过期记录"""
+        # Redis 通过 TTL 自动清理，无需操作
+        pass
 
     @property
     def is_available(self) -> bool:
@@ -244,13 +245,12 @@ class TokenBlacklistManager:
 
 
 # ============================================================
-# 全局实例（惰性创建：首次使用时才触发 Redis 连接和 .ping()）
-# 避免模块导入时就创建实例，导致多线程并行导入时 Redis .ping() 被 import lock 串行化
+# 全局实例（惰性创建）
 # ============================================================
 _token_blacklist_instance = None
 
 
-def _get_token_blacklist():
+def get_token_blacklist():
     """获取 TokenBlacklistManager 单例（首次调用时才创建，避免模块导入时触发 Redis 连接）"""
     global _token_blacklist_instance
     if _token_blacklist_instance is None:
@@ -258,24 +258,4 @@ def _get_token_blacklist():
     return _token_blacklist_instance
 
 
-class _TokenBlacklistProxy:
-    """TokenBlacklistManager 的惰性代理，首次属性访问时才创建真实实例
-
-    这样 `from src.utils.token_blacklist import token_blacklist` 不会触发 Redis .ping()，
-    只有在实际使用 token_blacklist 的方法时才会初始化 Redis 连接。
-    """
-
-    def __getattr__(self, name):
-        return getattr(_get_token_blacklist(), name)
-
-    def __setattr__(self, name, value):
-        setattr(_get_token_blacklist(), name, value)
-
-    def __bool__(self):
-        return True
-
-    def __repr__(self):
-        return repr(_get_token_blacklist())
-
-
-token_blacklist = _TokenBlacklistProxy()
+token_blacklist = get_token_blacklist()

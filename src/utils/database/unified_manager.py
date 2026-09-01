@@ -18,6 +18,7 @@ import src.utils.database.sqlite_compat  # noqa: F401
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.unified_logger import default_logger as logger
+from src.setting import settings
 
 
 class UnifiedDatabaseManager:
@@ -139,7 +140,7 @@ class UnifiedDatabaseManager:
                     f"url={async_url}"
                 )
                 engine_kwargs = {
-                    'echo': getattr(__import__('src.setting', fromlist=['settings']).settings,
+                    'echo': getattr(settings,
                                     'database_echo', False),
                 }
             else:
@@ -166,8 +167,7 @@ class UnifiedDatabaseManager:
                     'pool_size': pool_config['pool_size'],
                     'max_overflow': pool_config['max_overflow'],
                     'pool_timeout': pool_config['pool_timeout'],
-                    'echo': getattr(__import__('src.setting', fromlist=['settings']).settings,
-                                    'database_echo', False),
+                    'echo': getattr(settings, 'database_echo', False),
                 }
 
                 # Windows + asyncpg: 添加额外的连接参数

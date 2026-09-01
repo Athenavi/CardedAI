@@ -11,7 +11,7 @@
 
 import json
 import os
-import pickle
+import struct
 import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
@@ -31,6 +31,16 @@ def _cosine_similarity(a: List[float], b: List[float]) -> float:
     if na == 0.0 or nb == 0.0:
         return 0.0
     return dot / ((na ** 0.5) * (nb ** 0.5))
+
+
+def _serialize_vector(vec: List[float]) -> bytes:
+    """将浮点数向量序列化为安全的二进制格式（JSON + struct 替代 pickle）"""
+    return json.dumps(vec, ensure_ascii=False).encode("utf-8")
+
+
+def _deserialize_vector(data: bytes) -> List[float]:
+    """从安全的二进制格式反序列化浮点数向量"""
+    return json.loads(data.decode("utf-8"))
 
 
 class VectorStoreBackend(ABC):
@@ -363,6 +373,9 @@ class LocalBackend(VectorStoreBackend):
                 " collection TEXT, id TEXT, vector BLOB, metadata TEXT,"
                 " PRIMARY KEY (collection, id))"
             )
+            await self._conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_vectors_collection ON vectors(collection)"
+            )
             await self._conn.commit()
             logger.info(f"本地向量存储已就绪: {os.path.abspath(db_path)}")
         return self._conn
@@ -396,7 +409,7 @@ class LocalBackend(VectorStoreBackend):
                 vid = str(uuid.uuid4())
                 await conn.execute(
                     "INSERT INTO vectors (collection, id, vector, metadata) VALUES (?, ?, ?, ?)",
-                    (collection_name, vid, pickle.dumps(vec), json.dumps(meta, ensure_ascii=False)),
+                    (collection_name, vid, _serialize_vector(vec), json.dumps(meta, ensure_ascii=False)),
                 )
                 ids.append(vid)
             await conn.commit()
@@ -415,7 +428,7 @@ class LocalBackend(VectorStoreBackend):
             rows = await cursor.fetchall()
             results = []
             for rid, blob, meta_json in rows:
-                vec = pickle.loads(blob)
+                vec = _deserialize_vector(blob)
                 meta = json.loads(meta_json) if meta_json else {}
                 if filters and not all(meta.get(k) == v for k, v in filters.items()):
                     continue

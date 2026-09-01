@@ -97,6 +97,11 @@ class SMSVerificationService:
 
         return None
 
+    def _is_production(self) -> bool:
+        """检查是否生产环境"""
+        import os
+        return os.environ.get('ENVIRONMENT', 'development').lower() == 'production'
+
     def _send_sms_mock(self, phone: str, code: str) -> bool:
         """
         模拟发送短信(开发/测试环境)
@@ -141,7 +146,9 @@ class SMSVerificationService:
             template_code = self.sms_config.get('aliyun_template_code', '')
 
             if not all([access_key_id, access_key_secret, sign_name, template_code]):
-                logger.warning("Aliyun SMS config incomplete, using mock mode")
+                logger.warning("Aliyun SMS config incomplete")
+                if self._is_production():
+                    return False
                 return self._send_sms_mock(phone, code)
 
             config = open_api_models.Config(
@@ -169,7 +176,9 @@ class SMSVerificationService:
                 return False
 
         except ImportError:
-            logger.warning("Aliyun SDK not installed, using mock mode")
+            logger.warning("Aliyun SDK not installed")
+            if self._is_production():
+                return False
             return self._send_sms_mock(phone, code)
         except Exception as e:
             logger.error(f"Failed to send SMS via Aliyun: {str(e)}")
@@ -199,7 +208,9 @@ class SMSVerificationService:
             template_id = self.sms_config.get('tencent_template_id', '')
 
             if not all([secret_id, secret_key, sdk_app_id, sign_name, template_id]):
-                logger.warning("Tencent SMS config incomplete, using mock mode")
+                logger.warning("Tencent SMS config incomplete")
+                if self._is_production():
+                    return False
                 return self._send_sms_mock(phone, code)
 
             cred = credential.Credential(secret_id, secret_key)
@@ -228,7 +239,9 @@ class SMSVerificationService:
                 return False
 
         except ImportError:
-            logger.warning("Tencent SDK not installed, using mock mode")
+            logger.warning("Tencent SDK not installed")
+            if self._is_production():
+                return False
             return self._send_sms_mock(phone, code)
         except Exception as e:
             logger.error(f"Failed to send SMS via Tencent: {str(e)}")
@@ -253,7 +266,9 @@ class SMSVerificationService:
             from_number = self.sms_config.get('twilio_from_number', '')
 
             if not all([account_sid, auth_token, from_number]):
-                logger.warning("Twilio SMS config incomplete, using mock mode")
+                logger.warning("Twilio SMS config incomplete")
+                if self._is_production():
+                    return False
                 return self._send_sms_mock(phone, code)
 
             client = Client(account_sid, auth_token)
@@ -272,7 +287,9 @@ class SMSVerificationService:
                 return False
 
         except ImportError:
-            logger.warning("Twilio SDK not installed, using mock mode")
+            logger.warning("Twilio SDK not installed")
+            if self._is_production():
+                return False
             return self._send_sms_mock(phone, code)
         except Exception as e:
             logger.error(f"Failed to send SMS via Twilio: {str(e)}")

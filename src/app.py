@@ -227,8 +227,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         await safe_run_async("定时发布调度器", _start_scheduled_publisher)
         print(f"[lifespan] 定时发布调度器耗时: {_time.monotonic() - step_start:.2f}s")
 
-    # 4. [已移除] 插件系统
-
     # 5. 下载队列处理器
     if is_installed:
         step_start = _time.monotonic()
@@ -243,7 +241,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
     # ---------- 关闭清理 ----------
-    await safe_run_async("调度器停止", lambda: __import__('src.scheduler').session_scheduler.scheduler.stop())
+    await safe_run_async("调度器停止", _stop_scheduler)
 
     if is_installed:
         await safe_run_async("下载队列停止", _shutdown_download_processor)
@@ -272,9 +270,12 @@ async def _start_scheduled_publisher():
     await start_scheduler()
 
 
-def _init_plugins():
-    # [已移除] 插件系统已删除
-    return None
+async def _stop_scheduler():
+    try:
+        from src.scheduler import session_scheduler
+        session_scheduler.scheduler.stop()
+    except (ImportError, AttributeError):
+        pass
 
 
 async def _init_download_processor():

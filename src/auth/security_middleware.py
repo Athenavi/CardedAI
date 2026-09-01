@@ -274,8 +274,8 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
     # 不需要 CSRF 验证的方法
     SAFE_METHODS = {'GET', 'HEAD', 'OPTIONS'}
 
-    # 排除的路径（如 API 端点使用 JWT 认证）
-    EXCLUDED_PATHS = ['/api/', '/auth/', '/api/v2/health']
+    # 排除的路径（仅豁免特定 API 端点，而非整个 /api/ 前缀）
+    EXCLUDED_PATHS = ['/api/v2/health', '/api/v2/auth/']
 
     async def dispatch(self, request: Request, call_next):
         # GET/HEAD/OPTIONS 请求不需要 CSRF 验证

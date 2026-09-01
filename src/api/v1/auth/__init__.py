@@ -24,21 +24,11 @@ from shared.services.users.sms_verification_service import sms_verification_serv
 from shared.services.users.user_manager import create_user_account
 from src.api.v1.core.responses import ApiResponse
 from src.auth.auth_deps import jwt_required_dependency as jwt_required
+from src.utils.token_blacklist import get_token_blacklist
 from src.extensions import get_async_db_session as get_async_db
 from src.setting import settings
 from src.unified_logger import default_logger as logger
 
-# token_blacklist 改为惰性导入：避免模块加载时触发 Redis .ping() 导致启动缓慢
-
-_tb_instance = None
-
-
-def _get_token_blacklist():
-    global _tb_instance
-    if _tb_instance is None:
-        from src.utils.token_blacklist import token_blacklist
-        _tb_instance = token_blacklist
-    return _tb_instance
 
 router = APIRouter(tags=["auth"])
 
@@ -107,27 +97,13 @@ def create_jwt_token(
         token_type: str = "access",
         expires_delta: Optional[timedelta] = None
 ) -> str:
-    """生成 JWT（包含标准声明 sub, exp, jti, type）"""
-    now = datetime.now(timezone.utc)
-    if expires_delta is None:
-        if token_type == "access":
-            expires_delta = timedelta(seconds=settings.JWT_EXPIRATION_DELTA)
-        else:
-            expires_delta = timedelta(seconds=settings.REFRESH_TOKEN_EXPIRATION_DELTA)
-    expire = now + expires_delta
-
-    payload = {
-        "sub": subject,
-        "iat": now,
-        "exp": expire,
-        "jti": str(uuid.uuid4()),
-        "type": token_type,
-    }
-    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    """生成 JWT（委托给 auth_deps.create_access_token）"""
+    from src.auth.auth_deps import create_access_token
+    return create_access_token(subject, lifetime=expires_delta)
 
 
 def decode_jwt_token(token: str) -> dict:
-    """解码并验证 JWT，返回 payload。若无效抛出 HTTPException"""
+    """解码并验证 JWT（委托给 auth_deps 的逻辑）"""
     try:
         payload = jwt.decode(
             token,
@@ -138,7 +114,7 @@ def decode_jwt_token(token: str) -> dict:
 
         # 黑名单检查
         jti = payload.get("jti")
-        _tb = _get_token_blacklist()
+        _tb = get_token_blacklist()
         if jti and _tb.is_available and _tb.is_blacklisted(jti):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -156,12 +132,9 @@ def decode_jwt_token(token: str) -> dict:
 
 
 def extract_token_from_request(request: Request) -> Optional[str]:
-    """从 Authorization header 或 cookie 中提取 JWT"""
-    auth_header = request.headers.get("Authorization")
-    if auth_header and auth_header.startswith("Bearer "):
-        return auth_header[len("Bearer "):]
-    # 兼容 cookie，名称根据你的需求调整
-    return request.cookies.get("access_token") or request.cookies.get("access_token_cookie")
+    """从请求中提取 JWT（委托给 auth_deps）"""
+    from src.auth.auth_deps import _get_token_from_request as _extract
+    return _extract(request)
 
 
 # ---------------------------------------------------------------------------
@@ -692,7 +665,7 @@ async def logout_api(
                 exp = payload.get("exp")
                 if jti and exp:
                     expires_at = datetime.fromtimestamp(exp, tz=timezone.utc)
-                    _get_token_blacklist().add_to_blacklist(jti, expires_at)
+                    get_token_blacklist().add_to_blacklist(jti, expires_at)
             except Exception:
                 pass
 
@@ -754,7 +727,7 @@ async def refresh_token_api(request: Request):
         # 黑名单检查：检查 refresh token 的 JTI 是否在黑名单中
         jti = payload.get("jti")
         exp = payload.get("exp")
-        _tb = _get_token_blacklist()
+        _tb = get_token_blacklist()
         if jti and _tb.is_available and _tb.is_blacklisted(jti):
             return ApiResponse(success=False, error="Token 已被撤销，请重新登录")
 
@@ -764,7 +737,7 @@ async def refresh_token_api(request: Request):
 
         # 将旧的 refresh token 加入黑名单（token 轮换策略）
         if jti and exp:
-            _get_token_blacklist().add_to_blacklist(
+            get_token_blacklist().add_to_blacklist(
                 jti,
                 datetime.fromtimestamp(exp, tz=timezone.utc)
             )

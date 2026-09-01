@@ -1,6 +1,7 @@
 """
 单个媒体的标签、缩略图、EXIF操作
 """
+import logging
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +12,8 @@ from src.auth import jwt_required_dependency as jwt_required
 from src.extensions import get_async_db_session as get_async_db
 
 router = APIRouter()
+
+_logger = logging.getLogger(__name__)
 
 
 @router.get("/{media_id}/exif")
@@ -69,7 +72,7 @@ async def remove_exif(
         with open(file_path, 'wb') as f:
             f.write(output.getvalue())
 
-        logger = __import__('logging').getLogger(__name__)
+        logger = _logger
         logger.info(f"EXIF已移除: {media.original_filename}")
 
         return ApiResponse(
@@ -79,7 +82,7 @@ async def remove_exif(
         )
 
     except Exception as e:
-        logger = __import__('logging').getLogger(__name__)
+        logger = _logger
         logger.error(f"移除EXIF失败: {e}")
         import traceback
         traceback.print_exc()

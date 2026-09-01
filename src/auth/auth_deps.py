@@ -27,8 +27,8 @@ _tb_instance = None
 def _get_token_blacklist():
     global _tb_instance
     if _tb_instance is None:
-        from src.utils.token_blacklist import token_blacklist
-        _tb_instance = token_blacklist
+        from src.utils.token_blacklist import get_token_blacklist
+        _tb_instance = get_token_blacklist()
     return _tb_instance
 
 

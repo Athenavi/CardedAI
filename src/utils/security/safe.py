@@ -1,16 +1,7 @@
 """
 安全工具模块
 包含输入验证、SQL注入防护、XSS防护等功能
-注意：部分函数（如 sql_injection_protection, validate_xss）与 auth/security_middleware.py 中的 XSSFilterMiddleware 功能重叠
-TODO: 评估并清理与 XSSFilterMiddleware 重叠的功能，统一安全中间件逻辑
 """
-import random
-import re
-import string
-from urllib.parse import urlparse
-
-from fastapi import Request
-from sqlalchemy import text
 
 
 def validate_input(input_string, allowed_pattern=None):
@@ -103,48 +94,6 @@ def sanitize_sql_identifier(identifier):
         return identifier
     else:
         raise ValueError(f"Invalid SQL identifier: {identifier}")
-
-
-def safe_query_builder(table_name, conditions=None, columns="*", order_by=None, limit=None):
-    """
-    安全的查询构建器，防止SQL注入
-    
-    :param table_name: 表名
-    :param conditions: 条件字典，格式为 {'column': 'value'}
-    :param columns: 要查询的列
-    :param order_by: 排序字段
-    :param limit: 限制返回记录数
-    :return: SQLAlchemy TextClause 对象
-    """
-    # 验证表名
-    sanitized_table = sanitize_sql_identifier(table_name)
-
-    # 构建基础查询
-    query_parts = [f"SELECT {columns} FROM {sanitized_table}"]
-
-    # 处理条件
-    if conditions and isinstance(conditions, dict):
-        where_clauses = []
-        for col, val in conditions.items():
-            # 验证列名
-            sanitized_col = sanitize_sql_identifier(col)
-            where_clauses.append(f"{sanitized_col} = :{sanitized_col}")
-
-        if where_clauses:
-            query_parts.append("WHERE " + " AND ".join(where_clauses))
-
-    # 处理排序
-    if order_by:
-        # 验证排序字段
-        sanitized_order = sanitize_sql_identifier(order_by)
-        query_parts.append(f"ORDER BY {sanitized_order}")
-
-    # 处理限制
-    if limit and isinstance(limit, int) and limit > 0:
-        query_parts.append(f"LIMIT {limit}")
-
-    query_str = " ".join(query_parts)
-    return text(query_str)
 
 
 def escape_html(text):

@@ -3,7 +3,6 @@
 基于 SQLAlchemy 的数据库结构和数据备份工具
 
 注意：包含 DatabaseBackup、FastAPIDatabaseBackup、SQLAlchemyBackup 三个备份类，功能高度重复
-TODO: 合并 DatabaseBackup、FastAPIDatabaseBackup、SQLAlchemyBackup 为统一备份类
 """
 
 import gzip
