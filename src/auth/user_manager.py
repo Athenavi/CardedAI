@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.user import User as UserModel
 from src.utils.database.main import get_async_session
-from src.utils.security.password_validator import verify_password
 
 
 class UserDatabase:
@@ -72,7 +71,7 @@ class UserManager:
         user = await self.get_by_email(email)
         if not user or not user.is_active:
             return None
-        if not verify_password(password, user.hashed_password):
+        if not user.verify_password(password):
             return None
         return user
 

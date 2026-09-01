@@ -279,36 +279,3 @@ class _TokenBlacklistProxy:
 
 
 token_blacklist = _TokenBlacklistProxy()
-# ============================================================
-_token_blacklist_instance = None
-
-
-def _get_token_blacklist():
-    """获取 TokenBlacklistManager 单例（首次调用时才创建，避免模块导入时触发 Redis 连接）"""
-    global _token_blacklist_instance
-    if _token_blacklist_instance is None:
-        _token_blacklist_instance = TokenBlacklistManager()
-    return _token_blacklist_instance
-
-
-class _TokenBlacklistProxy:
-    """TokenBlacklistManager 的惰性代理，首次属性访问时才创建真实实例
-
-    这样 `from src.utils.token_blacklist import token_blacklist` 不会触发 Redis .ping()，
-    只有在实际使用 token_blacklist 的方法时才会初始化 Redis 连接。
-    """
-
-    def __getattr__(self, name):
-        return getattr(_get_token_blacklist(), name)
-
-    def __setattr__(self, name, value):
-        setattr(_get_token_blacklist(), name, value)
-
-    def __bool__(self):
-        return True
-
-    def __repr__(self):
-        return repr(_get_token_blacklist())
-
-
-token_blacklist = _TokenBlacklistProxy()

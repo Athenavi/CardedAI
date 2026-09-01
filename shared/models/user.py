@@ -5,6 +5,7 @@ SQLAlchemy 模型定义 - User
 """
 
 from sqlalchemy import Column, Integer, BigInteger, String, Text, Boolean, DateTime, Index
+from sqlalchemy.orm import validates
 
 from . import Base  # 使用统一的 Base
 
@@ -65,6 +66,24 @@ class User(Base):
 
 
 
+    def set_password(self, raw_password: str) -> None:
+        """设置密码哈希"""
+        import bcrypt
+        secret = raw_password.encode('utf-8')
+        if len(secret) > 72:
+            secret = secret[:72]
+        self.password = bcrypt.hashpw(secret, bcrypt.gensalt()).decode('utf-8')
+
+    def verify_password(self, raw_password: str) -> bool:
+        """验证密码"""
+        import bcrypt
+        if not self.password:
+            return False
+        try:
+            return bcrypt.checkpw(raw_password.encode('utf-8'), self.password.encode('utf-8'))
+        except Exception:
+            return False
+
     def to_dict(self, exclude_sensitive=True):
         """转换为字典
 
@@ -75,7 +94,6 @@ class User(Base):
             'id': self.id,
             'username': self.username,
             'email': self.email,
-            'password': self.password,
             'profile_picture': self.profile_picture,
             'bio': self.bio,
             'is_active': self.is_active,
@@ -87,12 +105,13 @@ class User(Base):
             'last_login_ip': self.last_login_ip,
             'register_ip': self.register_ip,
             'is_2fa_enabled': self.is_2fa_enabled,
-            'totp_secret': self.totp_secret,
-            'backup_codes': self.backup_codes,
         }
 
         if not exclude_sensitive:
             sensitive_data = {
+                'password': self.password,
+                'totp_secret': self.totp_secret,
+                'backup_codes': self.backup_codes,
             }
             data.update(sensitive_data)
 

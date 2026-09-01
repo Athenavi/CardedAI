@@ -109,47 +109,6 @@ try:
         return decorator
 
 
-    def _redis_cached(timeout=300, key_prefix=''):
-        """Redis cached 装饰器"""
-        import functools
-        import json
-
-        def decorator(func):
-            @functools.wraps(func)
-            def wrapper(*args, **kwargs):
-                # 创建缓存键
-                cache_key = f"{key_prefix}{func.__name__}:{str(args)}:{str(sorted(kwargs.items()))}"
-
-                # 尝试从 Redis 获取
-                try:
-                    result = _redis_client.get(cache_key)
-                    if result is not None:
-                        try:
-                            return json.loads(result)
-                        except (json.JSONDecodeError, TypeError):
-                            return result
-                except Exception:
-                    pass
-
-                # 执行函数
-                result = func(*args, **kwargs)
-
-                # 存储到 Redis
-                try:
-                    if isinstance(result, (dict, list)):
-                        _redis_client.setex(cache_key, timeout, json.dumps(result, ensure_ascii=False))
-                    else:
-                        _redis_client.setex(cache_key, timeout, str(result))
-                except Exception:
-                    pass
-
-                return result
-
-            return wrapper
-
-        return decorator
-
-
     # 创建兼容的缓存对象，包装 Redis 客户端
     class RedisCacheWrapper:
         """Redis 缓存包装器，提供与 SimpleCache 兼容的接口"""
@@ -157,7 +116,7 @@ try:
         def __init__(self, redis_client):
             self._client = redis_client
             self.memoize = _redis_memoize
-            self.cached = _redis_cached
+            self.cached = _redis_memoize
 
         def __getattr__(self, name):
             """代理所有其他属性到 Redis 客户端"""
@@ -165,7 +124,7 @@ try:
 
         def __call__(self, timeout=300):
             """使对象可以作为装饰器使用"""
-            return _redis_cached(timeout=timeout)
+            return _redis_memoize(timeout=timeout)
 
         # 代理常用的 Redis 方法
         def get(self, key):
@@ -440,60 +399,6 @@ except Exception:
 
             return decorator
 
-        def cached(self, timeout=300, key_prefix=''):
-            """
-            简单的 cached 装饰器实现
-            :param timeout: 超时时间（秒）
-            :param key_prefix: 缓存键前缀
-            """
-
-            def decorator(func):
-                import asyncio
-                import functools
-
-                if asyncio.iscoroutinefunction(func):
-                    # 异步函数的处理
-                    @functools.wraps(func)
-                    async def async_wrapper(*args, **kwargs):
-                        # 创建缓存键
-                        cache_key = f"{key_prefix}{func.__name__}:{str(args)}:{str(sorted(kwargs.items()))}"
-
-                        # 尝试从缓存中获取结果
-                        result = self.get(cache_key)
-                        if result is not None:
-                            return result
-
-                        # 如果缓存中没有，则执行函数并将结果存储在缓存中
-                        result = await func(*args, **kwargs)
-                        # 在降级模式下不写入新缓存
-                        if not self._fallback_mode:
-                            self.set(cache_key, result, ex=timeout)
-                        return result
-
-                    return async_wrapper
-                else:
-                    # 同步函数的处理
-                    @functools.wraps(func)
-                    def sync_wrapper(*args, **kwargs):
-                        # 创建缓存键
-                        cache_key = f"{key_prefix}{func.__name__}:{str(args)}:{str(sorted(kwargs.items()))}"
-
-                        # 尝试从缓存中获取结果
-                        result = self.get(cache_key)
-                        if result is not None:
-                            return result
-
-                        # 如果缓存中没有，则执行函数并将结果存储在缓存中
-                        result = func(*args, **kwargs)
-                        # 在降级模式下不写入新缓存
-                        if not self._fallback_mode:
-                            self.set(cache_key, result, ex=timeout)
-                        return result
-
-                    return sync_wrapper
-
-            return decorator
-
         def __call__(self, *args, **kwargs):
             """
             使SimpleCache对象本身可调用，模拟Flask-Cache的用法
@@ -506,79 +411,25 @@ except Exception:
             # 如果第一个参数是函数，将其包装为缓存装饰器
             if args and callable(args[0]):
                 func = args[0]
-                # 默认使用cached装饰器行为
-                return self.cached(**kwargs)(func)
+                # 默认使用memoize装饰器行为
+                return self.memoize(**kwargs)(func)
 
             # 否则，根据参数决定行为
             timeout = kwargs.get('timeout', 300)
-            key_prefix = kwargs.get('key_prefix', '')
-            return self.cached(timeout=timeout, key_prefix=key_prefix)
+            return self.memoize(timeout=timeout)
 
 
     cache = SimpleCache()
 
-
-# JWT 密码哈希上下文
-def _get_pwd_context():
-    """获取密码上下文，使用纯 bcrypt 实现以避免 passlib 兼容性问题"""
-    # 直接使用 bcrypt 实现，避免 passlib 的兼容性问题
-    import bcrypt
-    class BcryptContext:
-        def hash(self, secret):
-            # 确保密码不超过 72 字节限制
-            if len(secret.encode('utf-8')) > 72:
-                secret = secret.encode('utf-8')[:72].decode('utf-8', errors='ignore')
-            return bcrypt.hashpw(secret.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-        def verify(self, secret, hash):
-            try:
-                return bcrypt.checkpw(secret.encode('utf-8'), hash.encode('utf-8'))
-            except Exception:
-                # 处理各种可能的错误情况
-                try:
-                    return bcrypt.checkpw(secret.encode('utf-8'), hash)
-                except Exception:
-                    return False
-
-    return BcryptContext()
-
-
-pwd_context = _get_pwd_context()
 
 # 数据库引擎和会话 - 使用统一管理器
 from src.utils.database.unified_manager import (
     db_manager,
 )
 
-# 为了向后兼容，保留旧的变量名（但指向统一管理器的实例）
-engine = None  # 同步引擎已废弃，仅保留变量
-SessionLocal = None  # 同步会话工厂已废弃
-_async_engine_instance = None  # 指向统一管理器的引擎
-_AsyncSessionLocal_instance = None  # 指向统一管理器的会话工厂
-
-
-def _get_async_engine():
-    """
-    延迟获取异步引擎实例（向后兼容）
-
-    注意：这个方法已被弃用，请使用 unified_manager.db_manager
-    """
-    global _async_engine_instance, _AsyncSessionLocal_instance
-
-    # 确保统一管理器已初始化
-    if not db_manager._initialized:
-        db_manager.initialize()
-
-    # 返回统一管理器的实例（保持向后兼容）
-    _async_engine_instance = db_manager.async_engine
-    _AsyncSessionLocal_instance = db_manager.async_session_factory
-
-    return _async_engine_instance, _AsyncSessionLocal_instance
-
 
 def init_extensions(app):
     """初始化所有FastAPI扩展"""
-    global engine, SessionLocal
 
     # 从设置中获取数据库URL
     try:
@@ -593,12 +444,6 @@ def init_extensions(app):
         print("Database URL is not configured. Skipping database initialization.")
         print("This is normal during installation wizard.")
         return
-
-    # 【重要】不再创建独立的引擎和会话工厂
-    # 统一管理器已在 app.py 的 lifespan 事件中初始化
-    # 这里只保留变量以保持向后兼容性
-    engine = db_manager.async_engine.sync_engine if hasattr(db_manager.async_engine, 'sync_engine') else None
-    SessionLocal = None  # 同步会话工厂已完全废弃
 
     print("Using unified database manager (created in lifespan event)")
 
@@ -685,7 +530,7 @@ def _get_sync_session_factory():
 @contextmanager
 def get_db() -> Generator:
     """获取数据库会话的便捷函数（兼容旧代码）"""
-    factory = SessionLocal or _get_sync_session_factory()
+    factory = _get_sync_session_factory()
     if factory is None:
         raise RuntimeError(
             "Extensions not initialized and sync session factory unavailable. "

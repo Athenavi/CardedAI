@@ -154,7 +154,7 @@ class HttpCacheMiddleware(BaseHTTPMiddleware):
         Returns:
             ETag 字符串（强验证器）
         """
-        hash_value = hashlib.md5(content).hexdigest()
+        hash_value = hashlib.sha256(content).hexdigest()
         return f'"{hash_value}"'
 
     def _format_http_datetime(self, timestamp: float) -> str:

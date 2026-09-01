@@ -19,7 +19,7 @@ from .auth_deps import (
 
 from .user_manager import get_user_manager, get_user_db
 
-# 保留旧别名
+# 向后兼容的旧别名（已废弃，请直接使用原名）
 jwt_required_dependency = jwt_required
 jwt_required_page_dependency = jwt_required_page
 admin_required_api = admin_required

@@ -181,7 +181,6 @@ class BaseConfig:
         # 其他常见格式
         'application/json',
         'application/xml',
-        'application/octet-stream',  # 通用二进制文件
     ]
     UPLOAD_LIMIT = int(os.environ.get('UPLOAD_LIMIT', str(500 * 1024 * 1024)))
     MAX_LINE = 1000
@@ -210,9 +209,9 @@ class BaseConfig:
     JWT_ACCESS_COOKIE_NAME = 'access_token'
     JWT_REFRESH_COOKIE_NAME = 'refresh_token'
     JWT_TOKEN_LOCATION = ['cookies']
-    JWT_COOKIE_SECURE = False
-    JWT_COOKIE_CSRF_PROTECT = False
-    JWT_COOKIE_SAMESITE = 'Lax'  # 添加SameSite属性以防范CSRF攻击
+    JWT_COOKIE_SECURE = os.environ.get('JWT_COOKIE_SECURE', 'True').lower() == 'true'
+    JWT_COOKIE_CSRF_PROTECT = os.environ.get('JWT_COOKIE_CSRF_PROTECT', 'True').lower() == 'true'
+    JWT_COOKIE_SAMESITE = os.environ.get('JWT_COOKIE_SAMESITE', 'Lax')  # 添加SameSite属性以防范CSRF攻击
     JWT_SESSION_COOKIE = False
     REMEMBER_COOKIE_DURATION = timedelta(days=30)  # 记住登录状态30天
     PERMANENT_SESSION_LIFETIME = timedelta(days=30)
@@ -226,12 +225,7 @@ class BaseConfig:
     S3_USE_SSL = os.environ.get('S3_USE_SSL', 'True').lower() == 'true'  # 是否使用SSL
     S3_SIGNATURE_VERSION = os.environ.get('S3_SIGNATURE_VERSION', 's3v4')  # 签名版本
 
-    # 安全头配置（Talisman）
-    TALISMAN_CONTENT_SECURITY_POLICY = {
-        'default-src': "'self'",
-        'script-src': ["'self'", "cdn.example.com"],
-        'style-src': ["'self'", "'unsafe-inline'"]
-    }
+    # 安全头配置（已移除 Talisman，改用 FastAPI 中间件实现安全头）
 
 
 class AppConfig(BaseConfig):
@@ -306,20 +300,6 @@ class AppConfig(BaseConfig):
             "pool_pre_ping": True,
         }
 
-    # RedisConfig = {
-    #    "host": os.environ.get('REDIS_HOST') or os.getenv('REDIS_HOST', 'localhost'),
-    #    "port": os.environ.get('REDIS_PORT') or os.getenv('REDIS_PORT', 6379),
-    #    "db": os.environ.get('REDIS_DB') or os.getenv('REDIS_DB', 0),
-    #    "password": os.environ.get('REDIS_PASSWORD') or os.getenv('REDIS_PASSWORD') or None,
-    #    "decode_responses": True,
-    #    "socket_connect_timeout": 3,  # 连接超时3秒
-    #    "socket_timeout": 3,  # 读写超时3秒
-    #    "retry_on_timeout": True,  # 超时重试
-    #    "max_connections": 10  # 连接池大小
-    # }
-
-
-#
 
 class WechatPayConfig:
     # 微信支付配置 (服务商模式或直连模式)
