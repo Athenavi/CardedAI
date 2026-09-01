@@ -67,22 +67,16 @@ class User(Base):
 
 
     def set_password(self, raw_password: str) -> None:
-        """设置密码哈希"""
-        import bcrypt
-        secret = raw_password.encode('utf-8')
-        if len(secret) > 72:
-            secret = secret[:72]
-        self.password = bcrypt.hashpw(secret, bcrypt.gensalt()).decode('utf-8')
+        """设置密码哈希（Argon2）"""
+        from src.utils.security.password_validator import hash_password
+        self.password = hash_password(raw_password)
 
     def verify_password(self, raw_password: str) -> bool:
-        """验证密码"""
-        import bcrypt
+        """验证密码（Argon2）"""
+        from src.utils.security.password_validator import verify_password
         if not self.password:
             return False
-        try:
-            return bcrypt.checkpw(raw_password.encode('utf-8'), self.password.encode('utf-8'))
-        except Exception:
-            return False
+        return verify_password(raw_password, self.password)
 
     def to_dict(self, exclude_sensitive=True):
         """转换为字典

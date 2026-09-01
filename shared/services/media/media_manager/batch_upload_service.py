@@ -160,7 +160,7 @@ class BatchUploadService:
                 s3_storage.save_raw_file(thumbnail_path, thumbnail_data)
                 media.thumbnail_path = thumbnail_path
                 await db.flush()
-                result['thumbnail'] = {'path': thumbnail_path, 'url': f"/api/v1/media/thumbnails/{thumbnail_hash}"}
+                result['thumbnail'] = {'path': thumbnail_path, 'url': f"/api/v2/media/thumbnails/{thumbnail_hash}"}
                 logger.info(f"生成缩略图成功: {media.original_filename}")
             except Exception as e:
                 result['thumbnail_error'] = str(e)

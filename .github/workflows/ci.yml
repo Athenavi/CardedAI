@@ -1,8 +1,8 @@
 # ============================================================================
 # CardedAI — Continuous Integration
 # ============================================================================
-# Runs only on version tags (v*).
-# Jobs: Python lint → Python tests → Frontend build → SDK lint
+# Runs on version tags (v*).
+# Jobs: Python lint → Python tests → Frontend build → SDK lint → Security audit
 # ============================================================================
 
 name: CI
@@ -10,29 +10,24 @@ name: CI
 on:
   push:
     tags: ["v*"]
+  pull_request:
+    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  PYTHON_VERSION: "3.14"
+  PYTHON_VERSION: "3.13"
   NODE_VERSION: "22"
 
 jobs:
   # ────────────────────────────────────────────────────────────────────────────
   # 1. Python Lint & Type Check
   # ────────────────────────────────────────────────────────────────────────────
-  python-tests:
-    name: 🧪 Python Tests
+  python-lint:
+    name: 🧪 Python Lint
     runs-on: ubuntu-latest
-        strategy:
-      matrix:
-        test-file:
-          - debug/test_phase2_imports.py
-          - debug/test_phase3_imports.py
-          - debug/test_phase4_imports.py
-          - debug/test_phase6_imports.py
     steps:
       - uses: actions/checkout@v4
 
@@ -47,9 +42,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install ruff
 
-      - name: Run ${{ matrix.test-file }}
-        run: python ${{ matrix.test-file }}
+      - name: Run ruff check
+        run: ruff check src/ shared/ --output-format=github
 
   # ────────────────────────────────────────────────────────────────────────────
   # 3. Python Unit Tests (pytest)
@@ -81,7 +77,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
-      DATABASE_URL: postgresql://test:test@localhost:5432/fastblog_test
+      DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/fastblog_test
       REDIS_URL: redis://localhost:6379/0
       SECRET_KEY: ci-test-secret-key-not-for-production
     steps:
@@ -98,12 +94,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
+          pip install -r requirements-postgres.txt
+          pip install pytest pytest-asyncio pytest-cov pytest-xdist
 
       - name: Run pytest
         run: |
-          python -m pytest tests/ -v --tb=short --co -q 2>/dev/null || echo "No pytest tests found, skipping"
-          python -m pytest tests/ -v --tb=short 2>/dev/null || echo "pytest suite passed or no tests found"
+          python -m pytest tests/ -v --tb=short -x --timeout=60 -q
 
   # ────────────────────────────────────────────────────────────────────────────
   # 4. Frontend Build & Lint
@@ -128,7 +124,7 @@ jobs:
         run: npm ci
 
       - name: Type check
-        run: npx tsc --noEmit 2>/dev/null || echo "TypeScript check completed with warnings"
+        run: npx tsc --noEmit
 
       - name: Build
         run: npm run build
@@ -156,7 +152,11 @@ jobs:
       - name: Lint Python SDK
         run: |
           pip install ruff
-          ruff check sdk/python/ --output-format=github
+          if [ -d sdk/python ]; then
+            ruff check sdk/python/ --output-format=github
+          else
+            echo "No Python SDK directory found, skipping"
+          fi
 
       # JavaScript SDK
       - name: Set up Node.js ${{ env.NODE_VERSION }}
@@ -166,9 +166,13 @@ jobs:
 
       - name: Build JavaScript SDK
         run: |
-          cd sdk/javascript
-          npm ci 2>/dev/null || npm install
-          npm run build 2>/dev/null || echo "No build script defined for JS SDK"
+          if [ -d sdk/javascript ]; then
+            cd sdk/javascript
+            npm ci 2>/dev/null || npm install
+            npm run build 2>/dev/null || echo "No build script defined for JS SDK"
+          else
+            echo "No JavaScript SDK directory found, skipping"
+          fi
 
   # ────────────────────────────────────────────────────────────────────────────
   # 6. Security Audit
@@ -188,7 +192,7 @@ jobs:
         run: pip install pip-audit
 
       - name: Audit Python dependencies
-        run: pip-audit -r requirements.txt --ignore-vuln PYSEC-2024-* 2>/dev/null || echo "Audit completed with advisory notes"
+        run: pip-audit -r requirements.txt 2>/dev/null || echo "Audit completed with advisory notes"
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4

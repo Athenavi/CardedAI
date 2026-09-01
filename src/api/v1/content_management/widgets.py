@@ -433,7 +433,7 @@ async def render_widget(widget_id: int, db: AsyncSession = Depends(get_async_db)
         if widget.config:
             try:
                 config = json.loads(widget.config) if isinstance(widget.config, str) else widget.config
-            except:
+            except (json.JSONDecodeError, TypeError):
                 config = {}
 
         # 构建 widget 数据

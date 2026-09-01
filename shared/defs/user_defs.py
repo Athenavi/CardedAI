@@ -5,16 +5,30 @@ User 模型的自定义方法定义
 from datetime import datetime
 
 
+def set_password(self, raw_password: str) -> None:
+    """设置密码哈希（Argon2）"""
+    from src.utils.security.password_validator import hash_password
+    self.password = hash_password(raw_password)
+
+
+def verify_password(self, raw_password: str) -> bool:
+    """验证密码（Argon2）"""
+    from src.utils.security.password_validator import verify_password
+    if not self.password:
+        return False
+    return verify_password(raw_password, self.password)
+
+
 def is_vip(self) -> bool:
     """
     判断是否为 VIP 用户
-    
+
     Returns:
         bool: 是否为 VIP 用户
     """
     if not self.vip_level:
         return False
-    
+
     # 检查 VIP 是否过期
     if self.vip_expires_at:
         try:
@@ -29,5 +43,5 @@ def is_vip(self) -> bool:
         except Exception:
             # 如果解析失败，只检查 vip_level
             return self.vip_level > 0
-    
+
     return self.vip_level > 0

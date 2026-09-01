@@ -121,7 +121,7 @@ class RemoteStorageManager:
             remote_dir = config.get('directory', '/backups')
             try:
                 ftp.cwd(remote_dir)
-            except:
+            except Exception:
                 ftp.mkd(remote_dir)
                 ftp.cwd(remote_dir)
 

@@ -8,6 +8,7 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from shared.services.core.cache_service import cache_service
+from src.unified_logger import default_logger as logger
 
 
 class CacheMiddleware(BaseHTTPMiddleware):
@@ -31,8 +32,8 @@ class CacheMiddleware(BaseHTTPMiddleware):
         self.default_ttl = default_ttl
         self.skip_paths = skip_paths or [
             '/admin',
-            '/api/v1/auth',
-            '/api/v1/user',
+            '/api/v2/auth',
+            '/api/v2/user',
             '/login',
             '/register'
         ]
@@ -100,7 +101,7 @@ class CacheMiddleware(BaseHTTPMiddleware):
                 )
             except Exception as e:
                 # 如果无法解码(可能是二进制内容),不缓存
-                print(f"Cache middleware error: {e}")
+                logger.warning(f"Cache middleware decode error: {e}")
                 response = Response(
                     content=response_body,
                     status_code=response.status_code,
@@ -163,9 +164,9 @@ async def invalidate_article_cache(article_id: int):
         # 清除对象缓存
         cache_service.delete_object(f"article:{article_id}")
 
-        print(f"✓ Invalidated cache for article {article_id}")
+        logger.info(f"✓ Invalidated cache for article {article_id}")
     except Exception as e:
-        print(f"✗ Cache invalidation failed: {e}")
+        logger.error(f"✗ Cache invalidation failed: {e}")
 
 
 async def invalidate_category_cache(category_id: int):
@@ -173,6 +174,6 @@ async def invalidate_category_cache(category_id: int):
     try:
         cache_service.invalidate_pattern("/category/")
         cache_service.delete_object(f"category:{category_id}")
-        print(f"✓ Invalidated cache for category {category_id}")
+        logger.info(f"✓ Invalidated cache for category {category_id}")
     except Exception as e:
-        print(f"✗ Cache invalidation failed: {e}")
+        logger.error(f"✗ Cache invalidation failed: {e}")

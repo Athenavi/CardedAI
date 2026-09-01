@@ -4,11 +4,10 @@
 该模块包含用户管理相关的各种工具函数：
 - user_entities: 用户实体相关的业务逻辑
 - user_profile: 用户资料管理相关功能
-- password_utils: 密码管理相关功能
 - qrlogin_utils: 二维码登录相关功能
 """
 from src.utils.security.safe import validate_password_strength
-from .password_utils import *
+from src.utils.security.password_validator import hash_password, verify_password
 from .qrlogin_utils import *
 from .user_entities import *
 
@@ -21,11 +20,9 @@ __all__ = [
     'bind_email',
     'get_avatar',
 
-    # 从 password_utils 导入的函数
+    # 密码函数（直接来自 password_validator）
     'verify_password',
-    'update_password',
     'hash_password',
-    'validate_password',
 
     # 从 qrlogin_utils 导入的函数
     'gen_qr_token',

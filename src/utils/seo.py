@@ -126,8 +126,8 @@ def get_feed_discovery_tags(base_url: str = None) -> dict:
         base_url = "http://localhost:8000"
 
     return {
-        'rss_link': f'{base_url}/api/v1/feed/rss',
-        'atom_link': f'{base_url}/api/v1/feed/atom',
-        'rss_xml': f'<link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="{base_url}/api/v1/feed/rss" />',
-        'atom_xml': f'<link rel="alternate" type="application/atom+xml" title="Atom 1.0" href="{base_url}/api/v1/feed/atom" />'
+        'rss_link': f'{base_url}/api/v2/feed/rss',
+        'atom_link': f'{base_url}/api/v2/feed/atom',
+        'rss_xml': f'<link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="{base_url}/api/v2/feed/rss" />',
+        'atom_xml': f'<link rel="alternate" type="application/atom+xml" title="Atom 1.0" href="{base_url}/api/v2/feed/atom" />'
     }

@@ -415,9 +415,7 @@ async def login_api(
             data=response_data,
         )
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise
+        logger.exception(f"Login failed for user")
 
 
 @router.post("/register", summary="用户注册")
@@ -503,7 +501,7 @@ async def register_api(
             user_agent=user_agent,
         )
     except Exception as e:
-        print(f"[Register API] Warning: Failed to create session: {e}")
+        logger.warning(f"[Register API] Failed to create session: {e}")
 
     return ApiResponse(
         success=True,

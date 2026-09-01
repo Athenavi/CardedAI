@@ -400,7 +400,7 @@ async def get_database_stats(db: AsyncSession) -> Dict[str, Any]:
             size_row = result.fetchone()
             if size_row and size_row[0]:
                 stats['database_size'] = f"{size_row[0]} MB"
-        except:
+        except Exception:
             pass
 
         return stats

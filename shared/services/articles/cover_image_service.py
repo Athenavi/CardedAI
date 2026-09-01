@@ -95,7 +95,7 @@ class CoverImageService:
             # 如果文件已存在，直接返回URL
             if cover_path.exists():
                 logger.info(f"封面已存在: {cover_filename}")
-                return f"/api/v1/media/cover/{cover_filename}"
+                return f"/api/v2/media/cover/{cover_filename}"
 
             # 优化图片
             optimized_data, optimized_mime = self._optimize_image(
@@ -116,7 +116,7 @@ class CoverImageService:
             logger.info(f"封面图片已保存: {cover_filename}, 大小: {len(optimized_data)} bytes")
 
             # 返回公开访问的URL
-            return f"/api/v1/media/cover/{cover_filename}"
+            return f"/api/v2/media/cover/{cover_filename}"
 
         except Exception as e:
             logger.error(f"优化和保存封面失败: {e}", exc_info=True)
@@ -193,7 +193,7 @@ class CoverImageService:
             封面图片的URL
         """
         filename = self.generate_cover_filename(media_id, file_hash, extension)
-        return f"/api/v1/media/cover/{filename}"
+        return f"/api/v2/media/cover/{filename}"
 
 
 # 全局实例

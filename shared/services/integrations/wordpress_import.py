@@ -234,7 +234,7 @@ class WordPressImportService:
             else:
                 elem = parent.find(path)
             return elem.text.strip() if elem is not None and elem.text else default
-        except:
+        except Exception:
             return default
 
     def _parse_date(self, date_str: str) -> Optional[datetime]:
@@ -243,10 +243,10 @@ class WordPressImportService:
             return None
         try:
             return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-        except:
+        except (ValueError, TypeError):
             try:
                 return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%SZ')
-            except:
+            except (ValueError, TypeError):
                 return None
 
     def _calculate_stats(self, data: Dict[str, Any]) -> Dict[str, int]:

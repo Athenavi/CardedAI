@@ -157,7 +157,7 @@ class PageCacheService:
             return False
 
         # 不缓存管理后台
-        if "/admin" in url or "/api/v1/admin" in url:
+        if "/admin" in url or "/api/v2/admin" in url:
             return False
 
         # 不认证用户的个性化页面
@@ -167,7 +167,7 @@ class PageCacheService:
 
         # 已登录用户的页面需要谨慎缓存
         # 通常只缓存公共内容
-        if "/api/v1/user" in url or "/api/v1/profile" in url:
+        if "/api/v2/user" in url or "/api/v2/profile" in url:
             return False
 
         return True

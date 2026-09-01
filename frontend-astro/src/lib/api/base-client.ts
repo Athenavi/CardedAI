@@ -25,7 +25,17 @@ function clearCookie(name: string) {
 function buildUrl(path: string, params?: Record<string, any>): string {
   const base = getConfig().API_BASE_URL || '';
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
-  const apiPath = path.startsWith('/api/') ? path : `/api/v2${!path.startsWith('/') ? '/' : ''}${path}`;
+  // 确保所有 API 路径使用 V2 前缀
+  let apiPath: string;
+  if (path.startsWith('/api/v1/')) {
+    // V1→V2 兼容转换
+    apiPath = path.replace('/api/v1/', '/api/v2/');
+  } else if (path.startsWith('/api/')) {
+    // 确保非 V2 的 /api/ 路径也使用 V2
+    apiPath = path;
+  } else {
+    apiPath = `/api/v2${!path.startsWith('/') ? '/' : ''}${path}`;
+  }
   let url = `${base}${apiPath}`;
   if (!params) return url;
   const qs = Object.entries(params)

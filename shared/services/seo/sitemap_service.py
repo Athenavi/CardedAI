@@ -112,11 +112,11 @@ Allow: /search
 
 # 禁止访问管理后台
 Disallow: /admin/
-Disallow: /api/v1/admin/
+Disallow: /api/v2/admin/
 
 # 禁止访问API端点(可选)
-Disallow: /api/v1/auth/
-Disallow: /api/v1/user/
+Disallow: /api/v2/auth/
+Disallow: /api/v2/user/
 
 # Sitemap位置
 Sitemap: {sitemap_url}

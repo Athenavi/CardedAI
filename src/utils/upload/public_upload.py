@@ -349,7 +349,7 @@ class FileProcessor:
                             Media.id == media.id
                         ).values(
                             thumbnail_path=thumbnail_storage_path,
-                            thumbnail_url=f"/api/v1/media/thumbnail/{media.id}",
+                            thumbnail_url=f"/api/v2/media/thumbnail/{media.id}",
                             updated_at=datetime.now()
                         )
                         await db.execute(stmt)

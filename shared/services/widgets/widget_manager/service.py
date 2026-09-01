@@ -94,7 +94,7 @@ class WidgetService:
             try:
                 config = json.loads(w.config) if w.config else {}
                 conditions = json.loads(w.conditions) if w.conditions else {}
-            except:
+            except (json.JSONDecodeError, TypeError):
                 config, conditions = {}, {}
 
             widgets.append({

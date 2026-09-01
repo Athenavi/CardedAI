@@ -368,7 +368,7 @@ class IncrementalBackupService:
                 count = await conn.fetchval(f'SELECT COUNT(*) FROM "{table_name}"')
                 checksum_str = f"{table_name}:{count}"
                 return hashlib.md5(checksum_str.encode()).hexdigest()
-            except:
+            except Exception:
                 # 如果完全失败，返回空校验和
                 return hashlib.md5(table_name.encode()).hexdigest()
 

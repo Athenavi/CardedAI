@@ -192,6 +192,74 @@ async def bind_email(user_id: int, param: str, db) -> bool:
         return False
 
 
+async def update_password(user_id: int, new_password: str, confirm_password: str, ip: str, db):
+    """更新用户密码"""
+    from datetime import datetime
+    from shared.models.notification import Notification
+    from src.utils.security.password_validator import hash_password
+
+    from sqlalchemy import select
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    if isinstance(db, AsyncSession):
+        result = await db.execute(select(User).filter_by(id=user_id))
+        user = result.scalar_one_or_none()
+    else:
+        user_query = select(User).where(User.id == user_id)
+        user_result = db.execute(user_query)
+        user = user_result.scalar_one_or_none()
+
+    if user:
+        if new_password == confirm_password and len(new_password) >= 6:
+            try:
+                user.password = hash_password(new_password)
+                now = datetime.now()
+                notice = Notification(
+                    recipient=user_id,
+                    type='safe',
+                    title='密码已更改',
+                    message=f"{ip} changed password",
+                    created_at=now,
+                    updated_at=now
+                )
+                if isinstance(db, AsyncSession):
+                    db.add(notice)
+                    await db.commit()
+                else:
+                    db.add(notice)
+                    db.commit()
+                return True
+            except Exception as e:
+                print(e)
+                if isinstance(db, AsyncSession):
+                    await db.rollback()
+                else:
+                    db.rollback()
+                return False
+        else:
+            return False
+    return False
+
+
+async def validate_password_async(user_id: int, password: str, db) -> bool:
+    """异步验证用户密码"""
+    from sqlalchemy import select
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from src.utils.security.password_validator import verify_password
+
+    if isinstance(db, AsyncSession):
+        result = await db.execute(select(User).filter_by(id=user_id))
+        user = result.scalar_one_or_none()
+    else:
+        user_query = select(User).where(User.id == user_id)
+        user_result = db.execute(user_query)
+        user = user_result.scalar_one_or_none()
+
+    if user and user.password:
+        return verify_password(password, user.password)
+    return False
+
+
 async def get_avatar(domain: str, user_identifier, identifier_type: str = 'id', db=None):
     avatar_url = None
     if not user_identifier or not db:

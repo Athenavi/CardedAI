@@ -501,13 +501,13 @@ class SQLInjectionFilterMiddleware(BaseHTTPMiddleware):
 
     # 排除的路径（如搜索接口可能包含 SQL 关键字、文件上传等）
     EXCLUDED_PATHS = [
-        '/api/v1/search',  # 搜索接口
-        '/api/v1/auth/login',  # 登录接口（避免消耗请求体）
-        '/api/v1/auth/register',  # 注册接口（避免消耗请求体）
-        '/api/v1/users/auth/login',  # 用户管理模块的登录接口
-        '/api/v1/users/auth/register',  # 用户管理模块的注册接口
-        '/api/v1/user-settings/profile/avatar',  # 头像上传（避免消耗请求体）
-        '/api/v1/media/upload',  # 媒体文件上传（避免消耗请求体）
+        '/api/v2/search',  # 搜索接口
+        '/api/v2/auth/login',  # 登录接口（避免消耗请求体）
+        '/api/v2/auth/register',  # 注册接口（避免消耗请求体）
+        '/api/v2/users/auth/login',  # 用户管理模块的登录接口
+        '/api/v2/users/auth/register',  # 用户管理模块的注册接口
+        '/api/v2/user-settings/profile/avatar',  # 头像上传（避免消耗请求体）
+        '/api/v2/media/upload',  # 媒体文件上传（避免消耗请求体）
     ]
 
     def __init__(self, app, enable_logging: bool = True):

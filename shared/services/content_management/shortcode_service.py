@@ -135,7 +135,7 @@ class ShortcodeService:
         for img_id in image_ids:
             html += f'''
             <div class="gallery-item">
-                <img src="/api/v1/media/{img_id}" alt="Gallery Image" loading="lazy" />
+                <img src="/api/v2/media/{img_id}" alt="Gallery Image" loading="lazy" />
             </div>
             '''
         html += '</div>'

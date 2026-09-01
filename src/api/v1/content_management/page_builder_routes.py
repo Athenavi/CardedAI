@@ -88,7 +88,7 @@ async def create_page(
         import json
         try:
             blocks = json.loads(new_page.blocks_data)
-        except:
+        except (json.JSONDecodeError, TypeError):
             blocks = []
 
         return PageResponse(
@@ -136,7 +136,7 @@ async def list_pages(
         for page in pages:
             try:
                 blocks = json.loads(page.blocks_data)
-            except:
+            except (json.JSONDecodeError, TypeError):
                 blocks = []
 
             response_list.append(PageResponse(
@@ -178,7 +178,7 @@ async def get_page(
         import json
         try:
             blocks = json.loads(page.blocks_data)
-        except:
+        except (json.JSONDecodeError, TypeError):
             blocks = []
 
         return PageResponse(
@@ -235,7 +235,7 @@ async def update_page(
         import json
         try:
             blocks = json.loads(page.blocks_data)
-        except:
+        except (json.JSONDecodeError, TypeError):
             blocks = []
 
         return PageResponse(
@@ -363,7 +363,7 @@ async def get_page_by_slug(slug: str):
         import json
         try:
             blocks = json.loads(page.blocks_data)
-        except:
+        except (json.JSONDecodeError, TypeError):
             blocks = []
 
         return PageResponse(
@@ -692,7 +692,7 @@ async def create_page_from_template(
 
         try:
             blocks = json.loads(new_page.blocks_data)
-        except:
+        except (json.JSONDecodeError, TypeError):
             blocks = []
 
         return PageResponse(

@@ -377,7 +377,7 @@ class DatabaseURLReplacer:
                             'column': column_name,
                             'samples': [row[0][:200] for row in rows[:3]]
                         })
-                except:
+                except Exception:
                     continue
 
             return {

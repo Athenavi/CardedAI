@@ -101,7 +101,7 @@ class SEOService:
                     dt = lastmod
                 lastmod_elem = SubElement(url_elem, 'lastmod')
                 lastmod_elem.text = dt.strftime('%Y-%m-%dT%H:%M:%S+00:00')
-            except:
+            except (ValueError, TypeError):
                 pass
 
         changefreq_elem = SubElement(url_elem, 'changefreq')

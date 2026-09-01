@@ -170,7 +170,7 @@ class RedirectService:
                 try:
                     pattern = re.compile(source_url)
                     matched = pattern.match(request_url) is not None
-                except:
+                except re.error:
                     continue
 
             if matched:
