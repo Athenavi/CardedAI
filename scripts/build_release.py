@@ -136,8 +136,7 @@ class ReleaseBuilder:
         print("复制后端文件...")
         files = []
         backend_dirs = [
-            "src", "apps", "django_blog", "shared", "config",
-            "process_supervisor", "updater", "update_server",
+            "src", "shared", "config",
             "scripts", "docs", "static"
         ]
         for d in backend_dirs:

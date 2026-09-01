@@ -2,12 +2,9 @@
 路由代码生成器
 根据 routes.yaml 声明文件自动生成 Django Ninja 和 FastAPI 的路由代码
 
-使用方法:
-    python scripts/generate_routes.py
-
-子命令:
+输出目录: */
+sub命令:
     - generate-all: 生成所有代码（默认）
-    - sync-to-django: 同步 SQLAlchemy 模型到 Django ORM
 """
 
 import argparse
@@ -217,7 +214,7 @@ class RouteGenerator:
             print("  ⚠ TypeScript 生成未配置")
             return
 
-        output_dir = self.project_root / ts_config.get('output_dir', 'frontend-next/types/generated')
+        output_dir = self.project_root / ts_config.get('output_dir', 'frontend-astro/src/types/generated')
         output_dir.mkdir(parents=True, exist_ok=True)
 
         # 生成类型定义

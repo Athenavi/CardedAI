@@ -363,41 +363,42 @@ def register_middleware(app: FastAPI):
         expose_headers=["Content-Length", "X-Total-Count"],
     )
 
-    # 统一调试中间件
-    class DebugMiddleware(BaseHTTPMiddleware):
-        async def dispatch(self, request, call_next):
-            url = str(request.url)
-            if "/sensitive-words" in url:
-                print(f"\n[DEBUG] 请求: {request.method} {url}")
-                print(f"[DEBUG] Headers: {dict(request.headers)}")
-                if request.method == "POST":
-                    try:
-                        # 先读取 body
-                        body = await request.body()
-                        print(f"[DEBUG] Body: {body.decode('utf-8')}")
+    # 统一调试中间件（仅开发环境加载）
+    if os.environ.get('ENVIRONMENT', 'development').lower() != 'production':
+        class DebugMiddleware(BaseHTTPMiddleware):
+            async def dispatch(self, request, call_next):
+                url = str(request.url)
+                if "/sensitive-words" in url:
+                    print(f"\n[DEBUG] 请求: {request.method} {url}")
+                    print(f"[DEBUG] Headers: {dict(request.headers)}")
+                    if request.method == "POST":
+                        try:
+                            body = await request.body()
+                            print(f"[DEBUG] Body: {body.decode('utf-8')}")
 
-                        # 重要：将 body 重新设置回 request，以便后续 endpoint 可以读取
-                        async def receive():
-                            return {"type": "http.request", "body": body}
+                            async def receive():
+                                return {"type": "http.request", "body": body}
 
-                        request._receive = receive
-                    except Exception as e:
-                        print(f"[DEBUG] 无法读取 body: {e}")
-            response = await call_next(request)
-            if "/sensitive-words" in url and response.status_code == 422:
-                print(f"[DEBUG] 422 响应: {response.status_code}")
-            return response
+                            request._receive = receive
+                        except Exception as e:
+                            print(f"[DEBUG] 无法读取 body: {e}")
+                response = await call_next(request)
+                if "/sensitive-words" in url and response.status_code == 422:
+                    print(f"[DEBUG] 422 响应: {response.status_code}")
+                return response
 
-    app.add_middleware(DebugMiddleware)
+        app.add_middleware(DebugMiddleware)
 
-    # WebSocket 调试（简化）
-    class WSDebugMiddleware(BaseHTTPMiddleware):
-        async def dispatch(self, request, call_next):
-            if request.headers.get("upgrade", "").lower() == "websocket" and "/collaboration/ws/" in str(request.url):
-                print(f"[WS DEBUG] 连接尝试: {request.url}")
-            return await call_next(request)
+        # WebSocket 调试（仅开发环境）
+        class WSDebugMiddleware(BaseHTTPMiddleware):
+            async def dispatch(self, request, call_next):
+                if request.headers.get("upgrade", "").lower() == "websocket" and "/collaboration/ws/" in str(request.url):
+                    print(f"[WS DEBUG] 连接尝试: {request.url}")
+                return await call_next(request)
 
-    app.add_middleware(WSDebugMiddleware)
+        app.add_middleware(WSDebugMiddleware)
+    else:
+        print(f"{worker_info} [Middleware] 生产环境，调试中间件已跳过")
 
     # HTTP 缓存
     try:

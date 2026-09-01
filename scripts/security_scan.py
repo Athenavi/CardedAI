@@ -72,10 +72,10 @@ def check_nodejs_dependencies():
     print("Node.js 依赖安全扫描")
     print("=" * 80)
 
-    frontend_dir = Path(__file__).parent.parent / "frontend-next"
+    frontend_dir = Path(__file__).parent.parent / "frontend-astro"
 
     if not frontend_dir.exists():
-        print("⚠️  frontend-next 目录不存在，跳过 Node.js 依赖检查")
+        print("⚠️  frontend-astro 目录不存在，跳过 Node.js 依赖检查")
         return True
 
     package_json = frontend_dir / "package.json"

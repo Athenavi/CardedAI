@@ -436,17 +436,12 @@ class ConfigRepairTool:
                 }
             },
             'generation': {
-                'django_ninja': {
-                    'output_dir': 'apps/generated',
-                    'router_file': 'generated_router.py',
-                    'models_file': 'auto_orm.py',
-                },
                 'fastapi': {
                     'output_dir': 'src/api/v1/generated',
                     'router_file': 'generated_router.py',
                 },
                 'typescript': {
-                    'output_dir': 'frontend-next/types/generated',
+                    'output_dir': 'frontend-astro/src/types/generated',
                     'types_file': 'api-types.ts',
                     'client_file': 'api-client.ts',
                 }
@@ -520,7 +515,7 @@ class ConfigRepairTool:
             'models': {},
             'generation': {
                 'typescript': {
-                    'output_dir': 'frontend-next/types/generated',
+                    'output_dir': 'frontend-astro/src/types/generated',
                     'types_file': 'api-types.ts',
                     'client_file': 'api-client.ts',
                 }

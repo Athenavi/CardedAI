@@ -169,10 +169,6 @@ def cmd_dev(args):
     """启动开发服务器"""
     print("🚀 Starting FastBlog development server...")
 
-    # 设置环境变量
-    import os
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_blog.settings')
-
     # 启动主应用
     try:
         import uvicorn
@@ -193,7 +189,7 @@ def cmd_build(args):
     print("🔨 Building FastBlog...")
 
     # 前端构建
-    frontend_dir = Path("frontend-next")
+    frontend_dir = Path("frontend-astro")
     if frontend_dir.exists():
         print("   Building frontend...")
         try:
@@ -287,16 +283,6 @@ def cmd_plugin(args):
     """插件管理"""
     action = args.action
 
-    # 设置 Django 环境
-    import os
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_blog.settings')
-
-    try:
-        import django
-        django.setup()
-    except Exception as e:
-        print(f"⚠️  Warning: Could not setup Django: {e}")
-
     if action == "install":
         plugin_install(args)
     elif action == "uninstall":
@@ -315,16 +301,6 @@ def cmd_plugin(args):
 def cmd_theme(args):
     """主题管理"""
     action = args.action
-
-    # 设置 Django 环境
-    import os
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_blog.settings')
-
-    try:
-        import django
-        django.setup()
-    except Exception as e:
-        print(f"⚠️  Warning: Could not setup Django: {e}")
 
     if action == "list":
         theme_list(args)
@@ -416,16 +392,6 @@ def theme_deactivate(args):
 def cmd_user(args):
     """用户管理"""
     action = args.action
-
-    # 设置 Django 环境
-    import os
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_blog.settings')
-
-    try:
-        import django
-        django.setup()
-    except Exception as e:
-        print(f"⚠️  Warning: Could not setup Django: {e}")
 
     if action == "create":
         user_create(args)

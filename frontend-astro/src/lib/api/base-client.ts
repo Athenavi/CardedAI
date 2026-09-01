@@ -14,11 +14,11 @@ function getCookie(name: string): string | null {
 }
 function setCookie(name: string, value: string, maxAgeSec: number) {
   if (typeof document === 'undefined') return;
-  document.cookie = `${name}=${value}; path=/; max-age=${maxAgeSec}; SameSite=Lax`;
+  document.cookie = `${name}=${value}; path=/; max-age=${maxAgeSec}; SameSite=Strict; Secure`;
 }
 function clearCookie(name: string) {
   if (typeof document === 'undefined') return;
-  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax`;
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict; Secure`;
 }
 
 /** 构建完整 URL：补全 API 前缀 + 查询参数 */
