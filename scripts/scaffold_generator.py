@@ -18,7 +18,7 @@ class ScaffoldGenerator:
     def write_file(self, path: Path, content: str):
         """写入文件,如果文件已存在则提示"""
         if path.exists():
-            print(f"⚠️  File already exists: {path}")
+            logger(f"⚠️  File already exists: {path}")
             response = input("Overwrite? (y/N): ").strip().lower()
             if response != 'y':
                 print("Skipped")

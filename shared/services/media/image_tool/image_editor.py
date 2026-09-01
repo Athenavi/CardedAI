@@ -36,7 +36,7 @@ OPERATION_MAP = {
 class ImageEditor:
     """
     图片编辑器
-    
+
     功能:
     1. 裁剪
     2. 旋转
@@ -55,11 +55,11 @@ class ImageEditor:
     ) -> Tuple[bool, str, Optional[bytes]]:
         """
         处理图片(应用多个操作)
-        
+
         Args:
             image_path: 图片路径
             operations: 操作列表
-            
+
         Returns:
             (成功标志, 消息, 处理后图片数据)
         """
@@ -156,10 +156,10 @@ class ImageEditor:
     def get_image_info(self, image_path: str) -> Optional[Dict[str, Any]]:
         """
         获取图片信息
-        
+
         Args:
             image_path: 图片路径
-            
+
         Returns:
             图片信息字典
         """
@@ -174,7 +174,7 @@ class ImageEditor:
                 'size': Path(image_path).stat().st_size,
             }
         except Exception as e:
-            print(f"获取图片信息失败: {e}")
+            logger(f"获取图片信息失败: {e}")
             return None
 
 

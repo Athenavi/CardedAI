@@ -88,7 +88,7 @@ class BackupService:
 
             return {'success': True, 'backup_name': backup_name, 'info': backup_info}
         except Exception as e:
-            print(f"[BackupService] Backup failed: {e}")
+            logger(f"[BackupService] Backup failed: {e}")
             return {'success': False, 'error': str(e)}
 
     def restore_backup(self, backup_name: str, restore_files: bool = True) -> Dict[str, Any]:
@@ -149,7 +149,7 @@ class BackupService:
                 'restored_items': restored_items
             }
         except Exception as e:
-            print(f"[BackupService] Restore failed: {e}")
+            logger(f"[BackupService] Restore failed: {e}")
             return {'success': False, 'error': str(e)}
 
     def list_backups(self) -> List[Dict[str, Any]]:
@@ -205,7 +205,7 @@ class BackupService:
 
             return False
         except Exception as e:
-            print(f"[BackupService] Failed to check file changes: {e}")
+            logger(f"[BackupService] Failed to check file changes: {e}")
             return True
 
 
@@ -254,7 +254,7 @@ async def create_full_backup(db: AsyncSession) -> Dict[str, Any]:
             ]}
         }
     except Exception as e:
-        print(f"[BackupService] JSON backup failed: {e}")
+        logger(f"[BackupService] JSON backup failed: {e}")
         return {'success': False, 'error': str(e)}
 
 
@@ -376,7 +376,7 @@ async def get_database_stats(db: AsyncSession) -> Dict[str, Any]:
         for key, model in [
             ('total_articles', Article, Article.status == 1),
             ('total_categories', Category, None),
-            
+
             ('total_menus', Menus, None),
             ('total_media', Media, None),
             ('total_users', User, None),

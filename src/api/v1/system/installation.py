@@ -30,8 +30,8 @@ async def check_prerequisites_api():
         )
     except Exception as e:
         import traceback
-        print(f"Error in check_prerequisites_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in check_prerequisites_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -111,8 +111,8 @@ async def configure_database_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in configure_database_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in configure_database_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -271,8 +271,8 @@ async def import_sample_data_api(
 
     except Exception as e:
         import traceback
-        print(f"Error in import_sample_data_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in import_sample_data_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -291,8 +291,8 @@ async def get_installation_status_api():
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_installation_status_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_installation_status_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -314,8 +314,8 @@ async def get_installation_steps_api():
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_installation_steps_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_installation_steps_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -336,8 +336,8 @@ async def check_database_connection_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in check_database_connection_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in check_database_connection_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -392,7 +392,7 @@ async def create_admin_user_api(
 
         # 确保数据库管理器已初始化
         if unified_db_manager._async_session_factory is None:
-            print("[Install] 检测到数据库管理器未初始化，尝试重新加载配置...")
+            logger("[Install] 检测到数据库管理器未初始化，尝试重新加载配置...")
             try:
                 # 强制重新加载 .env 文件和配置
                 import importlib
@@ -400,13 +400,13 @@ async def create_admin_user_api(
 
                 # 重新加载 .env 文件
                 load_dotenv(override=True)
-                print("  ✓ .env 文件已重新加载")
+                logger("  ✓ .env 文件已重新加载")
 
                 # 重新导入并初始化设置
                 import src.setting
                 importlib.reload(src.setting)
                 from src.setting import settings as new_settings
-                print(f"  ✓ 配置已重新加载，数据库 URL: {new_settings.database_url[:50]}..." if new_settings.database_url else "  ⚠ 数据库 URL 仍为空")
+                logger(f"  ✓ 配置已重新加载，数据库 URL: {new_settings.database_url[:50]}..." if new_settings.database_url else "  ⚠ 数据库 URL 仍为空")
 
                 # 重置并重新初始化数据库管理器
                 unified_db_manager._async_engine = None
@@ -414,7 +414,7 @@ async def create_admin_user_api(
                 unified_db_manager.initialize()
 
                 if unified_db_manager._async_session_factory is not None:
-                    print("✓ 数据库连接池初始化成功")
+                    logger("✓ 数据库连接池初始化成功")
                 else:
                     return ApiResponse(
                         success=False,
@@ -422,8 +422,8 @@ async def create_admin_user_api(
                     )
             except Exception as init_err:
                 import traceback
-                print(f"数据库管理器初始化失败: {init_err}")
-                print(traceback.format_exc())
+                logger(f"数据库管理器初始化失败: {init_err}")
+                logger(traceback.format_exc())
                 return ApiResponse(
                     success=False,
                     error=f'数据库管理器初始化失败: {str(init_err)}'
@@ -488,8 +488,8 @@ async def create_admin_user_api(
 
     except Exception as e:
         import traceback
-        print(f"Error in create_admin_user_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in create_admin_user_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -531,8 +531,8 @@ async def configure_site_settings_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in configure_site_settings_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in configure_site_settings_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -562,14 +562,14 @@ async def complete_installation_api(
             import json
             json.dump(install_info, f, ensure_ascii=False, indent=2)
 
-        print("\n" + "=" * 60)
-        print("✓ 安装完成！")
-        print("=" * 60)
+        logger("\n" + "=" * 60)
+        logger("✓ 安装完成！")
+        logger("=" * 60)
 
         # 如果选择导入示例数据，调用辅助函数
         sample_data_imported = False
         if install_info.get('import_sample_data', False):
-            print("\n正在导入示例数据...")
+            logger("\n正在导入示例数据...")
             try:
                 result = await _import_sample_data_helper(
                     import_articles=install_info.get('import_articles', True),
@@ -577,12 +577,12 @@ async def complete_installation_api(
                 )
 
                 if result.success:
-                    print(f"✓ {result.data.get('message', '示例数据导入成功')}")
+                    logger(f"✓ {result.data.get('message', '示例数据导入成功')}")
                     sample_data_imported = True
                 else:
-                    print(f"✗ 示例数据导入失败: {result.error}")
+                    logger(f"✗ 示例数据导入失败: {result.error}")
             except Exception as e:
-                print(f"✗ 示例数据导入失败: {str(e)}")
+                logger(f"✗ 示例数据导入失败: {str(e)}")
 
         return ApiResponse(
             success=True,
@@ -594,8 +594,8 @@ async def complete_installation_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in complete_installation_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in complete_installation_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -621,8 +621,8 @@ async def confirm_database_and_migrate_api():
         )
     except Exception as e:
         import traceback
-        print(f"Error in confirm_database_and_migrate_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in confirm_database_and_migrate_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -641,8 +641,8 @@ async def reset_installation_api():
         )
     except Exception as e:
         import traceback
-        print(f"Error in reset_installation_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in reset_installation_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -660,18 +660,18 @@ async def stream_migration_logs():
         """生成 SSE 事件"""
         try:
             import sys
-            print(f"\n[SSE] 开始迁移日志流", file=sys.stderr)
+            logger(f"\n[SSE] 开始迁移日志流", file=sys.stderr)
 
             # 检查 Alembic 是否可用
             if not migration_service.check_alembic_available():
                 error_msg = {'type': 'error', 'message': 'Alembic 未安装或不可用'}
-                print(f"[SSE] {error_msg}", file=sys.stderr)
+                logger(f"[SSE] {error_msg}", file=sys.stderr)
                 yield f"data: {json.dumps(error_msg, ensure_ascii=False)}\n\n"
                 return
 
             # 获取迁移状态
             status = migration_service.get_migration_status()
-            print(f"[SSE] 当前版本: {status['current']}, 目标版本: {status['head']}", file=sys.stderr)
+            logger(f"[SSE] 当前版本: {status['current']}, 目标版本: {status['head']}", file=sys.stderr)
 
             current_ver = status["current"]
             head_ver = status["head"]
@@ -684,13 +684,13 @@ async def stream_migration_logs():
                 return
 
             # 执行迁移并实时推送日志
-            print(f"[SSE] 开始执行迁移...", file=sys.stderr)
+            logger(f"[SSE] 开始执行迁移...", file=sys.stderr)
             async for log_entry in migration_service.run_migration():
                 yield f"data: {json.dumps(log_entry, ensure_ascii=False)}\n\n"
                 # 给前端一点时间处理
                 await asyncio.sleep(0.05)
 
-            print(f"[SSE] 迁移完成", file=sys.stderr)
+            logger(f"[SSE] 迁移完成", file=sys.stderr)
 
         except Exception as e:
             import traceback
@@ -700,8 +700,8 @@ async def stream_migration_logs():
                 'message': f'SSE 端点出错: {str(e)}',
                 'traceback': traceback.format_exc()
             }
-            print(f"[SSE ERROR] {error_msg}", file=sys.stderr)
-            print(traceback.format_exc(), file=sys.stderr)
+            logger(f"[SSE ERROR] {error_msg}", file=sys.stderr)
+            logger(traceback.format_exc(), file=sys.stderr)
             yield f"data: {json.dumps(error_msg, ensure_ascii=False)}\n\n"
 
     return StreamingResponse(

@@ -14,7 +14,7 @@ from shared.utils.plugin_database import plugin_db
 class PluginDatabaseInitializer:
     """
     插件数据库初始化器
-    
+
     功能:
     1. 自动发现需要数据库的插件
     2. 调用每个插件的初始化函数
@@ -28,7 +28,7 @@ class PluginDatabaseInitializer:
     def discover_plugins_needing_db(self) -> List[Dict[str, Any]]:
         """
         发现所有需要数据库的插件
-        
+
         Returns:
             插件信息列表 [{slug, name, metadata}]
         """
@@ -59,17 +59,17 @@ class PluginDatabaseInitializer:
                     })
 
             except Exception as e:
-                print(f"[PluginDBInit] Failed to read metadata for {item.name}: {e}")
+                logger(f"[PluginDBInit] Failed to read metadata for {item.name}: {e}")
 
         return plugins
 
     def initialize_plugin_db(self, plugin_slug: str) -> bool:
         """
         初始化单个插件的数据库
-        
+
         Args:
             plugin_slug: 插件标识
-            
+
         Returns:
             是否成功
         """
@@ -78,7 +78,7 @@ class PluginDatabaseInitializer:
             plugin_path = self.plugins_dir / plugin_slug / "plugin.py"
 
             if not plugin_path.exists():
-                print(f"[PluginDBInit] Plugin file not found: {plugin_slug}")
+                logger(f"[PluginDBInit] Plugin file not found: {plugin_slug}")
                 return False
 
             # 动态导入插件模块
@@ -96,14 +96,14 @@ class PluginDatabaseInitializer:
             if hasattr(module, init_func_name):
                 init_func = getattr(module, init_func_name)
                 init_func()
-                print(f"[PluginDBInit] ✓ Initialized database for {plugin_slug}")
+                logger(f"[PluginDBInit] ✓ Initialized database for {plugin_slug}")
                 return True
             else:
-                print(f"[PluginDBInit] ⚠ No init function found for {plugin_slug}")
+                logger(f"[PluginDBInit] ⚠ No init function found for {plugin_slug}")
                 return False
 
         except Exception as e:
-            print(f"[PluginDBInit] ✗ Failed to initialize {plugin_slug}: {e}")
+            logger(f"[PluginDBInit] ✗ Failed to initialize {plugin_slug}: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -111,18 +111,18 @@ class PluginDatabaseInitializer:
     def initialize_all(self) -> Dict[str, bool]:
         """
         初始化所有需要数据库的插件
-        
+
         Returns:
             初始化结果 {plugin_slug: success}
         """
         plugins = self.discover_plugins_needing_db()
 
         if not plugins:
-            print("[PluginDBInit] No plugins requiring database found")
+            logger("[PluginDBInit] No plugins requiring database found")
             return {}
 
-        print(f"[PluginDBInit] Found {len(plugins)} plugins requiring database initialization")
-        print("=" * 60)
+        logger(f"[PluginDBInit] Found {len(plugins)} plugins requiring database initialization")
+        logger("=" * 60)
 
         results = {}
         success_count = 0
@@ -132,7 +132,7 @@ class PluginDatabaseInitializer:
             slug = plugin_info['slug']
             name = plugin_info['name']
 
-            print(f"\nInitializing: {name} ({slug})...")
+            logger(f"\nInitializing: {name} ({slug})...")
             success = self.initialize_plugin_db(slug)
 
             results[slug] = success
@@ -141,18 +141,18 @@ class PluginDatabaseInitializer:
             else:
                 fail_count += 1
 
-        print("\n" + "=" * 60)
-        print(f"[PluginDBInit] Initialization complete:")
-        print(f"  Total: {len(plugins)}")
-        print(f"  Success: {success_count}")
-        print(f"  Failed: {fail_count}")
+        logger("\n" + "=" * 60)
+        logger(f"[PluginDBInit] Initialization complete:")
+        logger(f"  Total: {len(plugins)}")
+        logger(f"  Success: {success_count}")
+        logger(f"  Failed: {fail_count}")
 
         return results
 
     def list_plugin_databases(self) -> List[Dict[str, Any]]:
         """
         列出所有插件数据库
-        
+
         Returns:
             数据库信息列表
         """
@@ -161,32 +161,32 @@ class PluginDatabaseInitializer:
     def reset_plugin_db(self, plugin_slug: str) -> bool:
         """
         重置插件数据库（删除并重新创建）
-        
+
         Args:
             plugin_slug: 插件标识
-            
+
         Returns:
             是否成功
         """
         try:
-            print(f"[PluginDBInit] Resetting database for {plugin_slug}...")
+            logger(f"[PluginDBInit] Resetting database for {plugin_slug}...")
 
             # 删除现有数据库
             if plugin_db.delete_plugin_db(plugin_slug):
-                print(f"[PluginDBInit] Deleted existing database")
+                logger(f"[PluginDBInit] Deleted existing database")
 
             # 重新初始化
             return self.initialize_plugin_db(plugin_slug)
 
         except Exception as e:
-            print(f"[PluginDBInit] Failed to reset database: {e}")
+            logger(f"[PluginDBInit] Failed to reset database: {e}")
             return False
 
 
 def init_all_plugin_databases():
     """
     一键初始化所有插件数据库（向后兼容）
-    
+
     这是主入口函数，可以被其他模块调用
     """
     initializer = PluginDatabaseInitializer()
@@ -196,7 +196,7 @@ def init_all_plugin_databases():
 def init_single_plugin_db(plugin_slug: str):
     """
     初始化单个插件数据库
-    
+
     Args:
         plugin_slug: 插件标识
     """
@@ -232,13 +232,13 @@ if __name__ == "__main__":
     if args.list:
         databases = initializer.list_plugin_databases()
         if databases:
-            print("\nPlugin Databases:")
-            print("-" * 60)
+            logger("\nPlugin Databases:")
+            logger("-" * 60)
             for db in databases:
                 size_kb = db['size_bytes'] / 1024
-                print(f"  {db['plugin_slug']:30s} {size_kb:8.2f} KB")
+                logger(f"  {db['plugin_slug']:30s} {size_kb:8.2f} KB")
         else:
-            print("No plugin databases found")
+            logger("No plugin databases found")
 
     elif args.reset:
         initializer.reset_plugin_db(args.reset)

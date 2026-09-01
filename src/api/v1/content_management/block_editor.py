@@ -61,10 +61,10 @@ class BlockTypeInfo(BaseModel):
 async def get_block_types(category: Optional[str] = None):
     """
     获取所有块类型
-    
+
     Args:
         category: 可选，按分类过滤
-        
+
     Returns:
         块类型列表
     """
@@ -91,7 +91,7 @@ async def get_block_types(category: Optional[str] = None):
 async def get_block_categories():
     """
     获取所有块分类
-    
+
     Returns:
         分类名称列表
     """
@@ -103,10 +103,10 @@ async def get_block_categories():
 async def validate_block(request: BlockValidationRequest):
     """
     验证块数据
-    
+
     Args:
         request: 块验证请求
-        
+
     Returns:
         验证结果
     """
@@ -123,10 +123,10 @@ async def validate_block(request: BlockValidationRequest):
 async def render_blocks(request: BlockRenderRequest):
     """
     将块数据渲染为 HTML
-    
+
     Args:
         request: 块渲染请求
-        
+
     Returns:
         HTML 字符串
     """
@@ -140,10 +140,10 @@ async def render_blocks(request: BlockRenderRequest):
 async def convert_html_to_blocks(html: str):
     """
     将 HTML 转换为块数据
-    
+
     Args:
         html: HTML 字符串
-        
+
     Returns:
         块数据列表
     """
@@ -234,7 +234,7 @@ async def convert_html_to_blocks(html: str):
                     'content': text_content
                 }
             })
-    
+
     return {
         "blocks": blocks,
         "count": len(blocks)
@@ -245,7 +245,7 @@ async def convert_html_to_blocks(html: str):
 async def get_example_blocks():
     """
     获取示例块数据
-    
+
     Returns:
         示例块数据列表
     """
@@ -278,7 +278,7 @@ async def get_example_blocks():
             "type": "code",
             "attributes": {
                 "language": "python",
-                "content": "print('Hello, World!')",
+                "content": "logger('Hello, World!')",
                 "showLineNumbers": True
             }
         },
@@ -327,11 +327,11 @@ async def convert_block_type(
 ):
     """
     转换块类型
-    
+
     Args:
         block: 原始块数据
         new_type: 目标块类型
-        
+
     Returns:
         转换后的块数据
     """
@@ -348,10 +348,10 @@ async def convert_block_type(
 async def duplicate_block(block: BlockData):
     """
     复制块
-    
+
     Args:
         block: 要复制的块数据
-        
+
     Returns:
         复制的块数据
     """
@@ -368,11 +368,11 @@ async def merge_blocks(
 ):
     """
     合并两个相邻的文本块
-    
+
     Args:
         block1: 第一个块
         block2: 第二个块
-        
+
     Returns:
         合并后的块
     """
@@ -391,11 +391,11 @@ async def split_block(
 ):
     """
     在指定位置分割块
-    
+
     Args:
         block: 要分割的块
         position: 分割位置（字符索引）
-        
+
     Returns:
         分割后的块列表
     """
@@ -408,10 +408,10 @@ async def split_block(
 async def export_blocks(blocks: List[BlockData]):
     """
     导出块数据为 JSON
-    
+
     Args:
         blocks: 块数据列表
-        
+
     Returns:
         JSON 字符串
     """
@@ -425,10 +425,10 @@ async def export_blocks(blocks: List[BlockData]):
 async def import_blocks(json_str: str):
     """
     从 JSON 导入块数据
-    
+
     Args:
         json_str: JSON 字符串
-        
+
     Returns:
         块数据列表
     """
@@ -441,10 +441,10 @@ async def import_blocks(json_str: str):
 async def get_statistics(blocks: List[BlockData]):
     """
     获取块统计信息
-    
+
     Args:
         blocks: 块数据列表
-        
+
     Returns:
         统计信息
     """

@@ -17,7 +17,7 @@ except ImportError:
 class EnhancedCacheStrategy:
     """
     增强缓存策略
-    
+
     特性：
     1. 分层缓存（L1内存 + L2 Redis）
     2. 智能过期策略
@@ -29,7 +29,7 @@ class EnhancedCacheStrategy:
     def __init__(self, cache_service=None):
         """
         初始化增强缓存策略
-        
+
         Args:
             cache_service: CacheService实例
         """
@@ -123,7 +123,7 @@ class EnhancedCacheStrategy:
     async def warmup_cache(self, keys_and_fetchers: List[Dict]):
         """
         缓存预热
-        
+
         Args:
             keys_and_fetchers: 列表，每个元素包含：
                 - key: 缓存键
@@ -157,12 +157,12 @@ class EnhancedCacheStrategy:
             if data is not None:
                 self.set_with_stats(key, data, ttl, tags)
         except Exception as e:
-            print(f"[CacheWarmup] Failed to warmup {key}: {e}")
+            logger(f"[CacheWarmup] Failed to warmup {key}: {e}")
 
     def cached(self, key_template: str, ttl: int = None, tags: List[str] = None):
         """
         装饰器：自动缓存函数结果
-        
+
         Usage:
             @cache_strategy.cached("article:{article_id}", ttl=3600, tags=["article"])
             async def get_article(article_id: int):
@@ -251,12 +251,12 @@ class EnhancedCacheStrategy:
     def generate_cache_key(prefix: str, *args, **kwargs) -> str:
         """
         生成缓存键
-        
+
         Args:
             prefix: 键前缀
             *args: 位置参数
             **kwargs: 关键字参数
-            
+
         Returns:
             缓存键字符串
         """

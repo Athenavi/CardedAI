@@ -15,10 +15,10 @@ from shared.models.article import Article
 async def check_and_publish_scheduled_articles(db: AsyncSession) -> Dict[str, Any]:
     """
     检查并发布到期的定时文章
-    
+
     Args:
         db: 数据库会话
-        
+
     Returns:
         包含发布统计信息的字典
     """
@@ -58,7 +58,7 @@ async def check_and_publish_scheduled_articles(db: AsyncSession) -> Dict[str, An
                 published_count += 1
 
             except Exception as e:
-                print(f"发布文章 {article.id} 失败: {e}")
+                logger(f"发布文章 {article.id} 失败: {e}")
                 failed_count += 1
 
         # 提交所有更改
@@ -75,7 +75,7 @@ async def check_and_publish_scheduled_articles(db: AsyncSession) -> Dict[str, An
 
     except Exception as e:
         await db.rollback()
-        print(f"检查定时发布失败: {e}")
+        logger(f"检查定时发布失败: {e}")
         import traceback
         traceback.print_exc()
 
@@ -96,12 +96,12 @@ async def get_scheduled_articles(
 ) -> Dict[str, Any]:
     """
     获取所有待发布的定时文章列表
-    
+
     Args:
         db: 数据库会话
         page: 页码
         per_page: 每页数量
-        
+
     Returns:
         包含文章列表和分页信息的字典
     """
@@ -165,7 +165,7 @@ async def get_scheduled_articles(
         }
 
     except Exception as e:
-        print(f"获取定时文章列表失败: {e}")
+        logger(f"获取定时文章列表失败: {e}")
         import traceback
         traceback.print_exc()
 
@@ -190,11 +190,11 @@ async def cancel_scheduled_publish(
 ) -> bool:
     """
     取消文章的定时发布
-    
+
     Args:
         db: 数据库会话
         article_id: 文章ID
-        
+
     Returns:
         是否成功
     """
@@ -217,5 +217,5 @@ async def cancel_scheduled_publish(
 
     except Exception as e:
         await db.rollback()
-        print(f"取消定时发布失败: {e}")
+        logger(f"取消定时发布失败: {e}")
         return False

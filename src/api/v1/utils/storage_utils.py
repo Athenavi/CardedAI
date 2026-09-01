@@ -42,12 +42,12 @@ def async_file_cleanup(db_session, cleanup_data):
                     # 从S3删除文件
                     success = s3_storage.delete_file(storage_path)
                     if success:
-                        print(f"成功从S3删除文件: {storage_path}")
+                        logger(f"成功从S3删除文件: {storage_path}")
                     else:
-                        print(f"从S3删除文件失败: {storage_path}")
+                        logger(f"从S3删除文件失败: {storage_path}")
 
             except Exception as e:
-                print(f"文件删除失败: {storage_path} - {str(e)}")
+                logger(f"文件删除失败: {storage_path} - {str(e)}")
 
     except Exception as e:
-        print(f"后台清理任务失败: {str(e)}")
+        logger(f"后台清理任务失败: {str(e)}")

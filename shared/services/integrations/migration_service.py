@@ -23,7 +23,7 @@
     # Python API
     from shared.services.integrations.migration_service import migration_service
     from src.extensions import get_async_db_session
-    
+
     # WordPress 迁移
     async with get_async_db_session() as db:
         result = await migration_service.migrate_from_wordpress(
@@ -32,7 +32,7 @@
             user_id=1,
             options={'download_media': True, 'import_comments': True}
         )
-    
+
     # Jekyll 迁移
     async with get_async_db_session() as db:
         result = await migration_service.migrate_from_markdown(
@@ -41,7 +41,7 @@
             platform='jekyll',
             user_id=1
         )
-    
+
     # Ghost 迁移
     async with get_async_db_session() as db:
         result = await migration_service.migrate_from_ghost(
@@ -49,7 +49,7 @@
             db_session=db,
             user_id=1
         )
-    
+
     # JSON 迁移（带字段映射）
     async with get_async_db_session() as db:
         result = await migration_service.migrate_from_json(
@@ -58,7 +58,7 @@
             user_id=1,
             mapping={'title': 'post_title', 'content': 'post_body'}
         )
-    
+
     # CSV 迁移
     async with get_async_db_session() as db:
         result = await migration_service.migrate_from_csv(
@@ -66,13 +66,13 @@
             db_session=db,
             user_id=1
         )
-    
+
     # 生成重定向规则
     redirects = migration_service.generate_redirect_map(
         old_urls=[{'old': '/old-path', 'new': '/new-path'}],
         output_format='nginx'
     )
-    
+
     # REST API
     POST /api/v1/migrations/wordpress - 上传 WXR 文件
     POST /api/v1/migrations/ghost - 上传 Ghost JSON
@@ -123,7 +123,7 @@ class MigrationService:
     ) -> Dict[str, Any]:
         """
         从 WordPress WXR 文件迁移
-        
+
         Args:
             wxr_file: WXR 文件路径
             db_session: 数据库会话
@@ -132,16 +132,16 @@ class MigrationService:
                 - map_authors: 作者映射字典
                 - import_comments: 是否导入评论
             user_id: 关联的用户ID
-                
+
         Returns:
             迁移结果统计
         """
-        print("[Migration] Starting WordPress migration...")
+        logger("[Migration] Starting WordPress migration...")
 
         importer = WordPressImportService()
 
         # 解析 WXR 文件
-        print(f"[Migration] Parsing WXR file: {wxr_file}")
+        logger(f"[Migration] Parsing WXR file: {wxr_file}")
         parsed_data = importer.parse_wxr_file(wxr_file)
 
         stats = {
@@ -156,12 +156,12 @@ class MigrationService:
             'errors': 0,
         }
 
-        print(f"[Migration] Found:")
-        print(f"  - {stats['total_posts']} posts")
-        print(f"  - {stats['total_categories']} categories")
-        print(f"  - {stats['total_tags']} tags")
-        print(f"  - {stats['total_comments']} comments")
-        print(f"  - {stats['total_media']} media items")
+        logger(f"[Migration] Found:")
+        logger(f"  - {stats['total_posts']} posts")
+        logger(f"  - {stats['total_categories']} categories")
+        logger(f"  - {stats['total_tags']} tags")
+        logger(f"  - {stats['total_comments']} comments")
+        logger(f"  - {stats['total_media']} media items")
 
         # 导入分类
         for cat_name in parsed_data.get('categories', []):
@@ -181,7 +181,7 @@ class MigrationService:
                     await db_session.flush()
                     stats['imported_categories'] += 1
             except Exception as e:
-                print(f"[Migration] Error importing category {cat_name}: {e}")
+                logger(f"[Migration] Error importing category {cat_name}: {e}")
                 stats['errors'] += 1
 
         # 导入标签
@@ -201,7 +201,7 @@ class MigrationService:
                     await db_session.flush()
                     stats['imported_tags'] += 1
             except Exception as e:
-                print(f"[Migration] Error importing tag {tag_name}: {e}")
+                logger(f"[Migration] Error importing tag {tag_name}: {e}")
                 stats['errors'] += 1
 
         # 导入文章
@@ -255,7 +255,7 @@ class MigrationService:
                 stats['imported_posts'] += 1
 
             except Exception as e:
-                print(f"[Migration] Error importing post {post.get('title')}: {e}")
+                logger(f"[Migration] Error importing post {post.get('title')}: {e}")
                 stats['errors'] += 1
 
         await db_session.commit()
@@ -275,16 +275,16 @@ class MigrationService:
     ) -> Dict[str, Any]:
         """
         从 Markdown 文件迁移 (Jekyll/Hexo)
-        
+
         Args:
             source_dir: Markdown 文件目录
             platform: 平台类型 (jekyll/hexo)
             options: 迁移选项
-            
+
         Returns:
             迁移结果统计
         """
-        print(f"[Migration] Starting {platform} migration from: {source_dir}")
+        logger(f"[Migration] Starting {platform} migration from: {source_dir}")
 
         source_path = Path(source_dir)
         if not source_path.exists():
@@ -295,7 +295,7 @@ class MigrationService:
 
         # 查找所有 Markdown 文件
         md_files = list(source_path.rglob('*.md'))
-        print(f"[Migration] Found {len(md_files)} markdown files")
+        logger(f"[Migration] Found {len(md_files)} markdown files")
 
         imported_count = 0
         errors = []
@@ -334,13 +334,13 @@ class MigrationService:
     ) -> Dict[str, Any]:
         """
         导入单个 Markdown 文件
-        
+
         Args:
             file_path: 文件路径
             platform: 平台类型
             db_session: 数据库会话
             user_id: 用户ID
-            
+
         Returns:
             导入结果
         """
@@ -445,17 +445,17 @@ class MigrationService:
     ) -> Dict[str, Any]:
         """
         从 Ghost JSON 导出文件迁移
-        
+
         Args:
             json_file: Ghost JSON 文件路径
             db_session: 数据库会话
             options: 迁移选项
             user_id: 用户ID
-            
+
         Returns:
             迁移结果
         """
-        print(f"[Migration] Starting Ghost migration from: {json_file}")
+        logger(f"[Migration] Starting Ghost migration from: {json_file}")
 
         with open(json_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -475,10 +475,10 @@ class MigrationService:
             'errors': 0,
         }
 
-        print(f"[Migration] Found:")
-        print(f"  - {stats['posts']} posts")
-        print(f"  - {stats['tags']} tags")
-        print(f"  - {stats['users']} users")
+        logger(f"[Migration] Found:")
+        logger(f"  - {stats['posts']} posts")
+        logger(f"  - {stats['tags']} tags")
+        logger(f"  - {stats['users']} users")
 
         # 导入标签
         for tag_data in ghost_data.get('tags', []):
@@ -498,7 +498,7 @@ class MigrationService:
                     await db_session.flush()
                     stats['imported_tags'] += 1
             except Exception as e:
-                print(f"[Migration] Error importing tag: {e}")
+                logger(f"[Migration] Error importing tag: {e}")
                 stats['errors'] += 1
 
         # 导入文章
@@ -543,7 +543,7 @@ class MigrationService:
                 stats['imported_posts'] += 1
 
             except Exception as e:
-                print(f"[Migration] Error importing post: {e}")
+                logger(f"[Migration] Error importing post: {e}")
                 stats['errors'] += 1
 
         await db_session.commit()
@@ -564,17 +564,17 @@ class MigrationService:
     ) -> Dict[str, Any]:
         """
         从通用 JSON 文件迁移
-        
+
         Args:
             json_file: JSON 文件路径
             db_session: 数据库会话
             mapping: 字段映射 {target_field: source_field}
             user_id: 用户ID
-            
+
         Returns:
             迁移结果
         """
-        print(f"[Migration] Starting JSON migration from: {json_file}")
+        logger(f"[Migration] Starting JSON migration from: {json_file}")
 
         with open(json_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -628,7 +628,7 @@ class MigrationService:
                 imported_count += 1
 
             except Exception as e:
-                print(f"[Migration] Error importing item: {e}")
+                logger(f"[Migration] Error importing item: {e}")
                 errors += 1
 
         await db_session.commit()
@@ -652,18 +652,18 @@ class MigrationService:
     ) -> Dict[str, Any]:
         """
         从 CSV 文件迁移
-        
+
         Args:
             csv_file: CSV 文件路径
             db_session: 数据库会话
             delimiter: 分隔符
             encoding: 文件编码
             user_id: 用户ID
-            
+
         Returns:
             迁移结果
         """
-        print(f"[Migration] Starting CSV migration from: {csv_file}")
+        logger(f"[Migration] Starting CSV migration from: {csv_file}")
 
         imported_count = 0
         errors = []
@@ -716,11 +716,11 @@ class MigrationService:
     ) -> str:
         """
         生成 URL 重定向映射
-        
+
         Args:
             old_urls: 旧URL列表 [{'old': '/old-path', 'new': '/new-path'}]
             output_format: 输出格式 (nginx/apache/json)
-            
+
         Returns:
             重定向配置文本
         """
@@ -745,10 +745,10 @@ class MigrationService:
     def _generate_slug(self, text: str) -> str:
         """
         生成 URL 友好的 slug
-        
+
         Args:
             text: 原始文本
-            
+
         Returns:
             slug 字符串
         """
@@ -774,12 +774,12 @@ class MigrationService:
     ) -> Dict[str, Any]:
         """
         生成迁移报告
-        
+
         Args:
             platform: 源平台
             stats: 统计数据
             duration_seconds: 耗时（秒）
-            
+
         Returns:
             迁移报告
         """

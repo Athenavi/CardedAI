@@ -14,7 +14,7 @@ from collections import defaultdict, Counter
 class SiteAnalyticsService:
     """
     站内数据分析服务
-    
+
     功能:
     1. 页面浏览量统计
     2. 用户行为追踪
@@ -50,7 +50,7 @@ class SiteAnalyticsService:
     ):
         """
         追踪页面浏览
-        
+
         Args:
             page_path: 页面路径
             page_title: 页面标题
@@ -98,7 +98,7 @@ class SiteAnalyticsService:
     ):
         """
         追踪自定义事件
-        
+
         Args:
             event_name: 事件名称
             user_id: 用户ID
@@ -134,7 +134,7 @@ class SiteAnalyticsService:
     ):
         """
         追踪用户操作
-        
+
         Args:
             action: 操作类型（click, scroll, form_submit等）
             user_id: 用户ID
@@ -162,12 +162,12 @@ class SiteAnalyticsService:
     ) -> Dict[str, int]:
         """
         获取页面浏览量
-        
+
         Args:
             page_path: 页面路径过滤
             start_date: 开始日期
             end_date: 结束日期
-            
+
         Returns:
             页面浏览量字典
         """
@@ -180,10 +180,10 @@ class SiteAnalyticsService:
     def get_popular_pages(self, limit: int = 20) -> List[Dict[str, Any]]:
         """
         获取热门页面
-        
+
         Args:
             limit: 返回数量
-            
+
         Returns:
             热门页面列表
         """
@@ -200,10 +200,10 @@ class SiteAnalyticsService:
     def get_traffic_sources(self, limit: int = 20) -> List[Dict[str, Any]]:
         """
         获取流量来源统计
-        
+
         Args:
             limit: 返回数量
-            
+
         Returns:
             流量来源列表
         """
@@ -234,11 +234,11 @@ class SiteAnalyticsService:
     ) -> Dict[str, Any]:
         """
         获取用户活动统计
-        
+
         Args:
             user_id: 用户ID
             days: 统计天数
-            
+
         Returns:
             用户活动数据
         """
@@ -278,10 +278,10 @@ class SiteAnalyticsService:
     def get_session_stats(self, session_id: str) -> Optional[Dict[str, Any]]:
         """
         获取会话统计
-        
+
         Args:
             session_id: 会话ID
-            
+
         Returns:
             会话统计数据
         """
@@ -305,10 +305,10 @@ class SiteAnalyticsService:
     def get_daily_stats(self, days: int = 30) -> List[Dict[str, Any]]:
         """
         获取每日统计数据
-        
+
         Args:
             days: 统计天数
-            
+
         Returns:
             每日统计数据列表
         """
@@ -401,7 +401,7 @@ class SiteAnalyticsService:
             self.events_buffer.clear()
 
         except Exception as e:
-            print(f"[Analytics] Failed to flush events: {e}")
+            logger(f"[Analytics] Failed to flush events: {e}")
 
     def _extract_domain(self, url: str) -> str:
         """从URL提取域名"""
@@ -415,10 +415,10 @@ class SiteAnalyticsService:
     def load_events_from_file(self, date_str: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         从文件加载事件数据
-        
+
         Args:
             date_str: 日期字符串（YYYY-MM-DD），默认为今天
-            
+
         Returns:
             事件列表
         """
@@ -438,7 +438,7 @@ class SiteAnalyticsService:
                     if line:
                         events.append(json.loads(line))
         except Exception as e:
-            print(f"[Analytics] Failed to load events: {e}")
+            logger(f"[Analytics] Failed to load events: {e}")
 
         return events
 

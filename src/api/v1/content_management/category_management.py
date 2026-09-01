@@ -11,6 +11,7 @@ from shared.models.category import Category
 from src.api.v1.core.responses import ApiResponse
 from src.auth import jwt_required_dependency as jwt_required
 from src.utils.database.main import get_async_session
+from src.unified_logger import default_logger as logger
 
 router = APIRouter(tags=["category-management"])
 
@@ -69,8 +70,8 @@ async def create_category_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in create_category_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in create_category_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -132,8 +133,8 @@ async def update_category_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in update_category_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in update_category_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -219,8 +220,8 @@ async def get_categories_with_stats_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_categories_with_stats_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_categories_with_stats_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -265,8 +266,8 @@ async def delete_category_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in delete_category_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in delete_category_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -279,7 +280,7 @@ async def reorder_categories_api(
 ):
     """
     分类拖拽排序
-    
+
     请求体格式：
     {
         "categories": [
@@ -335,5 +336,5 @@ async def reorder_categories_api(
     except Exception as e:
         await db.rollback()
         import traceback
-        print(f"Error in reorder_categories_api: {e}\n{traceback.format_exc()}")
+        logger(f"Error in reorder_categories_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))

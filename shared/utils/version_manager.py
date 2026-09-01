@@ -189,17 +189,17 @@ if __name__ == '__main__':
     # 测试版本管理功能
     vm = VersionManager()
 
-    print("=== 当前版本信息 ===")
+    logger("=== 当前版本信息 ===")
     all_versions = vm.get_all_versions()
     for component, info in all_versions.items():
-        print(f"\n{component.upper()}:")
+        logger(f"\n{component.upper()}:")
         for key, value in info.items():
-            print(f"  {key}: {value}")
+            logger(f"  {key}: {value}")
 
-    print("\n=== 版本摘要 ===")
+    logger("\n=== 版本摘要 ===")
     summary = get_version_summary()
     for key, value in summary.items():
-        print(f"  {key}: {value}")
+        logger(f"  {key}: {value}")
 
     # 同步前端版本
-    print(f"\n同步前端版本: {vm.sync_frontend_version()}")
+    logger(f"\n同步前端版本: {vm.sync_frontend_version()}")

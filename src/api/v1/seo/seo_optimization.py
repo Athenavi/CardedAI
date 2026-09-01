@@ -21,7 +21,7 @@ async def analyze_seo(
 ):
     """
     分析文章SEO质量
-    
+
     请求体:
     - title: 文章标题
     - slug: URL Slug
@@ -29,7 +29,7 @@ async def analyze_seo(
     - content: 文章内容
     - cover_image: 封面图片URL
     - tags: 标签列表
-    
+
     返回:
     - score: SEO评分 (0-100)
     - grade: 等级 (A/B/C/D/F)
@@ -58,8 +58,8 @@ async def analyze_seo(
         )
     except Exception as e:
         import traceback
-        print(f"Error in analyze_seo: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in analyze_seo: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -74,14 +74,14 @@ async def get_sitemap():
         from shared.models.category import Category
         from sqlalchemy import select
         from src.extensions import get_async_db_session as get_async_db
-        
+
         db = next(get_async_db())
-        
+
         # 从数据库获取文章、分类、页面数据
         stmt = select(Article).where(Article.status == 'published')
         result = await db.execute(stmt)
         articles = result.scalars().all()
-        
+
         article_list = [
             {
                 'id': a.id,
@@ -95,11 +95,11 @@ async def get_sitemap():
             }
             for a in articles
         ]
-        
+
         stmt = select(Category)
         result = await db.execute(stmt)
         categories = result.scalars().all()
-        
+
         category_list = [
             {'id': c.id, 'slug': c.slug, 'name': c.name}
             for c in categories
@@ -107,7 +107,7 @@ async def get_sitemap():
 
         result = await db.execute(stmt)
         pages = result.scalars().all()
-        
+
         page_list = [
             {'id': p.id, 'slug': p.slug, 'title': p.title}
             for p in pages
@@ -135,14 +135,14 @@ async def generate_sitemap(
         from shared.models.category import Category
         from sqlalchemy import select
         from src.extensions import get_async_db_session as get_async_db
-        
+
         db = next(get_async_db())
-        
+
         # 获取所有已发布的文章
         stmt = select(Article).where(Article.status == 'published')
         result = await db.execute(stmt)
         articles = result.scalars().all()
-        
+
         article_list = [
             {
                 'id': a.id,
@@ -156,31 +156,31 @@ async def generate_sitemap(
             }
             for a in articles
         ]
-        
+
         # 获取所有分类
         stmt = select(Category)
         result = await db.execute(stmt)
         categories = result.scalars().all()
-        
+
         category_list = [
             {'id': c.id, 'slug': c.slug, 'name': c.name}
             for c in categories
         ]
-        
+
         # 生成站点地图
         seo_service = SEOService(base_url="https://example.com")
         sitemap_xml = seo_service.generate_sitemap(
             articles=article_list,
             categories=category_list
         )
-        
+
         # 保存到文件
         import os
         sitemap_path = os.path.join('static', 'sitemap.xml')
         os.makedirs(os.path.dirname(sitemap_path), exist_ok=True)
         with open(sitemap_path, 'w', encoding='utf-8') as f:
             f.write(sitemap_xml)
-        
+
         return ApiResponse(success=True, data={"message": "站点地图已生成", "path": sitemap_path})
     except Exception as e:
         return ApiResponse(success=False, error=str(e))
@@ -199,17 +199,17 @@ async def get_article_schema(
         from shared.models.article import Article
         from sqlalchemy import select
         from src.extensions import get_async_db_session as get_async_db
-        
+
         db = next(get_async_db())
-        
+
         # 从数据库获取文章
         stmt = select(Article).where(Article.id == article_id)
         result = await db.execute(stmt)
         article = result.scalar_one_or_none()
-        
+
         if not article:
             return ApiResponse(success=False, error="文章不存在")
-        
+
         article_data = {
             'title': article.title,
             'excerpt': article.excerpt,
@@ -266,29 +266,29 @@ async def get_article_breadcrumbs(
         from shared.models.category import Category
         from sqlalchemy import select
         from src.extensions import get_async_db_session as get_async_db
-        
+
         db = next(get_async_db())
-        
+
         # 从数据库获取文章和分类
         stmt = select(Article).where(Article.id == article_id)
         result = await db.execute(stmt)
         article = result.scalar_one_or_none()
-        
+
         if not article:
             return ApiResponse(success=False, error="文章不存在")
-        
+
         category = None
         if article.category_id:
             stmt = select(Category).where(Category.id == article.category_id)
             result = await db.execute(stmt)
             category = result.scalar_one_or_none()
-        
+
         article_data = {
             'title': article.title,
             'slug': article.slug,
             'id': article.id
         }
-        
+
         category_data = {
             'name': category.name,
             'slug': category.slug,
@@ -317,17 +317,17 @@ async def get_category_breadcrumbs(
         from shared.models.category import Category
         from sqlalchemy import select
         from src.extensions import get_async_db_session as get_async_db
-        
+
         db = next(get_async_db())
-        
+
         # 从数据库获取分类
         stmt = select(Category).where(Category.id == category_id)
         result = await db.execute(stmt)
         category = result.scalar_one_or_none()
-        
+
         if not category:
             return ApiResponse(success=False, error="分类不存在")
-        
+
         category_data = {
             'name': category.name,
             'slug': category.slug,
@@ -376,10 +376,10 @@ async def normalize_url(
 ):
     """
     URL规范化 - 统一URL格式
-    
+
     请求体:
     - url: 需要规范化的URL
-    
+
     返回:
     - normalized_url: 规范化后的URL
     """
@@ -410,11 +410,11 @@ async def detect_duplicate_content(
 ):
     """
     检测重复内容
-    
+
     请求体:
     - urls: URL列表
     - content_hash: 内容哈希值（可选）
-    
+
     返回:
     - is_duplicate: 是否重复
     - canonical_url: 推荐的规范URL
@@ -447,7 +447,7 @@ async def get_pagination_tags(
 ):
     """
     生成分页相关标签 (rel=prev/next)
-    
+
     返回:
     - tags: HTML link标签列表
     """
@@ -473,11 +473,11 @@ async def select_primary_url(
 ):
     """
     主URL选择策略
-    
+
     请求体:
     - urls: URL列表
     - strategy: 选择策略 ('shortest', 'first', 'https_preferred')
-    
+
     返回:
     - primary_url: 选定的主URL
     """

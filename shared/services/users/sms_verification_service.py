@@ -45,10 +45,10 @@ class SMSVerificationService:
     def validate_phone_format(self, phone: str) -> bool:
         """
         验证手机号格式
-        
+
         Args:
             phone: 手机号
-            
+
         Returns:
             是否为有效手机号格式
         """
@@ -62,10 +62,10 @@ class SMSVerificationService:
     def _check_rate_limit(self, phone: str) -> Optional[str]:
         """
         检查发送频率限制
-        
+
         Args:
             phone: 手机号
-            
+
         Returns:
             如果受限返回错误消息,否则返回None
         """
@@ -105,31 +105,31 @@ class SMSVerificationService:
     def _send_sms_mock(self, phone: str, code: str) -> bool:
         """
         模拟发送短信(开发/测试环境)
-        
+
         Args:
             phone: 手机号
             code: 验证码
-            
+
         Returns:
             是否发送成功
         """
         logger.info(f"[SMS MOCK] Phone: {phone}, Code: {code}")
-        print(f"\n{'=' * 60}")
-        print(f"📱 短信验证码 (MOCK模式)")
-        print(f"手机号: {phone}")
-        print(f"验证码: {code}")
-        print(f"有效期: {self.EXPIRE_MINUTES} 分钟")
-        print(f"{'=' * 60}\n")
+        logger(f"\n{'=' * 60}")
+        logger(f"📱 短信验证码 (MOCK模式)")
+        logger(f"手机号: {phone}")
+        logger(f"验证码: {code}")
+        logger(f"有效期: {self.EXPIRE_MINUTES} 分钟")
+        logger(f"{'=' * 60}\n")
         return True
 
     def _send_sms_aliyun(self, phone: str, code: str) -> bool:
         """
         使用阿里云SMS发送验证码
-        
+
         Args:
             phone: 手机号
             code: 验证码
-            
+
         Returns:
             是否发送成功
         """
@@ -187,11 +187,11 @@ class SMSVerificationService:
     def _send_sms_tencent(self, phone: str, code: str) -> bool:
         """
         使用腾讯云SMS发送验证码
-        
+
         Args:
             phone: 手机号
             code: 验证码
-            
+
         Returns:
             是否发送成功
         """
@@ -250,11 +250,11 @@ class SMSVerificationService:
     def _send_sms_twilio(self, phone: str, code: str) -> bool:
         """
         使用Twilio发送验证码(国际短信)
-        
+
         Args:
             phone: 手机号(需带国家代码,如+86)
             code: 验证码
-            
+
         Returns:
             是否发送成功
         """
@@ -298,11 +298,11 @@ class SMSVerificationService:
     def _send_sms(self, phone: str, code: str) -> bool:
         """
         根据配置选择SMS服务商发送短信
-        
+
         Args:
             phone: 手机号
             code: 验证码
-            
+
         Returns:
             是否发送成功
         """
@@ -331,10 +331,10 @@ class SMSVerificationService:
     def send_verification_code(self, phone: str) -> dict:
         """
         发送手机验证码
-        
+
         Args:
             phone: 手机号
-            
+
         Returns:
             包含成功状态和消息的字典
         """
@@ -385,11 +385,11 @@ class SMSVerificationService:
     def verify_code(self, phone: str, code: str) -> dict:
         """
         验证手机验证码
-        
+
         Args:
             phone: 手机号
             code: 验证码
-            
+
         Returns:
             包含验证结果的字典
         """
@@ -450,10 +450,10 @@ class SMSVerificationService:
     def is_verified(self, phone: str) -> bool:
         """
         检查手机号是否已验证
-        
+
         Args:
             phone: 手机号
-            
+
         Returns:
             是否已验证
         """
@@ -465,7 +465,7 @@ class SMSVerificationService:
     def cleanup_expired_codes(self) -> int:
         """
         清理过期的验证码
-        
+
         Returns:
             清理的数量
         """
@@ -488,7 +488,7 @@ class SMSVerificationService:
                                template_code: str = ''):
         """
         配置SMS服务商
-        
+
         Args:
             provider: 服务商名称 (mock, aliyun, tencent, twilio)
             access_key: Access Key

@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List
+from src.unified_logger import default_logger as logger
 
 
 class InstallationWizardService:
@@ -31,10 +32,10 @@ class InstallationWizardService:
         self.config_file = self.config_dir / ".env"
         self.ensure_directories()
 
-        print(f"\n[InstallationWizard] 初始化:")
-        print(f"  .env 文件路径: {self.config_file.absolute()}")
-        print(f"  项目根目录: {self.config_file.parent.absolute()}")
-        print(f"  文件是否存在: {self.config_file.exists()}")
+        logger(f"\n[InstallationWizard] 初始化:")
+        logger(f"  .env 文件路径: {self.config_file.absolute()}")
+        logger(f"  项目根目录: {self.config_file.parent.absolute()}")
+        logger(f"  文件是否存在: {self.config_file.exists()}")
 
     def ensure_directories(self):
         """确保必需的目录存在"""
@@ -241,12 +242,12 @@ class InstallationWizardService:
             }
 
             # 调试输出
-            print(f"\n[DEBUG] 保存数据库配置到 .env:")
+            logger(f"\n[DEBUG] 保存数据库配置到 .env:")
             for key, value in env_updates.items():
                 if key == 'DB_PASSWORD':
-                    print(f"  {key}: {'***' if value else '(empty)'}")
+                    logger(f"  {key}: {'***' if value else '(empty)'}")
                 else:
-                    print(f"  {key}: '{value}'")
+                    logger(f"  {key}: '{value}'")
 
             self._update_env_file(env_updates)
 
@@ -282,10 +283,10 @@ class InstallationWizardService:
             comments = []  # 保留注释
             original_lines = []  # 保留原始行顺序
 
-            print(f"\n[DEBUG] .env 文件路径: {self.config_file.absolute()}")
-            print(f"[DEBUG] 文件是否存在: {self.config_file.exists()}")
-            print(f"[DEBUG] 父目录: {self.config_file.parent.absolute()}")
-            print(f"[DEBUG] 父目录是否存在: {self.config_file.parent.exists()}")
+            logger(f"\n[DEBUG] .env 文件路径: {self.config_file.absolute()}")
+            logger(f"[DEBUG] 文件是否存在: {self.config_file.exists()}")
+            logger(f"[DEBUG] 父目录: {self.config_file.parent.absolute()}")
+            logger(f"[DEBUG] 父目录是否存在: {self.config_file.parent.exists()}")
 
             if self.config_file.exists():
                 with open(self.config_file, 'r', encoding='utf-8') as f:
@@ -299,7 +300,7 @@ class InstallationWizardService:
                             env_content[key.strip()] = value.strip()
             else:
                 # 如果文件不存在，添加标准头部注释
-                print("[DEBUG] .env 文件不存在，将创建新文件")
+                logger("[DEBUG] .env 文件不存在，将创建新文件")
                 comments = [
                     '# ============================================================================',
                     '# FastBlog 环境配置文件',
@@ -313,16 +314,16 @@ class InstallationWizardService:
             env_content.update(updates)
 
             # 调试输出：显示即将写入的配置
-            print(f"\n[DEBUG] 即将写入 .env 文件的配置:")
+            logger(f"\n[DEBUG] 即将写入 .env 文件的配置:")
             for key, value in env_content.items():
                 if 'PASSWORD' in key or 'SECRET' in key:
-                    print(f"  {key}: {'***' if value else '(empty)'}")
+                    logger(f"  {key}: {'***' if value else '(empty)'}")
                 else:
-                    print(f"  {key}: '{value}' (type: {type(value).__name__})")
+                    logger(f"  {key}: '{value}' (type: {type(value).__name__})")
 
             # 确保父目录存在
             self.config_file.parent.mkdir(parents=True, exist_ok=True)
-            print(f"[DEBUG] 父目录已确保存在")
+            logger(f"[DEBUG] 父目录已确保存在")
 
             # 写入文件，保持标准格式
             with open(self.config_file, 'w', encoding='utf-8') as f:
@@ -343,33 +344,33 @@ class InstallationWizardService:
                     # 写入配置
                     f.write(f"{key}={value}\n")
 
-            print(f"\n[DEBUG] .env 文件已成功写入: {self.config_file.absolute()}")
+            logger(f"\n[DEBUG] .env 文件已成功写入: {self.config_file.absolute()}")
 
             # 验证文件是否真的被创建
             if self.config_file.exists():
                 file_size = self.config_file.stat().st_size
-                print(f"[DEBUG] ✓ 文件存在，大小: {file_size} bytes")
+                logger(f"[DEBUG] ✓ 文件存在，大小: {file_size} bytes")
 
                 # 读取并显示文件内容以供调试
                 with open(self.config_file, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    print(f"\n[DEBUG] 文件完整内容:")
-                    print("=" * 60)
-                    print(content)
-                    print("=" * 60)
+                    logger(f"\n[DEBUG] 文件完整内容:")
+                    logger("=" * 60)
+                    logger(content)
+                    logger("=" * 60)
             else:
-                print(f"\n[ERROR] ✗ .env 文件写入后仍然不存在！")
-                print(f"[ERROR] 请检查以下可能的问题:")
-                print(f"  1. 父目录是否存在: {self.config_file.parent.exists()}")
-                print(f"  2. 父目录是否可写: {os.access(str(self.config_file.parent), os.W_OK)}")
-                print(f"  3. 当前工作目录: {Path.cwd().absolute()}")
+                logger(f"\n[ERROR] ✗ .env 文件写入后仍然不存在！")
+                logger(f"[ERROR] 请检查以下可能的问题:")
+                logger(f"  1. 父目录是否存在: {self.config_file.parent.exists()}")
+                logger(f"  2. 父目录是否可写: {os.access(str(self.config_file.parent), os.W_OK)}")
+                logger(f"  3. 当前工作目录: {Path.cwd().absolute()}")
                 raise RuntimeError(".env 文件创建失败")
 
         except Exception as e:
             import traceback
             error_msg = f"更新 .env 文件失败: {str(e)}"
-            print(f"\n[ERROR] {error_msg}")
-            print(traceback.format_exc())
+            logger(f"\n[ERROR] {error_msg}")
+            logger(traceback.format_exc())
             raise
 
     def import_sample_data(
@@ -555,8 +556,8 @@ class InstallationWizardService:
 
         except Exception as e:
             import traceback
-            print(f"导入示例数据失败: {str(e)}")
-            print(traceback.format_exc())
+            logger(f"导入示例数据失败: {str(e)}")
+            logger(traceback.format_exc())
             return {
                 'success': False,
                 'error': f'导入示例数据失败: {str(e)}'
@@ -658,7 +659,7 @@ class InstallationWizardService:
             # 确保数据库管理器已初始化
             from src.utils.database.unified_manager import db_manager as unified_db_manager
             if unified_db_manager._async_session_factory is None:
-                print("[Install] Initializing database manager for admin user creation...")
+                logger("[Install] Initializing database manager for admin user creation...")
                 unified_db_manager.initialize()
 
             # 使用 Argon2 密码哈希函数
@@ -745,8 +746,8 @@ class InstallationWizardService:
 
         except Exception as e:
             import traceback
-            print(f"创建管理员账号失败: {str(e)}")
-            print(traceback.format_exc())
+            logger(f"创建管理员账号失败: {str(e)}")
+            logger(traceback.format_exc())
             return {
                 'success': False,
                 'error': f'创建管理员账号失败: {str(e)}'
@@ -826,25 +827,25 @@ class InstallationWizardService:
             import sys
             from pathlib import Path
 
-            print("\n" + "=" * 60)
-            print("开始初始化数据库...")
-            print("=" * 60)
+            logger("\n" + "=" * 60)
+            logger("开始初始化数据库...")
+            logger("=" * 60)
 
             # 首先重新加载配置并初始化数据库管理器
-            print("\n[1/4] 重新加载配置并初始化数据库管理器...")
+            logger("\n[1/4] 重新加载配置并初始化数据库管理器...")
             try:
                 import importlib
                 from dotenv import load_dotenv
 
                 # 重新加载 .env 文件
                 load_dotenv(override=True)
-                print("  ✓ .env 文件已重新加载")
+                logger("  ✓ .env 文件已重新加载")
 
                 # 重新导入并初始化设置
                 import src.setting
                 importlib.reload(src.setting)
                 from src.setting import settings as new_settings
-                print(
+                logger(
                     f"  ✓ 配置已重新加载，数据库 URL: {new_settings.database_url[:50]}..." if new_settings.database_url else "  ⚠ 数据库 URL 仍为空")
 
                 # 初始化统一数据库管理器
@@ -855,9 +856,9 @@ class InstallationWizardService:
                 db_manager.initialize()
 
                 if db_manager._async_session_factory is not None:
-                    print("✓ 数据库连接池初始化成功")
+                    logger("✓ 数据库连接池初始化成功")
                 else:
-                    print("⚠ 警告：数据库连接池初始化失败，数据库 URL 可能未正确配置")
+                    logger("⚠ 警告：数据库连接池初始化失败，数据库 URL 可能未正确配置")
                     return {
                         'success': False,
                         'error': '数据库连接池初始化失败。请检查 .env 文件中的数据库配置是否正确。'
@@ -865,15 +866,15 @@ class InstallationWizardService:
             except Exception as init_err:
                 import traceback
                 error_msg = f'数据库管理器初始化失败: {str(init_err)}'
-                print(f"✗ {error_msg}")
-                print(traceback.format_exc())
+                logger(f"✗ {error_msg}")
+                logger(traceback.format_exc())
                 return {
                     'success': False,
                     'error': error_msg
                 }
 
             # 测试数据库连接
-            print("\n[2/4] 测试数据库连接...")
+            logger("\n[2/4] 测试数据库连接...")
 
             # 使用 psycopg2 进行同步连接测试（更可靠）
             try:
@@ -903,18 +904,18 @@ class InstallationWizardService:
                     connect_timeout=5
                 )
                 conn.close()
-                print("✓ 数据库连接成功")
+                logger("✓ 数据库连接成功")
 
             except ImportError:
                 error_msg = '缺少 psycopg2 库，请安装: pip install psycopg2-binary'
-                print(f"✗ {error_msg}")
+                logger(f"✗ {error_msg}")
                 return {
                     'success': False,
                     'error': error_msg
                 }
             except Exception as e:
                 error_msg = f'数据库连接失败: {str(e)}'
-                print(f"✗ {error_msg}")
+                logger(f"✗ {error_msg}")
                 return {
                     'success': False,
                     'error': error_msg
@@ -930,14 +931,14 @@ class InstallationWizardService:
             # 过滤掉 __init__.py
             migration_files = [f for f in migration_files if f.name != "__init__.py"]
 
-            print(f"\n[3/4] 检查迁移脚本... (找到 {len(migration_files)} 个)")
+            logger(f"\n[3/4] 检查迁移脚本... (找到 {len(migration_files)} 个)")
 
             # 如果没有迁移脚本，生成初始迁移
             if len(migration_files) == 0:
-                print("→ 未找到迁移脚本，正在生成初始迁移...")
-                print(f"  项目根目录: {project_root.absolute()}")
-                print(f"  迁移目录: {versions_dir.absolute()}")
-                print(f"  迁移目录是否存在: {versions_dir.exists()}")
+                logger("→ 未找到迁移脚本，正在生成初始迁移...")
+                logger(f"  项目根目录: {project_root.absolute()}")
+                logger(f"  迁移目录: {versions_dir.absolute()}")
+                logger(f"  迁移目录是否存在: {versions_dir.exists()}")
 
                 result = subprocess.run(
                     [sys.executable, "-m", "alembic", "revision", "--autogenerate", "-m", "Initial migration"],
@@ -948,11 +949,11 @@ class InstallationWizardService:
                 )
 
                 # 调试输出
-                print(f"\n[DEBUG] Alembic 命令返回码: {result.returncode}")
+                logger(f"\n[DEBUG] Alembic 命令返回码: {result.returncode}")
                 if result.stdout:
-                    print(f"[DEBUG] Alembic stdout:\n{result.stdout}")
+                    logger(f"[DEBUG] Alembic stdout:\n{result.stdout}")
                 if result.stderr:
-                    print(f"[DEBUG] Alembic stderr:\n{result.stderr}")
+                    logger(f"[DEBUG] Alembic stderr:\n{result.stderr}")
 
                 if result.returncode != 0:
                     error_msg = f'生成迁移脚本失败 (退出码: {result.returncode}):'
@@ -960,29 +961,29 @@ class InstallationWizardService:
                         error_msg += f'\n{result.stderr}'
                     if result.stdout:
                         error_msg += f'\n{result.stdout}'
-                    print(f"✗ {error_msg}")
+                    logger(f"✗ {error_msg}")
                     return {
                         'success': False,
                         'error': error_msg
                     }
 
-                print("✓ 初始迁移脚本生成成功")
+                logger("✓ 初始迁移脚本生成成功")
 
                 # 重新检查迁移文件
                 migration_files = list(versions_dir.glob("*.py")) if versions_dir.exists() else []
                 migration_files = [f for f in migration_files if f.name != "__init__.py"]
-                print(f"→ 现在共有 {len(migration_files)} 个迁移脚本")
+                logger(f"→ 现在共有 {len(migration_files)} 个迁移脚本")
 
                 # 列出生成的文件
                 if migration_files:
-                    print("  生成的文件:")
+                    logger("  生成的文件:")
                     for f in migration_files:
-                        print(f"    - {f.name}")
+                        logger(f"    - {f.name}")
             else:
-                print(f"✓ 找到 {len(migration_files)} 个迁移脚本")
+                logger(f"✓ 找到 {len(migration_files)} 个迁移脚本")
 
             # 执行迁移
-            print("\n[4/4] 执行数据库迁移...")
+            logger("\n[4/4] 执行数据库迁移...")
             result = subprocess.run(
                 [sys.executable, "-m", "alembic", "upgrade", "head"],
                 cwd=str(project_root),
@@ -992,16 +993,16 @@ class InstallationWizardService:
             )
 
             # 调试输出
-            print(f"\n[DEBUG] Alembic upgrade 返回码: {result.returncode}")
+            logger(f"\n[DEBUG] Alembic upgrade 返回码: {result.returncode}")
             if result.stdout:
-                print(f"[DEBUG] Alembic stdout:\n{result.stdout}")
+                logger(f"[DEBUG] Alembic stdout:\n{result.stdout}")
             if result.stderr:
-                print(f"[DEBUG] Alembic stderr:\n{result.stderr}")
+                logger(f"[DEBUG] Alembic stderr:\n{result.stderr}")
 
             if result.returncode == 0:
-                print("✓ 数据库迁移成功完成")
+                logger("✓ 数据库迁移成功完成")
                 if result.stdout:
-                    print(f"\n迁移输出:\n{result.stdout}")
+                    logger(f"\n迁移输出:\n{result.stdout}")
 
                 return {
                     'success': True,
@@ -1015,7 +1016,7 @@ class InstallationWizardService:
                     error_msg += f'\n{result.stderr}'
                 if result.stdout:
                     error_msg += f'\n{result.stdout}'
-                print(f"✗ {error_msg}")
+                logger(f"✗ {error_msg}")
                 return {
                     'success': False,
                     'error': error_msg
@@ -1023,7 +1024,7 @@ class InstallationWizardService:
 
         except subprocess.TimeoutExpired:
             error_msg = '迁移超时（超过5分钟）'
-            print(f"✗ {error_msg}")
+            logger(f"✗ {error_msg}")
             return {
                 'success': False,
                 'error': error_msg
@@ -1031,8 +1032,8 @@ class InstallationWizardService:
         except Exception as e:
             import traceback
             error_msg = f'数据库初始化失败: {str(e)}'
-            print(f"✗ {error_msg}")
-            print(traceback.format_exc())
+            logger(f"✗ {error_msg}")
+            logger(traceback.format_exc())
             return {
                 'success': False,
                 'error': error_msg
@@ -1060,22 +1061,22 @@ class InstallationWizardService:
             with open(self.install_flag_file, 'w', encoding='utf-8') as f:
                 json.dump(install_info, f, ensure_ascii=False, indent=2)
 
-            print("\n" + "=" * 60)
-            print("✓ 安装完成！")
-            print("=" * 60)
+            logger("\n" + "=" * 60)
+            logger("✓ 安装完成！")
+            logger("=" * 60)
 
             # 如果选择导入示例数据
             if install_info.get('import_sample_data', False):
-                print("\n正在导入示例数据...")
+                logger("\n正在导入示例数据...")
                 sample_result = self.import_sample_data(
                     import_articles=install_info.get('import_articles', True),
                     import_categories=install_info.get('import_categories', True)
                 )
 
                 if sample_result['success']:
-                    print(f"✓ {sample_result['message']}")
+                    logger(f"✓ {sample_result['message']}")
                 else:
-                    print(f"✗ 示例数据导入失败: {sample_result.get('error', '未知错误')}")
+                    logger(f"✗ 示例数据导入失败: {sample_result.get('error', '未知错误')}")
 
             return {
                 "success": True,
@@ -1084,8 +1085,8 @@ class InstallationWizardService:
             }
         except Exception as e:
             import traceback
-            print(f"完成安装失败: {str(e)}")
-            print(traceback.format_exc())
+            logger(f"完成安装失败: {str(e)}")
+            logger(traceback.format_exc())
             return {
                 "success": False,
                 "error": str(e)

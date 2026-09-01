@@ -22,7 +22,7 @@ async def preview_url_replace(
 ):
     """
     预览URL替换（不实际执行）
-    
+
     Body参数:
         search: 搜索字符串
         replace: 替换字符串
@@ -63,8 +63,8 @@ async def preview_url_replace(
 
     except Exception as e:
         import traceback
-        print(f"Error in preview_url_replace: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in preview_url_replace: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -76,7 +76,7 @@ async def execute_url_replace(
 ):
     """
     执行URL替换
-    
+
     Body参数:
         search: 搜索字符串
         replace: 替换字符串
@@ -123,8 +123,8 @@ async def execute_url_replace(
 
     except Exception as e:
         import traceback
-        print(f"Error in execute_url_replace: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in execute_url_replace: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -136,7 +136,7 @@ async def validate_url_replace(
 ):
     """
     验证URL替换的正确性
-    
+
     Body参数:
         old_url: 旧URL
         new_url: 新URL
@@ -166,8 +166,8 @@ async def validate_url_replace(
 
     except Exception as e:
         import traceback
-        print(f"Error in validate_url_replace: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in validate_url_replace: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

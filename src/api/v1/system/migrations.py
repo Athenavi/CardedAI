@@ -29,15 +29,15 @@ async def migration_status_api(
     """
     try:
         status = migration_manager.get_migration_status()
-        
+
         return ApiResponse(
             success=True,
             data=status
         )
     except Exception as e:
         import traceback
-        print(f"Error in migration_status_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in migration_status_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -55,7 +55,7 @@ async def apply_migrations_api(
     """
     try:
         result = await migration_manager.apply_all_migrations(db)
-        
+
         if result['success']:
             return ApiResponse(
                 success=True,
@@ -74,8 +74,8 @@ async def apply_migrations_api(
             )
     except Exception as e:
         import traceback
-        print(f"Error in apply_migrations_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in apply_migrations_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -90,7 +90,7 @@ async def create_migration_api(
 ):
     """
     创建迁移文件API
-    
+
     Request Body:
     {
         "message": "Add user avatar column",
@@ -100,12 +100,12 @@ async def create_migration_api(
     try:
         message = data.get('message', '')
         autogenerate = data.get('autogenerate', False)
-        
+
         if not message:
             return ApiResponse(success=False, error='缺少迁移描述')
-        
+
         result = migration_manager.create_migration(message, autogenerate)
-        
+
         if result['success']:
             return ApiResponse(
                 success=True,
@@ -118,8 +118,8 @@ async def create_migration_api(
             return ApiResponse(success=False, error=result.get('error', '创建失败'))
     except Exception as e:
         import traceback
-        print(f"Error in create_migration_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in create_migration_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -134,7 +134,7 @@ async def rollback_migration_api(
 ):
     """
     回滚迁移API
-    
+
     Request Body:
     {
         "steps": 1
@@ -142,9 +142,9 @@ async def rollback_migration_api(
     """
     try:
         steps = data.get('steps', 1)
-        
+
         result = migration_manager.rollback_migration(steps)
-        
+
         if result['success']:
             return ApiResponse(
                 success=True,
@@ -154,8 +154,8 @@ async def rollback_migration_api(
             return ApiResponse(success=False, error=result.get('error', '回滚失败'))
     except Exception as e:
         import traceback
-        print(f"Error in rollback_migration_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in rollback_migration_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

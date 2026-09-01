@@ -41,17 +41,17 @@ async def get_maintenance_status_api(
         if not getattr(current_user, 'is_staff', False) and not getattr(current_user, 'is_superuser', False):
             from fastapi import HTTPException
             raise HTTPException(status_code=403, detail="Admin permission required")
-        
+
         status = maintenance_service.get_status()
-        
+
         return ApiResponse(
             success=True,
             data=status
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_maintenance_status_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_maintenance_status_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -69,13 +69,13 @@ async def enable_maintenance_api(
         if not getattr(current_user, 'is_staff', False) and not getattr(current_user, 'is_superuser', False):
             from fastapi import HTTPException
             raise HTTPException(status_code=403, detail="Admin permission required")
-        
+
         config = maintenance_service.enable_maintenance(
             message=request.message,
             whitelist_ips=request.whitelist_ips,
             retry_after=request.retry_after
         )
-        
+
         return ApiResponse(
             success=True,
             data={
@@ -85,8 +85,8 @@ async def enable_maintenance_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in enable_maintenance_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in enable_maintenance_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -103,9 +103,9 @@ async def disable_maintenance_api(
         if not getattr(current_user, 'is_staff', False) and not getattr(current_user, 'is_superuser', False):
             from fastapi import HTTPException
             raise HTTPException(status_code=403, detail="Admin permission required")
-        
+
         config = maintenance_service.disable_maintenance()
-        
+
         return ApiResponse(
             success=True,
             data={
@@ -115,8 +115,8 @@ async def disable_maintenance_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in disable_maintenance_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in disable_maintenance_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -134,14 +134,14 @@ async def schedule_maintenance_api(
         if not getattr(current_user, 'is_staff', False) and not getattr(current_user, 'is_superuser', False):
             from fastapi import HTTPException
             raise HTTPException(status_code=403, detail="Admin permission required")
-        
+
         config = maintenance_service.schedule_maintenance(
             start_time=request.start_time,
             end_time=request.end_time,
             message=request.message,
             whitelist_ips=request.whitelist_ips
         )
-        
+
         return ApiResponse(
             success=True,
             data={
@@ -151,8 +151,8 @@ async def schedule_maintenance_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in schedule_maintenance_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in schedule_maintenance_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -170,9 +170,9 @@ async def add_whitelist_ip_api(
         if not getattr(current_user, 'is_staff', False) and not getattr(current_user, 'is_superuser', False):
             from fastapi import HTTPException
             raise HTTPException(status_code=403, detail="Admin permission required")
-        
+
         config = maintenance_service.add_whitelist_ip(ip)
-        
+
         return ApiResponse(
             success=True,
             data={
@@ -182,8 +182,8 @@ async def add_whitelist_ip_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in add_whitelist_ip_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in add_whitelist_ip_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -201,9 +201,9 @@ async def remove_whitelist_ip_api(
         if not getattr(current_user, 'is_staff', False) and not getattr(current_user, 'is_superuser', False):
             from fastapi import HTTPException
             raise HTTPException(status_code=403, detail="Admin permission required")
-        
+
         config = maintenance_service.remove_whitelist_ip(ip)
-        
+
         return ApiResponse(
             success=True,
             data={
@@ -213,8 +213,8 @@ async def remove_whitelist_ip_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in remove_whitelist_ip_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in remove_whitelist_ip_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -232,9 +232,9 @@ async def update_message_api(
         if not getattr(current_user, 'is_staff', False) and not getattr(current_user, 'is_superuser', False):
             from fastapi import HTTPException
             raise HTTPException(status_code=403, detail="Admin permission required")
-        
+
         config = maintenance_service.update_message(message)
-        
+
         return ApiResponse(
             success=True,
             data={
@@ -244,6 +244,6 @@ async def update_message_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in update_message_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in update_message_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))

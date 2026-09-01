@@ -29,13 +29,13 @@ class LoginSecurityService:
                                          is_success: bool = False, db: AsyncSession = None) -> Dict:
         """
         异步记录登录尝试
-        
+
         Args:
             username: 用户名
             ip_address: IP地址
             is_success: 是否成功
             db: 数据库会话
-            
+
         Returns:
             记录结果
         """
@@ -66,11 +66,11 @@ class LoginSecurityService:
         bool, Optional[datetime]]:
         """
         异步检查账户是否被锁定（基于用户名）
-        
+
         Args:
             username: 用户名
             db: 数据库会话
-            
+
         Returns:
             (is_locked, unlock_time) 元组
         """
@@ -124,11 +124,11 @@ class LoginSecurityService:
     async def get_failed_attempts_count_async(self, username: str, db: AsyncSession = None) -> int:
         """
         异步获取失败尝试次数
-        
+
         Args:
             username: 用户名
             db: 数据库会话
-            
+
         Returns:
             失败尝试次数
         """
@@ -157,11 +157,11 @@ class LoginSecurityService:
     async def clear_failed_attempts_async(self, username: str, db: AsyncSession = None) -> bool:
         """
         异步清除失败尝试记录
-        
+
         Args:
             username: 用户名
             db: 数据库会话
-            
+
         Returns:
             是否成功清除
         """
@@ -196,12 +196,12 @@ class LoginSecurityService:
     async def get_login_history_async(self, username: str, limit: int = 50, db: AsyncSession = None) -> List[Dict]:
         """
         异步获取用户登录历史
-        
+
         Args:
             username: 用户名
             limit: 返回数量
             db: 数据库会话
-            
+
         Returns:
             登录历史记录
         """
@@ -234,11 +234,11 @@ class LoginSecurityService:
     async def get_security_stats_async(self, username: str, db: AsyncSession = None) -> Dict:
         """
         异步获取用户安全统计
-        
+
         Args:
             username: 用户名
             db: 数据库会话
-            
+
         Returns:
             统计数据
         """
@@ -329,10 +329,10 @@ class LoginSecurityService:
     async def get_locked_users_async(self, db: AsyncSession = None) -> List[Dict]:
         """
         异步获取所有被锁定的用户(管理员)
-        
+
         Args:
             db: 数据库会话
-            
+
         Returns:
             锁定用户列表
         """
@@ -380,15 +380,15 @@ class LoginSecurityService:
             logger.error(f"Failed to get locked users: {e}")
             return []
 
-    def _generate_device_fingerprint(self, device_info: Dict,
+    def _generate_device_fingerlogger(self, device_info: Dict,
                                      user_agent: str = '') -> str:
         """
         生成设备指纹（保留用于向后兼容）
-        
+
         Args:
             device_info: 设备信息
             user_agent: User-Agent
-            
+
         Returns:
             设备指纹哈希
         """

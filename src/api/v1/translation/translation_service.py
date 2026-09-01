@@ -29,7 +29,7 @@ async def translate_text_api(
 ):
     """
     翻译文本API
-    
+
     Request Body:
     {
         "text": "Hello world",
@@ -43,10 +43,10 @@ async def translate_text_api(
         target_lang = data.get('target_lang', '')
         source_lang = data.get('source_lang', 'auto')
         provider = data.get('provider', None)
-        
+
         if not text or not target_lang:
             return ApiResponse(success=False, error='缺少必要参数')
-        
+
         # 转换语言代码
         lang_map = {
             'zh-CN': 'zh',
@@ -56,12 +56,12 @@ async def translate_text_api(
             'ar': 'ar',
             'he': 'he',
         }
-        
+
         target_code = lang_map.get(target_lang, target_lang)
         source_code = lang_map.get(source_lang, source_lang) if source_lang != 'auto' else 'auto'
-        
+
         result = translation_service_manager.translate(text, target_code, source_code, provider)
-        
+
         if result['success']:
             return ApiResponse(
                 success=True,
@@ -75,8 +75,8 @@ async def translate_text_api(
             return ApiResponse(success=False, error=result.get('error', '翻译失败'))
     except Exception as e:
         import traceback
-        print(f"Error in translate_text_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in translate_text_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -91,7 +91,7 @@ async def detect_language_api(
 ):
     """
     检测语言API
-    
+
     Request Body:
     {
         "text": "Hello world",
@@ -101,15 +101,15 @@ async def detect_language_api(
     try:
         text = data.get('text', '')
         provider = data.get('provider', 'google')
-        
+
         if not text:
             return ApiResponse(success=False, error='缺少文本')
-        
+
         # 目前只有Google支持语言检测
         if provider == 'google' and 'google' in translation_service_manager.clients:
             client = translation_service_manager.clients['google']
             result = client.detect_language(text)
-            
+
             if result['success']:
                 return ApiResponse(
                     success=True,
@@ -125,8 +125,8 @@ async def detect_language_api(
             return ApiResponse(success=False, error='当前提供商不支持语言检测')
     except Exception as e:
         import traceback
-        print(f"Error in detect_language_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in detect_language_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -144,7 +144,7 @@ async def get_providers_api(
     try:
         providers = translation_service_manager.get_available_providers()
         default = translation_service_manager.default_provider
-        
+
         return ApiResponse(
             success=True,
             data={
@@ -155,8 +155,8 @@ async def get_providers_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_providers_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_providers_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -171,7 +171,7 @@ async def configure_translation_api(
 ):
     """
     配置翻译服务API
-    
+
     Request Body:
     {
         "provider": "google",
@@ -183,10 +183,10 @@ async def configure_translation_api(
         provider = data.get('provider', '')
         api_key = data.get('api_key', '')
         set_as_default = data.get('set_as_default', False)
-        
+
         if not provider or not api_key:
             return ApiResponse(success=False, error='缺少必要参数')
-        
+
         # 注册客户端
         if provider == 'google':
             client = GoogleTranslateClient(api_key)
@@ -196,18 +196,18 @@ async def configure_translation_api(
             translation_service_manager.register_client('deepl', client)
         else:
             return ApiResponse(success=False, error=f'不支持的提供商: {provider}')
-        
+
         if set_as_default:
             translation_service_manager.set_default_provider(provider)
-        
+
         return ApiResponse(
             success=True,
             message=f'{provider}翻译服务配置成功'
         )
     except Exception as e:
         import traceback
-        print(f"Error in configure_translation_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in configure_translation_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

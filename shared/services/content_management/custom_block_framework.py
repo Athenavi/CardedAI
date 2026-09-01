@@ -5,11 +5,11 @@
 使用示例:
     # 1. 创建自定义块插件
     from shared.services.custom_block_framework import CustomBlockPlugin, BlockType
-    
+
     class MyCustomPlugin(CustomBlockPlugin):
         name = "my-custom-plugin"
         version = "1.0.0"
-        
+
         def register_blocks(self):
             # 注册自定义块
             self.register_block(BlockType(
@@ -22,18 +22,18 @@
                     "level": {"type": "string", "enum": ["info", "warning", "error"]}
                 }
             ))
-            
+
         def render_custom_alert(self, attributes, children):
             # 自定义渲染逻辑
             level = attributes.get("level", "info")
             message = attributes.get("message", "")
             return f'<div class="alert alert-{level}">{message}</div>'
-    
+
     # 2. 加载插件
     from shared.services.custom_block_framework import block_plugin_manager
     plugin = MyCustomPlugin()
     block_plugin_manager.load_plugin(plugin)
-    
+
     # 3. 使用自定义块
     blocks = block_plugin_manager.get_all_blocks()
 """
@@ -62,7 +62,7 @@ class BlockPlugin:
 class CustomBlockPlugin:
     """
     自定义块插件基类
-    
+
     开发者继承此类来创建自定义块插件
     """
 
@@ -83,7 +83,7 @@ class CustomBlockPlugin:
     def register_blocks(self):
         """
         注册块类型（子类必须实现）
-        
+
         在此方法中调用 self.register_block() 来注册自定义块
         """
         raise NotImplementedError("Subclasses must implement register_blocks()")
@@ -91,7 +91,7 @@ class CustomBlockPlugin:
     def register_block(self, block_type: BlockType):
         """
         注册单个块类型
-        
+
         Args:
             block_type: 块类型定义
         """
@@ -114,12 +114,12 @@ class CustomBlockPlugin:
     def get_render_method(self, block_name: str) -> Optional[Any]:
         """
         获取块的自定义渲染方法
-        
+
         如果插件定义了 render_{block_name} 方法，则返回该方法
-        
+
         Args:
             block_name: 块名称
-            
+
         Returns:
             渲染方法或 None
         """
@@ -130,7 +130,7 @@ class CustomBlockPlugin:
 class BlockPluginManager:
     """
     块插件管理器
-    
+
     功能：
     1. 插件加载和卸载
     2. 插件生命周期管理
@@ -147,10 +147,10 @@ class BlockPluginManager:
     def load_plugin(self, plugin_instance: CustomBlockPlugin) -> bool:
         """
         加载插件
-        
+
         Args:
             plugin_instance: 插件实例
-            
+
         Returns:
             是否加载成功
         """
@@ -158,7 +158,7 @@ class BlockPluginManager:
 
         # 检查是否已加载
         if plugin_name in self.plugins:
-            print(f"⚠️ 插件 '{plugin_name}' 已加载")
+            logger(f"⚠️ 插件 '{plugin_name}' 已加载")
             return False
 
         try:
@@ -181,13 +181,13 @@ class BlockPluginManager:
             # 调用激活钩子
             plugin_instance.on_activate()
 
-            print(f"✅ 插件 '{plugin_name}' v{plugin_instance.version} 加载成功")
-            print(f"   注册了 {len(plugin_info.blocks)} 个块类型")
+            logger(f"✅ 插件 '{plugin_name}' v{plugin_instance.version} 加载成功")
+            logger(f"   注册了 {len(plugin_info.blocks)} 个块类型")
 
             return True
 
         except Exception as e:
-            print(f"❌ 插件 '{plugin_name}' 加载失败: {e}")
+            logger(f"❌ 插件 '{plugin_name}' 加载失败: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -195,15 +195,15 @@ class BlockPluginManager:
     def unload_plugin(self, plugin_name: str) -> bool:
         """
         卸载插件
-        
+
         Args:
             plugin_name: 插件名称
-            
+
         Returns:
             是否卸载成功
         """
         if plugin_name not in self.plugins:
-            print(f"⚠️ 插件 '{plugin_name}' 未加载")
+            logger(f"⚠️ 插件 '{plugin_name}' 未加载")
             return False
 
         try:
@@ -216,11 +216,11 @@ class BlockPluginManager:
             del self.plugins[plugin_name]
             del self.plugin_instances[plugin_name]
 
-            print(f"✅ 插件 '{plugin_name}' 已卸载")
+            logger(f"✅ 插件 '{plugin_name}' 已卸载")
             return True
 
         except Exception as e:
-            print(f"❌ 插件 '{plugin_name}' 卸载失败: {e}")
+            logger(f"❌ 插件 '{plugin_name}' 卸载失败: {e}")
             return False
 
     def activate_plugin(self, plugin_name: str) -> bool:
@@ -252,14 +252,14 @@ class BlockPluginManager:
     def auto_discover_plugins(self) -> int:
         """
         自动发现并加载插件
-        
+
         扫描插件目录，自动加载所有有效的插件
-        
+
         Returns:
             成功加载的插件数量
         """
         if not self.plugin_dir.exists():
-            print(f"📁 插件目录不存在: {self.plugin_dir}")
+            logger(f"📁 插件目录不存在: {self.plugin_dir}")
             return 0
 
         loaded_count = 0
@@ -288,9 +288,9 @@ class BlockPluginManager:
                             loaded_count += 1
 
             except Exception as e:
-                print(f"⚠️ 加载插件 {plugin_path} 失败: {e}")
+                logger(f"⚠️ 加载插件 {plugin_path} 失败: {e}")
 
-        print(f"🔍 自动发现完成，成功加载 {loaded_count} 个插件")
+        logger(f"🔍 自动发现完成，成功加载 {loaded_count} 个插件")
         return loaded_count
 
     def get_plugin(self, plugin_name: str) -> Optional[BlockPlugin]:
@@ -316,10 +316,10 @@ class BlockPluginManager:
     def get_plugin_by_block(self, block_name: str) -> Optional[str]:
         """
         根据块名称查找所属插件
-        
+
         Args:
             block_name: 块名称
-            
+
         Returns:
             插件名称或 None
         """

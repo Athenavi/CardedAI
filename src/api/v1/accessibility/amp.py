@@ -12,6 +12,7 @@ from shared.models.user import User
 from shared.services.advanced_features.amp_service import amp_service
 from src.api.v1.core.responses import ApiResponse
 from src.extensions import get_async_db_session as get_async_db
+from src.unified_logger import default_logger as logger
 
 router = APIRouter()
 
@@ -27,7 +28,7 @@ async def get_article_amp_api(
 ):
     """
     获取文章AMP版本API
-    
+
     返回符合AMP规范的HTML页面
     """
     try:
@@ -38,23 +39,23 @@ async def get_article_amp_api(
         )
         article_result = await db.execute(article_query)
         article = article_result.scalar_one_or_none()
-        
+
         if not article:
             raise HTTPException(status_code=404, detail="Article not found")
-        
+
         # 获取文章内容
         content_query = select(ArticleContent).where(ArticleContent.aid == article_id)
         content_result = await db.execute(content_query)
         article_content = content_result.scalar_one_or_none()
-        
+
         if not article_content:
             raise HTTPException(status_code=404, detail="Article content not found")
-        
+
         # 获取作者信息
         author_query = select(User).where(User.id == article.user)
         author_result = await db.execute(author_query)
         author = author_result.scalar_one_or_none()
-        
+
         # 构建文章数据
         from datetime import datetime
         article_data = {
@@ -69,17 +70,17 @@ async def get_article_amp_api(
             'featured_image': article.cover_image,
             'canonical_url': f"{request.base_url}articles/{article.slug}" if article.slug else f"{request.base_url}articles/{article_id}",
         }
-        
+
         # 生成AMP HTML
         amp_html = amp_service.generate_amp_html(article_data)
-        
+
         # 验证AMP
         validation = amp_service.validate_amp(amp_html)
-        
+
         if not validation['valid']:
             # 如果验证失败,记录错误但仍返回(开发阶段)
-            print(f"AMP Validation Errors: {validation['errors']}")
-        
+            logger(f"AMP Validation Errors: {validation['errors']}")
+
         # 返回AMP HTML
         from fastapi.responses import HTMLResponse
         return HTMLResponse(
@@ -90,13 +91,13 @@ async def get_article_amp_api(
                 'Link': f'<{article_data["canonical_url"]}>; rel="canonical"',
             }
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         import traceback
-        print(f"Error in get_article_amp_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_article_amp_api: {str(e)}")
+        logger(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -117,23 +118,23 @@ async def validate_article_amp_api(
         article_query = select(Article).where(Article.id == article_id)
         article_result = await db.execute(article_query)
         article = article_result.scalar_one_or_none()
-        
+
         if not article:
             return ApiResponse(success=False, error="Article not found")
-        
+
         # 获取文章内容
         content_query = select(ArticleContent).where(ArticleContent.aid == article_id)
         content_result = await db.execute(content_query)
         article_content = content_result.scalar_one_or_none()
-        
+
         if not article_content:
             return ApiResponse(success=False, error="Article content not found")
-        
+
         # 获取作者信息
         author_query = select(User).where(User.id == article.user)
         author_result = await db.execute(author_query)
         author = author_result.scalar_one_or_none()
-        
+
         # 构建文章数据
         from datetime import datetime
         article_data = {
@@ -147,11 +148,11 @@ async def validate_article_amp_api(
             'featured_image': article.cover_image,
             'canonical_url': f"{request.base_url}articles/{article.slug}" if article.slug else f"{request.base_url}articles/{article_id}",
         }
-        
+
         # 生成并验证AMP
         amp_html = amp_service.generate_amp_html(article_data)
         validation = amp_service.validate_amp(amp_html)
-        
+
         return ApiResponse(
             success=True,
             data={
@@ -160,11 +161,11 @@ async def validate_article_amp_api(
                 'amp_url': f"{request.base_url}api/v1/amp/{article_id}/amp",
             }
         )
-        
+
     except Exception as e:
         import traceback
-        print(f"Error in validate_article_amp_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in validate_article_amp_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

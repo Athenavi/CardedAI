@@ -34,9 +34,12 @@ async def get_cover_image(filename: str):
         封面图片文件
     """
     try:
+        # URL 解码防止 %2e%2e 绕过路径检查
+        decoded_filename = urllib.parse.unquote(filename)
+
         # 构建封面文件路径
         cover_dir = Path("storage/cache/cover")
-        cover_path = cover_dir / filename
+        cover_path = cover_dir / decoded_filename
 
         # 安全检查：防止目录遍历攻击
         if not cover_path.exists():
@@ -84,7 +87,7 @@ async def get_media_file_by_id(
         db: AsyncSession = Depends(get_async_db)
 ):
     try:
-        logger.info(f"[DEBUG] 请求媒体文件 - ID: {media_id}, User: {current_user_obj.id}")
+        logger.debug(f"请求媒体文件 - ID: {media_id}, User: {current_user_obj.id}")
 
         # 查询媒体文件（支持访问自己的文件或公开文件）
         media_query = select(Media).where(Media.id == media_id)
@@ -95,8 +98,8 @@ async def get_media_file_by_id(
             logger.error(f"[ERROR] 媒体文件不存在 - ID: {media_id}")
             raise HTTPException(status_code=404, detail="文件不存在")
 
-        logger.info(
-            f"[DEBUG] 找到媒体文件 - ID: {media.id}, Hash: {media.hash}, User: {media.user}, IsPublic: {media.is_public}")
+        logger.debug(
+            f"找到媒体文件 - ID: {media.id}, Hash: {media.hash}, User: {media.user}, IsPublic: {media.is_public}")
 
         # 检查用户权限（只能访问自己的文件或公开文件）
         if media.user != current_user_obj.id and not media.is_public:
@@ -160,7 +163,7 @@ async def get_media_file_by_id(
 
         if if_none_match and if_none_match == etag:
             # 文件未修改，返回 304 Not Modified
-            logger.info(f"[OK] 命中 ETag 缓存，返回 304 - ID: {media_id}")
+            logger.debug(f"命中 ETag 缓存，返回 304 - ID: {media_id}")
             return Response(status_code=304, headers={"ETag": etag})
 
         # 设置响应头
@@ -180,24 +183,24 @@ async def get_media_file_by_id(
 
         # 处理本地文件（优先检查标准路径，支持带扩展名和不带扩展名）
         if file_path.exists():
-            logger.info(f"  [OK] 文件存在于标准路径: {file_path}")
+            logger.debug(f"文件存在于标准路径: {file_path}")
             return await handle_local_file(file_path, file_hash.mime_type, file_hash.filename, range_header, headers)
 
         # 如果标准路径不存在，尝试从 storage_path 构建完整路径
         if file_hash.storage_path:
             # 处理相对路径格式：objects/xx/xxx.ext
             if not file_hash.storage_path.startswith(("s3://",)):
-                relative_path = Path(file_hash.storage_path)  #
+                relative_path = Path(file_hash.storage_path)
                 full_path = Path("storage") / relative_path
-                logger.info(f"  尝试从 storage_path 构建路径: {full_path}")
+                logger.debug(f"尝试从 storage_path 构建路径: {full_path}")
                 if full_path.exists():
-                    logger.info(f"  [OK] 文件存在于 storage_path 对应的路径: {full_path}")
+                    logger.debug(f"文件存在于 storage_path 对应的路径: {full_path}")
                     return await handle_local_file(full_path, file_hash.mime_type, file_hash.filename, range_header,
                                                    headers)
 
         # 处理 S3 存储
         elif file_hash.storage_path and file_hash.storage_path.startswith("s3://"):
-            logger.info(f"  [OK] 使用 S3 路径: {file_hash.storage_path}")
+            logger.debug(f"使用 S3 路径: {file_hash.storage_path}")
             return await handle_s3_streaming(
                 s3_path=file_hash.storage_path,
                 mime_type=file_hash.mime_type,

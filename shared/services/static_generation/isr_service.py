@@ -19,7 +19,7 @@ class ISRService:
                 # 调用 Astro 或 Next.js 的 ISR 端点
                 await client.post(f"{frontend_url}/api/revalidate", json={"path": path})
         except Exception as e:
-            print(f"ISR revalidation failed for {path}: {e}")
+            logger(f"ISR revalidation failed for {path}: {e}")
 
     @staticmethod
     async def on_article_update(slug: str):

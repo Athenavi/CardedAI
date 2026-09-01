@@ -52,7 +52,7 @@ async def create_article_revision(
 ):
     """
     手动创建文章修订版本或同步本地草稿
-    
+
     Args:
         article_id: 文章ID
         request_data: 请求数据，包含变更说明和可选的草稿数据
@@ -156,8 +156,8 @@ async def create_article_revision(
 
     except Exception as e:
         import traceback
-        print(f"Error creating revision: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error creating revision: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -171,7 +171,7 @@ async def list_article_revisions(
 ):
     """
     获取文章的修订历史列表
-    
+
     Args:
         article_id: 文章ID
         page: 页码
@@ -203,7 +203,7 @@ async def compare_article_revisions(
 ):
     """
     比较两个修订版本的差异
-    
+
     Args:
         revision1_id: 第一个修订ID
         revision2_id: 第二个修订ID
@@ -238,7 +238,7 @@ async def get_revision(
 ):
     """
     获取特定修订版本的详细信息
-    
+
     Args:
         revision_id: 修订ID
     """
@@ -272,7 +272,7 @@ async def rollback_article(
 ):
     """
     回滚文章到指定修订版本
-    
+
     Args:
         article_id: 文章ID
         revision_id: 目标修订ID
@@ -308,7 +308,7 @@ async def sync_article_revisions(
 ):
     """
     同步文章修订历史到云端（强制保存当前状态为修订版本）
-    
+
     Args:
         article_id: 文章ID
     """
@@ -337,8 +337,8 @@ async def sync_article_revisions(
 
     except Exception as e:
         import traceback
-        print(f"Error syncing revisions: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error syncing revisions: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -351,7 +351,7 @@ async def delete_article_revision(
 ):
     """
     删除指定的修订版本
-    
+
     Args:
         article_id: 文章ID
         revision_id: 修订ID

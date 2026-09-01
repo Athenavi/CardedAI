@@ -58,19 +58,19 @@ class AuditStatus(str, Enum):
 class AuditLogger:
     """
     插件行为审计日志器
-    
+
     记录插件的所有关键操作，支持多种存储后端
     """
 
     def __init__(self, storage_backend: str = "file", log_dir: str = "logs/plugin_audit"):
         """
         初始化审计日志器
-        
+
         Args:
             storage_backend: 存储后端类型 (file, database)
             log_dir: 日志文件目录（当使用 file 后端时）
         """
-        print(f"[AuditLogger] Initialized with {storage_backend} backend")
+        logger(f"[AuditLogger] Initialized with {storage_backend} backend")
 
     def log(
             self,
@@ -83,7 +83,7 @@ class AuditLogger:
     ):
         """
         记录审计日志
-        
+
         Args:
             plugin_slug: 插件标识
             action_type: 动作类型
@@ -110,7 +110,7 @@ class AuditLogger:
 
         # 如果是 denied 或 failure，额外输出到控制台
         if status in [AuditStatus.DENIED, AuditStatus.FAILURE]:
-            print(f"[AUDIT ALERT] {plugin_slug}: {action_type} on {resource} - {status}")
+            logger(f"[AUDIT ALERT] {plugin_slug}: {action_type} on {resource} - {status}")
 
         return log_entry
 
@@ -187,14 +187,14 @@ class AuditLogger:
     ) -> List[Dict[str, Any]]:
         """
         查询审计日志
-        
+
         Args:
             plugin_slug: 插件标识过滤
             action_type: 动作类型过滤
             start_time: 开始时间 (ISO format)
             end_time: 结束时间 (ISO format)
             limit: 返回数量限制
-            
+
         Returns:
             日志条目列表
         """
@@ -230,18 +230,18 @@ class AuditLogger:
                         except json.JSONDecodeError:
                             continue
             except Exception as e:
-                print(f"[AuditLogger] Error reading {log_file}: {e}")
+                logger(f"[AuditLogger] Error reading {log_file}: {e}")
 
         return logs
 
     def generate_report(self, plugin_slug: str, days: int = 7) -> Dict[str, Any]:
         """
         生成插件审计报告
-        
+
         Args:
             plugin_slug: 插件标识
             days: 报告天数
-            
+
         Returns:
             审计报告
         """
@@ -308,7 +308,7 @@ def audit_action(
 ):
     """
     装饰器：自动审计插件操作
-    
+
     用法:
         @audit_action(AuditActionType.DATA_READ, "articles")
         def read_articles(self):

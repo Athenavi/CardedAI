@@ -309,7 +309,7 @@ async def login_api(
                 user_agent=user_agent,
             )
         except Exception as e:
-            print(f"[Login API] Warning: Failed to create session record: {e}")
+            logger(f"[Login API] Warning: Failed to create session record: {e}")
             # 会话创建失败不影响登录流程
 
         # 4. 更新最后登录时间

@@ -26,7 +26,7 @@ async def add_translation_api(
 ):
     """
     添加翻译API
-    
+
     Request Body:
     {
         "source_text": "Hello",
@@ -42,14 +42,14 @@ async def add_translation_api(
         source_lang = data.get('source_lang', '')
         target_lang = data.get('target_lang', '')
         context = data.get('context', '')
-        
+
         if not all([source_text, target_text, source_lang, target_lang]):
             return ApiResponse(success=False, error='缺少必要参数')
-        
+
         success = translation_memory_service.add_translation(
             source_text, target_text, source_lang, target_lang, context
         )
-        
+
         if success:
             return ApiResponse(
                 success=True,
@@ -59,8 +59,8 @@ async def add_translation_api(
             return ApiResponse(success=False, error='添加失败')
     except Exception as e:
         import traceback
-        print(f"Error in add_translation_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in add_translation_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -74,7 +74,7 @@ async def get_translation_suggestions_api(
 ):
     """
     获取翻译建议API
-    
+
     Request Body:
     {
         "source_text": "Hello world",
@@ -88,14 +88,14 @@ async def get_translation_suggestions_api(
         source_lang = data.get('source_lang', '')
         target_lang = data.get('target_lang', '')
         threshold = data.get('threshold', 0.7)
-        
+
         if not all([source_text, source_lang, target_lang]):
             return ApiResponse(success=False, error='缺少必要参数')
-        
+
         suggestions = translation_memory_service.find_similar_translations(
             source_text, source_lang, target_lang, threshold
         )
-        
+
         return ApiResponse(
             success=True,
             data={
@@ -105,8 +105,8 @@ async def get_translation_suggestions_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_translation_suggestions_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_translation_suggestions_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -123,15 +123,15 @@ async def translation_stats_api(
     """
     try:
         stats = translation_memory_service.get_translation_stats()
-        
+
         return ApiResponse(
             success=True,
             data=stats
         )
     except Exception as e:
         import traceback
-        print(f"Error in translation_stats_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in translation_stats_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -148,7 +148,7 @@ async def export_translation_memory_api(
     """
     try:
         json_str = translation_memory_service.export_memory()
-        
+
         from fastapi.responses import JSONResponse
         return JSONResponse(
             content=json.loads(json_str),
@@ -158,8 +158,8 @@ async def export_translation_memory_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in export_translation_memory_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in export_translation_memory_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -174,7 +174,7 @@ async def import_translation_memory_api(
 ):
     """
     导入翻译记忆API
-    
+
     Request Body:
     {
         "json_data": {...},
@@ -184,12 +184,12 @@ async def import_translation_memory_api(
     try:
         json_data = data.get('json_data', {})
         merge = data.get('merge', True)
-        
+
         import json
         json_str = json.dumps(json_data)
-        
+
         success = translation_memory_service.import_memory(json_str, merge)
-        
+
         if success:
             return ApiResponse(
                 success=True,
@@ -199,8 +199,8 @@ async def import_translation_memory_api(
             return ApiResponse(success=False, error='导入失败')
     except Exception as e:
         import traceback
-        print(f"Error in import_translation_memory_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in import_translation_memory_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -215,7 +215,7 @@ async def clear_translation_memory_api(
 ):
     """
     清除翻译记忆API
-    
+
     Request Body:
     {
         "language_pair": "zh-CN_en" (可选,不传则清除全部)
@@ -223,17 +223,17 @@ async def clear_translation_memory_api(
     """
     try:
         language_pair = data.get('language_pair', None)
-        
+
         translation_memory_service.clear_memory(language_pair)
-        
+
         return ApiResponse(
             success=True,
             message=f'已清除{"语言对: " + language_pair if language_pair else "全部"}翻译记忆'
         )
     except Exception as e:
         import traceback
-        print(f"Error in clear_translation_memory_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in clear_translation_memory_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

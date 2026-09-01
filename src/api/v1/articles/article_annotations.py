@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.api.v1.core.responses import ApiResponse
 from src.auth.auth_deps import jwt_required
 from src.utils.database.main import get_async_session
+from src.unified_logger import default_logger as logger
 
 router = APIRouter(tags=["annotations"])
 
@@ -27,14 +28,14 @@ async def create_annotation(
 ):
     """
     创建文章批注
-    
+
     Args:
         article_id: 文章ID
         content: 批注内容
         position: 批注位置信息
         selection_text: 选中的文本片段
         parent_id: 父批注ID（用于回复）
-        
+
     Returns:
         创建的批注
     """
@@ -109,7 +110,7 @@ async def create_annotation(
     except Exception as e:
         await db.rollback()
         import traceback
-        print(f"Error creating annotation: {e}\n{traceback.format_exc()}")
+        logger(f"Error creating annotation: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=f"创建批注失败: {str(e)}")
 
 
@@ -122,11 +123,11 @@ async def get_article_annotations(
 ):
     """
     获取文章的所有批注（包括回复）
-    
+
     Args:
         article_id: 文章ID
         resolved: 筛选已解决或未解决的批注
-        
+
     Returns:
         批注列表（树形结构）
     """
@@ -193,7 +194,7 @@ async def get_article_annotations(
         )
     except Exception as e:
         import traceback
-        print(f"Error getting annotations: {e}\n{traceback.format_exc()}")
+        logger(f"Error getting annotations: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=f"获取批注失败: {str(e)}")
 
 
@@ -207,12 +208,12 @@ async def update_annotation(
 ):
     """
     更新批注（只能更新自己的批注或管理员）
-    
+
     Args:
         annotation_id: 批注ID
         content: 新的批注内容
         is_resolved: 解决状态
-        
+
     Returns:
         更新后的批注
     """
@@ -257,7 +258,7 @@ async def update_annotation(
     except Exception as e:
         await db.rollback()
         import traceback
-        print(f"Error updating annotation: {e}\n{traceback.format_exc()}")
+        logger(f"Error updating annotation: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=f"更新批注失败: {str(e)}")
 
 
@@ -269,10 +270,10 @@ async def delete_annotation(
 ):
     """
     删除批注（只能删除自己的批注或管理员）
-    
+
     Args:
         annotation_id: 批注ID
-        
+
     Returns:
         删除结果
     """
@@ -304,5 +305,5 @@ async def delete_annotation(
     except Exception as e:
         await db.rollback()
         import traceback
-        print(f"Error deleting annotation: {e}\n{traceback.format_exc()}")
+        logger(f"Error deleting annotation: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=f"删除批注失败: {str(e)}")

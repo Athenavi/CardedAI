@@ -31,16 +31,16 @@ class SessionManagementService:
                        ip_address: str = None, user_agent: str = None) -> str:
         """
         创建或复用会话
-        
+
         如果同一用户从同一设备（相同设备指纹）已有活跃会话，则复用该会话。
         否则创建新会话。
-        
+
         Args:
             user_id: 用户ID
             device_info: 设备信息
             ip_address: IP地址
             user_agent: User-Agent字符串
-            
+
         Returns:
             会话ID
         """
@@ -48,7 +48,7 @@ class SessionManagementService:
         self._cleanup_old_sessions(user_id)
 
         # 计算设备指纹
-        device_fingerprint = self._generate_device_fingerprint(device_info, user_agent)
+        device_fingerprint = self._generate_device_fingerlogger(device_info, user_agent)
 
         # 查找同一设备的活跃会话
         existing_session = self._find_session_by_device(user_id, device_fingerprint)
@@ -82,7 +82,7 @@ class SessionManagementService:
             'device_info': device_info,
             'ip_address': ip_address,
             'user_agent': user_agent,
-            'device_fingerprint': self._generate_device_fingerprint(device_info, user_agent),
+            'device_fingerprint': self._generate_device_fingerlogger(device_info, user_agent),
             'created_at': now,
             'last_active': now,
             'expires_at': now + timedelta(hours=self.session_timeout_hours),
@@ -100,10 +100,10 @@ class SessionManagementService:
     def get_user_sessions(self, user_id: int) -> List[Dict]:
         """
         获取用户的所有活跃会话
-        
+
         Args:
             user_id: 用户ID
-            
+
         Returns:
             会话列表
         """
@@ -132,7 +132,7 @@ class SessionManagementService:
     def update_session_activity(self, session_id: str):
         """
         更新会话活动时间
-        
+
         Args:
             session_id: 会话ID
         """
@@ -149,11 +149,11 @@ class SessionManagementService:
     def revoke_session(self, user_id: int, session_id: str) -> bool:
         """
         撤销指定会话(远程注销)
-        
+
         Args:
             user_id: 用户ID
             session_id: 会话ID
-            
+
         Returns:
             是否成功
         """
@@ -162,11 +162,11 @@ class SessionManagementService:
     def revoke_all_sessions(self, user_id: int, exclude_session_id: str = None) -> int:
         """
         撤销用户的所有会话(除当前会话外)
-        
+
         Args:
             user_id: 用户ID
             exclude_session_id: 排除的会话ID(当前会话)
-            
+
         Returns:
             撤销的会话数量
         """
@@ -187,10 +187,10 @@ class SessionManagementService:
     def is_session_valid(self, session_id: str) -> bool:
         """
         检查会话是否有效
-        
+
         Args:
             session_id: 会话ID
-            
+
         Returns:
             是否有效
         """
@@ -213,10 +213,10 @@ class SessionManagementService:
     def get_session_details(self, session_id: str) -> Optional[Dict]:
         """
         获取会话详细信息
-        
+
         Args:
             session_id: 会话ID
-            
+
         Returns:
             会话详情
         """
@@ -248,12 +248,12 @@ class SessionManagementService:
                                    current_device_fingerprint: str) -> List[Dict]:
         """
         检测可疑活动(异地登录、新设备等)
-        
+
         Args:
             user_id: 用户ID
             current_ip: 当前IP地址
             current_device_fingerprint: 当前设备指纹
-            
+
         Returns:
             可疑活动列表
         """
@@ -298,27 +298,27 @@ class SessionManagementService:
                              ip_address: str = None) -> str:
         """
         生成会话ID
-        
+
         Args:
             user_id: 用户ID
             device_info: 设备信息
             ip_address: IP地址
-            
+
         Returns:
             会话ID
         """
         data = f"{user_id}:{device_info}:{ip_address}:{datetime.now().timestamp()}"
         return hashlib.sha256(data.encode()).hexdigest()[:32]
 
-    def _generate_device_fingerprint(self, device_info: Dict,
+    def _generate_device_fingerlogger(self, device_info: Dict,
                                      user_agent: str = None) -> str:
         """
         生成设备指纹
-        
+
         Args:
             device_info: 设备信息
             user_agent: User-Agent字符串
-            
+
         Returns:
             设备指纹
         """
@@ -329,11 +329,11 @@ class SessionManagementService:
                                  device_fingerprint: str) -> Optional[Dict]:
         """
         查找同一设备的活跃会话
-        
+
         Args:
             user_id: 用户ID
             device_fingerprint: 设备指纹
-            
+
         Returns:
             匹配的会话，无则返回None
         """
@@ -347,10 +347,10 @@ class SessionManagementService:
     def _estimate_location(self, ip_address: str = None) -> str:
         """
         估算位置(基于IP)
-        
+
         Args:
             ip_address: IP地址
-            
+
         Returns:
             位置描述
         """
@@ -386,10 +386,10 @@ class SessionManagementService:
     def _get_location_from_ip(self, ip_address: str) -> Dict[str, str]:
         """
         从IP地址获取地理位置信息
-        
+
         Args:
             ip_address: IP地址
-            
+
         Returns:
             包含城市、地区、国家信息的字典，失败返回None
         """
@@ -481,7 +481,7 @@ class SessionManagementService:
     def _cleanup_old_sessions(self, user_id: int):
         """
         清理过期会话
-        
+
         Args:
             user_id: 用户ID
         """
@@ -497,11 +497,11 @@ class SessionManagementService:
     def _remove_session(self, user_id: int, session_id: str) -> bool:
         """
         移除会话
-        
+
         Args:
             user_id: 用户ID
             session_id: 会话ID
-            
+
         Returns:
             是否成功
         """
@@ -524,7 +524,7 @@ class SessionManagementService:
     def get_session_stats(self) -> Dict:
         """
         获取会话统计信息
-        
+
         Returns:
             统计数据
         """
@@ -534,7 +534,7 @@ class SessionManagementService:
             for s in sessions
             if s['is_active'] and s['expires_at'] > datetime.now()
         )
-        
+
         return {
             'total_users_with_sessions': len(self._user_sessions),
             'total_sessions': total_sessions,

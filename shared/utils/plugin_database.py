@@ -16,7 +16,7 @@ class PluginDatabaseManager:
     def __init__(self, base_dir: str = "plugins_data"):
         """
         初始化数据库管理器
-        
+
         Args:
             base_dir: 插件数据库根目录
         """
@@ -27,10 +27,10 @@ class PluginDatabaseManager:
     def get_connection(self, plugin_slug: str) -> sqlite3.Connection:
         """
         获取插件的数据库连接(单例模式)
-        
+
         Args:
             plugin_slug: 插件标识符
-            
+
         Returns:
             SQLite数据库连接
         """
@@ -50,10 +50,10 @@ class PluginDatabaseManager:
     def get_cursor(self, plugin_slug: str):
         """
         获取数据库游标(上下文管理器,自动提交/回滚)
-        
+
         Args:
             plugin_slug: 插件标识符
-            
+
         Yields:
             数据库游标
         """
@@ -81,10 +81,10 @@ class PluginDatabaseManager:
     def delete_plugin_db(self, plugin_slug: str) -> bool:
         """
         删除插件的数据库文件
-        
+
         Args:
             plugin_slug: 插件标识符
-            
+
         Returns:
             是否删除成功
         """
@@ -105,13 +105,13 @@ class PluginDatabaseManager:
 
             return True
         except Exception as e:
-            print(f"[PluginDB] Failed to delete database for {plugin_slug}: {e}")
+            logger(f"[PluginDB] Failed to delete database for {plugin_slug}: {e}")
             return False
 
     def list_plugin_databases(self) -> List[Dict[str, Any]]:
         """
         列出所有插件数据库
-        
+
         Returns:
             数据库信息列表
         """
@@ -130,12 +130,12 @@ class PluginDatabaseManager:
     def execute_query(self, plugin_slug: str, query: str, params: tuple = ()) -> List[Dict]:
         """
         执行查询语句
-        
+
         Args:
             plugin_slug: 插件标识符
             query: SQL查询语句
             params: 查询参数
-            
+
         Returns:
             查询结果列表
         """
@@ -148,12 +148,12 @@ class PluginDatabaseManager:
     def execute_update(self, plugin_slug: str, query: str, params: tuple = ()) -> int:
         """
         执行更新语句(INSERT/UPDATE/DELETE)
-        
+
         Args:
             plugin_slug: 插件标识符
             query: SQL更新语句
             params: 更新参数
-            
+
         Returns:
             影响的行数
         """
@@ -164,11 +164,11 @@ class PluginDatabaseManager:
     def table_exists(self, plugin_slug: str, table_name: str) -> bool:
         """
         检查表是否存在
-        
+
         Args:
             plugin_slug: 插件标识符
             table_name: 表名
-            
+
         Returns:
             表是否存在
         """

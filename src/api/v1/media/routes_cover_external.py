@@ -4,12 +4,16 @@
 import hashlib
 
 import aiohttp
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from shared.services.articles.cover_image_service import CoverImageService
+from shared.utils.logger import get_logger
 from src.api.v1.core.responses import ApiResponse
+from src.auth.auth_deps import jwt_required as jwt_required_api
+from src.utils.security.safe import validate_url
 
+logger = get_logger(__name__)
 router = APIRouter(tags=["cover-image"])
 
 
@@ -25,13 +29,16 @@ class ExternalImageUrlResponse(BaseModel):
 
 
 @router.post("/from-url", summary="从外链URL生成封面")
-async def generate_cover_from_external_url(request_data: ExternalImageUrlRequest):
+async def generate_cover_from_external_url(
+    request_data: ExternalImageUrlRequest,
+    current_user=Depends(jwt_required_api)
+):
     """
     从外链图片URL下载并生成本地封面
-    
+
     Args:
         request_data: 包含外链图片URL的请求数据
-        
+
     Returns:
         本地封面URL
     """
@@ -45,9 +52,14 @@ async def generate_cover_from_external_url(request_data: ExternalImageUrlRequest
         if not external_url.startswith(('http://', 'https://')):
             raise HTTPException(status_code=400, detail="URL必须以http://或https://开头")
 
+        # SSRF 防护：验证目标地址不是内网/本地
+        is_valid, sanitized_url = validate_url(external_url)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail="不允许访问该URL")
+
         # 下载图片
         async with aiohttp.ClientSession() as session:
-            async with session.get(external_url, timeout=aiohttp.ClientTimeout(total=30)) as response:
+            async with session.get(sanitized_url, timeout=aiohttp.ClientTimeout(total=30)) as response:
                 if response.status != 200:
                     raise HTTPException(
                         status_code=400,
@@ -93,7 +105,7 @@ async def generate_cover_from_external_url(request_data: ExternalImageUrlRequest
 
         # 使用虚拟的media_id（因为是外链图片，没有媒体库ID）
         # 使用URL的哈希作为标识
-        url_hash = hashlib.md5(external_url.encode()).hexdigest()[:8]
+        url_hash = hashlib.sha256(external_url.encode()).hexdigest()[:8]
         media_id = f"ext_{url_hash}"
 
         # 优化并保存封面
@@ -118,7 +130,5 @@ async def generate_cover_from_external_url(request_data: ExternalImageUrlRequest
     except HTTPException:
         raise
     except Exception as e:
-        import traceback
-        print(f"Error generating cover from external URL: {e}")
-        print(traceback.format_exc())
+        logger.error(f"生成封面失败: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"生成封面失败: {str(e)}")

@@ -14,6 +14,7 @@ from src.api.v1.core.responses import ApiResponse
 from src.api.v1.utils.article_utils import get_articles_with_filters
 from src.auth import jwt_required_dependency as jwt_required
 from src.utils.database.main import get_async_session
+from src.unified_logger import default_logger as logger
 
 router = APIRouter(tags=["category"])
 
@@ -75,8 +76,8 @@ async def get_all_categories_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_all_categories_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_all_categories_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -119,8 +120,8 @@ async def get_public_categories_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_public_categories_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_public_categories_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -223,8 +224,8 @@ async def get_category_by_name_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_category_by_name_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_category_by_name_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -284,8 +285,8 @@ async def get_all_categories_root_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_all_categories_root_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_all_categories_root_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -345,8 +346,8 @@ async def subscribe_category_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in subscribe_category_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in subscribe_category_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -393,6 +394,6 @@ async def unsubscribe_category_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in unsubscribe_category_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in unsubscribe_category_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))

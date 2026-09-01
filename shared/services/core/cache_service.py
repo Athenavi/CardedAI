@@ -6,6 +6,7 @@ import json
 import time
 from functools import wraps
 from typing import Dict, Any, Optional, Callable, List
+from src.unified_logger import default_logger as logger
 
 try:
     import redis
@@ -64,13 +65,13 @@ class CacheService:
                 }
                 self.redis_client = redis.Redis(**config)
                 # 移除 ping()：redis.Redis() 本身是惰性的，首次实际操作时才连接
-                print("[CacheService] Redis客户端已创建（惰性连接）")
+                logger("[CacheService] Redis客户端已创建（惰性连接）")
             except Exception as e:
-                print(f"[CacheService] Redis连接失败: {e}, 使用内存缓存")
+                logger(f"[CacheService] Redis连接失败: {e}, 使用内存缓存")
                 self.use_redis = False
                 self.redis_client = None
         elif use_redis and not REDIS_AVAILABLE:
-            print("[CacheService] redis库未安装,使用内存缓存")
+            logger("[CacheService] redis库未安装,使用内存缓存")
             self.use_redis = False
 
     def get(self, key: str) -> Optional[Any]:
@@ -94,7 +95,7 @@ class CacheService:
                         return value
                 return None
             except Exception as e:
-                print(f"[CacheService] Redis获取失败: {e}, 降级到内存缓存")
+                logger(f"[CacheService] Redis获取失败: {e}, 降级到内存缓存")
                 self.use_redis = False
 
         # 从内存缓存获取(cachetools会自动处理TTL)
@@ -132,7 +133,7 @@ class CacheService:
 
                 self.redis_client.setex(key, ttl, serialized_value)
             except Exception as e:
-                print(f"[CacheService] Redis存储失败: {e}, 降级到内存缓存")
+                logger(f"[CacheService] Redis存储失败: {e}, 降级到内存缓存")
                 self.use_redis = False
 
         # 存储到内存缓存
@@ -155,7 +156,7 @@ class CacheService:
             try:
                 self.redis_client.delete(key)
             except Exception as e:
-                print(f"[CacheService] Redis删除失败: {e}")
+                logger(f"[CacheService] Redis删除失败: {e}")
 
         if key in self.cache:
             del self.cache[key]
@@ -166,7 +167,7 @@ class CacheService:
             try:
                 self.redis_client.flushdb()
             except Exception as e:
-                print(f"[CacheService] Redis清空失败: {e}")
+                logger(f"[CacheService] Redis清空失败: {e}")
 
         self.cache.clear()
 
@@ -252,7 +253,7 @@ class AssetMinifier:
                 with open(path, 'r', encoding='utf-8') as f:
                     combined.append(f.read())
             except Exception as e:
-                print(f"读取文件失败 {path}: {e}")
+                logger(f"读取文件失败 {path}: {e}")
 
         content = '\n'.join(combined)
 
@@ -365,7 +366,7 @@ class PageCacheService:
                 'age': int(time.time() - meta['cached_at'])
             }
         except Exception as e:
-            print(f"[PageCache] 读取缓存失败: {e}")
+            logger(f"[PageCache] 读取缓存失败: {e}")
             return None
 
     def set_page(self, url: str, content: str, status_code: int = 200,
@@ -407,7 +408,7 @@ class PageCacheService:
                 json.dump(meta, f, ensure_ascii=False, indent=2)
 
         except Exception as e:
-            print(f"[PageCache] 保存缓存失败: {e}")
+            logger(f"[PageCache] 保存缓存失败: {e}")
 
     def invalidate_page(self, url: str):
         """使页面缓存失效"""
@@ -422,7 +423,7 @@ class PageCacheService:
             if os.path.exists(meta_path):
                 os.remove(meta_path)
         except Exception as e:
-            print(f"[PageCache] 删除缓存失败: {e}")
+            logger(f"[PageCache] 删除缓存失败: {e}")
 
     def clear_all(self):
         """清空所有页面缓存"""
@@ -435,7 +436,7 @@ class PageCacheService:
             for file in glob.glob(os.path.join(self.cache_dir, "*.meta.json")):
                 os.remove(file)
         except Exception as e:
-            print(f"[PageCache] 清空缓存失败: {e}")
+            logger(f"[PageCache] 清空缓存失败: {e}")
 
     def get_stats(self) -> Dict[str, Any]:
         """获取缓存统计信息"""
@@ -500,16 +501,16 @@ class CacheWarmer:
                 if content:
                     self.page_cache.set_page(url, content)
                     warmed_count += 1
-                    print(f"[CacheWarmer] ✓ 预热成功: {url}")
+                    logger(f"[CacheWarmer] ✓ 预热成功: {url}")
                 else:
                     failed_count += 1
-                    print(f"[CacheWarmer] ✗ 预热失败(空内容): {url}")
+                    logger(f"[CacheWarmer] ✗ 预热失败(空内容): {url}")
 
             except Exception as e:
                 failed_count += 1
-                print(f"[CacheWarmer] ✗ 预热失败: {url} - {e}")
+                logger(f"[CacheWarmer] ✗ 预热失败: {url} - {e}")
 
-        print(f"[CacheWarmer] 预热完成: 成功{warmed_count}, 失败{failed_count}")
+        logger(f"[CacheWarmer] 预热完成: 成功{warmed_count}, 失败{failed_count}")
         self.warmup_queue.clear()
 
 

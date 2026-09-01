@@ -24,6 +24,7 @@ from src.api.v1.core.responses import ApiResponse
 from src.auth.auth_deps import admin_required as admin_required_api, jwt_required_dependency as jwt_required, \
     get_current_active_user
 from src.extensions import get_async_db_session as get_async_db
+from src.unified_logger import default_logger as logger
 
 router = APIRouter()
 
@@ -300,8 +301,8 @@ async def get_blog_management_articles(
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_blog_management_articles: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_blog_management_articles: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -415,7 +416,7 @@ async def get_my_articles(
                 content = content_result.scalar_one_or_none()
                 has_password = bool(content and content.passwd)
             except Exception as e:
-                print(f"检查文章密码状态失败: {e}")
+                logger(f"检查文章密码状态失败: {e}")
 
             articles_data.append({
                 **article_dict,  # 展开模型的基础字段
@@ -657,7 +658,7 @@ async def get_users(
             roles_result = await db.execute(roles_query)
             user_roles = roles_result.scalars().all()
 
-            print(f"DEBUG: User {user.username} (ID: {user.id}) has {len(user_roles)} roles")
+            logger(f"DEBUG: User {user.username} (ID: {user.id}) has {len(user_roles)} roles")
 
             # 构建角色数据
             roles_data = []
@@ -666,10 +667,10 @@ async def get_users(
                 try:
                     permissions_list = json.loads(role.permissions) if role.permissions else []
                 except Exception as e:
-                    print(f"DEBUG: Error parsing permissions for role {role.id}: {e}")
+                    logger(f"DEBUG: Error parsing permissions for role {role.id}: {e}")
                     permissions_list = []
 
-                print(f"DEBUG: Role {role.name} (ID: {role.id}) has permissions: {permissions_list}")
+                logger(f"DEBUG: Role {role.name} (ID: {role.id}) has permissions: {permissions_list}")
 
                 roles_data.append({
                     "id": role.id,
@@ -679,7 +680,7 @@ async def get_users(
                     "permissions": permissions_list  # 添加权限列表
                 })
 
-            print(f"DEBUG: User {user.username} roles_data: {roles_data}")
+            logger(f"DEBUG: User {user.username} roles_data: {roles_data}")
 
             # 这里可以添加计算用户存储使用量的逻辑
             users_data.append({
@@ -875,7 +876,7 @@ async def delete_blog_management_article(
         )
     except Exception as e:
         import traceback
-        print(f"Error in delete_blog_management_article: {e}\n{traceback.format_exc()}")
+        logger(f"Error in delete_blog_management_article: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 

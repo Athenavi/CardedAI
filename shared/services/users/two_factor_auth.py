@@ -16,7 +16,7 @@ import qrcode
 class TwoFactorAuthService:
     """
     双因素认证服务
-    
+
     功能:
     1. 生成TOTP密钥
     2. 生成QR码用于Google Authenticator等应用扫描
@@ -34,7 +34,7 @@ class TwoFactorAuthService:
     def generate_totp_secret(self) -> str:
         """
         生成TOTP密钥
-        
+
         Returns:
             Base32编码的密钥字符串
         """
@@ -43,12 +43,12 @@ class TwoFactorAuthService:
     def generate_qr_code(self, secret: str, username: str, email: str) -> Dict[str, Any]:
         """
         生成QR码图像(用于Google Authenticator等应用扫描)
-        
+
         Args:
             secret: TOTP密钥
             username: 用户名
             email: 邮箱
-            
+
         Returns:
             包含QR码图像的字典
         """
@@ -86,12 +86,12 @@ class TwoFactorAuthService:
     def verify_totp(self, secret: str, token: str, window: int = 1) -> bool:
         """
         验证TOTP验证码
-        
+
         Args:
             secret: TOTP密钥
             token: 用户输入的6位验证码
             window: 允许的时间窗口(前后几个周期)
-            
+
         Returns:
             是否验证成功
         """
@@ -99,16 +99,16 @@ class TwoFactorAuthService:
             totp = pyotp.TOTP(secret)
             return totp.verify(token, valid_window=window)
         except Exception as e:
-            print(f"TOTP verification error: {e}")
+            logger(f"TOTP verification error: {e}")
             return False
 
     def generate_backup_codes(self, count: Optional[int] = None) -> List[str]:
         """
         生成备用码
-        
+
         Args:
             count: 备用码数量
-            
+
         Returns:
             备用码列表
         """
@@ -126,10 +126,10 @@ class TwoFactorAuthService:
     def hash_backup_codes(self, codes: List[str]) -> str:
         """
         哈希备用码(用于安全存储)
-        
+
         Args:
             codes: 备用码列表
-            
+
         Returns:
             JSON格式的哈希后备用码
         """
@@ -146,11 +146,11 @@ class TwoFactorAuthService:
     def verify_backup_code(self, stored_codes_json: str, input_code: str) -> bool:
         """
         验证备用码
-        
+
         Args:
             stored_codes_json: 存储的哈希后备用码JSON
             input_code: 用户输入的备用码
-            
+
         Returns:
             是否验证成功
         """
@@ -167,19 +167,19 @@ class TwoFactorAuthService:
 
             return False
         except Exception as e:
-            print(f"Backup code verification error: {e}")
+            logger(f"Backup code verification error: {e}")
             return False
 
     def enable_2fa(self, user_id: int, secret: str, backup_codes: List[str], db_session) -> Dict[str, Any]:
         """
         为用户启用2FA
-        
+
         Args:
             user_id: 用户ID
             secret: TOTP密钥
             backup_codes: 备用码列表
             db_session: 数据库会话
-            
+
         Returns:
             操作结果
         """
@@ -209,17 +209,17 @@ class TwoFactorAuthService:
             }
         except Exception as e:
             db_session.rollback()
-            print(f"Enable 2FA error: {e}")
+            logger(f"Enable 2FA error: {e}")
             return {'success': False, 'error': str(e)}
 
     def disable_2fa(self, user_id: int, db_session) -> Dict[str, Any]:
         """
         为用户禁用2FA
-        
+
         Args:
             user_id: 用户ID
             db_session: 数据库会话
-            
+
         Returns:
             操作结果
         """
@@ -244,17 +244,17 @@ class TwoFactorAuthService:
             return {'success': True, 'message': '2FA已禁用'}
         except Exception as e:
             db_session.rollback()
-            print(f"Disable 2FA error: {e}")
+            logger(f"Disable 2FA error: {e}")
             return {'success': False, 'error': str(e)}
 
     def regenerate_backup_codes(self, user_id: int, db_session) -> Dict[str, Any]:
         """
         重新生成备用码
-        
+
         Args:
             user_id: 用户ID
             db_session: 数据库会话
-            
+
         Returns:
             新的备用码列表
         """
@@ -285,18 +285,18 @@ class TwoFactorAuthService:
             }
         except Exception as e:
             db_session.rollback()
-            print(f"Regenerate backup codes error: {e}")
+            logger(f"Regenerate backup codes error: {e}")
             return {'success': False, 'error': str(e)}
 
     def verify_2fa_login(self, user_id: int, token: str, db_session) -> Dict[str, Any]:
         """
         验证2FA登录
-        
+
         Args:
             user_id: 用户ID
             token: TOTP验证码或备用码
             db_session: 数据库会话
-            
+
         Returns:
             验证结果
         """
@@ -326,7 +326,7 @@ class TwoFactorAuthService:
 
             return {'success': False, 'error': '验证码错误'}
         except Exception as e:
-            print(f"2FA login verification error: {e}")
+            logger(f"2FA login verification error: {e}")
             return {'success': False, 'error': str(e)}
 
 

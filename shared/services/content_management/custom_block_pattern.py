@@ -153,7 +153,7 @@ class CustomBlockPatternService:
                 return [p.to_dict() for p in patterns]
 
         except Exception as e:
-            print(f"获取用户块模式失败: {e}")
+            logger(f"获取用户块模式失败: {e}")
             return []
 
     async def get_pattern_by_id(self, user_id: int, pattern_id: int) -> Optional[Dict[str, Any]]:
@@ -186,7 +186,7 @@ class CustomBlockPatternService:
                 return None
 
         except Exception as e:
-            print(f"获取块模式失败: {e}")
+            logger(f"获取块模式失败: {e}")
             return None
 
     async def update_pattern(
@@ -320,7 +320,7 @@ class CustomBlockPatternService:
                 return sorted(categories)
 
         except Exception as e:
-            print(f"获取分类失败: {e}")
+            logger(f"获取分类失败: {e}")
             return []
 
 

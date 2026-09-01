@@ -29,7 +29,7 @@ TRANSLATIONS_DIR = 'translations'
 class I18nService:
     """
     国际化服务
-    
+
     功能:
     1. 多语言翻译管理
     2. 语言自动检测
@@ -131,7 +131,7 @@ class I18nService:
         try:
             if language not in self.supported_languages:
                 return {'success': False, 'error': f'不支持的语言: {language}'}
-            
+
             if language not in self.translations_cache:
                 self.translations_cache[language] = {}
 
@@ -147,7 +147,7 @@ class I18nService:
         try:
             if language not in self.supported_languages:
                 return {'success': False, 'error': f'不支持的语言: {language}'}
-            
+
             if language not in self.translations_cache:
                 self.translations_cache[language] = {}
 
@@ -167,7 +167,7 @@ class I18nService:
         ref_lang = reference_language or self.default_language
         ref_translations = self._load_translations(ref_lang)
         target_translations = self._load_translations(language)
-        
+
         if not ref_translations:
             return []
         if not target_translations:
@@ -251,7 +251,7 @@ class I18nService:
             with open(translation_file, 'w', encoding='utf-8') as f:
                 json.dump(translations, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            print(f"Error saving translations: {e}")
+            logger(f"Error saving translations: {e}")
 
     def generate_translation_template(self) -> Dict[str, str]:
         """生成翻译模板(基于默认语言)"""

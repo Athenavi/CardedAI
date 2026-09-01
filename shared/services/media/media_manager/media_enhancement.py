@@ -31,7 +31,7 @@ WEBP_CONVERTIBLE_FORMATS = {'JPEG', 'JPG', 'PNG', 'BMP', 'TIFF'}
 class MediaEnhancementService:
     """
     媒体文件增强服务
-    
+
     功能:
     1. 批量上传处理
     2. 图片自动优化(压缩、调整大小)
@@ -186,7 +186,7 @@ class MediaEnhancementService:
                 }
             return None
         except Exception as e:
-            print(f"Duplicate detection error: {e}")
+            logger(f"Duplicate detection error: {e}")
             return None
 
     def extract_exif_data(self, image_path: str) -> Dict[str, Any]:

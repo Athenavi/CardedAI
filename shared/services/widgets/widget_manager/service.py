@@ -295,7 +295,7 @@ class WidgetService:
             return widget
         except Exception as e:
             await db.rollback()
-            print(f"保存Widget失败: {e}")
+            logger(f"保存Widget失败: {e}")
             return None
 
     async def get_widgets_by_area(self, db: AsyncSession, area: str) -> List[WidgetInstance]:
@@ -310,7 +310,7 @@ class WidgetService:
             result = await db.execute(query)
             return result.scalars().all()
         except Exception as e:
-            print(f"获取Widget列表失败: {e}")
+            logger(f"获取Widget列表失败: {e}")
             return []
 
     async def update_widget_config_in_db(
@@ -334,7 +334,7 @@ class WidgetService:
             return True
         except Exception as e:
             await db.rollback()
-            print(f"更新Widget配置失败: {e}")
+            logger(f"更新Widget配置失败: {e}")
             return False
 
     async def reorder_widgets_in_db(
@@ -358,7 +358,7 @@ class WidgetService:
             return True
         except Exception as e:
             await db.rollback()
-            print(f"重新排序Widget失败: {e}")
+            logger(f"重新排序Widget失败: {e}")
             return False
 
     async def delete_widget_from_db(self, db: AsyncSession, widget_id: int) -> bool:
@@ -370,7 +370,7 @@ class WidgetService:
             return True
         except Exception as e:
             await db.rollback()
-            print(f"删除Widget失败: {e}")
+            logger(f"删除Widget失败: {e}")
             return False
 
     async def toggle_widget_active(self, db: AsyncSession, widget_id: int, is_active: bool) -> bool:
@@ -386,7 +386,7 @@ class WidgetService:
             return True
         except Exception as e:
             await db.rollback()
-            print(f"切换Widget状态失败: {e}")
+            logger(f"切换Widget状态失败: {e}")
             return False
 
     # ==================== Widget数据获取方法 ====================
@@ -417,7 +417,7 @@ class WidgetService:
                 'cover_image': article.cover_image,
             } for article in articles]
         except Exception as e:
-            print(f"获取最新文章失败: {e}")
+            logger(f"获取最新文章失败: {e}")
             return []
 
     async def get_recent_comments_data(self, db: AsyncSession, count: int = 5, show_avatar: bool = True) -> List[
@@ -460,7 +460,7 @@ class WidgetService:
 
             return comments_data
         except Exception as e:
-            print(f"获取最新评论失败: {e}")
+            logger(f"获取最新评论失败: {e}")
             return []
 
     async def get_tags_cloud_data(self, db: AsyncSession, count: int = 20, **kwargs) -> List[Dict[str, Any]]:
@@ -493,7 +493,7 @@ class WidgetService:
                 'slug': tag_name.lower().replace(' ', '-'),
             } for tag_name, tag_count in most_common]
         except Exception as e:
-            print(f"获取标签云失败: {e}")
+            logger(f"获取标签云失败: {e}")
             return []
 
     async def get_categories_data(self, db: AsyncSession, show_count: bool = True, **kwargs) -> List[Dict[str, Any]]:
@@ -529,7 +529,7 @@ class WidgetService:
 
             return categories_data
         except Exception as e:
-            print(f"获取分类目录失败: {e}")
+            logger(f"获取分类目录失败: {e}")
             return []
 
     async def get_archives_data(self, db: AsyncSession, archive_type: str = 'monthly', show_count: bool = True) -> List[
@@ -579,7 +579,7 @@ class WidgetService:
 
             return archives_data
         except Exception as e:
-            print(f"获取文章归档失败: {e}")
+            logger(f"获取文章归档失败: {e}")
             return []
 
     async def get_popular_posts_data(self, db: AsyncSession, count: int = 5, period: str = 'week') -> List[
@@ -614,5 +614,5 @@ class WidgetService:
                     article.created_at),
             } for article in articles]
         except Exception as e:
-            print(f"获取热门文章失败: {e}")
+            logger(f"获取热门文章失败: {e}")
             return []

@@ -545,7 +545,7 @@ def on_translation_complete(language_code, key, translator_id, translator_name):
 
 # 获取进度
 progress = translation_tracker.get_language_progress('zh')
-print(f"中文翻译进度: {progress['progress_percentage']}%")
+logger(f"中文翻译进度: {progress['progress_percentage']}%")
             '''.strip()
         },
         "dashboard": {

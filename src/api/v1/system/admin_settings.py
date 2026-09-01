@@ -218,8 +218,8 @@ async def get_settings(
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_settings: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_settings: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -263,8 +263,8 @@ async def update_settings(
 
     except Exception as e:
         import traceback
-        print(f"Error in update_settings: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in update_settings: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e), data=None)
 
 
@@ -334,8 +334,8 @@ async def create_menu(
         )
     except Exception as e:
         import traceback
-        print(f"Error in create_menu: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in create_menu: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -400,8 +400,8 @@ async def update_menu(
         )
     except Exception as e:
         import traceback
-        print(f"Error in update_menu: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in update_menu: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -454,8 +454,8 @@ async def delete_menu(
         )
     except Exception as e:
         import traceback
-        print(f"Error in delete_menu: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in delete_menu: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -543,8 +543,8 @@ async def create_page(
         )
     except Exception as e:
         import traceback
-        print(f"Error in create_page: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in create_page: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -624,8 +624,8 @@ async def update_page(
         )
     except Exception as e:
         import traceback
-        print(f"Error in update_page: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in update_page: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -671,8 +671,8 @@ async def delete_page(
         )
     except Exception as e:
         import traceback
-        print(f"Error in delete_page: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in delete_page: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -739,8 +739,8 @@ async def create_menu_item(
         )
     except Exception as e:
         import traceback
-        print(f"Error in create_menu_item: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in create_menu_item: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -806,8 +806,8 @@ async def update_menu_item(
         )
     except Exception as e:
         import traceback
-        print(f"Error in update_menu_item: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in update_menu_item: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -861,6 +861,6 @@ async def delete_menu_item(
         )
     except Exception as e:
         import traceback
-        print(f"Error in delete_menu_item: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in delete_menu_item: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))

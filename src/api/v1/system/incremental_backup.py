@@ -36,7 +36,7 @@ async def create_incremental_backup(
 ):
     """
     创建增量备份
-    
+
     Body参数:
         base_backup_id: 基础备份ID（可选，默认使用最新完整备份）
         tables: 要备份的表列表（可选，默认全部）
@@ -78,7 +78,7 @@ async def create_differential_backup(
 ):
     """
     创建差异备份
-    
+
     Body参数:
         base_backup_id: 基础备份ID（可选，默认使用最新完整备份）
         tables: 要备份的表列表（可选，默认全部）
@@ -120,7 +120,7 @@ async def restore_incremental_backup(
 ):
     """
     恢复增量备份链
-    
+
     Body参数:
         target_backup_id: 目标备份ID
     """
@@ -191,7 +191,7 @@ async def get_backup_chain(
 ):
     """
     获取恢复到指定备份所需的备份链
-    
+
     Args:
         backup_id: 备份ID
     """
@@ -228,8 +228,8 @@ async def get_backup_chain(
 
     except Exception as e:
         import traceback
-        print(f"Error getting backup chain: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error getting backup chain: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -240,7 +240,7 @@ async def cleanup_old_backups(
 ):
     """
     清理旧备份
-    
+
     Body参数:
         keep_days: 保留天数（默认30天）
     """
@@ -259,6 +259,6 @@ async def cleanup_old_backups(
 
     except Exception as e:
         import traceback
-        print(f"Error cleaning up old backups: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error cleaning up old backups: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))

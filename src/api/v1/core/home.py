@@ -67,10 +67,10 @@ async def send_subscription_confirmation_email(email: str):
             text_content=text_content
         )
 
-        print(f"订阅确认邮件已发送到: {email}")
+        logger(f"订阅确认邮件已发送到: {email}")
 
     except Exception as e:
-        print(f"发送订阅确认邮件失败: {e}")
+        logger(f"发送订阅确认邮件失败: {e}")
         import traceback
         traceback.print_exc()
 
@@ -293,7 +293,7 @@ async def get_home_articles_api(
         )
     except Exception as e:
         import traceback
-        print(f"Error in get_home_articles_api: {e}\n{traceback.format_exc()}")
+        logger(f"Error in get_home_articles_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -391,8 +391,8 @@ async def get_home_menus(request: Request = None):
                 await db.close()
     except Exception as e:
         import traceback
-        print(f"Error in get_home_menus: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in get_home_menus: {str(e)}")
+        logger(traceback.format_exc())
         # 出错时返回默认菜单
         from src.utils.menu_builder import get_default_menu
         default_items = get_default_menu()

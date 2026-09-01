@@ -15,7 +15,7 @@ from shared.services.core.multi_level_cache import MultiLevelCache, multi_level_
 class ObjectCacheService:
     """
     对象缓存服务
-    
+
     用于缓存数据库查询结果、ORM对象等
     支持基于标签的批量失效
     """
@@ -23,7 +23,7 @@ class ObjectCacheService:
     def __init__(self, cache: Optional[MultiLevelCache] = None):
         """
         初始化对象缓存服务
-        
+
         Args:
             cache: 多级缓存实例
         """
@@ -36,12 +36,12 @@ class ObjectCacheService:
                              field: Optional[str] = None) -> str:
         """
         生成对象缓存键
-        
+
         Args:
             model_name: 模型名称
             object_id: 对象ID
             field: 字段名（可选，用于缓存特定字段）
-        
+
         Returns:
             缓存键
         """
@@ -53,11 +53,11 @@ class ObjectCacheService:
     def _generate_query_key(self, query_type: str, params: Dict[str, Any]) -> str:
         """
         生成查询结果缓存键
-        
+
         Args:
             query_type: 查询类型（如 'list', 'count'）
             params: 查询参数字典
-        
+
         Returns:
             缓存键
         """
@@ -74,12 +74,12 @@ class ObjectCacheService:
                          field: Optional[str] = None) -> Optional[Any]:
         """
         获取缓存的对象
-        
+
         Args:
             model_name: 模型名称
             object_id: 对象ID
             field: 字段名（可选）
-        
+
         Returns:
             缓存的对象数据
         """
@@ -92,7 +92,7 @@ class ObjectCacheService:
                          tags: Optional[List[str]] = None) -> None:
         """
         缓存对象数据
-        
+
         Args:
             model_name: 模型名称
             object_id: 对象ID
@@ -115,7 +115,7 @@ class ObjectCacheService:
                             field: Optional[str] = None) -> None:
         """
         删除对象缓存
-        
+
         Args:
             model_name: 模型名称
             object_id: 对象ID
@@ -128,11 +128,11 @@ class ObjectCacheService:
                                params: Dict[str, Any]) -> Optional[Any]:
         """
         获取缓存的查询结果
-        
+
         Args:
             query_type: 查询类型
             params: 查询参数
-        
+
         Returns:
             缓存的查询结果
         """
@@ -144,7 +144,7 @@ class ObjectCacheService:
                                tags: Optional[List[str]] = None) -> None:
         """
         缓存查询结果
-        
+
         Args:
             query_type: 查询类型
             params: 查询参数
@@ -165,10 +165,10 @@ class ObjectCacheService:
     async def invalidate_by_tag(self, tag: str) -> int:
         """
         根据标签使缓存失效
-        
+
         Args:
             tag: 缓存标签
-        
+
         Returns:
             失效的缓存数量
         """
@@ -186,16 +186,16 @@ class ObjectCacheService:
         # 清除标签索引
         self.cache.delete(index_key)
 
-        print(f"[ObjectCache] Invalidated {deleted_count} objects with tag: {tag}")
+        logger(f"[ObjectCache] Invalidated {deleted_count} objects with tag: {tag}")
         return deleted_count
 
     async def invalidate_by_tags(self, tags: List[str]) -> int:
         """
         根据多个标签使缓存失效
-        
+
         Args:
             tags: 缓存标签列表
-        
+
         Returns:
             失效的缓存总数
         """
@@ -209,7 +209,7 @@ class ObjectCacheService:
     async def _add_to_tag_index(self, cache_key: str, tags: List[str]) -> None:
         """
         将缓存键添加到标签索引
-        
+
         Args:
             cache_key: 缓存键
             tags: 标签列表
@@ -229,15 +229,15 @@ class ObjectCacheService:
                      ttl: Optional[int] = None, tags: Optional[List[str]] = None):
         """
         对象缓存装饰器
-        
+
         用于自动缓存函数返回的对象数据
-        
+
         Args:
             model_name: 模型名称
             field: 字段名（可选）
             ttl: TTL(秒)
             tags: 缓存标签
-        
+
         Returns:
             装饰器函数
         """
@@ -283,14 +283,14 @@ class ObjectCacheService:
                     tags: Optional[List[str]] = None):
         """
         查询结果缓存装饰器
-        
+
         用于自动缓存查询结果
-        
+
         Args:
             query_type: 查询类型
             ttl: TTL(秒)
             tags: 缓存标签
-        
+
         Returns:
             装饰器函数
         """
@@ -325,7 +325,7 @@ class ObjectCacheService:
     async def get_stats(self) -> Dict[str, Any]:
         """
         获取对象缓存统计信息
-        
+
         Returns:
             统计信息字典
         """

@@ -9,6 +9,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from src.api.v1.core.responses import ApiResponse
 from shared.models.user import User
 from src.auth.auth_deps import admin_required as admin_required_api
+from src.unified_logger import default_logger as logger
 
 router = APIRouter()
 
@@ -31,18 +32,18 @@ async def site_health_check_api(
             report = site_health_service.generate_report('text')
             from fastapi.responses import PlainTextResponse
             return PlainTextResponse(content=report)
-        
+
         # 默认返回JSON
         health_data = site_health_service.run_full_check()
-        
+
         return ApiResponse(
             success=True,
             data=health_data
         )
     except Exception as e:
         import traceback
-        print(f"Error in site_health_check_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in site_health_check_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -61,9 +62,9 @@ async def system_info_api(
         import platform
         import sys
         from pathlib import Path
-        
+
         base_dir = Path(__file__).resolve().parent.parent.parent.parent
-        
+
         info = {
             'python_version': f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
             'platform': f"{platform.system()} {platform.release()}",
@@ -71,13 +72,13 @@ async def system_info_api(
             'environment': os.getenv('ENVIRONMENT', 'development'),
             'debug_mode': os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes'),
         }
-        
+
         return ApiResponse(
             success=True,
             data=info
         )
     except Exception as e:
         import traceback
-        print(f"Error in system_info_api: {str(e)}")
-        print(traceback.format_exc())
+        logger(f"Error in system_info_api: {str(e)}")
+        logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))

@@ -15,7 +15,7 @@ from shared.services.core.multi_level_cache import MultiLevelCache, multi_level_
 class PageCacheService:
     """
     页面缓存服务
-    
+
     提供全页缓存和片段缓存功能
     支持基于URL、用户角色等的缓存策略
     """
@@ -23,7 +23,7 @@ class PageCacheService:
     def __init__(self, cache: Optional[MultiLevelCache] = None):
         """
         初始化页面缓存服务
-        
+
         Args:
             cache: 多级缓存实例，默认使用全局实例
         """
@@ -35,12 +35,12 @@ class PageCacheService:
                             params: Optional[Dict[str, Any]] = None) -> str:
         """
         生成页面缓存键
-        
+
         Args:
             url: 页面URL
             user_role: 用户角色 (anonymous, user, admin)
             params: 查询参数
-        
+
         Returns:
             缓存键
         """
@@ -63,12 +63,12 @@ class PageCacheService:
                        params: Optional[Dict[str, Any]] = None) -> Optional[str]:
         """
         获取缓存的页面内容
-        
+
         Args:
             url: 页面URL
             user_role: 用户角色
             params: 查询参数
-        
+
         Returns:
             缓存的HTML内容，不存在则返回None
         """
@@ -76,10 +76,10 @@ class PageCacheService:
         cached_content = self.cache.get(cache_key)
 
         if cached_content:
-            print(f"[PageCache] HIT: {url} (role: {user_role})")
+            logger(f"[PageCache] HIT: {url} (role: {user_role})")
             return cached_content
 
-        print(f"[PageCache] MISS: {url} (role: {user_role})")
+        logger(f"[PageCache] MISS: {url} (role: {user_role})")
         return None
 
     async def set_page(self, url: str, content: str, user_role: str = "anonymous",
@@ -87,7 +87,7 @@ class PageCacheService:
                        ttl: Optional[int] = None) -> None:
         """
         缓存页面内容
-        
+
         Args:
             url: 页面URL
             content: HTML内容
@@ -101,13 +101,13 @@ class PageCacheService:
         cache_key = self._generate_cache_key(url, user_role, params)
         self.cache.set(cache_key, content, ttl)
 
-        print(f"[PageCache] SET: {url} (role: {user_role}, ttl: {ttl}s)")
+        logger(f"[PageCache] SET: {url} (role: {user_role}, ttl: {ttl}s)")
 
     async def invalidate_page(self, url: str, user_role: str = "anonymous",
                               params: Optional[Dict[str, Any]] = None) -> None:
         """
         使页面缓存失效
-        
+
         Args:
             url: 页面URL
             user_role: 用户角色
@@ -116,39 +116,39 @@ class PageCacheService:
         cache_key = self._generate_cache_key(url, user_role, params)
         self.cache.delete(cache_key)
 
-        print(f"[PageCache] INVALIDATE: {url} (role: {user_role})")
+        logger(f"[PageCache] INVALIDATE: {url} (role: {user_role})")
 
     async def invalidate_pattern(self, pattern: str) -> int:
         """
         使匹配模式的缓存失效
-        
+
         Args:
             pattern: URL模式（支持通配符）
-        
+
         Returns:
             失效的缓存数量
         """
         # 注意：这里简化实现，实际应该扫描所有缓存键
         # 对于生产环境，建议使用Redis的KEYS命令或维护索引
-        print(f"[PageCache] INVALIDATE PATTERN: {pattern}")
+        logger(f"[PageCache] INVALIDATE PATTERN: {pattern}")
         return 0
 
     async def clear_all(self) -> None:
         """清空所有页面缓存"""
         # 清空所有以page_cache:开头的键
         # 这里简化处理，实际应该只清除页面缓存
-        print("[PageCache] CLEAR ALL")
+        logger("[PageCache] CLEAR ALL")
 
     def should_cache_request(self, url: str, method: str = "GET",
                              user_role: str = "anonymous") -> bool:
         """
         判断是否应该缓存请求
-        
+
         Args:
             url: 请求URL
             method: HTTP方法
             user_role: 用户角色
-        
+
         Returns:
             是否应该缓存
         """
@@ -176,12 +176,12 @@ class PageCacheService:
                        params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         获取缓存信息
-        
+
         Args:
             url: 页面URL
             user_role: 用户角色
             params: 查询参数
-        
+
         Returns:
             缓存信息字典
         """
@@ -203,13 +203,13 @@ class PageCacheService:
 def page_cache(ttl: int = 300, user_role_param: str = "user_role"):
     """
     页面缓存装饰器
-    
+
     用于FastAPI路由，自动缓存响应内容
-    
+
     Args:
         ttl: 缓存TTL(秒)
         user_role_param: 从请求中获取用户角色的参数名
-    
+
     Returns:
         装饰器函数
     """

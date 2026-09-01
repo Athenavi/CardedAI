@@ -24,14 +24,14 @@ async def generate_sitemap_xml(
 ) -> str:
     """
     生成站点地图XML
-    
+
     Args:
         db: 数据库会话
         base_url: 网站基础URL
         include_articles: 是否包含文章页面
         include_categories: 是否包含分类页面
         articles_limit: 文章数量限制(None表示全部)
-        
+
     Returns:
         sitemap XML字符串
     """
@@ -77,7 +77,7 @@ async def generate_sitemap_xml(
         return pretty_xml.decode('utf-8')
 
     except Exception as e:
-        print(f"生成sitemap失败: {e}")
+        logger(f"生成sitemap失败: {e}")
         import traceback
         traceback.print_exc()
         return ""
@@ -89,11 +89,11 @@ async def generate_robots_txt(
 ) -> str:
     """
     生成robots.txt文件内容
-    
+
     Args:
         base_url: 网站基础URL
         sitemap_url: sitemap.xml的完整URL
-        
+
     Returns:
         robots.txt文本内容
     """
@@ -160,7 +160,7 @@ def _add_url(
 ):
     """
     向sitemap添加URL条目
-    
+
     Args:
         urlset: sitemap根元素
         loc: URL地址
