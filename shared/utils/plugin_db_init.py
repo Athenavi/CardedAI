@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 from shared.utils.plugin_database import plugin_db
+from src.unified_logger import default_logger as logger
 
 
 class PluginDatabaseInitializer:

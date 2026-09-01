@@ -8,6 +8,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional, Any
+from src.unified_logger import default_logger as logger
 
 
 class VersionManager:

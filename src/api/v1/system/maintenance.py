@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from shared.services.system.maintenance_mode import maintenance_service
 from src.api.v1.core.responses import ApiResponse
 from src.auth.auth_deps import jwt_required_dependency as jwt_required
+from src.unified_logger import default_logger as logger
 
 router = APIRouter()
 
@@ -49,9 +50,8 @@ async def get_maintenance_status_api(
             data=status
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in get_maintenance_status_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.error(f"Error in get_maintenance_status_api: {str(e)}")
+        logger.error(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -84,9 +84,8 @@ async def enable_maintenance_api(
             }
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in enable_maintenance_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.error(f"Error in enable_maintenance_api: {str(e)}")
+        logger.error(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -114,9 +113,8 @@ async def disable_maintenance_api(
             }
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in disable_maintenance_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.error(f"Error in disable_maintenance_api: {str(e)}")
+        logger.error(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -150,9 +148,8 @@ async def schedule_maintenance_api(
             }
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in schedule_maintenance_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.error(f"Error in schedule_maintenance_api: {str(e)}")
+        logger.error(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -212,9 +209,8 @@ async def remove_whitelist_ip_api(
             }
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in remove_whitelist_ip_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.error(f"Error in remove_whitelist_ip_api: {str(e)}")
+        logger.error(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -243,7 +239,6 @@ async def update_message_api(
             }
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in update_message_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.error(f"Error in update_message_api: {str(e)}")
+        logger.error(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))

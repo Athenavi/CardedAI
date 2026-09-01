@@ -10,6 +10,7 @@ from shared.services.system.database_url_replacer import database_url_replacer
 from src.api.v1.core.responses import ApiResponse
 from src.auth.auth_deps import admin_required as admin_required_api
 from src.extensions import get_async_db_session as get_async_db
+from src.unified_logger import default_logger as logger
 
 router = APIRouter(tags=["Migration"])
 
@@ -62,9 +63,8 @@ async def preview_url_replace(
         )
 
     except Exception as e:
-        import traceback
-        logger(f"Error in preview_url_replace: {str(e)}")
-        logger(traceback.format_exc())
+        logger.error(f"Error in preview_url_replace: {str(e)}")
+        logger.error(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -122,9 +122,8 @@ async def execute_url_replace(
             )
 
     except Exception as e:
-        import traceback
-        logger(f"Error in execute_url_replace: {str(e)}")
-        logger(traceback.format_exc())
+        logger.error(f"Error in execute_url_replace: {str(e)}")
+        logger.error(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -165,9 +164,8 @@ async def validate_url_replace(
         )
 
     except Exception as e:
-        import traceback
-        logger(f"Error in validate_url_replace: {str(e)}")
-        logger(traceback.format_exc())
+        logger.error(f"Error in validate_url_replace: {str(e)}")
+        logger.error(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

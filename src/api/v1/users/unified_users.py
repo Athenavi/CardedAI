@@ -33,6 +33,7 @@ from src.utils.security.forms import ChangePasswordForm
 from src.utils.security.ip_utils import get_client_ip
 from src.utils.security.safe import is_valid_iso_language_code
 from src.utils.send_email import request_email_change
+from src.unified_logger import default_logger as logger
 
 router = APIRouter(tags=["users"])
 

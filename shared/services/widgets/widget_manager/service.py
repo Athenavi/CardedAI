@@ -16,7 +16,7 @@ from shared.models.widget_instance import WidgetInstance
 from shared.services.performance.cache_manager import cache_service
 from shared.services.widgets.widget_manager.config import WIDGET_TYPES, WIDGET_AREAS
 from shared.services.widgets.widget_manager.renderer import WidgetRenderer
-
+from src.unified_logger import default_logger as logger
 
 class WidgetService:
     """
