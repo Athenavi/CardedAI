@@ -19,10 +19,18 @@ class PerformanceMonitor:
             self._page_loads.pop(0)
 
     def record_db_query(self, query_type: str, duration: float, **kwargs) -> None:
-        pass
+        self._db_queries.append({
+            'type': query_type, 'duration': duration, 'time': time.time(), **kwargs
+        })
+        if len(self._db_queries) > self._max_history:
+            self._db_queries.pop(0)
 
     def record_api_response(self, endpoint: str, method: str, **kwargs) -> None:
-        pass
+        self._api_responses.append({
+            'endpoint': endpoint, 'method': method, 'time': time.time(), **kwargs
+        })
+        if len(self._api_responses) > self._max_history:
+            self._api_responses.pop(0)
 
     def get_server_metrics(self) -> dict:
         avg_time = 0.0

@@ -8,6 +8,9 @@
 2. 按需导入
 3. 模块依赖管理
 4. 加载优先级控制
+
+注意：实际注册的模块仅 12 个，且多数模块在 lifespan 中已被显式导入
+TODO: 评估懒加载管理器是否必要，考虑移除该抽象层或简化实现
 """
 
 import importlib
@@ -100,8 +103,10 @@ class LazyLoaderManager:
         if critical:
             try:
                 _ = lazy_module._module  # 触发加载
-            except Exception:
-                pass
+            except ImportError as e:
+                print(f"[LazyLoader] 关键模块加载失败 {name}: {e}")
+            except Exception as e:
+                print(f"[LazyLoader] 加载关键模块 {name} 时出现未知错误: {e}")
 
     def get_module(self, name: str) -> LazyModule:
         """

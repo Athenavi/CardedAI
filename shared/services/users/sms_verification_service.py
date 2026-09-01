@@ -291,6 +291,13 @@ class SMSVerificationService:
         """
         provider = self.sms_config.get('provider', 'mock')
 
+        # 生产环境禁止使用 mock 模式
+        import os
+        env = os.environ.get('ENVIRONMENT', 'development').lower()
+        if provider == 'mock' and env == 'production':
+            logger.error("生产环境禁止使用 SMS mock 模式，请配置真实的 SMS 服务商")
+            return False
+
         if provider == 'aliyun':
             return self._send_sms_aliyun(phone, code)
         elif provider == 'tencent':
@@ -298,7 +305,10 @@ class SMSVerificationService:
         elif provider == 'twilio':
             return self._send_sms_twilio(phone, code)
         else:
-            # 默认使用模拟模式
+            if env == 'production':
+                logger.error("生产环境未配置 SMS 服务商，无法发送短信")
+                return False
+            # 非生产环境使用模拟模式
             return self._send_sms_mock(phone, code)
 
     def send_verification_code(self, phone: str) -> dict:

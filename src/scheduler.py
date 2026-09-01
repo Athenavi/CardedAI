@@ -1,4 +1,4 @@
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 from shared.services.articles.article_view_stats import article_view_stats
@@ -7,8 +7,8 @@ from src.unified_logger import default_logger as logger
 
 class SessionScheduler:
     def __init__(self, app=None):
-        # 使用 BackgroundScheduler 替代 FastScheduler
-        self.scheduler = BackgroundScheduler()
+        # 使用 AsyncIOScheduler 异步调度器，避免重复创建事件循环
+        self.scheduler = AsyncIOScheduler()
         self.app = app
 
     def init_app(self, app):
@@ -46,19 +46,9 @@ class SessionScheduler:
                 import traceback
                 traceback.print_exc()
 
-        # 添加定时任务（使用 APScheduler 的异步支持）
-        import asyncio
-
-        def sync_article_views_job():
-            """包装异步函数为同步函数"""
-            loop = asyncio.new_event_loop()
-            try:
-                loop.run_until_complete(sync_article_views_to_db())
-            finally:
-                loop.close()
-
+        # 添加定时任务（AsyncIOScheduler 直接支持异步协程）
         self.scheduler.add_job(
-            sync_article_views_job,
+            sync_article_views_to_db,
             trigger=IntervalTrigger(minutes=5),
             id='sync_article_views',
             replace_existing=True

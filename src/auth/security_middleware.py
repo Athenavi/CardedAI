@@ -4,6 +4,7 @@
 提供 XSS 过滤、CSRF 保护、速率限制等安全功能
 """
 
+import json
 import re
 import time
 from collections import defaultdict
@@ -135,8 +136,10 @@ class XSSFilterMiddleware(BaseHTTPMiddleware):
                                 "severity": xss_result.get('severity', 'medium')
                             }
                         )
+                except json.JSONDecodeError:
+                    logger.warning(f"XSS check: invalid JSON body from {request.client.host if request.client else 'unknown'}")
                 except Exception:
-                    pass
+                    logger.exception("XSS check: unexpected error reading JSON body")
 
             # 检查表单数据
             elif 'application/x-www-form-urlencoded' in content_type or 'multipart/form-data' in content_type:
@@ -157,7 +160,7 @@ class XSSFilterMiddleware(BaseHTTPMiddleware):
                                     }
                                 )
                 except Exception:
-                    pass
+                    logger.exception("XSS check: unexpected error reading form data")
 
         response = await call_next(request)
 

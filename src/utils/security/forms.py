@@ -1,3 +1,8 @@
+"""
+WTForms 表单定义（已弃用）
+注意：项目使用 FastAPI Pydantic 模型进行请求验证，此文件中的表单类未被使用。
+保留仅用于兼容旧代码，将在后续版本中移除。
+"""
 from wtforms import Form
 from wtforms import StringField, PasswordField, BooleanField, SelectField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
@@ -10,7 +15,7 @@ class LoginForm(Form):
     ])
     password = PasswordField('Password', validators=[
         DataRequired(message='密码不能为空'),
-        Length(min=6, message='密码长度至少6位')
+        Length(min=8, message='密码长度至少8位')
     ])
     remember_me = BooleanField('Remember Me')
 
@@ -26,7 +31,7 @@ class RegisterForm(Form):
     ])
     password = PasswordField('Password', validators=[
         DataRequired(message='密码不能为空'),
-        Length(min=6, message='密码长度至少6位')
+        Length(min=8, message='密码长度至少8位')
     ])
     confirm_password = PasswordField('Confirm Password', validators=[
         DataRequired(message='确认密码不能为空'),
@@ -63,7 +68,7 @@ class ChangePasswordForm(Form):
     ])
     new_password = PasswordField('New Password', validators=[
         DataRequired(message='新密码不能为空'),
-        Length(min=6, message='密码长度至少6位')
+        Length(min=8, message='密码长度至少8位')
     ])
     confirm_password = PasswordField('Confirm New Password', validators=[
         DataRequired(message='确认密码不能为空'),

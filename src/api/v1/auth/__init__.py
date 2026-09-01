@@ -390,8 +390,10 @@ async def login_api(
                 ip_address=request.client.host if request.client else None,
                 user_agent=request.headers.get('user-agent'),
             )
-        except Exception:
-            pass
+        except ImportError as e:
+            logger.warning(f"审计日志服务不可用: {e}")
+        except Exception as e:
+            logger.error(f"记录审计日志失败: {e}")
 
         response_data = {
             "user": {
@@ -464,6 +466,8 @@ async def register_api(
         return ApiResponse(success=False, error="密码必须包含小写字母")
     if not re.search(r"\d", password):
         return ApiResponse(success=False, error="密码必须包含数字")
+    if not re.search(r"[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]", password):
+        return ApiResponse(success=False, error="密码必须包含特殊字符")
 
     # 检查重名
     result = await db.execute(select(UserModel).where(UserModel.username == username))

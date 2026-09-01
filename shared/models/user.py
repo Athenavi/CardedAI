@@ -78,13 +78,9 @@ class User(Base):
             return False
         return verify_password(raw_password, self.password)
 
-    def to_dict(self, exclude_sensitive=True):
-        """转换为字典
-
-        Args:
-            exclude_sensitive: 是否排除敏感字段（密码、密钥、token 等）
-        """
-        data = {
+    def to_dict(self):
+        """转换为字典，始终排除敏感字段（密码、密钥、token 等）"""
+        return {
             'id': self.id,
             'username': self.username,
             'email': self.email,
@@ -100,16 +96,6 @@ class User(Base):
             'register_ip': self.register_ip,
             'is_2fa_enabled': self.is_2fa_enabled,
         }
-
-        if not exclude_sensitive:
-            sensitive_data = {
-                'password': self.password,
-                'totp_secret': self.totp_secret,
-                'backup_codes': self.backup_codes,
-            }
-            data.update(sensitive_data)
-
-        return data
 
     def __repr__(self):
         """字符串表示"""

@@ -1,6 +1,8 @@
 """
 安全工具模块
 包含输入验证、SQL注入防护、XSS防护等功能
+注意：部分函数（如 sql_injection_protection, validate_xss）与 auth/security_middleware.py 中的 XSSFilterMiddleware 功能重叠
+TODO: 评估并清理与 XSSFilterMiddleware 重叠的功能，统一安全中间件逻辑
 """
 import random
 import re
@@ -49,9 +51,10 @@ def load_sensitive_words(file_path):
             sensitive_words = set(word.strip().lower() for word in file)
         return sensitive_words
     except FileNotFoundError:
+        print(f"敏感词文件不存在：{file_path}")
         return set()
     except IOError as e:
-        print(e)
+        print(f"读取敏感词文件失败：{e}")
         return set()
 
 

@@ -233,6 +233,18 @@ class AppConfig(BaseConfig):
 
     def __init__(self):
         super().__init__()
+        # 检测是否使用了默认密钥（来自 .env.example 的占位值）
+        _secret_key = os.environ.get('SECRET_KEY', '')
+        if 'change-this' in _secret_key.lower():
+            raise ValueError(
+                "SECRET_KEY 使用了默认占位值（change-this-to-a-random-string-at-least-32-chars），"
+                "请修改 .env 文件中的 SECRET_KEY 为随机字符串"
+            )
+        _jwt_secret = os.environ.get('JWT_SECRET_KEY', '')
+        if 'change-this' in _jwt_secret.lower():
+            raise ValueError(
+                "JWT_SECRET_KEY 使用了默认占位值，请修改 .env 文件中的 JWT_SECRET_KEY 为随机字符串"
+            )
         # 初始化数据库URI（可能为 None，如果配置不完整）
         self.database_url = self._get_database_uri()
         # 为SQLAlchemy设置数据库URI
@@ -247,9 +259,9 @@ class AppConfig(BaseConfig):
     db_port_env = os.environ.get('DB_PORT') or os.getenv('DATABASE_PORT')
     db_port = int(db_port_env) if db_port_env is not None else 5432
     db_pool_size_env = os.environ.get('DB_POOL_SIZE') or os.getenv('DATABASE_POOL_SIZE')
-    db_pool_size = int(db_pool_size_env) if db_pool_size_env is not None else 50
+    db_pool_size = int(db_pool_size_env) if db_pool_size_env is not None else 10
     db_pool_overflow_env = os.environ.get('DB_POOL_OVERFLOW') or os.getenv('DATABASE_POOL_OVERFLOW')
-    db_pool_overflow = int(db_pool_overflow_env) if db_pool_overflow_env is not None else 100
+    db_pool_overflow = int(db_pool_overflow_env) if db_pool_overflow_env is not None else 20
     db_pool_timeout_env = os.environ.get('DB_POOL_TIMEOUT') or os.getenv('DATABASE_POOL_TIMEOUT')
     db_pool_timeout = int(db_pool_timeout_env) if db_pool_timeout_env is not None else 60
     db_table_prefix = os.environ.get('DB_TABLE_PREFIX') or os.getenv('DB_TABLE_PREFIX', '')
@@ -398,6 +410,13 @@ class AliPayConfig:
 
 
 # 延迟导入以避免循环导入
+# 默认密钥黑名单，检测用户是否直接从 .env.example 复制而未修改
+_DEFAULT_SECRETS = frozenset({
+    "change-this-to-a-random-string-at-least-32-chars",
+    "change-this-jwt-secret-key",
+})
+
+
 def get_app_config():
     # 使用密码学安全的 secrets 模块生成密钥
     import secrets
@@ -411,8 +430,41 @@ def get_app_config():
         print(f"临时密钥：{secret_key}")
         print("请在生产环境中设置 SECRET_KEY 环境变量以确保 Token 稳定性。")
         print("=" * 60)
+    elif secret_key in _DEFAULT_SECRETS:
+        # 检测到默认密钥，终止启动
+        raise RuntimeError(
+            "\n"
+            "=" * 70 + "\n"
+            "严重安全错误：检测到 SECRET_KEY 使用了 .env.example 中的默认值！\n"
+            f"当前值: {secret_key}\n"
+            "\n"
+            "请按以下步骤修复：\n"
+            "1. 编辑 .env 文件\n"
+            "2. 将 SECRET_KEY 改为一个随机字符串（至少32位）\n"
+            "3. 你也可以使用以下命令生成安全的密钥：\n"
+            "   python -c \"import secrets; print(secrets.token_urlsafe(32))\"\n"
+            "4. 将生成的密钥复制到 .env 中的 SECRET_KEY\n"
+            "5. 重新启动应用\n"
+            "=" * 70
+        )
 
     BaseConfig.SECRET_KEY = secret_key
+
+    # 检测 JWT_SECRET_KEY 是否使用了默认值
+    jwt_secret_key = os.environ.get('JWT_SECRET_KEY')
+    if jwt_secret_key and jwt_secret_key in _DEFAULT_SECRETS:
+        raise RuntimeError(
+            "\n"
+            "=" * 70 + "\n"
+            "严重安全错误：检测到 JWT_SECRET_KEY 使用了 .env.example 中的默认值！\n"
+            f"当前值: {jwt_secret_key}\n"
+            "\n"
+            "请按以下步骤修复：\n"
+            "1. 编辑 .env 文件\n"
+            "2. 将 JWT_SECRET_KEY 改为一个随机字符串（至少32位）\n"
+            "3. 重新启动应用\n"
+            "=" * 70
+        )
 
     # 获取domain环境变量
     domain_env = os.getenv('DOMAIN')

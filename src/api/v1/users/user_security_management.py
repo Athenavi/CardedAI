@@ -109,7 +109,7 @@ async def get_session(
         if session.user_id != current_user.id and not is_admin:
             raise HTTPException(status_code=403, detail="无权查看此会话")
 
-        data = session.to_dict(exclude_sensitive=False) if is_admin else session.to_dict()
+        data = session.to_dict()
         if not is_admin:
             data.pop("access_token", None)
             data.pop("refresh_token", None)

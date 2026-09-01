@@ -16,7 +16,7 @@ class DataExportService:
     """数据导出服务"""
 
     def __init__(self):
-        pass
+        logger.info("DataExportService initialized")
 
     def export_to_csv(self, data: List[Dict],
                       filename: str = None,

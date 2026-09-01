@@ -54,7 +54,7 @@ async def create_notification(
     # 尝试通过WebSocket发送实时通知
     try:
         from src.extensions import socketio, SOCKETIO_AVAILABLE
-        if SOCKETIO_AVAILABLE:
+        if SOCKETIO_AVAILABLE and socketio is not None:
             # 发送实时通知到客户端
             socketio.emit('notification', {
                 'id': notification.id,
@@ -64,9 +64,12 @@ async def create_notification(
                 'timestamp': notification.created_at.isoformat(),
                 'read': False
             }, room=f'user_{recipient_id}')
+    except ImportError:
+        # 未安装 websocket 依赖，静默跳过
+        pass
     except Exception as e:
         # 在serverless环境中，WebSocket可能不可用，记录警告但不抛出错误
-        print(f"无法发送实时通知: {str(e)}")
+        logger.warning(f"无法发送实时通知: {str(e)}")
 
     return notification
 

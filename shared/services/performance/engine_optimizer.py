@@ -68,7 +68,12 @@ class CollectionTaskQueue:
         self._tasks.pop(msg_id, None)
 
     async def report_result(self, task: CollectionTask, result: dict) -> None:
-        pass
+        """记录任务执行结果"""
+        self._stats['completed'] = self._stats.get('completed', 0) + 1
+        if result.get('success'):
+            self._stats['success'] = self._stats.get('success', 0) + 1
+        else:
+            self._stats['failed'] = self._stats.get('failed', 0) + 1
 
     def pending_count(self) -> int:
         return self._queue.qsize()
@@ -169,10 +174,14 @@ class BatchEmbeddingProcessor:
         self._batch_size = batch_size
 
     async def start(self):
-        pass
+        """启动批处理处理器（简化版 - 直接返回）"""
+        self._running = True
+        logger.info("BatchEmbeddingProcessor started")
 
     async def stop(self):
-        pass
+        """停止批处理处理器"""
+        self._running = False
+        logger.info("BatchEmbeddingProcessor stopped")
 
     async def submit(self, job: EmbeddingJob):
         await self.process_immediate(job.texts)

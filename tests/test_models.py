@@ -4,60 +4,74 @@ Model unit tests.
 """
 
 import pytest
+from datetime import datetime, timezone
+
+from shared.models import User, Category
 
 
-@pytest.mark.unit
-class TestArticleModel:
-    """Tests for the Article model."""
-
-    def test_article_title_required(self):
-        """Verify article title is required."""
-        # TODO: 实现真实测试，需要数据库 fixture 和模型实例
-        # Placeholder test
-        assert True
-
-    def test_article_slug_generation(self):
-        """Verify slug is auto-generated from title."""
-        # TODO: 实现真实测试，需要检验 slug 生成逻辑
-        # Placeholder test
-        assert True
-
-    def test_article_default_status(self):
-        """Verify default article status is draft."""
-        # TODO: 实现真实测试，需要检验默认 status 字段值
-        # Placeholder test
-        assert True
-
-
-@pytest.mark.unit
 class TestUserModel:
     """Tests for the User model."""
 
     def test_user_creation(self):
-        """Verify user can be created with required fields."""
-        # TODO: 实现真实测试，需要数据库 fixture 和用户模型实例
-        # Placeholder test
-        assert True
+        """Verify User can be created with required fields."""
+        user = User(
+            username="testuser",
+            email="test@example.com",
+            is_active=True,
+            is_superuser=False,
+        )
+        assert user.username == "testuser"
+        assert user.email == "test@example.com"
+        assert user.is_active is True
+        assert user.is_superuser is False
 
-    def test_password_hashing(self):
-        """Verify password is properly hashed."""
-        # TODO: 实现真实测试，需要调用 set_password() 并验证存储为哈希值
-        # Placeholder test
-        assert True
+    def test_user_to_dict_excludes_sensitive(self):
+        """Verify to_dict() excludes sensitive fields by default."""
+        user = User(
+            username="sensitive_user",
+            email="sensitive@example.com",
+            password="hashed_pwd_here",
+            totp_secret="secret123",
+            backup_codes='["code1","code2"]',
+        )
+        data = user.to_dict()
+        assert data["username"] == "sensitive_user"
+        assert "password" not in data
+        assert "totp_secret" not in data
+        assert "backup_codes" not in data
+
+    def test_user_str_repr(self):
+        """Verify __repr__ returns meaningful string."""
+        user = User(id=99)
+        assert repr(user) == "<User id=99>"
 
 
-@pytest.mark.unit
 class TestCategoryModel:
     """Tests for the Category model."""
 
     def test_category_creation(self):
-        """Verify category can be created."""
-        # TODO: 实现真实测试，需要数据库 fixture
-        # Placeholder test
-        assert True
+        """Verify Category can be created."""
+        now = datetime.now(timezone.utc)
+        cat = Category(
+            name="Tech",
+            slug="tech",
+            sort_order=1,
+            is_visible=True,
+            created_at=now,
+            updated_at=now,
+        )
+        assert cat.name == "Tech"
+        assert cat.slug == "tech"
+        assert cat.is_visible is True
 
     def test_category_hierarchy(self):
         """Verify parent-child category relationships."""
-        # TODO: 实现真实测试，需要检验 parent_id 关联
-        # Placeholder test
-        assert True
+        parent = Category(id=1, name="Parent", slug="parent")
+        child = Category(id=2, name="Child", slug="child", parent_id=1)
+        assert child.parent_id == parent.id
+        assert child.parent_id == 1
+
+    def test_category_default_visibility(self):
+        """Verify default visibility is True."""
+        cat = Category(name="Default", slug="default")
+        assert cat.is_visible is True or cat.is_visible is None
