@@ -27,11 +27,14 @@ try:
 
     sentry_dsn = os.getenv("SENTRY_DSN")
     if sentry_dsn:
+        # 生产环境 trace 采样率默认 0.1，避免 100% 采样造成性能开销
+        env = os.getenv("ENVIRONMENT", "development")
+        traces_rate = float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "0.1" if env == "production" else "1.0"))
         sentry_sdk.init(
             dsn=sentry_dsn,
             integrations=[FastApiIntegration()],
-            traces_sample_rate=float(os.getenv("SENTRY_TRACES_SAMPLE_RATE", "1.0")),
-            environment=os.getenv("ENVIRONMENT", "development"),
+            traces_sample_rate=traces_rate,
+            environment=env,
         )
         logger.info("Sentry initialized successfully")
     else:
@@ -441,11 +444,11 @@ def init_extensions(app):
 
     # 如果数据库URL为 None（安装向导模式），跳过数据库初始化
     if not database_url:
-        print("Database URL is not configured. Skipping database initialization.")
-        print("This is normal during installation wizard.")
+        logger.warning("Database URL is not configured. Skipping database initialization.")
+        logger.warning("This is normal during installation wizard.")
         return
 
-    print("Using unified database manager (created in lifespan event)")
+    logger.info("Using unified database manager (created in lifespan event)")
 
     # 限流中间件（slowapi 未安装时跳过）
     try:
@@ -453,9 +456,9 @@ def init_extensions(app):
             app.state.limiter = Limiter(key_func=get_remote_address)
             app.add_exception_handler(429, _rate_limit_exceeded_handler)
         else:
-            print("slowapi 未安装，限流已禁用")
+            logger.warning("slowapi 未安装，限流已禁用")
     except Exception as e:
-        print(f"Failed to initialize rate limiter: {e}")
+        logger.error(f"Failed to initialize rate limiter: {e}")
 
     # 【移除】不再在这里创建表，由 Alembic 迁移管理
     # Base.metadata.create_all(bind=engine)  # 已删除

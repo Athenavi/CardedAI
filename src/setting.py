@@ -4,6 +4,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from src.unified_logger import default_logger as logger
+
 # 加载 .env 文件
 # 优先加载根目录 .env（本地开发模式），再加载 config/.env 作为补充
 # 在 Docker 模式下，环境变量由 docker-compose.yml 的 environment 注入，不会被覆盖
@@ -47,8 +49,8 @@ def get_sqlalchemy_uri(db_config):
         worker_info = _get_worker_info()
         env_key = f"DB_INFO_PRINTED_{os.getpid()}"
         if not os.environ.get(env_key):
-            print(f"{worker_info} 数据库引擎：SQLite")
-            print(f"{worker_info} 数据库路径：{db_path_obj.resolve()}")
+            logger.info(f"{worker_info} 数据库引擎：SQLite")
+            logger.info(f"{worker_info} 数据库路径：{db_path_obj.resolve()}")
             os.environ[env_key] = "1"
         return sqlalchemy_uri
 
@@ -61,9 +63,9 @@ def get_sqlalchemy_uri(db_config):
 
     # 检查必要配置
     if not all([db_host, db_user, db_port, db_name]):
-        print(
+        logger.warning(
             'The database connection configuration is incomplete. Please check the .env file or environment variables.')
-        print('This is normal during installation wizard - configuration will be set up through the installer.')
+        logger.warning('This is normal during installation wizard - configuration will be set up through the installer.')
         return None
 
     # 对于IPv6地址，需要使用方括号包围主机地址
@@ -85,8 +87,8 @@ def get_sqlalchemy_uri(db_config):
     env_key = f"DB_INFO_PRINTED_{os.getpid()}"
 
     if not os.environ.get(env_key):
-        print(f"{worker_info} 数据库引擎：PostgreSQL")
-        print(f"{worker_info} SQLAlchemy URI: {safe_uri}")
+        logger.info(f"{worker_info} 数据库引擎：PostgreSQL")
+        logger.info(f"{worker_info} SQLAlchemy URI: {safe_uri}")
         os.environ[env_key] = "1"  # 标记为已打印
 
     return sqlalchemy_uri
@@ -364,7 +366,7 @@ class AliPayConfig:
             domain = (domain.rstrip('/') + '/') if domain is not None else '/'
 
         if domain is None:
-            print("域名配置有问题")
+            logger.warning("域名配置有问题")
 
         self.ALIPAY_APPID = os.getenv('ALIPAY_APPID')
         self.ALIPAY_DEBUG = os.getenv('ALIPAY_DEBUG', 'True').lower() == 'true'  # 沙箱模式设为True
@@ -385,7 +387,7 @@ class AliPayConfig:
                     self.ALIPAY_PRIVATE_KEY_STRING = private_key_path.read_bytes().decode('utf-8', errors='ignore')
             except Exception as e:
                 # 其他错误也应妥善处理
-                print(f"读取支付宝私钥文件失败: {str(e)}")
+                logger.error(f"读取支付宝私钥文件失败: {str(e)}")
                 self.ALIPAY_PRIVATE_KEY_STRING = None
         else:
             self.ALIPAY_PRIVATE_KEY_STRING = None
@@ -403,7 +405,7 @@ class AliPayConfig:
                     self.ALIPAY_PUBLIC_KEY_STRING = public_key_path.read_bytes().decode('utf-8', errors='ignore')
             except Exception as e:
                 # 其他错误也应妥善处理
-                print(f"读取支付宝公钥文件失败: {str(e)}")
+                logger.error(f"读取支付宝公钥文件失败: {str(e)}")
                 self.ALIPAY_PUBLIC_KEY_STRING = None
         else:
             self.ALIPAY_PUBLIC_KEY_STRING = None
@@ -507,31 +509,22 @@ class ProductionConfig(AppConfig):
             missing.append('DB_USER')
 
         if missing:
-            print("=" * 70)
-            print("⚠️  警告：以下数据库环境变量未设置，应用将以安装向导模式启动")
-            print("=" * 70)
-            print(f"   未设置的变量: {', '.join(missing)}")
-            print()
-            print("   请通过以下任一方式配置：")
-            print("   1. 创建 .env 文件（参考 .env.example）")
-            print("   2. 在 docker-compose.yml 的 environment 中设置")
-            print("   3. 直接设置系统环境变量")
-            print()
-            print("   示例 docker-compose.yml 配置：")
-            print("     environment:")
-            print("       - DB_HOST=postgres")
-            print("       - DB_PORT=5432")
-            print("       - DB_USER=postgres")
-            print("       - DB_PASSWORD=your_password")
-            print("       - DB_NAME=fast_blog")
-            print("       - SECRET_KEY=your-secret-key-at-least-32-chars")
-            print("=" * 70)
-            print("   应用将继续启动，请通过 /install 页面完成数据库配置。")
-            print("=" * 70)
+            logger.warning("=" * 70)
+            logger.warning("⚠️  警告：以下数据库环境变量未设置，应用将以安装向导模式启动")
+            logger.warning("=" * 70)
+            logger.warning(f"   未设置的变量: {', '.join(missing)}")
+            logger.warning("")
+            logger.warning("   请通过以下任一方式配置：")
+            logger.warning("   1. 创建 .env 文件（参考 .env.example）")
+            logger.warning("   2. 在 docker-compose.yml 的 environment 中设置")
+            logger.warning("   3. 直接设置系统环境变量")
+            logger.warning("")
+            logger.warning("   应用将继续启动，请通过 /install 页面完成数据库配置。")
+            logger.warning("=" * 70)
         else:
             # 警告：未设置密码（允许，但提示安全风险）
             if not self.db_password:
-                print("⚠️  警告：未设置 DB_PASSWORD，数据库将使用空密码连接")
+                logger.warning("⚠️  警告：未设置 DB_PASSWORD，数据库将使用空密码连接")
 
 
 class DevelopmentConfig(AppConfig):
