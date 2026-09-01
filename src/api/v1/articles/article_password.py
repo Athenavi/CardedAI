@@ -1,6 +1,7 @@
 """
 文章密码保护API
 """
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Path, Body, Request
@@ -12,6 +13,8 @@ from src.auth.auth_deps import jwt_required_dependency as jwt_required
 from src.utils.database.main import get_async_session
 
 router = APIRouter()
+
+logger = logging.getLogger(__name__)
 
 
 @router.post("/{article_id}/password",
@@ -51,9 +54,7 @@ async def set_article_password_api(
             data=result
         )
     except Exception as e:
-        import traceback
-        print(f"Error in set_article_password_api: {str(e)}")
-        print(traceback.format_exc())
+        logger.error(f"Error in set_article_password_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -80,9 +81,7 @@ async def verify_article_password_api(
             data=result
         )
     except Exception as e:
-        import traceback
-        print(f"Error in verify_article_password_api: {str(e)}")
-        print(traceback.format_exc())
+        logger.error(f"Error in verify_article_password_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -107,7 +106,5 @@ async def check_article_access_api(
             data=result
         )
     except Exception as e:
-        import traceback
-        print(f"Error in check_article_access_api: {str(e)}")
-        print(traceback.format_exc())
+        logger.error(f"Error in check_article_access_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))

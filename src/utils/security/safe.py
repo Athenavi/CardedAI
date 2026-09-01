@@ -2,7 +2,9 @@
 安全工具模块
 包含输入验证、SQL注入防护、XSS防护等功能
 """
+import os
 import re
+import socket
 from urllib.parse import urlparse
 
 
@@ -134,6 +136,37 @@ def validate_url(url_string, allowed_schemes=None):
         parsed = urlparse(url_string)
         if parsed.scheme not in allowed_schemes:
             return False, None
+
+        # 检查是否为内网地址（SSRF防护）
+        hostname = parsed.hostname
+        if hostname:
+            # 排除本地/内网地址
+            if hostname in ('localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'):
+                return False, None
+            # 尝试解析并检查是否为私有IP
+            try:
+                ip = socket.gethostbyname(hostname)
+                _ip_parts = ip.split('.')
+                if len(_ip_parts) == 4:
+                    # 10.x.x.x
+                    if _ip_parts[0] == '10':
+                        return False, None
+                    # 172.16-31.x.x
+                    if _ip_parts[0] == '172' and 16 <= int(_ip_parts[1]) <= 31:
+                        return False, None
+                    # 192.168.x.x
+                    if _ip_parts[0] == '192' and _ip_parts[1] == '168':
+                        return False, None
+                    # 169.254.x.x (链路本地)
+                    if _ip_parts[0] == '169' and _ip_parts[1] == '254':
+                        return False, None
+                    # 100.64-127.x.x (CGNAT)
+                    if _ip_parts[0] == '100' and 64 <= int(_ip_parts[1]) <= 127:
+                        return False, None
+            except (socket.gaierror, OSError, ValueError, IndexError):
+                # 解析失败或无法分类，继续
+                pass
+
         return True, url_string
     except Exception:
         return False, None
@@ -167,12 +200,34 @@ def sanitize_filename(filename):
     if not filename:
         return filename
 
-    # 移除路径分隔符以防止路径遍历
-    filename = filename.replace('../', '').replace('..\\', '')
+    # 先进行 URL 解码，防止 URL 编码绕过
+    from urllib.parse import unquote
+    filename = unquote(filename)
+
+    # 移除空字节注入
+    filename = filename.replace('\x00', '').replace('%00', '')
+
+    # 循环移除路径遍历，防止嵌套绕过（如 ....// 或 ....\\\\）
+    while True:
+        original = filename
+        filename = filename.replace('../', '').replace('..\\', '')
+        # 处理各种编码/变体
+        filename = filename.replace('..%2f', '').replace('..%5c', '')
+        filename = filename.replace('..%252f', '').replace('..%255c', '')
+        if filename == original:
+            break
+
+    # 移除路径分隔符
     filename = filename.replace('/', '').replace('\\', '')
 
     # 只允许字母、数字、下划线、连字符、点号
     sanitized = re.sub(r'[^\w.-]', '_', filename)
+
+    # 限制长度防止 Dos
+    if len(sanitized) > 255:
+        name, ext = os.path.splitext(sanitized)
+        ext = ext[:20]
+        sanitized = name[:235] + ext
 
     return sanitized
 

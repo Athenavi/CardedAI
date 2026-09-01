@@ -2,6 +2,7 @@
 增量备份 API 端点
 """
 
+import logging
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,7 +11,21 @@ from src.api.v1.core.responses import ApiResponse
 from src.auth.auth_deps import admin_required as admin_required_api
 from src.extensions import get_async_db_session as get_async_db
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(tags=["Incremental Backup"])
+
+
+def _get_db_config() -> dict:
+    """从统一配置源获取数据库配置"""
+    from src.setting import settings
+    return {
+        'host': settings.database_host or 'localhost',
+        'port': settings.database_port or '5432',
+        'database': settings.database_name or 'fast_blog',
+        'user': settings.database_user or 'postgres',
+        'password': settings.database_password or '',
+    }
 
 
 @router.post("/create")
@@ -31,16 +46,7 @@ async def create_incremental_backup(
         base_backup_id = body.get('base_backup_id')
         tables = body.get('tables')
 
-        # 获取数据库配置
-        import os
-        db_config = {
-            'host': os.getenv('DB_HOST', 'localhost'),
-            'port': os.getenv('DB_PORT', '5432'),
-            'database': os.getenv('DB_NAME', 'fast_blog'),
-            'user': os.getenv('DB_USER', 'postgres'),
-            'password': os.getenv('DB_PASSWORD', ''),
-        }
-
+        db_config = _get_db_config()
         result = await incremental_backup_service.create_incremental_backup(
             db_config,
             base_backup_id,
@@ -60,9 +66,7 @@ async def create_incremental_backup(
             )
 
     except Exception as e:
-        import traceback
-        print(f"Error creating incremental backup: {str(e)}")
-        print(traceback.format_exc())
+        logger.error(f"Error creating incremental backup: {e}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -84,16 +88,7 @@ async def create_differential_backup(
         base_backup_id = body.get('base_backup_id')
         tables = body.get('tables')
 
-        # 获取数据库配置
-        import os
-        db_config = {
-            'host': os.getenv('DB_HOST', 'localhost'),
-            'port': os.getenv('DB_PORT', '5432'),
-            'database': os.getenv('DB_NAME', 'fast_blog'),
-            'user': os.getenv('DB_USER', 'postgres'),
-            'password': os.getenv('DB_PASSWORD', ''),
-        }
-
+        db_config = _get_db_config()
         result = await incremental_backup_service.create_differential_backup(
             db_config,
             base_backup_id,
@@ -113,9 +108,7 @@ async def create_differential_backup(
             )
 
     except Exception as e:
-        import traceback
-        print(f"Error creating differential backup: {str(e)}")
-        print(traceback.format_exc())
+        logger.error(f"Error creating differential backup: {e}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -145,14 +138,7 @@ async def restore_incremental_backup(
             return ApiResponse(success=False, error=f'无法找到备份链: {target_backup_id}')
 
         # 获取数据库配置
-        import os
-        db_config = {
-            'host': os.getenv('DB_HOST', 'localhost'),
-            'port': os.getenv('DB_PORT', '5432'),
-            'database': os.getenv('DB_NAME', 'fast_blog'),
-            'user': os.getenv('DB_USER', 'postgres'),
-            'password': os.getenv('DB_PASSWORD', ''),
-        }
+        db_config = _get_db_config()
 
         result = await incremental_backup_service.restore_incremental_backup(
             backup_chain,
@@ -173,9 +159,7 @@ async def restore_incremental_backup(
             )
 
     except Exception as e:
-        import traceback
-        print(f"Error restoring incremental backup: {str(e)}")
-        print(traceback.format_exc())
+        logger.error(f"Error restoring incremental backup: {e}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -196,9 +180,7 @@ async def get_backup_statistics(
         )
 
     except Exception as e:
-        import traceback
-        print(f"Error getting backup statistics: {str(e)}")
-        print(traceback.format_exc())
+        logger.error(f"Error getting backup statistics: {e}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 

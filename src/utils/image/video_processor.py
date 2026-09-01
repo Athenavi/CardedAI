@@ -59,10 +59,13 @@ class VideoProcessor:
         
         Args:
             video_path: 视频文件路径
-            
         Returns:
-            包含视频信息的字典，包括：duration, width, height, codec, fps等
+            包含视频信息的字典
         """
+        # 安全校验：确保路径是合法文件路径，不以 - 开头防止 ffprobe 参数注入
+        if not video_path or video_path.startswith('-') or ';' in video_path or '|' in video_path:
+            logger.error(f"非法视频路径: {video_path}")
+            return None
         try:
             cmd = [
                 self.ffprobe_path,
@@ -70,6 +73,7 @@ class VideoProcessor:
                 '-print_format', 'json',
                 '-show_format',
                 '-show_streams',
+                '--',  # 使用 -- 结束选项解析，防止参数注入
                 video_path
             ]
 
@@ -125,17 +129,14 @@ class VideoProcessor:
     ) -> bool:
         """
         从视频中提取缩略图
-        
-        Args:
-            video_path: 视频文件路径
-            thumbnail_path: 缩略图保存路径
-            time: 提取时间点（秒）
-            width: 缩略图宽度（高度自动计算保持比例）
-            quality: JPEG质量 (1-100)
-            
-        Returns:
-            是否成功
         """
+        # 安全校验
+        if not video_path or video_path.startswith('-') or ';' in video_path or '|' in video_path:
+            logger.error(f"非法视频路径: {video_path}")
+            return False
+        if not thumbnail_path or thumbnail_path.startswith('-') or ';' in thumbnail_path or '|' in thumbnail_path:
+            logger.error(f"非法缩略图路径: {thumbnail_path}")
+            return False
         try:
             # 确保输出目录存在
             os.makedirs(os.path.dirname(thumbnail_path), exist_ok=True)
@@ -191,21 +192,12 @@ class VideoProcessor:
     ) -> Dict[str, Any]:
         """
         转码视频
-        
-        Args:
-            input_path: 输入视频路径
-            output_path: 输出视频路径
-            preset: x264预设 (ultrafast, fast, medium, slow, veryslow)
-            crf: 恒定质量因子 (18-28, 越小质量越高)
-            max_width: 最大宽度（可选，保持比例）
-            max_height: 最大高度（可选，保持比例）
-            audio_bitrate: 音频比特率
-            video_codec: 视频编码器
-            container: 容器格式 (mp4, webm等)
-            
-        Returns:
-            包含转码结果的字典
         """
+        # 安全校验：确保输入路径合法
+        if not input_path or input_path.startswith('-') or ';' in input_path or '|' in input_path:
+            return {'success': False, 'error': '非法输入路径'}
+        if not output_path or output_path.startswith('-') or ';' in output_path or '|' in output_path:
+            return {'success': False, 'error': '非法输出路径'}
         try:
             # 确保输出目录存在
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -371,16 +363,14 @@ class VideoProcessor:
     ) -> bool:
         """
         从视频中提取音频
-        
-        Args:
-            video_path: 视频文件路径
-            output_path: 输出音频路径
-            audio_format: 音频格式 (mp3, aac, ogg等)
-            audio_bitrate: 音频比特率
-            
-        Returns:
-            是否成功
         """
+        # 安全校验
+        if not video_path or video_path.startswith('-') or ';' in video_path or '|' in video_path:
+            logger.error(f"非法视频路径: {video_path}")
+            return False
+        if not output_path or output_path.startswith('-') or ';' in output_path or '|' in output_path:
+            logger.error(f"非法输出路径: {output_path}")
+            return False
         try:
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
 

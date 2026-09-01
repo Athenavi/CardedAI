@@ -420,16 +420,16 @@ _DEFAULT_SECRETS = frozenset({
 def get_app_config():
     # 使用密码学安全的 secrets 模块生成密钥
     import secrets
+    from src.unified_logger import default_logger as logger
     # 更新 BaseConfig 中的 SECRET_KEY
     secret_key = os.environ.get('SECRET_KEY')
     if not secret_key:
         # 未配置环境变量时，生成强随机密钥并警告用户
         secret_key = secrets.token_urlsafe(32)
-        print("=" * 60)
-        print("警告：未设置 SECRET_KEY 环境变量，已生成临时随机密钥。")
-        print(f"临时密钥：{secret_key}")
-        print("请在生产环境中设置 SECRET_KEY 环境变量以确保 Token 稳定性。")
-        print("=" * 60)
+        logger.warning("=" * 60)
+        logger.warning("警告：未设置 SECRET_KEY 环境变量，已生成临时随机密钥。")
+        logger.warning("请在生产环境中设置 SECRET_KEY 环境变量以确保 Token 稳定性。")
+        logger.warning("=" * 60)
     elif secret_key in _DEFAULT_SECRETS:
         # 检测到默认密钥，终止启动
         raise RuntimeError(
