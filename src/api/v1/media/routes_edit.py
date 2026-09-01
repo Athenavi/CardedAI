@@ -71,6 +71,7 @@ async def delete_user_media_api(
         return JSONResponse({'success': True, 'data': {'deleted_count': len(target_files)}, 'message': "删除成功"})
     except Exception as e:
         await db.rollback()
+        logger.error(f"批量删除失败: {e}", exc_info=True)
         return JSONResponse({'success': False, 'message': '数据库操作失败'}, status_code=500)
 
 

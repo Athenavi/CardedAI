@@ -108,10 +108,17 @@ def extract_cover_from_audio(media: Media) -> Optional[bytes]:
                 key = parts[1] if len(parts) > 1 else ''
 
                 # 从配置获取 AWS 凭据
+                aws_access_key = getattr(settings, 'S3_ACCESS_KEY', None) or getattr(settings, 'AWS_ACCESS_KEY_ID', None)
+                aws_secret_key = getattr(settings, 'S3_SECRET_KEY', None) or getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)
+
+                if not aws_access_key or not aws_secret_key:
+                    logger.error("S3 凭据未配置")
+                    return None
+
                 s3_client = boto3.client(
                     's3',
-                    aws_access_key_id=getattr(settings, 'AWS_ACCESS_KEY_ID', None),
-                    aws_secret_access_key=getattr(settings, 'AWS_SECRET_ACCESS_KEY', None),
+                    aws_access_key_id=aws_access_key,
+                    aws_secret_access_key=aws_secret_key,
                     region_name=getattr(settings, 'AWS_REGION', 'us-east-1'),
                 )
 

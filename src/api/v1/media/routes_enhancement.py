@@ -93,9 +93,7 @@ async def optimize_media_file(
         )
         
     except Exception as e:
-        logger.error(f"图片优化失败: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"图片优化失败: {e}", exc_info=True)
         return ApiResponse(success=False, error=f"优化失败: {str(e)}")
 
 
@@ -176,9 +174,7 @@ async def convert_to_webp_endpoint(
         )
         
     except Exception as e:
-        logger.error(f"WebP转换失败: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"WebP转换失败: {e}", exc_info=True)
         return ApiResponse(success=False, error=f"转换失败: {str(e)}")
 
 
