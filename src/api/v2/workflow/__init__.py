@@ -36,13 +36,14 @@ import logging
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Depends
 from pydantic import BaseModel
 
 from shared.models.workflow.workflow_definition import WorkflowDefinition
 from shared.services.workflow.dag_engine import DAGEngine
 from shared.services.workflow.trigger_service import trigger_service
 from src.api.v1.core.responses import ApiResponse
+from src.auth import jwt_required
 from src.extensions import get_db
 
 logger = logging.getLogger(__name__)
@@ -65,6 +66,7 @@ async def create_definition(
     graph: str = Body(...),
     description: str = Body(default=None),
     trigger_config: str = Body(default="{}"),
+    current_user=Depends(jwt_required),
 ):
     try:
         graph_data = json.loads(graph) if isinstance(graph, str) else graph
@@ -105,6 +107,7 @@ async def get_definitions(
     page: int = 1,
     per_page: int = 20,
     is_active: Optional[bool] = None,
+    current_user=Depends(jwt_required),
 ):
     """获取所有工作流定义"""
     from shared.models.workflow.workflow_definition import WorkflowDefinition
@@ -128,7 +131,7 @@ async def get_definitions(
 
 
 @router.get("/definitions/{def_id}", summary="获取工作流定义详")
-async def get_definition(def_id: int):
+async def get_definition(def_id: int, current_user=Depends(jwt_required)):
     """获取指定工作流定义详 """
     from shared.models.workflow.workflow_definition import WorkflowDefinition
 
@@ -160,6 +163,7 @@ async def update_definition(
     graph: str = Body(default=None),
     description: str = Body(default=None),
     trigger_config: str = Body(default=None),
+    current_user=Depends(jwt_required),
 ):
     """更新工作流定 """
     from shared.models.workflow.workflow_definition import WorkflowDefinition
@@ -204,7 +208,7 @@ async def update_definition(
 
 
 @router.delete("/definitions/{def_id}", summary="删除工作流定")
-async def delete_definition(def_id: int):
+async def delete_definition(def_id: int, current_user=Depends(jwt_required)):
     """删除工作流定 """
     from shared.models.workflow.workflow_definition import WorkflowDefinition
 
@@ -220,7 +224,7 @@ async def delete_definition(def_id: int):
 
 
 @router.post("/definitions/{def_id}/activate", summary="激活工作流")
-async def activate_definition(def_id: int):
+async def activate_definition(def_id: int, current_user=Depends(jwt_required)):
     """激活工作流（启用触发器 """
     from shared.models.workflow.workflow_definition import WorkflowDefinition
 
@@ -246,7 +250,7 @@ async def activate_definition(def_id: int):
 
 
 @router.post("/definitions/{def_id}/deactivate", summary="停用工作")
-async def deactivate_definition(def_id: int):
+async def deactivate_definition(def_id: int, current_user=Depends(jwt_required)):
     """停用工作流（禁用触发器）"""
     from shared.models.workflow.workflow_definition import WorkflowDefinition
 
@@ -269,7 +273,11 @@ async def deactivate_definition(def_id: int):
 
 
 @router.post("/definitions/{def_id}/execute", summary="手动触发工作")
-async def execute_workflow(def_id: int, req: ExecuteWorkflowRequest = None):
+async def execute_workflow(
+    def_id: int,
+    req: ExecuteWorkflowRequest = Body(default=None),
+    current_user=Depends(jwt_required),
+):
     """手动触发指定工作流执 """
     from shared.services.workflow.trigger_service import trigger_service
 
@@ -294,6 +302,7 @@ async def get_executions(
     per_page: int = 20,
     workflow_id: Optional[int] = None,
     status: Optional[str] = None,
+    current_user=Depends(jwt_required),
 ):
     """获取工作流执行记 """
     from shared.models.workflow.workflow_execution import WorkflowExecution
@@ -319,7 +328,7 @@ async def get_executions(
 
 
 @router.get("/executions/{exec_id}", summary="获取执行记录详情")
-async def get_execution(exec_id: int):
+async def get_execution(exec_id: int, current_user=Depends(jwt_required)):
     """获取指定执行记录详情，包含所有节点执行状 """
     from shared.models.workflow.workflow_execution import WorkflowExecution
 
@@ -340,7 +349,7 @@ async def get_execution(exec_id: int):
 
 
 @router.post("/executions/{exec_id}/cancel", summary="取消执行")
-async def cancel_execution(exec_id: int):
+async def cancel_execution(exec_id: int, current_user=Depends(jwt_required)):
     """取消正在运行的执 """
     from shared.models.workflow.workflow_execution import WorkflowExecution
     from shared.services.workflow.dag_engine import dag_engine
@@ -371,7 +380,7 @@ async def cancel_execution(exec_id: int):
 
 
 @router.get("/tools", summary="获取工具列表")
-async def get_tools(tool_type: Optional[str] = None):
+async def get_tools(tool_type: Optional[str] = None, current_user=Depends(jwt_required)):
     """获取已注册的 Agent 工具列表"""
     from shared.services.workflow.tool_registry import tool_registry
 
@@ -388,6 +397,7 @@ async def register_tool(
     description: str = Body(...),
     parameters: str = Body(...),
     tool_type: str = Body(default="function"),
+    current_user=Depends(jwt_required),
 ):
     """注册新的 Agent 工具（仅记录元数据到数据库）"""
     from shared.models.workflow.agent_tool import AgentTool
@@ -419,7 +429,7 @@ async def register_tool(
 
 
 @router.post("/tools/{name}/test", summary="工具测试")
-async def test_tool(name: str, params: str = Body(default="{}")):
+async def test_tool(name: str, params: str = Body(default="{}"), current_user=Depends(jwt_required)):
     """测试调用指定工具"""
     from shared.services.workflow.tool_registry import tool_registry
 
@@ -436,7 +446,7 @@ async def test_tool(name: str, params: str = Body(default="{}")):
 
 
 @router.get("/triggers", summary="获取触发器列")
-async def get_triggers():
+async def get_triggers(current_user=Depends(jwt_required)):
     """获取工作流触发器配置"""
     from shared.models.workflow.trigger import Trigger
 
@@ -462,6 +472,7 @@ async def get_triggers():
 async def create_cron_trigger(
     workflow_id: int = Body(...),
     cron_expr: str = Body(...),
+    current_user=Depends(jwt_required),
 ):
     """注册定时触发 """
     from shared.services.workflow.trigger_service import trigger_service
@@ -498,6 +509,7 @@ async def create_cron_trigger(
 async def create_event_trigger(
     workflow_id: int = Body(...),
     event_name: str = Body(...),
+    current_user=Depends(jwt_required),
 ):
     """注册事件触发 """
     from shared.services.workflow.trigger_service import trigger_service
@@ -532,6 +544,7 @@ async def create_event_trigger(
 @router.post("/triggers/webhook", summary="创建 webhook 触发")
 async def create_webhook_trigger(
     workflow_id: int = Body(...),
+    current_user=Depends(jwt_required),
 ):
     """注册 Webhook 触发 """
     from shared.services.workflow.trigger_service import trigger_service
@@ -563,7 +576,7 @@ async def create_webhook_trigger(
 
 
 @router.delete("/triggers/{trigger_id}", summary="删除触发")
-async def delete_trigger(trigger_id: int):
+async def delete_trigger(trigger_id: int, current_user=Depends(jwt_required)):
     """删除触发 """
     from shared.models.workflow.trigger import Trigger
 
@@ -631,7 +644,7 @@ async def _setup_triggers(workflow_id: int, graph_data, trigger_config: dict):
 
 
 @router.get("/stats", summary="工作流引擎统计概")
-async def get_workflow_stats():
+async def get_workflow_stats(current_user=Depends(jwt_required)):
     """获取工作流引擎的统计数据（用于仪表盘集成 """
     from sqlalchemy import select, func
     from shared.models.workflow.workflow_definition import WorkflowDefinition
