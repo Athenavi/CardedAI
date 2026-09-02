@@ -70,7 +70,7 @@ class CreateAlertRuleRequest(BaseModel):
 async def create_source(req: CreateSourceRequest, current_user=Depends(jwt_required)):
     """创建新的数据源配置"""
     from shared.models import DataSource
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
         parsed_config = json.loads(req.config)
@@ -78,7 +78,7 @@ async def create_source(req: CreateSourceRequest, current_user=Depends(jwt_requi
         return ApiResponse(success=False, error="config 不是合法的 JSON")
 
     try:
-        with get_db() as db:
+        async with get_async_session_context() as db:
             source = DataSource(
                 name=req.name,
                 source_type=req.source_type,
@@ -89,9 +89,9 @@ async def create_source(req: CreateSourceRequest, current_user=Depends(jwt_requi
                 created_at=datetime.now(timezone.utc),
             )
             db.add(source)
-            db.flush()
+            await db.flush()
             source_id = source.id
-            db.commit()
+            await db.commit()
 
         return ApiResponse(success=True, data={"id": source_id}, message="数据源创建成功")
     except Exception as e:
@@ -110,10 +110,10 @@ async def get_sources(
     """获取所有数据源配置"""
     from sqlalchemy import select, func
     from shared.models import DataSource
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
-        with get_db() as db:
+        async with get_async_session_context() as db:
             base_query = select(DataSource)
             if source_type:
                 base_query = base_query.where(DataSource.source_type == source_type)
@@ -122,12 +122,12 @@ async def get_sources(
 
             # 统计总数
             count_query = select(func.count()).select_from(base_query.subquery())
-            total = db.execute(count_query).scalar() or 0
+            total = (await db.execute(count_query)).scalar() or 0
 
             # 分页查询
             offset = (page - 1) * per_page
             query = base_query.order_by(DataSource.created_at.desc()).offset(offset).limit(per_page)
-            items = db.execute(query).scalars().all()
+            items = (await db.execute(query)).scalars().all()
 
             total_pages = math.ceil(total / per_page) if per_page > 0 else 0
             return ApiResponse(
@@ -151,14 +151,14 @@ async def get_sources(
 async def get_source(source_id: int, current_user=Depends(jwt_required)):
     """获取指定数据源详情"""
     from shared.models import DataSource
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
-        with get_db() as db:
-            source = db.get(DataSource, source_id)
-            if not source:
+        async with get_async_session_context() as db:
+            result = await db.get(DataSource, source_id)
+            if not result:
                 raise HTTPException(status_code=404, detail="数据源不存在")
-            return ApiResponse(success=True, data=source.to_dict())
+            return ApiResponse(success=True, data=result.to_dict())
     except HTTPException:
         raise
     except Exception as e:
@@ -170,11 +170,11 @@ async def get_source(source_id: int, current_user=Depends(jwt_required)):
 async def update_source(source_id: int, req: UpdateSourceRequest, current_user=Depends(jwt_required)):
     """更新数据源配置"""
     from shared.models import DataSource
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
-        with get_db() as db:
-            source = db.get(DataSource, source_id)
+        async with get_async_session_context() as db:
+            source = await db.get(DataSource, source_id)
             if not source:
                 raise HTTPException(status_code=404, detail="数据源不存在")
 
@@ -193,7 +193,7 @@ async def update_source(source_id: int, req: UpdateSourceRequest, current_user=D
             if req.is_active is not None:
                 source.is_active = req.is_active
 
-            db.commit()
+            await db.commit()
 
         return ApiResponse(success=True, message="数据源更新成功")
     except HTTPException:
@@ -207,15 +207,15 @@ async def update_source(source_id: int, req: UpdateSourceRequest, current_user=D
 async def delete_source(source_id: int, current_user=Depends(jwt_required)):
     """删除数据源"""
     from shared.models import DataSource
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
-        with get_db() as db:
-            source = db.get(DataSource, source_id)
+        async with get_async_session_context() as db:
+            source = await db.get(DataSource, source_id)
             if not source:
                 raise HTTPException(status_code=404, detail="数据源不存在")
-            db.delete(source)
-            db.commit()
+            await db.delete(source)
+            await db.commit()
 
         return ApiResponse(success=True, message="数据源已删除")
     except HTTPException:
@@ -255,10 +255,10 @@ async def get_items(
     """获取采集到的原始数据条目"""
     from sqlalchemy import select, func
     from shared.models import CollectedItem
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
-        with get_db() as db:
+        async with get_async_session_context() as db:
             base_query = select(CollectedItem)
             if source_id:
                 base_query = base_query.where(CollectedItem.source_id == source_id)
@@ -267,12 +267,12 @@ async def get_items(
 
             # 统计总数
             count_query = select(func.count()).select_from(base_query.subquery())
-            total = db.execute(count_query).scalar() or 0
+            total = (await db.execute(count_query)).scalar() or 0
 
             # 分页查询
             offset = (page - 1) * per_page
             query = base_query.order_by(CollectedItem.collected_at.desc()).offset(offset).limit(per_page)
-            items = db.execute(query).scalars().all()
+            items = (await db.execute(query)).scalars().all()
 
             total_pages = math.ceil(total / per_page) if per_page > 0 else 0
             return ApiResponse(
@@ -306,10 +306,10 @@ async def get_intelligence(
     """获取 AI 分析后的情报条目"""
     from sqlalchemy import select, func, desc, or_
     from shared.models import Intelligence
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
-        with get_db() as db:
+        async with get_async_session_context() as db:
             base_query = select(Intelligence)
             if category:
                 base_query = base_query.where(Intelligence.category == category)
@@ -326,12 +326,12 @@ async def get_intelligence(
 
             # 统计总数
             count_query = select(func.count()).select_from(base_query.subquery())
-            total = db.execute(count_query).scalar() or 0
+            total = (await db.execute(count_query)).scalar() or 0
 
             # 分页查询
             offset = (page - 1) * per_page
             query = base_query.order_by(desc(Intelligence.created_at)).offset(offset).limit(per_page)
-            items = db.execute(query).scalars().all()
+            items = (await db.execute(query)).scalars().all()
 
             total_pages = math.ceil(total / per_page) if per_page > 0 else 0
             return ApiResponse(
@@ -355,11 +355,11 @@ async def get_intelligence(
 async def get_intelligence_detail(intel_id: int, current_user=Depends(jwt_required)):
     """获取单条情报详情"""
     from shared.models import Intelligence
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
-        with get_db() as db:
-            intel = db.get(Intelligence, intel_id)
+        async with get_async_session_context() as db:
+            intel = await db.get(Intelligence, intel_id)
             if not intel:
                 raise HTTPException(status_code=404, detail="情报不存在")
             return ApiResponse(success=True, data=intel.to_dict())
@@ -382,22 +382,22 @@ async def get_briefings(
     """获取情报简报"""
     from sqlalchemy import select, func, desc
     from shared.models import Briefing
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
-        with get_db() as db:
+        async with get_async_session_context() as db:
             base_query = select(Briefing)
             if briefing_type:
                 base_query = base_query.where(Briefing.briefing_type == briefing_type)
 
             # 统计总数
             count_query = select(func.count()).select_from(base_query.subquery())
-            total = db.execute(count_query).scalar() or 0
+            total = (await db.execute(count_query)).scalar() or 0
 
             # 分页查询
             offset = (page - 1) * per_page
             query = base_query.order_by(desc(Briefing.created_at)).offset(offset).limit(per_page)
-            items = db.execute(query).scalars().all()
+            items = (await db.execute(query)).scalars().all()
 
             total_pages = math.ceil(total / per_page) if per_page > 0 else 0
             return ApiResponse(
@@ -421,11 +421,11 @@ async def get_briefings(
 async def get_briefing_detail(briefing_id: int, current_user=Depends(jwt_required)):
     """获取单条简报详情"""
     from shared.models import Briefing
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
-        with get_db() as db:
-            briefing = db.get(Briefing, briefing_id)
+        async with get_async_session_context() as db:
+            briefing = await db.get(Briefing, briefing_id)
             if not briefing:
                 raise HTTPException(status_code=404, detail="简报不存在")
             return ApiResponse(success=True, data=briefing.to_dict())
@@ -475,22 +475,22 @@ async def get_alert_rules(
     """获取预警规则"""
     from sqlalchemy import select, func, desc
     from shared.models import AlertRule
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
-        with get_db() as db:
+        async with get_async_session_context() as db:
             base_query = select(AlertRule)
             if is_active is not None:
                 base_query = base_query.where(AlertRule.is_active == is_active)
 
             # 统计总数
             count_query = select(func.count()).select_from(base_query.subquery())
-            total = db.execute(count_query).scalar() or 0
+            total = (await db.execute(count_query)).scalar() or 0
 
             # 分页查询
             offset = (page - 1) * per_page
             query = base_query.order_by(desc(AlertRule.created_at)).offset(offset).limit(per_page)
-            items = db.execute(query).scalars().all()
+            items = (await db.execute(query)).scalars().all()
 
             total_pages = math.ceil(total / per_page) if per_page > 0 else 0
             return ApiResponse(
@@ -514,7 +514,7 @@ async def get_alert_rules(
 async def create_alert_rule(req: CreateAlertRuleRequest, current_user=Depends(jwt_required)):
     """创建新的预警规则"""
     from shared.models import AlertRule
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     # 验证 JSON
     for field_name, field_val in [("keywords", req.keywords), ("conditions", req.conditions), ("actions", req.actions)]:
@@ -524,7 +524,7 @@ async def create_alert_rule(req: CreateAlertRuleRequest, current_user=Depends(jw
             return ApiResponse(success=False, error=f"{field_name} 不是合法的 JSON")
 
     try:
-        with get_db() as db:
+        async with get_async_session_context() as db:
             rule = AlertRule(
                 name=req.name,
                 severity=req.severity,
@@ -535,9 +535,9 @@ async def create_alert_rule(req: CreateAlertRuleRequest, current_user=Depends(jw
                 created_at=datetime.now(timezone.utc),
             )
             db.add(rule)
-            db.flush()
+            await db.flush()
             rule_id = rule.id
-            db.commit()
+            await db.commit()
 
         return ApiResponse(success=True, data={"id": rule_id}, message="预警规则创建成功")
     except Exception as e:
@@ -553,22 +553,22 @@ async def get_alert_events(
 ):
     """获取预警事件列表"""
     from sqlalchemy import select, func, desc
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
         # 尝试从数据库获取 AlertEvent
         from shared.models import AlertEvent
-        with get_db() as db:
+        async with get_async_session_context() as db:
             base_query = select(AlertEvent)
 
             # 统计总数
             count_query = select(func.count()).select_from(base_query.subquery())
-            total = db.execute(count_query).scalar() or 0
+            total = (await db.execute(count_query)).scalar() or 0
 
             # 分页查询
             offset = (page - 1) * per_page
             query = base_query.order_by(desc(AlertEvent.created_at)).offset(offset).limit(per_page)
-            items = db.execute(query).scalars().all()
+            items = (await db.execute(query)).scalars().all()
 
             total_pages = math.ceil(total / per_page) if per_page > 0 else 0
             return ApiResponse(
@@ -634,23 +634,23 @@ async def analyze_all_pending():
 async def get_intel_stats():
     """获取情报引擎的统计数据（用于仪表盘集成）"""
     from sqlalchemy import select, func
-    from src.extensions import get_db
+    from src.extensions import get_async_session_context
 
     try:
         from shared.models import DataSource, CollectedItem, Intelligence, Briefing, AlertRule
 
-        with get_db() as db:
-            sources_total = db.execute(select(func.count(DataSource.id))).scalar() or 0
-            sources_active = db.execute(
+        async with get_async_session_context() as db:
+            sources_total = (await db.execute(select(func.count(DataSource.id)))).scalar() or 0
+            sources_active = (await db.execute(
                 select(func.count(DataSource.id)).where(DataSource.is_active == True)
-            ).scalar() or 0
-            items_total = db.execute(select(func.count(CollectedItem.id))).scalar() or 0
-            intel_total = db.execute(select(func.count(Intelligence.id))).scalar() or 0
-            briefings_total = db.execute(select(func.count(Briefing.id))).scalar() or 0
-            rules_total = db.execute(select(func.count(AlertRule.id))).scalar() or 0
-            rules_active = db.execute(
+            )).scalar() or 0
+            items_total = (await db.execute(select(func.count(CollectedItem.id)))).scalar() or 0
+            intel_total = (await db.execute(select(func.count(Intelligence.id)))).scalar() or 0
+            briefings_total = (await db.execute(select(func.count(Briefing.id)))).scalar() or 0
+            rules_total = (await db.execute(select(func.count(AlertRule.id)))).scalar() or 0
+            rules_active = (await db.execute(
                 select(func.count(AlertRule.id)).where(AlertRule.is_active == True)
-            ).scalar() or 0
+            )).scalar() or 0
 
         return ApiResponse(
             success=True,

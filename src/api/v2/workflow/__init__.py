@@ -44,7 +44,7 @@ from shared.services.workflow.dag_engine import DAGEngine
 from shared.services.workflow.trigger_service import trigger_service
 from src.api.v1.core.responses import ApiResponse
 from src.auth import jwt_required
-from src.extensions import get_db
+from src.extensions import get_async_session_context
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -84,7 +84,7 @@ async def create_definition(
     except json.JSONDecodeError:
         return ApiResponse.fail(message="trigger_config 不是合法的 JSON")
 
-    with get_db() as db:
+    async with get_async_session_context() as db:
         wf = WorkflowDefinition(
             name=name,
             description=description,
@@ -95,9 +95,9 @@ async def create_definition(
             created_at=datetime.now(timezone.utc),
         )
         db.add(wf)
-        db.flush()
+        await db.flush()
         wf_id = wf.id
-        db.commit()
+        await db.commit()
 
     return ApiResponse.ok(data={"id": wf_id}, message="工作流创建成功")
 
@@ -111,16 +111,18 @@ async def get_definitions(
 ):
     """获取所有工作流定义"""
     from shared.models.workflow.workflow_definition import WorkflowDefinition
+    from sqlalchemy import select, func, desc as sql_desc
 
-    with get_db() as db:
-        query = db.query(WorkflowDefinition)
+    async with get_async_session_context() as db:
+        base_query = select(WorkflowDefinition)
         if is_active is not None:
-            query = query.filter(WorkflowDefinition.is_active == is_active)
-        total = query.count()
-        items = query.order_by(WorkflowDefinition.id.desc()) \
-            .offset((page - 1) * per_page) \
-            .limit(per_page) \
-            .all()
+            base_query = base_query.where(WorkflowDefinition.is_active == is_active)
+        total_result = await db.execute(select(func.count()).select_from(base_query.subquery()))
+        total = total_result.scalar() or 0
+        offset = (page - 1) * per_page
+        query = base_query.order_by(sql_desc(WorkflowDefinition.id)).offset(offset).limit(per_page)
+        result = await db.execute(query)
+        items = result.scalars().all()
 
     return ApiResponse.ok(data={
         "items": [wf.to_dict() for wf in items],
@@ -132,11 +134,11 @@ async def get_definitions(
 
 @router.get("/definitions/{def_id}", summary="获取工作流定义详")
 async def get_definition(def_id: int, current_user=Depends(jwt_required)):
-    """获取指定工作流定义详 """
+    """获取指定工作流定义详情"""
     from shared.models.workflow.workflow_definition import WorkflowDefinition
 
-    with get_db() as db:
-        wf = db.get(WorkflowDefinition, def_id)
+    async with get_async_session_context() as db:
+        wf = await db.get(WorkflowDefinition, def_id)
         if not wf:
             return ApiResponse.fail(message="工作流不存在", code=404)
 
@@ -165,12 +167,12 @@ async def update_definition(
     trigger_config: str = Body(default=None),
     current_user=Depends(jwt_required),
 ):
-    """更新工作流定 """
+    """更新工作流定义"""
     from shared.models.workflow.workflow_definition import WorkflowDefinition
     from shared.services.workflow.dag_engine import DAGEngine
 
-    with get_db() as db:
-        wf = db.get(WorkflowDefinition, def_id)
+    async with get_async_session_context() as db:
+        wf = await db.get(WorkflowDefinition, def_id)
         if not wf:
             return ApiResponse.fail(message="工作流不存在", code=404)
 
@@ -201,41 +203,41 @@ async def update_definition(
                 return ApiResponse.fail(message="trigger_config 不是合法的 JSON")
 
         wf.updated_at = datetime.now(timezone.utc)
-        db.flush()
-        db.commit()
+        await db.flush()
+        await db.commit()
 
     return ApiResponse.ok(message="工作流更新成功")
 
 
-@router.delete("/definitions/{def_id}", summary="删除工作流定")
+@router.delete("/definitions/{def_id}", summary="删除工作流定义")
 async def delete_definition(def_id: int, current_user=Depends(jwt_required)):
-    """删除工作流定 """
+    """删除工作流定义"""
     from shared.models.workflow.workflow_definition import WorkflowDefinition
 
-    with get_db() as db:
-        wf = db.get(WorkflowDefinition, def_id)
+    async with get_async_session_context() as db:
+        wf = await db.get(WorkflowDefinition, def_id)
         if not wf:
             return ApiResponse.fail(message="工作流不存在", code=404)
-        db.delete(wf)
-        db.flush()
-        db.commit()
+        await db.delete(wf)
+        await db.flush()
+        await db.commit()
 
     return ApiResponse.ok(message="工作流已删除")
 
 
 @router.post("/definitions/{def_id}/activate", summary="激活工作流")
 async def activate_definition(def_id: int, current_user=Depends(jwt_required)):
-    """激活工作流（启用触发器 """
+    """激活工作流（启用触发器）"""
     from shared.models.workflow.workflow_definition import WorkflowDefinition
 
-    with get_db() as db:
-        wf = db.get(WorkflowDefinition, def_id)
+    async with get_async_session_context() as db:
+        wf = await db.get(WorkflowDefinition, def_id)
         if not wf:
             return ApiResponse.fail(message="工作流不存在", code=404)
         wf.is_active = True
         wf.updated_at = datetime.now(timezone.utc)
-        db.flush()
-        db.commit()
+        await db.flush()
+        await db.commit()
 
         # 注册触发器
         if wf.trigger_config:
@@ -249,19 +251,19 @@ async def activate_definition(def_id: int, current_user=Depends(jwt_required)):
         return ApiResponse.ok(message="工作流已激活")
 
 
-@router.post("/definitions/{def_id}/deactivate", summary="停用工作")
+@router.post("/definitions/{def_id}/deactivate", summary="停用工作流")
 async def deactivate_definition(def_id: int, current_user=Depends(jwt_required)):
     """停用工作流（禁用触发器）"""
     from shared.models.workflow.workflow_definition import WorkflowDefinition
 
-    with get_db() as db:
-        wf = db.get(WorkflowDefinition, def_id)
+    async with get_async_session_context() as db:
+        wf = await db.get(WorkflowDefinition, def_id)
         if not wf:
             return ApiResponse.fail(message="工作流不存在", code=404)
         wf.is_active = False
         wf.updated_at = datetime.now(timezone.utc)
-        db.flush()
-        db.commit()
+        await db.flush()
+        await db.commit()
 
     # 取消 cron 触发器
     await trigger_service.unregister_cron_trigger(def_id)
@@ -304,20 +306,22 @@ async def get_executions(
     status: Optional[str] = None,
     current_user=Depends(jwt_required),
 ):
-    """获取工作流执行记 """
+    """获取工作流执行记录"""
     from shared.models.workflow.workflow_execution import WorkflowExecution
+    from sqlalchemy import select, func, desc as sql_desc
 
-    with get_db() as db:
-        query = db.query(WorkflowExecution)
+    async with get_async_session_context() as db:
+        base_query = select(WorkflowExecution)
         if workflow_id is not None:
-            query = query.filter(WorkflowExecution.workflow_id == workflow_id)
+            base_query = base_query.where(WorkflowExecution.workflow_id == workflow_id)
         if status:
-            query = query.filter(WorkflowExecution.status == status)
-        total = query.count()
-        items = query.order_by(WorkflowExecution.id.desc()) \
-            .offset((page - 1) * per_page) \
-            .limit(per_page) \
-            .all()
+            base_query = base_query.where(WorkflowExecution.status == status)
+        total_result = await db.execute(select(func.count()).select_from(base_query.subquery()))
+        total = total_result.scalar() or 0
+        offset = (page - 1) * per_page
+        query = base_query.order_by(sql_desc(WorkflowExecution.id)).offset(offset).limit(per_page)
+        result = await db.execute(query)
+        items = result.scalars().all()
 
     return ApiResponse.ok(data={
         "items": [ex.to_dict() for ex in items],
@@ -329,13 +333,13 @@ async def get_executions(
 
 @router.get("/executions/{exec_id}", summary="获取执行记录详情")
 async def get_execution(exec_id: int, current_user=Depends(jwt_required)):
-    """获取指定执行记录详情，包含所有节点执行状 """
+    """获取指定执行记录详情，包含所有节点执行状态"""
     from shared.models.workflow.workflow_execution import WorkflowExecution
 
-    with get_db() as db:
-        ex = db.get(WorkflowExecution, exec_id)
+    async with get_async_session_context() as db:
+        ex = await db.get(WorkflowExecution, exec_id)
         if not ex:
-            return ApiResponse.fail(message="执行记录不存", code=404)
+            return ApiResponse.fail(message="执行记录不存在", code=404)
 
         data = ex.to_dict()
         # 附加节点执行记录
@@ -350,28 +354,29 @@ async def get_execution(exec_id: int, current_user=Depends(jwt_required)):
 
 @router.post("/executions/{exec_id}/cancel", summary="取消执行")
 async def cancel_execution(exec_id: int, current_user=Depends(jwt_required)):
-    """取消正在运行的执 """
+    """取消正在运行的执行"""
     from shared.models.workflow.workflow_execution import WorkflowExecution
     from shared.services.workflow.dag_engine import dag_engine
 
-    with get_db() as db:
-        ex = db.get(WorkflowExecution, exec_id)
+    async with get_async_session_context() as db:
+        ex = await db.get(WorkflowExecution, exec_id)
         if not ex:
             return ApiResponse.fail(message="执行记录不存在", code=404)
         if ex.status not in ("pending", "running"):
             return ApiResponse.fail(message=f"执行状态为 {ex.status}，无法取消")
+        workflow_id = ex.id
 
-    dag_engine.cancel_execution(ex.workflow_id)
+    dag_engine.cancel_execution(workflow_id)
 
     # 更新状态
-    with get_db() as db:
-        ex = db.get(WorkflowExecution, exec_id)
+    async with get_async_session_context() as db:
+        ex = await db.get(WorkflowExecution, exec_id)
         if ex:
             ex.status = "cancelled"
             ex.completed_at = datetime.now(timezone.utc)
             ex.error_message = "执行被用户取消"
-            db.flush()
-            db.commit()
+            await db.flush()
+            await db.commit()
 
     return ApiResponse.ok(message="执行已取消")
 
@@ -391,7 +396,7 @@ async def get_tools(tool_type: Optional[str] = None, current_user=Depends(jwt_re
     })
 
 
-@router.post("/tools", summary="注册新工")
+@router.post("/tools", summary="注册新工具")
 async def register_tool(
     name: str = Body(...),
     description: str = Body(...),
@@ -401,16 +406,18 @@ async def register_tool(
 ):
     """注册新的 Agent 工具（仅记录元数据到数据库）"""
     from shared.models.workflow.agent_tool import AgentTool
+    from sqlalchemy import select
 
     try:
         params = json.loads(parameters) if isinstance(parameters, str) else parameters
     except json.JSONDecodeError:
         return ApiResponse.fail(message="parameters 不是合法的 JSON Schema")
 
-    with get_db() as db:
-        existing = db.query(AgentTool).filter_by(name=name).first()
+    async with get_async_session_context() as db:
+        existing_result = await db.execute(select(AgentTool).where(AgentTool.name == name))
+        existing = existing_result.scalar_one_or_none()
         if existing:
-            return ApiResponse.fail(message=f"工具 '{name}' 已存")
+            return ApiResponse.fail(message=f"工具 '{name}' 已存在")
 
         tool = AgentTool(
             name=name,
@@ -421,9 +428,9 @@ async def register_tool(
             created_at=datetime.now(timezone.utc),
         )
         db.add(tool)
-        db.flush()
+        await db.flush()
         tool_id = tool.id
-        db.commit()
+        await db.commit()
 
     return ApiResponse.ok(data={"id": tool_id}, message="工具注册成功")
 
@@ -449,15 +456,17 @@ async def test_tool(name: str, params: str = Body(default="{}"), current_user=De
 async def get_triggers(current_user=Depends(jwt_required)):
     """获取工作流触发器配置"""
     from shared.models.workflow.trigger import Trigger
+    from sqlalchemy import select
 
-    # 内存中的触发
+    # 内存中的触发器
     runtime_triggers = trigger_service.get_all_triggers()
 
     # 数据库中的触发器
     db_triggers = []
     try:
-        with get_db() as db:
-            items = db.query(Trigger).all()
+        async with get_async_session_context() as db:
+            result = await db.execute(select(Trigger))
+            items = result.scalars().all()
             db_triggers = [t.to_dict() for t in items]
     except Exception:
         pass
@@ -483,9 +492,9 @@ async def create_cron_trigger(
             cron_expr=cron_expr,
         )
 
-        # 持久化到数据
+        # 持久化到数据库
         try:
-            with get_db() as db:
+            async with get_async_session_context() as db:
                 from shared.models.workflow.trigger import Trigger
                 trigger = Trigger(
                     workflow_id=workflow_id,
@@ -495,8 +504,8 @@ async def create_cron_trigger(
                     created_at=datetime.now(timezone.utc),
                 )
                 db.add(trigger)
-                db.flush()
-                db.commit()
+                await db.flush()
+                await db.commit()
         except Exception:
             pass
         return ApiResponse.ok(data=result, message="Cron 触发器创建成功")
@@ -519,10 +528,9 @@ async def create_event_trigger(
         event_name=event_name,
     )
 
-    # 持久化到数据"
-
+    # 持久化到数据库
     try:
-        with get_db() as db:
+        async with get_async_session_context() as db:
             from shared.models.workflow.trigger import Trigger
 
             trigger = Trigger(
@@ -533,8 +541,8 @@ async def create_event_trigger(
                 created_at=datetime.now(timezone.utc),
             )
             db.add(trigger)
-            db.flush()
-            db.commit()
+            await db.flush()
+            await db.commit()
     except Exception:
         pass
 
@@ -546,17 +554,16 @@ async def create_webhook_trigger(
     workflow_id: int = Body(...),
     current_user=Depends(jwt_required),
 ):
-    """注册 Webhook 触发 """
+    """注册 Webhook 触发器"""
     from shared.services.workflow.trigger_service import trigger_service
 
     result = await trigger_service.register_webhook_trigger(
         workflow_id=workflow_id,
     )
 
-    # 持久化到数据"
-
+    # 持久化到数据库
     try:
-        with get_db() as db:
+        async with get_async_session_context() as db:
             from shared.models.workflow.trigger import Trigger
 
             trigger = Trigger(
@@ -567,26 +574,26 @@ async def create_webhook_trigger(
                 created_at=datetime.now(timezone.utc),
             )
             db.add(trigger)
-            db.flush()
-            db.commit()
+            await db.flush()
+            await db.commit()
     except Exception:
         pass
 
     return ApiResponse.ok(data=result, message="Webhook 触发器创建成功")
 
 
-@router.delete("/triggers/{trigger_id}", summary="删除触发")
+@router.delete("/triggers/{trigger_id}", summary="删除触发器")
 async def delete_trigger(trigger_id: int, current_user=Depends(jwt_required)):
-    """删除触发 """
+    """删除触发器"""
     from shared.models.workflow.trigger import Trigger
 
-    with get_db() as db:
-        trigger = db.get(Trigger, trigger_id)
+    async with get_async_session_context() as db:
+        trigger = await db.get(Trigger, trigger_id)
         if not trigger:
             return ApiResponse.fail(message="触发器不存在", code=404)
-        db.delete(trigger)
-        db.flush()
-        db.commit()
+        await db.delete(trigger)
+        await db.flush()
+        await db.commit()
 
     return ApiResponse.ok(message="触发器已删除")
 
@@ -643,9 +650,9 @@ async def _setup_triggers(workflow_id: int, graph_data, trigger_config: dict):
 # ==================== 统计概览 ====================
 
 
-@router.get("/stats", summary="工作流引擎统计概")
+@router.get("/stats", summary="工作流引擎统计概览")
 async def get_workflow_stats(current_user=Depends(jwt_required)):
-    """获取工作流引擎的统计数据（用于仪表盘集成 """
+    """获取工作流引擎的统计数据（用于仪表盘集成）"""
     from sqlalchemy import select, func
     from shared.models.workflow.workflow_definition import WorkflowDefinition
     from shared.models.workflow.workflow_execution import WorkflowExecution
@@ -653,17 +660,17 @@ async def get_workflow_stats(current_user=Depends(jwt_required)):
     from shared.models.workflow.trigger import Trigger
 
     try:
-        with get_db() as db:
-            defs_total = db.execute(select(func.count(WorkflowDefinition.id))).scalar() or 0
-            defs_active = db.execute(
+        async with get_async_session_context() as db:
+            defs_total = (await db.execute(select(func.count(WorkflowDefinition.id)))).scalar() or 0
+            defs_active = (await db.execute(
                 select(func.count(WorkflowDefinition.id)).where(WorkflowDefinition.is_active == True)
-            ).scalar() or 0
-            execs_total = db.execute(select(func.count(WorkflowExecution.id))).scalar() or 0
-            execs_running = db.execute(
+            )).scalar() or 0
+            execs_total = (await db.execute(select(func.count(WorkflowExecution.id)))).scalar() or 0
+            execs_running = (await db.execute(
                 select(func.count(WorkflowExecution.id)).where(WorkflowExecution.status == "running")
-            ).scalar() or 0
-            tools_total = db.execute(select(func.count(AgentTool.id))).scalar() or 0
-            triggers_total = db.execute(select(func.count(Trigger.id))).scalar() or 0
+            )).scalar() or 0
+            tools_total = (await db.execute(select(func.count(AgentTool.id)))).scalar() or 0
+            triggers_total = (await db.execute(select(func.count(Trigger.id)))).scalar() or 0
 
         return ApiResponse.ok(data={
             "definitions": {"total": defs_total, "active": defs_active},
