@@ -6,6 +6,7 @@ V2 知识引擎 API 路由
 
 import json
 import os
+import secrets
 from datetime import datetime
 
 from fastapi import APIRouter, UploadFile, File, Form, Query
@@ -13,6 +14,7 @@ from sqlalchemy import select, func, desc
 
 from src.extensions import get_db
 from src.api.v1.core.responses import ApiResponse
+from src.utils.security.safe import sanitize_filename
 
 router = APIRouter()
 
@@ -213,19 +215,30 @@ async def upload_document(
             upload_dir = os.path.join("media", "knowledge", str(base_id))
             os.makedirs(upload_dir, exist_ok=True)
 
-            file_path = os.path.join(upload_dir, file.filename)
+            safe_name = sanitize_filename(file.filename)
+            if not safe_name or '.' not in safe_name:
+                _, ext = os.path.splitext(file.filename)
+                safe_name = f"{secrets.token_hex(8)}{ext}"
+            file_path = os.path.join(upload_dir, safe_name)
+            real_path = os.path.realpath(file_path)
+            real_upload = os.path.realpath(upload_dir)
+            if not real_path.startswith(real_upload):
+                return ApiResponse.fail(message="无效的文件名", code=400)
             content = await file.read()
             with open(file_path, "wb") as f:
                 f.write(content)
 
             # 2. 检测文件类
-            _, ext = os.path.splitext(file.filename)
+            _, ext = os.path.splitext(safe_name)
             file_type = ext.lstrip(".").lower()
+            allowed_types = {'pdf', 'docx', 'txt', 'html', 'md', 'py', 'java', 'js', 'ts', 'c', 'cpp', 'h', 'go', 'rs', 'rb'}
+            if file_type not in allowed_types:
+                return ApiResponse.fail(message=f"不支持的文件类型: {file_type}", code=400)
 
             # 3. 创建文档记录
             doc = KnowledgeDocument(
                 knowledge_base_id=base_id,
-                title=file.filename,
+                title=safe_name,
                 file_path=file_path,
                 file_type=file_type,
                 status="parsing",
@@ -249,7 +262,7 @@ async def upload_document(
                 strategy="recursive",
                 chunk_size=kb.chunk_size,
                 chunk_overlap=kb.chunk_overlap,
-                metadata={"document_title": file.filename, "file_type": file_type},
+                metadata={"document_title": safe_name, "file_type": file_type},
             )
 
             if not chunks:

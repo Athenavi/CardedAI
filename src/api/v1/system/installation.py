@@ -29,10 +29,8 @@ async def check_prerequisites_api():
             data=result
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in check_prerequisites_api: {str(e)}")
-        logger(traceback.format_exc())
-        return ApiResponse(success=False, error=str(e))
+        logger.error(f"Error in check_prerequisites_api: {str(e)}", exc_info=True)
+        return ApiResponse(success=False, error="前置条件检查失败，请稍后重试")
 
 
 class DatabaseConfigRequest(BaseModel):
@@ -110,10 +108,8 @@ async def configure_database_api(
             data=result
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in configure_database_api: {str(e)}")
-        logger(traceback.format_exc())
-        return ApiResponse(success=False, error=str(e))
+        logger.error(f"Error in configure_database_api: {str(e)}", exc_info=True)
+        return ApiResponse(success=False, error="数据库配置失败，请稍后重试")
 
 
 async def _import_sample_data_helper(import_articles: bool, import_categories: bool):
@@ -270,10 +266,8 @@ async def import_sample_data_api(
         )
 
     except Exception as e:
-        import traceback
-        logger(f"Error in import_sample_data_api: {str(e)}")
-        logger(traceback.format_exc())
-        return ApiResponse(success=False, error=str(e))
+        logger.error(f"Error in import_sample_data_api: {str(e)}", exc_info=True)
+        return ApiResponse(success=False, error="示例数据导入失败，请稍后重试")
 
 
 @router.get("/status",
@@ -290,10 +284,8 @@ async def get_installation_status_api():
             data=status
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in get_installation_status_api: {str(e)}")
-        logger(traceback.format_exc())
-        return ApiResponse(success=False, error=str(e))
+        logger.error(f"Error in get_installation_status_api: {str(e)}", exc_info=True)
+        return ApiResponse(success=False, error="获取安装状态失败，请稍后重试")
 
 
 @router.get("/steps",
@@ -313,10 +305,8 @@ async def get_installation_steps_api():
             }
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in get_installation_steps_api: {str(e)}")
-        logger(traceback.format_exc())
-        return ApiResponse(success=False, error=str(e))
+        logger.error(f"Error in get_installation_steps_api: {str(e)}", exc_info=True)
+        return ApiResponse(success=False, error="获取安装步骤失败，请稍后重试")
 
 
 @router.post("/check-database",
@@ -335,10 +325,8 @@ async def check_database_connection_api(
             data=result
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in check_database_connection_api: {str(e)}")
-        logger(traceback.format_exc())
-        return ApiResponse(success=False, error=str(e))
+        logger.error(f"Error in check_database_connection_api: {str(e)}", exc_info=True)
+        return ApiResponse(success=False, error="数据库连接检查失败，请稍后重试")
 
 
 @router.post("/create-admin",
@@ -392,7 +380,7 @@ async def create_admin_user_api(
 
         # 确保数据库管理器已初始化
         if unified_db_manager._async_session_factory is None:
-            logger("[Install] 检测到数据库管理器未初始化，尝试重新加载配置...")
+            logger.info("[Install] 检测到数据库管理器未初始化，尝试重新加载配置...")
             try:
                 # 强制重新加载 .env 文件和配置
                 import importlib
@@ -400,13 +388,16 @@ async def create_admin_user_api(
 
                 # 重新加载 .env 文件
                 load_dotenv(override=True)
-                logger("  ✓ .env 文件已重新加载")
+                logger.info("  ✓ .env 文件已重新加载")
 
                 # 重新导入并初始化设置
                 import src.setting
                 importlib.reload(src.setting)
                 from src.setting import settings as new_settings
-                logger(f"  ✓ 配置已重新加载，数据库 URL: {new_settings.database_url[:50]}..." if new_settings.database_url else "  ⚠ 数据库 URL 仍为空")
+                if new_settings.database_url:
+                    logger.info(f"  ✓ 配置已重新加载，数据库 URL: {new_settings.database_url[:50]}...")
+                else:
+                    logger.warning("  ⚠ 数据库 URL 仍为空")
 
                 # 重置并重新初始化数据库管理器
                 unified_db_manager._async_engine = None
@@ -414,19 +405,17 @@ async def create_admin_user_api(
                 unified_db_manager.initialize()
 
                 if unified_db_manager._async_session_factory is not None:
-                    logger("✓ 数据库连接池初始化成功")
+                    logger.info("✓ 数据库连接池初始化成功")
                 else:
                     return ApiResponse(
                         success=False,
                         error='数据库连接池初始化失败。请确认已完成“确认数据库配置并执行迁移”步骤。'
                     )
             except Exception as init_err:
-                import traceback
-                logger(f"数据库管理器初始化失败: {init_err}")
-                logger(traceback.format_exc())
+                logger.error(f"数据库管理器初始化失败: {str(init_err)}", exc_info=True)
                 return ApiResponse(
                     success=False,
-                    error=f'数据库管理器初始化失败: {str(init_err)}'
+                    error='数据库管理器初始化失败，请稍后重试'
                 )
 
         async with unified_db_manager.get_session_no_auto_commit() as session:
@@ -487,10 +476,8 @@ async def create_admin_user_api(
                 raise
 
     except Exception as e:
-        import traceback
-        logger(f"Error in create_admin_user_api: {str(e)}")
-        logger(traceback.format_exc())
-        return ApiResponse(success=False, error=str(e))
+        logger.error(f"Error in create_admin_user_api: {str(e)}", exc_info=True)
+        return ApiResponse(success=False, error="管理员账号创建失败，请稍后重试")
 
 
 @router.post("/configure-site",
@@ -530,10 +517,8 @@ async def configure_site_settings_api(
             data=result
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in configure_site_settings_api: {str(e)}")
-        logger(traceback.format_exc())
-        return ApiResponse(success=False, error=str(e))
+        logger.error(f"Error in configure_site_settings_api: {str(e)}", exc_info=True)
+        return ApiResponse(success=False, error="站点配置失败，请稍后重试")
 
 
 @router.post("/complete",
@@ -562,14 +547,13 @@ async def complete_installation_api(
             import json
             json.dump(install_info, f, ensure_ascii=False, indent=2)
 
-        logger("\n" + "=" * 60)
-        logger("✓ 安装完成！")
-        logger("=" * 60)
+        logger.info("安装完成：已完成所有配置步骤")
+        logger.info("=" * 60)
 
         # 如果选择导入示例数据，调用辅助函数
         sample_data_imported = False
         if install_info.get('import_sample_data', False):
-            logger("\n正在导入示例数据...")
+            logger.info("正在导入示例数据...")
             try:
                 result = await _import_sample_data_helper(
                     import_articles=install_info.get('import_articles', True),
@@ -577,12 +561,12 @@ async def complete_installation_api(
                 )
 
                 if result.success:
-                    logger(f"✓ {result.data.get('message', '示例数据导入成功')}")
+                    logger.info("✓ 示例数据导入成功")
                     sample_data_imported = True
                 else:
-                    logger(f"✗ 示例数据导入失败: {result.error}")
+                    logger.warning(f"✗ 示例数据导入失败: {result.error}")
             except Exception as e:
-                logger(f"✗ 示例数据导入失败: {str(e)}")
+                logger.error(f"✗ 示例数据导入失败: {str(e)}")
 
         return ApiResponse(
             success=True,
@@ -593,10 +577,8 @@ async def complete_installation_api(
             }
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in complete_installation_api: {str(e)}")
-        logger(traceback.format_exc())
-        return ApiResponse(success=False, error=str(e))
+        logger.error(f"Error in complete_installation_api: {str(e)}", exc_info=True)
+        return ApiResponse(success=False, error="安装完成步骤失败，请稍后重试")
 
 
 @router.post("/confirm-database-and-migrate",
@@ -620,10 +602,8 @@ async def confirm_database_and_migrate_api():
             data=result
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in confirm_database_and_migrate_api: {str(e)}")
-        logger(traceback.format_exc())
-        return ApiResponse(success=False, error=str(e))
+        logger.error(f"Error in confirm_database_and_migrate_api: {str(e)}", exc_info=True)
+        return ApiResponse(success=False, error="数据库配置确认失败，请稍后重试")
 
 
 @router.post("/reset",
@@ -640,10 +620,8 @@ async def reset_installation_api():
             data=result
         )
     except Exception as e:
-        import traceback
-        logger(f"Error in reset_installation_api: {str(e)}")
-        logger(traceback.format_exc())
-        return ApiResponse(success=False, error=str(e))
+        logger.error(f"Error in reset_installation_api: {str(e)}", exc_info=True)
+        return ApiResponse(success=False, error="安装状态重置失败，请稍后重试")
 
 
 @router.get("/migration/stream",
@@ -659,19 +637,18 @@ async def stream_migration_logs():
     async def event_generator():
         """生成 SSE 事件"""
         try:
-            import sys
-            logger(f"\n[SSE] 开始迁移日志流", file=sys.stderr)
+            logger.info("[SSE] 开始迁移日志流")
 
             # 检查 Alembic 是否可用
             if not migration_service.check_alembic_available():
                 error_msg = {'type': 'error', 'message': 'Alembic 未安装或不可用'}
-                logger(f"[SSE] {error_msg}", file=sys.stderr)
+                logger.error(f"[SSE] {error_msg}")
                 yield f"data: {json.dumps(error_msg, ensure_ascii=False)}\n\n"
                 return
 
             # 获取迁移状态
             status = migration_service.get_migration_status()
-            logger(f"[SSE] 当前版本: {status['current']}, 目标版本: {status['head']}", file=sys.stderr)
+            logger.info(f"[SSE] 当前版本: {status['current']}, 目标版本: {status['head']}")
 
             current_ver = status["current"]
             head_ver = status["head"]
@@ -684,24 +661,22 @@ async def stream_migration_logs():
                 return
 
             # 执行迁移并实时推送日志
-            logger(f"[SSE] 开始执行迁移...", file=sys.stderr)
+            logger.info("[SSE] 开始执行迁移...")
             async for log_entry in migration_service.run_migration():
                 yield f"data: {json.dumps(log_entry, ensure_ascii=False)}\n\n"
                 # 给前端一点时间处理
                 await asyncio.sleep(0.05)
 
-            logger(f"[SSE] 迁移完成", file=sys.stderr)
+            logger.info("[SSE] 迁移完成")
 
         except Exception as e:
-            import traceback
-            import sys
+            # 仅记录 traceback 到日志，不返回给客户端
+            logger.error("[SSE ERROR] 迁移流出错", exc_info=True)
             error_msg = {
                 'type': 'error',
-                'message': f'SSE 端点出错: {str(e)}',
-                'traceback': traceback.format_exc()
+                'message': '迁移执行失败，请稍后重试'
             }
-            logger(f"[SSE ERROR] {error_msg}", file=sys.stderr)
-            logger(traceback.format_exc(), file=sys.stderr)
+            logger.error(f"[SSE ERROR] {error_msg}")
             yield f"data: {json.dumps(error_msg, ensure_ascii=False)}\n\n"
 
     return StreamingResponse(
