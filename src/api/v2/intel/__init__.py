@@ -204,7 +204,7 @@ async def update_source(source_id: int, req: UpdateSourceRequest, current_user=D
 
 
 @router.delete("/sources/{source_id}", summary="删除数据源", response_model=ApiResponse)
-async def delete_source(source_id: int):
+async def delete_source(source_id: int, current_user=Depends(jwt_required)):
     """删除数据源"""
     from shared.models import DataSource
     from src.extensions import get_db
@@ -226,7 +226,7 @@ async def delete_source(source_id: int):
 
 
 @router.post("/sources/{source_id}/collect", summary="手动触发采集", response_model=ApiResponse)
-async def trigger_collect(source_id: int):
+async def trigger_collect(source_id: int, current_user=Depends(jwt_required)):
     """手动触发指定数据源的采集任务"""
     from shared.services.intel.collector_engine import collector_engine, setup_default_collectors
 
@@ -250,6 +250,7 @@ async def get_items(
     per_page: int = 20,
     source_id: Optional[int] = None,
     status: Optional[str] = None,
+    current_user=Depends(jwt_required),
 ):
     """获取采集到的原始数据条目"""
     from sqlalchemy import select, func
@@ -300,6 +301,7 @@ async def get_intelligence(
     category: Optional[str] = None,
     sentiment: Optional[str] = None,
     query: Optional[str] = None,
+    current_user=Depends(jwt_required),
 ):
     """获取 AI 分析后的情报条目"""
     from sqlalchemy import select, func, desc, or_
@@ -350,7 +352,7 @@ async def get_intelligence(
 
 
 @router.get("/intelligence/{intel_id}", summary="获取情报详情", response_model=ApiResponse)
-async def get_intelligence_detail(intel_id: int):
+async def get_intelligence_detail(intel_id: int, current_user=Depends(jwt_required)):
     """获取单条情报详情"""
     from shared.models import Intelligence
     from src.extensions import get_db
@@ -375,6 +377,7 @@ async def get_briefings(
     page: int = 1,
     per_page: int = 20,
     briefing_type: Optional[str] = None,
+    current_user=Depends(jwt_required),
 ):
     """获取情报简报"""
     from sqlalchemy import select, func, desc
@@ -415,7 +418,7 @@ async def get_briefings(
 
 
 @router.get("/briefings/{briefing_id}", summary="获取简报详情", response_model=ApiResponse)
-async def get_briefing_detail(briefing_id: int):
+async def get_briefing_detail(briefing_id: int, current_user=Depends(jwt_required)):
     """获取单条简报详情"""
     from shared.models import Briefing
     from src.extensions import get_db
@@ -434,7 +437,7 @@ async def get_briefing_detail(briefing_id: int):
 
 
 @router.post("/briefings/generate", summary="生成简报", response_model=ApiResponse)
-async def generate_briefing(briefing_type: str = "daily", topic: Optional[str] = None, days: int = 7):
+async def generate_briefing(briefing_type: str = "daily", topic: Optional[str] = None, days: int = 7, current_user=Depends(jwt_required)):
     """基于最新情报生成简报（支持 daily / weekly / monthly / custom）"""
     from shared.services.intel.briefing_generator import briefing_generator
 
@@ -467,6 +470,7 @@ async def get_alert_rules(
     page: int = 1,
     per_page: int = 20,
     is_active: Optional[bool] = None,
+    current_user=Depends(jwt_required),
 ):
     """获取预警规则"""
     from sqlalchemy import select, func, desc
@@ -507,7 +511,7 @@ async def get_alert_rules(
 
 
 @router.post("/alerts/rules", summary="创建预警规则", response_model=ApiResponse)
-async def create_alert_rule(req: CreateAlertRuleRequest):
+async def create_alert_rule(req: CreateAlertRuleRequest, current_user=Depends(jwt_required)):
     """创建新的预警规则"""
     from shared.models import AlertRule
     from src.extensions import get_db
@@ -545,6 +549,7 @@ async def create_alert_rule(req: CreateAlertRuleRequest):
 async def get_alert_events(
     page: int = 1,
     per_page: int = 20,
+    current_user=Depends(jwt_required),
 ):
     """获取预警事件列表"""
     from sqlalchemy import select, func, desc
@@ -598,7 +603,7 @@ async def get_alert_events(
 # ==================== 分析 ====================
 
 @router.post("/analyze/{source_id}", summary="触发数据源分析", response_model=ApiResponse)
-async def trigger_analysis(source_id: int):
+async def trigger_analysis(source_id: int, current_user=Depends(jwt_required)):
     """触发指定数据源的 AI 分析"""
     from shared.services.intel.analysis_engine import analysis_engine
 

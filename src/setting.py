@@ -100,15 +100,11 @@ class BaseConfig:
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     SECRET_KEY = os.environ.get('SECRET_KEY')
     if not SECRET_KEY:
-        import warnings
-        warnings.warn(
-            "WARNING: SECRET_KEY not set in environment variables. "
-            "Using a random key - all sessions and encrypted data will be invalid on restart. "
-            "Set SECRET_KEY in .env file for production.",
-            UserWarning,
-            stacklevel=2
+        raise ValueError(
+            "SECRET_KEY is not set in environment variables. "
+            "Set SECRET_KEY in .env file or environment before starting the application. "
+            "Generate one with: python -c 'import secrets; print(secrets.token_hex(32))'"
         )
-        SECRET_KEY = os.urandom(32).hex()
 
     # 使用条件判断处理可能的 None 值
     jwt_expiration = os.getenv('JWT_EXPIRATION_DELTA')

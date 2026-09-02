@@ -588,9 +588,10 @@ def create_app(config=None):
     return app
 
 
-# 全局 app 实例（供 uvicorn 直接使用）
+# Global app instance (for uvicorn to use directly)
 try:
     app = create_app()
-except Exception as e:
+except Exception:
     traceback.print_exc()
-    app = None
+    import sys
+    sys.exit(1)
