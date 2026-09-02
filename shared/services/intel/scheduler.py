@@ -45,27 +45,25 @@ def init_intel_scheduler(scheduler) -> None:
 
 def _generate_daily_briefing_job():
     """定时任务：生成每日简报"""
+    loop = asyncio.new_event_loop()
     try:
-        import asyncio
         from shared.services.intel.briefing_generator import briefing_generator
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
         result = loop.run_until_complete(briefing_generator.generate_daily_briefing())
-        loop.close()
         logger.info(f"[IntelScheduler] 每日简报生成完成: success={result.get('success')}, count={result.get('intelligence_count')}")
     except Exception as e:
         logger.error(f"[IntelScheduler] 每日简报生成失败: {e}")
+    finally:
+        loop.close()
 
 
 def _generate_weekly_briefing_job():
     """定时任务：生成每周简报"""
+    loop = asyncio.new_event_loop()
     try:
-        import asyncio
         from shared.services.intel.briefing_generator import briefing_generator
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
         result = loop.run_until_complete(briefing_generator.generate_weekly_briefing())
-        loop.close()
         logger.info(f"[IntelScheduler] 每周简报生成完成: success={result.get('success')}, count={result.get('intelligence_count')}")
     except Exception as e:
         logger.error(f"[IntelScheduler] 每周简报生成失败: {e}")
+    finally:
+        loop.close()

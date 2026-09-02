@@ -3,13 +3,12 @@
 为未发布的文章生成临时预览链接
 """
 
-import hashlib
-
 import secrets
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 
 from src.unified_logger import default_logger as logger
+from src.utils.security.password_validator import hash_password, verify_password
 
 
 class DraftPreviewService:
@@ -55,7 +54,7 @@ class DraftPreviewService:
         # 如果有密码,进行哈希存储
         password_hash = None
         if password:
-            password_hash = hashlib.sha256(password.encode()).hexdigest()
+            password_hash = hash_password(password)
 
         # 存储令牌信息
         self.preview_tokens[token] = {
@@ -117,8 +116,7 @@ class DraftPreviewService:
                 logger.warning(f"预览令牌需要密码: {token[:8]}...")
                 return None
 
-            provided_hash = hashlib.sha256(password.encode()).hexdigest()
-            if provided_hash != token_info['password_hash']:
+            if not verify_password(password, token_info['password_hash']):
                 logger.warning(f"预览令牌密码错误: {token[:8]}...")
                 return None
 

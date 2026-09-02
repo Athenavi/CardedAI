@@ -1,46 +1,44 @@
 """
 文章密码保护服务
 """
-import hashlib
-import hmac
 from typing import Optional, Dict, Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.utils.security.password_validator import hash_password, verify_password
 
 from shared.models.article_content import ArticleContent
 
 
 class PasswordProtectionService:
     """文章密码保护服务"""
-    
+
     @staticmethod
     def hash_password(password: str) -> str:
         """
-        哈希密码
-        
+        哈希密码（使用 Argon2）
+
         Args:
             password: 明文密码
-            
+
         Returns:
             哈希后的密码
         """
-        return hashlib.sha256(password.encode('utf-8')).hexdigest()
-    
+        return hash_password(password)
+
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         """
-        验证密码
-        
+        验证密码（使用 Argon2）
+
         Args:
             plain_password: 明文密码
             hashed_password: 哈希密码
-            
+
         Returns:
             是否匹配
         """
-        hashed_input = PasswordProtectionService.hash_password(plain_password)
-        return hmac.compare_digest(hashed_input, hashed_password)
+        return verify_password(plain_password, hashed_password)
     
     @staticmethod
     async def set_article_password(

@@ -518,6 +518,10 @@ class InstallationWizardService:
                 loop = asyncio.get_running_loop()
                 # 如果已经有运行的事件循环，使用线程池在新的事件循环中执行
                 import concurrent.futures
+                import threading
+
+                # 线程安全锁
+                _singleton_lock = threading.Lock()
 
                 def run_in_thread():
                     """在线程中运行，创建独立的事件循环和数据库管理器"""
@@ -530,20 +534,25 @@ class InstallationWizardService:
                         asyncio.set_event_loop(new_loop)
                         # 重新初始化数据库管理器（在新的事件循环中）
                         from src.utils.database.unified_manager import UnifiedDatabaseManager
-                        # 重置单例，以便在新的事件循环中重新初始化
-                        UnifiedDatabaseManager._instance = None
-                        UnifiedDatabaseManager._initialized = False
+                        # 使用锁保护单例重置，避免并发冲突
+                        with _singleton_lock:
+                            UnifiedDatabaseManager._instance = None
+                            UnifiedDatabaseManager._initialized = False
 
                         from src.utils.database.unified_manager import db_manager as new_db_manager
                         new_db_manager.initialize()
 
                         # 运行异步函数
                         return new_loop.run_until_complete(_import_data())
+                    except Exception as e:
+                        logger.error(f"导入示例数据时事件循环异常: {e}")
+                        raise
                     finally:
                         new_loop.close()
-                        # 恢复原来的单例
-                        UnifiedDatabaseManager._instance = original_manager
-                        UnifiedDatabaseManager._initialized = True
+                        # 线程安全地恢复单例
+                        with _singleton_lock:
+                            UnifiedDatabaseManager._instance = original_manager
+                            UnifiedDatabaseManager._initialized = True
 
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     future = executor.submit(run_in_thread)
@@ -556,8 +565,8 @@ class InstallationWizardService:
 
         except Exception as e:
             import traceback
-            logger.info(f"导入示例数据失败: {str(e)}")
-            logger.info(traceback.format_exc())
+            logger.error(f"导入示例数据失败: {str(e)}")
+            logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'error': f'导入示例数据失败: {str(e)}'
@@ -746,8 +755,8 @@ class InstallationWizardService:
 
         except Exception as e:
             import traceback
-            logger.info(f"创建管理员账号失败: {str(e)}")
-            logger.info(traceback.format_exc())
+            logger.error(f"创建管理员账号失败: {str(e)}")
+            logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'error': f'创建管理员账号失败: {str(e)}'
