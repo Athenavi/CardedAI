@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import {GlobalShortcuts} from '@/components/GlobalShortcuts';
 import MobileGestures from '@/components/MobileGestures';
+import {CookieBanner} from '@/components/CookieBanner';
 
 export interface Props {
   title?: string;
@@ -54,6 +55,7 @@ const {title = 'FastBlog', description = 'A modern blog platform', dir = 'ltr', 
     </main>
 
     <Footer client:load />
+    <CookieBanner client:load />
 
     <slot name="scripts" />
   </body>

@@ -16,6 +16,7 @@ from shared.models.user import User
 from shared.services.integrations.migration_service import migration_service
 from src.auth.auth_deps import admin_required as admin_required_api
 from src.extensions import get_async_db_session as get_async_db
+from src.unified_logger import default_logger as logger
 
 router = APIRouter(prefix="/migrations", tags=["data-migration"])
 
@@ -37,6 +38,7 @@ async def migrate_from_wordpress(
     - 评论
     - 媒体文件（可选）
     """
+    tmp_path = None
     try:
         # 保存临时文件
         with tempfile.NamedTemporaryFile(delete=False, suffix='.xml') as tmp_file:
@@ -57,9 +59,6 @@ async def migrate_from_wordpress(
             }
         )
 
-        # 清理临时文件
-        Path(tmp_path).unlink(missing_ok=True)
-
         duration = time.time() - start_time
 
         return {
@@ -69,10 +68,14 @@ async def migrate_from_wordpress(
         }
 
     except Exception as e:
+        logger.error(f"WordPress migration failed: {e}", exc_info=True)
         return {
             'success': False,
-            'error': str(e),
+            'error': 'Migration failed. Please check the server logs for details.',
         }
+    finally:
+        if tmp_path:
+            Path(tmp_path).unlink(missing_ok=True)
 
 
 @router.post("/markdown", summary="从 Markdown 文件迁移 (Jekyll/Hexo)")
@@ -105,6 +108,7 @@ async def migrate_from_ghost(
     
     支持导入文章、标签、用户等
     """
+    tmp_path = None
     try:
         # 保存临时文件
         with tempfile.NamedTemporaryFile(delete=False, suffix='.json') as tmp_file:
@@ -121,9 +125,6 @@ async def migrate_from_ghost(
             user_id=current_user.id
         )
 
-        # 清理临时文件
-        Path(tmp_path).unlink(missing_ok=True)
-
         duration = time.time() - start_time
 
         return {
@@ -133,10 +134,14 @@ async def migrate_from_ghost(
         }
 
     except Exception as e:
+        logger.error(f"Ghost migration failed: {e}", exc_info=True)
         return {
             'success': False,
-            'error': str(e),
+            'error': 'Migration failed. Please check the server logs for details.',
         }
+    finally:
+        if tmp_path:
+            Path(tmp_path).unlink(missing_ok=True)
 
 
 @router.post("/json", summary="从通用 JSON 文件迁移")
@@ -152,6 +157,7 @@ async def migrate_from_json(
     可以通过 field_mapping 指定字段映射关系
     例如: {"title": "post_title", "content": "post_body"}
     """
+    tmp_path = None
     try:
         # 保存临时文件
         with tempfile.NamedTemporaryFile(delete=False, suffix='.json') as tmp_file:
@@ -175,9 +181,6 @@ async def migrate_from_json(
             mapping=mapping
         )
 
-        # 清理临时文件
-        Path(tmp_path).unlink(missing_ok=True)
-
         duration = time.time() - start_time
 
         return {
@@ -187,10 +190,14 @@ async def migrate_from_json(
         }
 
     except Exception as e:
+        logger.error(f"JSON migration failed: {e}", exc_info=True)
         return {
             'success': False,
-            'error': str(e),
+            'error': 'Migration failed. Please check the server logs for details.',
         }
+    finally:
+        if tmp_path:
+            Path(tmp_path).unlink(missing_ok=True)
 
 
 @router.post("/csv", summary="从 CSV 文件迁移")
@@ -206,6 +213,7 @@ async def migrate_from_csv(
     
     适用于从电子表格或其他系统导出的数据
     """
+    tmp_path = None
     try:
         # 保存临时文件
         with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp_file:
@@ -224,9 +232,6 @@ async def migrate_from_csv(
             encoding=encoding
         )
 
-        # 清理临时文件
-        Path(tmp_path).unlink(missing_ok=True)
-
         duration = time.time() - start_time
 
         return {
@@ -236,10 +241,14 @@ async def migrate_from_csv(
         }
 
     except Exception as e:
+        logger.error(f"CSV migration failed: {e}", exc_info=True)
         return {
             'success': False,
-            'error': str(e),
+            'error': 'Migration failed. Please check the server logs for details.',
         }
+    finally:
+        if tmp_path:
+            Path(tmp_path).unlink(missing_ok=True)
 
 
 @router.post("/redirects", summary="生成 URL 重定向规则")
@@ -275,9 +284,10 @@ async def generate_redirects(
         }
 
     except Exception as e:
+        logger.error(f"Redirect generation failed: {e}", exc_info=True)
         return {
             'success': False,
-            'error': str(e),
+            'error': 'Failed to generate redirects. Please check the server logs for details.',
         }
 
 
