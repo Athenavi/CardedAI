@@ -11,10 +11,11 @@ import math
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, model_validator
 
 from src.api.v1.core.responses import ApiResponse, PaginationInfo
+from src.auth import jwt_required
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["intel-v2"])
@@ -66,7 +67,7 @@ class CreateAlertRuleRequest(BaseModel):
 # ==================== 数据源管理 ====================
 
 @router.post("/sources", summary="创建数据源", response_model=ApiResponse)
-async def create_source(req: CreateSourceRequest):
+async def create_source(req: CreateSourceRequest, current_user=Depends(jwt_required)):
     """创建新的数据源配置"""
     from shared.models import DataSource
     from src.extensions import get_db
@@ -104,6 +105,7 @@ async def get_sources(
     per_page: int = 20,
     source_type: Optional[str] = None,
     is_active: Optional[bool] = None,
+    current_user=Depends(jwt_required),
 ):
     """获取所有数据源配置"""
     from sqlalchemy import select, func
@@ -146,7 +148,7 @@ async def get_sources(
 
 
 @router.get("/sources/{source_id}", summary="获取数据源详情", response_model=ApiResponse)
-async def get_source(source_id: int):
+async def get_source(source_id: int, current_user=Depends(jwt_required)):
     """获取指定数据源详情"""
     from shared.models import DataSource
     from src.extensions import get_db
@@ -165,7 +167,7 @@ async def get_source(source_id: int):
 
 
 @router.put("/sources/{source_id}", summary="更新数据源", response_model=ApiResponse)
-async def update_source(source_id: int, req: UpdateSourceRequest):
+async def update_source(source_id: int, req: UpdateSourceRequest, current_user=Depends(jwt_required)):
     """更新数据源配置"""
     from shared.models import DataSource
     from src.extensions import get_db

@@ -9,11 +9,11 @@ import os
 import secrets
 from datetime import datetime
 
-from fastapi import APIRouter, UploadFile, File, Form, Query
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Query
 from sqlalchemy import select, func, desc
 
-from src.extensions import get_db
 from src.api.v1.core.responses import ApiResponse
+from src.auth import jwt_required
 from src.utils.security.safe import sanitize_filename
 
 router = APIRouter()
@@ -28,11 +28,13 @@ async def create_knowledge_base(
     embedding_model: str = Form("all-MiniLM-L6-v2"),
     chunk_size: int = Form(512),
     chunk_overlap: int = Form(50),
+    current_user=Depends(jwt_required),
 ):
     """创建新的知识"""
     try:
         from shared.models.knowledge.knowledge_base import KnowledgeBase
         from shared.services.knowledge.rag_chain import rag_chain
+        from src.extensions import get_db
 
         with get_db() as db:
             kb = KnowledgeBase(
@@ -65,10 +67,12 @@ async def create_knowledge_base(
 async def get_knowledge_bases(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
+    current_user=Depends(jwt_required),
 ):
     """获取所有知识库列表"""
     try:
         from shared.models.knowledge.knowledge_base import KnowledgeBase
+        from src.extensions import get_db
 
         with get_db() as db:
             query = select(KnowledgeBase).order_by(desc(KnowledgeBase.created_at))
@@ -94,10 +98,11 @@ async def get_knowledge_bases(
 
 
 @router.get("/bases/{base_id}", summary="获取知识库详")
-async def get_knowledge_base(base_id: int):
+async def get_knowledge_base(base_id: int, current_user=Depends(jwt_required)):
     """获取指定知识库详"""
     try:
         from shared.models.knowledge.knowledge_base import KnowledgeBase
+        from src.extensions import get_db
 
         with get_db() as db:
             kb = db.get(KnowledgeBase, base_id)
@@ -116,10 +121,12 @@ async def update_knowledge_base(
     description: str = Form(None),
     chunk_size: int = Form(None),
     chunk_overlap: int = Form(None),
+    current_user=Depends(jwt_required),
 ):
     """更新知识库配"""
     try:
         from shared.models.knowledge.knowledge_base import KnowledgeBase
+        from src.extensions import get_db
 
         with get_db() as db:
             kb = db.get(KnowledgeBase, base_id)
@@ -145,13 +152,14 @@ async def update_knowledge_base(
 
 
 @router.delete("/bases/{base_id}", summary="删除知识")
-async def delete_knowledge_base(base_id: int):
+async def delete_knowledge_base(base_id: int, current_user=Depends(jwt_required)):
     """删除知识库及其所有文档和向量"""
     try:
         from shared.models.knowledge.knowledge_base import KnowledgeBase
         from shared.models.knowledge.knowledge_document import KnowledgeDocument
         from shared.models.knowledge.document_chunk import DocumentChunk
         from shared.services.knowledge.vector_store import vector_store
+        from src.extensions import get_db
 
         with get_db() as db:
             kb = db.get(KnowledgeBase, base_id)
@@ -192,6 +200,7 @@ async def delete_knowledge_base(base_id: int):
 async def upload_document(
     base_id: int,
     file: UploadFile = File(...),
+    current_user=Depends(jwt_required),
 ):
     """
     上传文档到知识库
@@ -205,6 +214,7 @@ async def upload_document(
         from shared.services.knowledge.document_parser import document_parser
         from shared.services.knowledge.chunker import document_chunker
         from shared.services.knowledge.rag_chain import rag_chain
+        from src.extensions import get_db
 
         with get_db() as db:
             kb = db.get(KnowledgeBase, base_id)
@@ -330,10 +340,12 @@ async def get_documents(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     status: str = Query(None),
+    current_user=Depends(jwt_required),
 ):
     """获取指定知识库的文档列表"""
     try:
         from shared.models.knowledge.knowledge_document import KnowledgeDocument
+        from src.extensions import get_db
 
         with get_db() as db:
             query = select(KnowledgeDocument).where(
@@ -367,13 +379,14 @@ async def get_documents(
 
 
 @router.delete("/bases/{base_id}/documents/{doc_id}", summary="删除文档")
-async def delete_document(base_id: int, doc_id: int):
+async def delete_document(base_id: int, doc_id: int, current_user=Depends(jwt_required)):
     """删除文档及其切片和向"""
     try:
         from shared.models.knowledge.knowledge_document import KnowledgeDocument
         from shared.models.knowledge.document_chunk import DocumentChunk
         from shared.models.knowledge.knowledge_base import KnowledgeBase
         from shared.services.knowledge.rag_chain import rag_chain
+        from src.extensions import get_db
 
         with get_db() as db:
             doc = db.get(KnowledgeDocument, doc_id)
@@ -425,6 +438,7 @@ async def rag_search(
     query: str = Form(...),
     top_k: int = Form(10),
     score_threshold: float = Form(0.0),
+    current_user=Depends(jwt_required),
 ):
     """在知识库中进行语义搜索（纯向量检索，不经"LLM"""
     try:
@@ -452,6 +466,7 @@ async def knowledge_qa(
     question: str = Form(...),
     top_k: int = Form(5),
     system_prompt: str = Form(None),
+    current_user=Depends(jwt_required),
 ):
     """
     知识库问答（RAG"

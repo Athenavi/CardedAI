@@ -8,6 +8,7 @@
 4. Windows + asyncpg 兼容性处理
 """
 
+import os
 import sys
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
@@ -135,9 +136,12 @@ class UnifiedDatabaseManager:
 
             # SQLite 模式：跳过连接池配置，使用 NullPool
             if is_sqlite:
+                # 隐藏完整路径，只显示文件名
+                db_path = async_url.replace("sqlite+aiosqlite:///", "")
+                db_filename = os.path.basename(db_path) if db_path else "unknown"
                 logger.info(
                     f"Initializing async database engine: SQLite mode, "
-                    f"url={async_url}"
+                    f"file={db_filename}"
                 )
                 engine_kwargs = {
                     'echo': getattr(settings,

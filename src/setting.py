@@ -98,7 +98,17 @@ class BaseConfig:
     """基础配置类"""
     global_encoding = 'utf-8'
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    SECRET_KEY = os.environ.get('SECRET_KEY') or os.urandom(32).hex()
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    if not SECRET_KEY:
+        import warnings
+        warnings.warn(
+            "WARNING: SECRET_KEY not set in environment variables. "
+            "Using a random key - all sessions and encrypted data will be invalid on restart. "
+            "Set SECRET_KEY in .env file for production.",
+            UserWarning,
+            stacklevel=2
+        )
+        SECRET_KEY = os.urandom(32).hex()
 
     # 使用条件判断处理可能的 None 值
     jwt_expiration = os.getenv('JWT_EXPIRATION_DELTA')
@@ -204,7 +214,18 @@ class BaseConfig:
     BABEL_SUPPORTED_LOCALES = ['zh_CN', "en"]
     BABEL_TRANSLATION_DIRECTORIES = 'translations'
     # jwt
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or SECRET_KEY
+    # jwt - JWT 签名密钥应与 SECRET_KEY 分离
+    _jwt_key = os.environ.get('JWT_SECRET_KEY')
+    if not _jwt_key:
+        import warnings
+        warnings.warn(
+            "WARNING: JWT_SECRET_KEY not set. Falling back to SECRET_KEY for JWT signing. "
+            "For production, set a separate JWT_SECRET_KEY in .env.",
+            UserWarning,
+            stacklevel=2
+        )
+        _jwt_key = SECRET_KEY
+    JWT_SECRET_KEY = _jwt_key
     JWT_ALGORITHM = "HS256"  # JWT 算法
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(seconds=JWT_EXPIRATION_DELTA)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(seconds=REFRESH_TOKEN_EXPIRATION_DELTA)
