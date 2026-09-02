@@ -91,9 +91,9 @@ class MultiLevelCache:
                 }
                 self.redis_client = redis.Redis(**config)
                 # 移除 ping()：redis.Redis() 本身是惰性的，首次实际操作时才连接
-                logger("[MultiLevelCache] L2 Redis客户端已创建（惰性连接）")
+                logger.info("[MultiLevelCache] L2 Redis客户端已创建（惰性连接）")
             except Exception as e:
-                logger(f"[MultiLevelCache] L2 Redis连接失败: {e}")
+                logger.warning(f"[MultiLevelCache] L2 Redis连接失败: {e}")
                 self.redis_enabled = False
 
         self.redis_stats = {
@@ -110,7 +110,7 @@ class MultiLevelCache:
 
         if file_cache_enabled:
             self.file_cache_dir.mkdir(parents=True, exist_ok=True)
-            logger(f"[MultiLevelCache] L3 文件缓存已启用: {self.file_cache_dir}")
+            logger.info(f"[MultiLevelCache] L3 文件缓存已启用: {self.file_cache_dir}")
 
         self.file_cache_stats = {
             'hits': 0,
@@ -228,7 +228,7 @@ class MultiLevelCache:
             try:
                 self.redis_client.flushdb()
             except Exception as e:
-                logger(f"[MultiLevelCache] Redis清空失败: {e}")
+                logger.warning(f"[MultiLevelCache] Redis清空失败: {e}")
 
         # 清空L3
         if self.file_cache_enabled:
@@ -236,9 +236,9 @@ class MultiLevelCache:
                 for file in self.file_cache_dir.glob("*.cache"):
                     file.unlink()
             except Exception as e:
-                logger(f"[MultiLevelCache] 文件缓存清空失败: {e}")
+                logger.warning(f"[MultiLevelCache] 文件缓存清空失败: {e}")
 
-        logger("[MultiLevelCache] 所有缓存层级已清空")
+        logger.info("[MultiLevelCache] 所有缓存层级已清空")
 
     def warmup(self, keys_data: List[Dict[str, Any]]):
         """
@@ -247,7 +247,7 @@ class MultiLevelCache:
         Args:
             keys_data: 预热的数据列表,每项包含 {'key': ..., 'value': ..., 'ttl': ...}
         """
-        logger(f"[MultiLevelCache] 开始缓存预热,共 {len(keys_data)} 条数据")
+        logger.info(f"[MultiLevelCache] 开始缓存预热,共 {len(keys_data)} 条数据")
 
         for item in keys_data:
             key = item.get('key')
@@ -257,7 +257,7 @@ class MultiLevelCache:
             if key is not None and value is not None:
                 self.set(key, value, ttl)
 
-        logger("[MultiLevelCache] 缓存预热完成")
+        logger.info("[MultiLevelCache] 缓存预热完成")
 
     def get_stats(self) -> Dict[str, Any]:
         """
@@ -351,7 +351,7 @@ class MultiLevelCache:
                     return value
             return None
         except Exception as e:
-            logger(f"[MultiLevelCache] Redis获取失败: {e}")
+            logger.error(f"[MultiLevelCache] Redis获取失败: {e}")
             self.redis_stats['errors'] += 1
             return None
 
@@ -368,7 +368,7 @@ class MultiLevelCache:
 
             self.redis_client.setex(key, ttl, serialized)
         except Exception as e:
-            logger(f"[MultiLevelCache] Redis设置失败: {e}")
+            logger.error(f"[MultiLevelCache] Redis设置失败: {e}")
             self.redis_stats['errors'] += 1
 
     def _delete_from_redis(self, key: str):
@@ -376,7 +376,7 @@ class MultiLevelCache:
         try:
             self.redis_client.delete(key)
         except Exception as e:
-            logger(f"[MultiLevelCache] Redis删除失败: {e}")
+            logger.error(f"[MultiLevelCache] Redis删除失败: {e}")
 
     # ========== L3 文件缓存操作 ==========
 
@@ -411,7 +411,7 @@ class MultiLevelCache:
                 return content
 
         except Exception as e:
-            logger(f"[MultiLevelCache] 文件缓存读取失败: {e}")
+            logger.error(f"[MultiLevelCache] 文件缓存读取失败: {e}")
             self.file_cache_stats['errors'] += 1
             return None
 
@@ -444,7 +444,7 @@ class MultiLevelCache:
                 json.dump(meta, f, ensure_ascii=False)
 
         except Exception as e:
-            logger(f"[MultiLevelCache] 文件缓存设置失败: {e}")
+            logger.error(f"[MultiLevelCache] 文件缓存设置失败: {e}")
             self.file_cache_stats['errors'] += 1
 
     def _delete_from_file(self, key: str):
@@ -456,7 +456,7 @@ class MultiLevelCache:
             file_path.unlink(missing_ok=True)
             meta_path.unlink(missing_ok=True)
         except Exception as e:
-            logger(f"[MultiLevelCache] 文件缓存删除失败: {e}")
+            logger.error(f"[MultiLevelCache] 文件缓存删除失败: {e}")
 
 
 # 全局实例

@@ -84,8 +84,7 @@ def register_all_routes(app: FastAPI, worker_info: str):
     """注册 API v2 和 v3 路由（已移除 v1）"""
 
     # 注册 v2 路由（新规范）— 并行加载 + 顺序注册
-    print(f"\n{worker_info} {'=' * 60}")
-    print(f"{worker_info} 开始注册 API v2 路由...")
+    logger.info(f"{worker_info} 开始注册 API v2 路由...")
     routes_start = _time.monotonic()
     try:
         from src.api.v2 import ROUTE_REGISTRY_V2
@@ -115,30 +114,30 @@ def register_all_routes(app: FastAPI, worker_info: str):
                 load_results.append((module_path, prefix, tags, result_by_path.get(module_path)))
 
         load_elapsed = _time.monotonic() - load_start
-        print(f"{worker_info} 📦 模块并行加载完成 (线程池: {max_workers}, 耗时: {load_elapsed:.2f}s)")
+        logger.info(f"{worker_info} 模块并行加载完成 (线程池: {max_workers}, 耗时: {load_elapsed:.2f}s)")
 
         # Phase 2: 顺序注册路由器到 app（FastAPI include_router 非线程安全）
         register_start = _time.monotonic()
         for module_path, prefix, tags, result in load_results:
             if result is None:
                 failed_count += 1
-                print(f"{worker_info} [Warning] v2/{module_path} 未找到加载结果")
+                logger.warning(f"{worker_info} v2/{module_path} 未找到加载结果")
                 continue
 
             _, router, mod_elapsed, req, error = result
 
             if error is not None:
                 if req:
-                    print(f"{worker_info} [ERROR] v2 必需模块加载失败: {module_path} - {error}")
+                    logger.error(f"{worker_info} v2 必需模块加载失败: {module_path} - {error}")
                     raise error
                 else:
                     failed_count += 1
-                    print(f"{worker_info} [Warning] v2/{module_path} 未能加载: {error}")
+                    logger.warning(f"{worker_info} v2/{module_path} 未能加载: {error}")
                     continue
 
             if router is None:
                 failed_count += 1
-                print(f"{worker_info} [Warning] v2/{module_path} 未找到 router 属性")
+                logger.warning(f"{worker_info} v2/{module_path} 未找到 router 属性")
                 continue
 
             try:
@@ -149,21 +148,21 @@ def register_all_routes(app: FastAPI, worker_info: str):
                 loaded_count += 1
                 short_name = module_path.split('.')[-1]
                 if mod_elapsed > 1.0:
-                    print(f"{worker_info} [SLOW] v2/{short_name} 已加载 ({mod_elapsed:.2f}s)")
+                    logger.warning(f"{worker_info} v2/{short_name} 已加载 (慢: {mod_elapsed:.2f}s)")
                 else:
-                    print(f"{worker_info} [OK] v2/{short_name} 已加载 ({mod_elapsed:.2f}s)")
+                    logger.debug(f"{worker_info} v2/{short_name} 已加载 ({mod_elapsed:.2f}s)")
             except Exception as e:
                 if req:
                     raise
                 failed_count += 1
-                print(f"{worker_info} [Warning] v2/{module_path} 注册异常: {e}")
+                logger.warning(f"{worker_info} v2/{module_path} 注册异常: {e}")
 
         routes_elapsed = _time.monotonic() - routes_start
         register_elapsed = _time.monotonic() - register_start
-        print(f"{worker_info} ✅ API v2 路由注册完成 (成功: {loaded_count}, 失败: {failed_count}, "
-              f"加载: {load_elapsed:.2f}s, 注册: {register_elapsed:.2f}s, 总耗时: {routes_elapsed:.2f}s)\n")
+        logger.info(f"{worker_info} API v2 路由注册完成 (成功: {loaded_count}, 失败: {failed_count}, "
+              f"加载: {load_elapsed:.2f}s, 注册: {register_elapsed:.2f}s, 总耗时: {routes_elapsed:.2f}s)")
     except ImportError as e:
-        print(f"{worker_info} [ERROR] API v2 模块未找到: {e}\n")
+        logger.error(f"{worker_info} API v2 模块未找到: {e}")
         raise
 
 
@@ -176,64 +175,62 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # 1. 安装状态检查
     step_start = _time.monotonic()
     is_installed = check_installation()
-    print(f"[lifespan] 安装检查耗时: {_time.monotonic() - step_start:.2f}s")
+    logger.debug(f"[lifespan] 安装检查耗时: {_time.monotonic() - step_start:.2f}s")
 
     # 2. 数据库管理器（仅安装后）
     if is_installed:
         step_start = _time.monotonic()
         await safe_run_async("数据库管理器", _init_database)
-        print(f"[lifespan] 数据库初始化耗时: {_time.monotonic() - step_start:.2f}s")
+        logger.debug(f"[lifespan] 数据库初始化耗时: {_time.monotonic() - step_start:.2f}s")
 
     # 2.5 懒加载系统初始化
     try:
         from src.utils.lazy_loader import init_lazy_loading
         step_start = _time.monotonic()
         safe_run("懒加载系统", init_lazy_loading)
-        print(f"[lifespan] 懒加载系统耗时: {_time.monotonic() - step_start:.2f}s")
+        logger.debug(f"[lifespan] 懒加载系统耗时: {_time.monotonic() - step_start:.2f}s")
     except ImportError as e:
-        print(f"[懒加载系统] ⚠️ 跳过: {e}")
+        logger.debug(f"[懒加载系统] 跳过: {e}")
 
     # 3. 扩展、调度器
     try:
         from src.extensions import init_extensions
         step_start = _time.monotonic()
         safe_run("扩展初始化", lambda: init_extensions(app))
-        print(f"[lifespan] 扩展初始化耗时: {_time.monotonic() - step_start:.2f}s")
+        logger.debug(f"[lifespan] 扩展初始化耗时: {_time.monotonic() - step_start:.2f}s")
     except ImportError as e:
-        print(f"[扩展初始化] ⚠️ 跳过: {e}")
+        logger.debug(f"[扩展初始化] 跳过: {e}")
 
     try:
         from src.scheduler import init_scheduler
         step_start = _time.monotonic()
         safe_run("调度器初始化", lambda: init_scheduler(app))
-        print(f"[lifespan] 调度器初始化耗时: {_time.monotonic() - step_start:.2f}s")
+        logger.debug(f"[lifespan] 调度器初始化耗时: {_time.monotonic() - step_start:.2f}s")
     except ImportError as e:
-        print(f"[调度器初始化] ⚠️ 跳过: {e}")
+        logger.debug(f"[调度器初始化] 跳过: {e}")
 
     # 3.5 工作流引擎节点执行器注册
     try:
         from shared.services.workflow.dag_engine import DAGEngine
         step_start = _time.monotonic()
         safe_run("工作流引擎执行器注册", DAGEngine.init_executors)
-        print(f"[lifespan] 执行器注册耗时: {_time.monotonic() - step_start:.2f}s")
+        logger.debug(f"[lifespan] 执行器注册耗时: {_time.monotonic() - step_start:.2f}s")
     except ImportError as e:
-        print(f"[执行器注册] ⚠️ 跳过: {e}")
+        logger.debug(f"[执行器注册] 跳过: {e}")
 
     if is_installed:
         step_start = _time.monotonic()
         await safe_run_async("定时发布调度器", _start_scheduled_publisher)
-        print(f"[lifespan] 定时发布调度器耗时: {_time.monotonic() - step_start:.2f}s")
+        logger.debug(f"[lifespan] 定时发布调度器耗时: {_time.monotonic() - step_start:.2f}s")
 
     # 5. 下载队列处理器
     if is_installed:
         step_start = _time.monotonic()
         await safe_run_async("下载队列处理器", _init_download_processor)
-        print(f"[lifespan] 下载队列处理器耗时: {_time.monotonic() - step_start:.2f}s")
+        logger.debug(f"[lifespan] 下载队列处理器耗时: {_time.monotonic() - step_start:.2f}s")
 
     total_elapsed = _time.monotonic() - lifespan_start
-    print(f"\n{'=' * 60}")
-    print(f"[lifespan] 🚀 应用启动完成，总耗时: {total_elapsed:.2f}s")
-    print(f"{'=' * 60}\n")
+    logger.info(f"[lifespan] 应用启动完成，总耗时: {total_elapsed:.2f}s")
 
     yield
 
@@ -255,9 +252,9 @@ async def _init_database():
         _import_models_once()
         async with db_manager.async_engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        print("[lifespan] 数据库表已确保存在（create_all）")
+        logger.info("[lifespan] 数据库表已确保存在（create_all）")
     except Exception as e:
-        print(f"[lifespan] 建表跳过/失败: {e}")
+        logger.warning(f"[lifespan] 建表跳过/失败: {e}")
 
 
 async def _start_scheduled_publisher():
@@ -305,7 +302,7 @@ def _make_lazy_middleware(module_path: str, class_name: str):
                     _cache['cls'] = getattr(mod, class_name)
                 except (ImportError, AttributeError) as e:
                     # 中间件模块缺失（如精简模式下未安装对应依赖）：跳过该中间件
-                    print(f"[Middleware] 中间件 {module_path}.{class_name} 不可用，已跳过: {e}")
+                    logger.warning(f"[Middleware] 中间件 {module_path}.{class_name} 不可用，已跳过: {e}")
                     _cache['cls'] = None
             if _cache['cls'] is not None:
                 self._impl = _cache['cls'](app=app, **kwargs)
@@ -351,7 +348,7 @@ def register_middleware(app: FastAPI):
     if "*" in allow_origins:
         allow_origins = [o for o in allow_origins if o != "*"] or ["http://localhost:3000"]
 
-    print(f"[CORS] 允许源: {allow_origins}")
+    logger.info(f"[CORS] 允许源: {allow_origins}")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=allow_origins,
@@ -367,22 +364,22 @@ def register_middleware(app: FastAPI):
             async def dispatch(self, request, call_next):
                 url = str(request.url)
                 if "/sensitive-words" in url:
-                    print(f"\n[DEBUG] 请求: {request.method} {url}")
-                    print(f"[DEBUG] Headers: {dict(request.headers)}")
+                    logger.debug(f"[DEBUG] 请求: {request.method} {url}")
+                    logger.debug(f"[DEBUG] Headers: {dict(request.headers)}")
                     if request.method == "POST":
                         try:
                             body = await request.body()
-                            print(f"[DEBUG] Body: {body.decode('utf-8')}")
+                            logger.debug(f"[DEBUG] Body: {body.decode('utf-8')}")
 
                             async def receive():
                                 return {"type": "http.request", "body": body}
 
                             request._receive = receive
                         except Exception as e:
-                            print(f"[DEBUG] 无法读取 body: {e}")
+                            logger.debug(f"[DEBUG] 无法读取 body: {e}")
                 response = await call_next(request)
                 if "/sensitive-words" in url and response.status_code == 422:
-                    print(f"[DEBUG] 422 响应: {response.status_code}")
+                    logger.debug(f"[DEBUG] 422 响应: {response.status_code}")
                 return response
 
         app.add_middleware(DebugMiddleware)
@@ -391,19 +388,19 @@ def register_middleware(app: FastAPI):
         class WSDebugMiddleware(BaseHTTPMiddleware):
             async def dispatch(self, request, call_next):
                 if request.headers.get("upgrade", "").lower() == "websocket" and "/collaboration/ws/" in str(request.url):
-                    print(f"[WS DEBUG] 连接尝试: {request.url}")
+                    logger.debug(f"[WS DEBUG] 连接尝试: {request.url}")
                 return await call_next(request)
 
         app.add_middleware(WSDebugMiddleware)
     else:
-        print(f"{worker_info} [Middleware] 生产环境，调试中间件已跳过")
+        logger.info(f"{worker_info} [Middleware] 生产环境，调试中间件已跳过")
 
     # HTTP 缓存
     try:
         from src.middleware.http_cache_middleware import HttpCacheMiddleware
         app.add_middleware(HttpCacheMiddleware, enable_etag=True, enable_last_modified=True,
                            default_cache_ttl=300, skip_methods=['POST', 'PUT', 'DELETE', 'PATCH'])
-        print("[HTTP Cache] 已添加")
+        logger.info("[HTTP Cache] 已添加")
     except ImportError:
         pass
 
@@ -425,16 +422,16 @@ def register_middleware(app: FastAPI):
             return response
 
     app.add_middleware(APIVersionMiddleware)
-    print("[API Version] 已添加版本响应头中间件")
+    logger.info("[API Version] 已添加版本响应头中间件")
 
     # 性能监控中间件（惰性加载：避免启动时 import psutil）
     try:
         app.add_middleware(
             _make_lazy_middleware("src.middleware.performance_monitor", "PerformanceMonitoringMiddleware")
         )
-        print("[Performance Monitor] 已添加性能监控中间件（惰性加载）")
+        logger.info("[Performance Monitor] 已添加性能监控中间件（惰性加载）")
     except Exception as e:
-        print(f"[Performance Monitor] 加载失败: {e}")
+        logger.warning(f"[Performance Monitor] 加载失败: {e}")
 
 
 # ---------- 错误处理与静态文件 ----------
@@ -545,12 +542,12 @@ def create_app(config=None):
     # 注册中间件
     step_start = _time.monotonic()
     register_middleware(app)
-    print(f"{worker_info} [create_app] 中间件注册耗时: {_time.monotonic() - step_start:.2f}s")
+    logger.info(f"{worker_info} [create_app] 中间件注册耗时: {_time.monotonic() - step_start:.2f}s")
 
     # 注册所有 API 路由
     step_start = _time.monotonic()
     register_all_routes(app, worker_info)
-    print(f"{worker_info} [create_app] 路由注册耗时: {_time.monotonic() - step_start:.2f}s")
+    logger.info(f"{worker_info} [create_app] 路由注册耗时: {_time.monotonic() - step_start:.2f}s")
 
     # 错误处理和 SPA 回退
     register_error_handlers(app)
@@ -581,12 +578,12 @@ def create_app(config=None):
     frontend_dist = os.path.join(os.path.dirname(__file__), "..", "frontend-astro", "dist")
     if os.path.isdir(frontend_dist):
         app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
-        print(f"[Frontend] 前端静态资源已挂载: {frontend_dist}")
+        logger.info(f"[Frontend] 前端静态资源已挂载: {frontend_dist}")
     else:
-        print(f"[Frontend] 未找到前端构建产物: {frontend_dist}（可先运行 npm run build 构建）")
+        logger.info(f"[Frontend] 未找到前端构建产物: {frontend_dist}（可先运行 npm run build 构建）")
 
     app_elapsed = _time.monotonic() - app_start
-    print(f"{worker_info} [create_app] 🏭 应用工厂完成，总耗时: {app_elapsed:.2f}s")
+    logger.info(f"{worker_info} [create_app] 应用工厂完成，总耗时: {app_elapsed:.2f}s")
 
     return app
 
