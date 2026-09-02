@@ -1,6 +1,7 @@
 """
 菜单构建工具，用于根据菜单slug生成菜单树结构
 """
+from src.unified_logger import default_logger as logger
 from typing import List, Dict
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -70,7 +71,7 @@ def get_menu_tree_by_slug(db: Session, menu_slug: str) -> List[Dict]:
         return menu_tree
     except Exception as e:
         # 如果数据库查询失败，返回默认菜单
-        print(f"获取菜单失败: {e}")
+        logger.info(f"获取菜单失败: {e}")
         return get_default_menu()
 
 
@@ -196,7 +197,7 @@ def get_all_menus_with_items(db: Session) -> Dict:
         return result
     except Exception as e:
         # 如果数据库查询失败，返回空字典
-        print(f"获取所有菜单失败: {e}")
+        logger.info(f"获取所有菜单失败: {e}")
         return {}
 
 
@@ -235,7 +236,7 @@ def get_menu_tree_by_system_config(db: Session) -> List[Dict]:
         return get_menu_tree_by_slug(db, menu_slug)
     except Exception as e:
         # 如果数据库查询失败，返回默认菜单
-        print(f"获取系统配置菜单失败: {e}")
+        logger.info(f"获取系统配置菜单失败: {e}")
         return get_default_menu()
 
 
@@ -317,7 +318,7 @@ async def get_all_menus_with_items_async(db: AsyncSession) -> Dict:
         return result_dict
     except Exception as e:
         # 如果数据库查询失败，返回空字典
-        print(f"获取所有菜单失败: {e}")
+        logger.info(f"获取所有菜单失败: {e}")
         import traceback
         traceback.print_exc()  # 打印完整的堆栈跟踪
         return {}

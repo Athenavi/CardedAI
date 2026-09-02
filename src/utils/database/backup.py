@@ -3,6 +3,7 @@
 基于 SQLAlchemy 的数据库结构和数据备份工具
 """
 
+from src.unified_logger import default_logger as logger
 import gzip
 import os
 import re
@@ -166,10 +167,10 @@ class DatabaseBackup:
             filepath += '.gz'
 
         try:
-            print(f"开始备份数据库结构: {self.dialect_name}")
+            logger.info(f"开始备份数据库结构: {self.dialect_name}")
 
             tables = self._get_tables()
-            print(f"找到 {len(tables)} 个表需要备份")
+            logger.info(f"找到 {len(tables)} 个表需要备份")
 
             schema_sql = ["-- Database Schema Backup",
                           f"-- Generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
@@ -185,11 +186,11 @@ class DatabaseBackup:
                 own_connection = False
 
             for table in tables:
-                print(f"处理表结构: {table}")
+                logger.info(f"处理表结构: {table}")
 
                 # 验证表名是否合法（防止SQL注入）
                 if not self._is_valid_table_name(table):
-                    print(f"警告: 表名包含非法字符: {table}")
+                    logger.warning(f"警告: 表名包含非法字符: {table}")
                     schema_sql.append(f"-- Warning: Invalid table name: {table}")
                     schema_sql.append("")
                     continue
@@ -203,7 +204,7 @@ class DatabaseBackup:
                             {"table_name": table}
                         )
                         if not table_exists_result.fetchone():
-                            print(f"警告: 表 {table} 不存在，跳过备份")
+                            logger.warning(f"警告: 表 {table} 不存在，跳过备份")
                             schema_sql.append(f"-- Warning: Table {table} does not exist, skipped")
                             schema_sql.append("")
                             continue
@@ -215,12 +216,12 @@ class DatabaseBackup:
                             {"table_name": table}
                         )
                         if not table_exists_result.fetchone()[0]:
-                            print(f"警告: 表 {table} 不存在，跳过备份")
+                            logger.warning(f"警告: 表 {table} 不存在，跳过备份")
                             schema_sql.append(f"-- Warning: Table {table} does not exist, skipped")
                             schema_sql.append("")
                             continue
                 except Exception as e:
-                    print(f"检查表 {table} 是否存在时出错: {str(e)}")
+                    logger.info(f"检查表 {table} 是否存在时出错: {str(e)}")
                     schema_sql.append(f"-- Error checking existence of table {table}: {str(e)}")
                     schema_sql.append("")
                     continue
@@ -251,7 +252,7 @@ class DatabaseBackup:
 
                     except Exception as e:
                         schema_sql.append(f"-- Error processing table {table}: {str(e)}")
-                        print(f"处理SQLite表 {table} 时出错: {str(e)}")
+                        logger.info(f"处理SQLite表 {table} 时出错: {str(e)}")
 
                 elif self.dialect_name == 'postgresql':
                     # PostgreSQL 获取表结构 - 使用参数化查询
@@ -279,7 +280,7 @@ class DatabaseBackup:
 
                     except Exception as e:
                         schema_sql.append(f"-- Error processing table {table}: {str(e)}")
-                        print(f"处理PostgreSQL表 {table} 时出错: {str(e)}")
+                        logger.info(f"处理PostgreSQL表 {table} 时出错: {str(e)}")
 
                 schema_sql.append("")
 
@@ -296,11 +297,11 @@ class DatabaseBackup:
                 connection.close()
 
             file_size = os.path.getsize(filepath)
-            print(f"数据库结构备份完成: {filepath} ({file_size} 字节)")
+            logger.info(f"数据库结构备份完成: {filepath} ({file_size} 字节)")
             return filepath
 
         except Exception as e:
-            print(f"数据库结构备份错误: {str(e)}")
+            logger.info(f"数据库结构备份错误: {str(e)}")
             import traceback
             traceback.print_exc()
             return None
@@ -326,10 +327,10 @@ class DatabaseBackup:
             filepath += '.gz'
 
         try:
-            print(f"开始备份数据库数据: {self.dialect_name}")
+            logger.info(f"开始备份数据库数据: {self.dialect_name}")
 
             tables = self._get_tables()
-            print(f"找到 {len(tables)} 个表需要备份")
+            logger.info(f"找到 {len(tables)} 个表需要备份")
 
             data_sql = [
                 "-- Database Data Backup",
@@ -350,12 +351,12 @@ class DatabaseBackup:
                 own_connection = False
 
             for table_name in tables:
-                print(f"备份表数据: {table_name}")
+                logger.info(f"备份表数据: {table_name}")
 
                 # 严格验证表名（防止SQL注入）
                 safe_name = _sanitized_table(table_name)
                 if not safe_name:
-                    print(f"警告: 表名包含非法字符: {table_name}")
+                    logger.warning(f"警告: 表名包含非法字符: {table_name}")
                     data_sql.append(f"-- Warning: Invalid table name: {table_name}")
                     data_sql.append("")
                     continue
@@ -368,7 +369,7 @@ class DatabaseBackup:
                             {"table_name": table_name}
                         )
                         if not table_exists_result.fetchone():
-                            print(f"警告: 表 {table_name} 不存在，跳过备份")
+                            logger.warning(f"警告: 表 {table_name} 不存在，跳过备份")
                             data_sql.append(f"-- Warning: Table {table_name} does not exist, skipped")
                             data_sql.append("")
                             continue
@@ -379,12 +380,12 @@ class DatabaseBackup:
                             {"table_name": table_name}
                         )
                         if not table_exists_result.fetchone()[0]:
-                            print(f"警告: 表 {table_name} 不存在，跳过备份")
+                            logger.warning(f"警告: 表 {table_name} 不存在，跳过备份")
                             data_sql.append(f"-- Warning: Table {table_name} does not exist, skipped")
                             data_sql.append("")
                             continue
                 except Exception as e:
-                    print(f"检查表 {table_name} 是否存在时出错: {str(e)}")
+                    logger.info(f"检查表 {table_name} 是否存在时出错: {str(e)}")
                     data_sql.append(f"-- Error checking existence of table {table_name}: {str(e)}")
                     data_sql.append("")
                     continue
@@ -406,7 +407,7 @@ class DatabaseBackup:
                         )
                         columns_info = [{'name': row[0], 'type': row[1]} for row in result]
                     except Exception as e:
-                        print(f"获取表 {table_name} 的列信息时出错: {str(e)}")
+                        logger.info(f"获取表 {table_name} 的列信息时出错: {str(e)}")
                         data_sql.append(f"-- Error getting column info for table {table_name}: {str(e)}")
                         data_sql.append("")
                         continue
@@ -420,7 +421,7 @@ class DatabaseBackup:
                     result = connection.execute(stmt)
                     rows = result.fetchall()
                 except Exception as e:
-                    print(f"查询表 {table_name} 时出错: {str(e)}")
+                    logger.info(f"查询表 {table_name} 时出错: {str(e)}")
                     data_sql.append(f"-- Error querying table {table_name}: {str(e)}")
                     data_sql.append("")
                     continue
@@ -445,7 +446,7 @@ class DatabaseBackup:
 
                 data_sql.append(f"-- {table_records} records from {table_name}")
                 data_sql.append("")
-                print(f"已备份 {table_records} 条记录从 {table_name}")
+                logger.info(f"已备份 {table_records} 条记录从 {table_name}")
 
             # 添加摘要信息
             data_sql.append(f"-- Backup completed: {total_records} total records")
@@ -463,11 +464,11 @@ class DatabaseBackup:
                 connection.close()
 
             file_size = os.path.getsize(filepath)
-            print(f"数据库数据备份完成: {filepath} ({file_size} 字节, {total_records} 条记录)")
+            logger.info(f"数据库数据备份完成: {filepath} ({file_size} 字节, {total_records} 条记录)")
             return filepath
 
         except Exception as e:
-            print(f"数据库数据备份错误: {str(e)}")
+            logger.info(f"数据库数据备份错误: {str(e)}")
             import traceback
             traceback.print_exc()
             return None
@@ -517,7 +518,7 @@ class DatabaseBackup:
                 os.remove(data_file)
 
             file_size = os.path.getsize(filepath)
-            print(f"完整数据库备份完成: {filepath} ({file_size} 字节)")
+            logger.info(f"完整数据库备份完成: {filepath} ({file_size} 字节)")
 
             return {
                 'full': filepath,
@@ -525,7 +526,7 @@ class DatabaseBackup:
             }
 
         except Exception as e:
-            print(f"合并备份文件时出错: {str(e)}")
+            logger.info(f"合并备份文件时出错: {str(e)}")
             return None
 
     def list_backups(self):
@@ -659,4 +660,4 @@ if __name__ == "__main__":
     # 列出所有备份
     # backups = backup_tool.list_backups()
 
-    print("数据库备份工具库已加载")
+    logger.info("数据库备份工具库已加载")

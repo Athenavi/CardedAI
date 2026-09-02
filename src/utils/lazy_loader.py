@@ -13,6 +13,7 @@
 当前保留此模块作为备用，未在核心启动流程中强制执行懒加载。
 """
 
+from src.unified_logger import default_logger as logger
 import importlib
 import time
 from typing import Dict, Any, Optional, Callable
@@ -41,9 +42,9 @@ class LazyModule:
             try:
                 self._module = importlib.import_module(self.module_path)
                 self._load_time = time.time() - start_time
-                print(f"[LazyLoader] 已加载模块: {self.module_path} ({self._load_time:.4f}s)")
+                logger.info(f"[LazyLoader] 已加载模块: {self.module_path} ({self._load_time:.4f}s)")
             except ImportError as e:
-                print(f"[LazyLoader] 加载失败: {self.module_path} - {e}")
+                logger.info(f"[LazyLoader] 加载失败: {self.module_path} - {e}")
                 raise
 
     def __getattr__(self, name):
@@ -104,9 +105,9 @@ class LazyLoaderManager:
             try:
                 _ = lazy_module._module  # 触发加载
             except ImportError as e:
-                print(f"[LazyLoader] 关键模块加载失败 {name}: {e}")
+                logger.info(f"[LazyLoader] 关键模块加载失败 {name}: {e}")
             except Exception as e:
-                print(f"[LazyLoader] 加载关键模块 {name} 时出现未知错误: {e}")
+                logger.info(f"[LazyLoader] 加载关键模块 {name} 时出现未知错误: {e}")
 
     def get_module(self, name: str) -> LazyModule:
         """
@@ -139,7 +140,7 @@ class LazyLoaderManager:
                 try:
                     module._load()
                 except Exception as e:
-                    print(f"[LazyLoader] 加载失败 {name}: {e}")
+                    logger.info(f"[LazyLoader] 加载失败 {name}: {e}")
 
     def load_all(self):
         """加载所有模块"""
@@ -264,9 +265,9 @@ def init_lazy_loading():
     # 立即加载关键模块
     lazy_loader.load_by_priority(max_priority=0)
 
-    print("[LazyLoader] 懒加载系统已初始化")
-    print(f"[LazyLoader] 注册了 {len(lazy_loader.modules)} 个模块")
-    print(f"[LazyLoader] 关键模块: {sum(1 for m in lazy_loader.modules.values() if m.critical)}")
+    logger.info("[LazyLoader] 懒加载系统已初始化")
+    logger.info(f"[LazyLoader] 注册了 {len(lazy_loader.modules)} 个模块")
+    logger.info(f"[LazyLoader] 关键模块: {sum(1 for m in lazy_loader.modules.values() if m.critical)}")
 
 
 def get_lazy_loader_stats():

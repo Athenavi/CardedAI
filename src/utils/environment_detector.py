@@ -13,6 +13,7 @@
 - 检测结果仅作为"推荐"，用户已在 .env 中显式配置的值不会被覆盖。
 """
 
+from src.unified_logger import default_logger as logger
 import argparse
 import json
 import socket
@@ -131,25 +132,25 @@ def main(argv: Optional[List[str]] = None) -> int:
                 for name, available in detection.items()
             },
         }
-        print(json.dumps(report, ensure_ascii=False, indent=2))
+        logger.info(json.dumps(report, ensure_ascii=False, indent=2))
         return 0
 
     if args.recommend:
         cfg = recommend_config(detection)
-        print(format_env_block(cfg))
+        logger.info(format_env_block(cfg))
         return 0
 
     # 默认：人类可读摘要
-    print("CardedAI 环境检测报告")
-    print("-" * 40)
+    logger.info("CardedAI 环境检测报告")
+    logger.info("-" * 40)
     for name, available in detection.items():
         status = "✅ 可用" if available else "❌ 未检测到"
-        print(f"  {SERVICES[name]['label']:<14} (端口 {SERVICES[name]['port']:<6}) {status}")
-    print("-" * 40)
+        logger.info(f"  {SERVICES[name]['label']:<14} (端口 {SERVICES[name]['port']:<6}) {status}")
+    logger.info("-" * 40)
     cfg = recommend_config(detection)
-    print("推荐配置：")
+    logger.info("推荐配置：")
     for key, value in cfg.items():
-        print(f"  {key}={value}")
+        logger.info(f"  {key}={value}")
     return 0
 
 

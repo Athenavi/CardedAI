@@ -207,12 +207,12 @@ if __name__ == "__main__":
         audio_file = sys.argv[1]
         output_file = "test_audio_thumb.jpg"
         
-        print(f"测试音频封面提取: {audio_file}")
+        logger.info(f"测试音频封面提取: {audio_file}")
         success = create_audio_thumbnail(audio_file, output_file)
         
         if success:
-            print(f"✅ 缩略图已保存到: {output_file}")
+            logger.info(f"✅ 缩略图已保存到: {output_file}")
         else:
-            print("❌ 缩略图生成失败")
+            logger.info("❌ 缩略图生成失败")
     else:
-        print("用法: python audio_processor.py <audio_file>")
+        logger.info("用法: python audio_processor.py <audio_file>")

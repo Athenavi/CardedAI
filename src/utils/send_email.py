@@ -1,3 +1,5 @@
+from src.unified_logger import default_logger as logger
+
 import smtplib
 import uuid
 from email.mime.multipart import MIMEMultipart
@@ -21,7 +23,7 @@ async def request_email_change(user_id, cache_instance, domain, new_email):
     temp_link = f'{domain}api/change-email/confirm/{token}'
     if await api_mail(user_id=user_id,
                       body_content=f'您可以通过点击如下的链接来完成邮箱更新\n\n{temp_link}\n\n如果不是您发起的请求，请忽略该邮件'):
-        print(temp_link)
+        logger.info(temp_link)
 
 
 # 获取邮件配置
@@ -77,8 +79,8 @@ async def api_mail(user_id, body_content, site_name='系统通知', recipient: O
         server.sendmail(config['MAIL_FROM'], recipient_email, text)
         server.quit()
 
-        print(f"邮件派送人: {user_id if user_id != 0 else '系统'}")
+        logger.info(f"邮件派送人: {user_id if user_id != 0 else '系统'}")
         return True
     except Exception as e:
-        print(f"邮件发送失败: {str(e)}")
+        logger.info(f"邮件发送失败: {str(e)}")
         return False

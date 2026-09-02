@@ -1,4 +1,5 @@
 """图像处理工具模块"""
+from src.unified_logger import default_logger as logger
 import io
 from typing import Tuple, Optional
 
@@ -115,7 +116,7 @@ def create_video_thumbnail(video_path: str, thumbnail_path: str, time: float = 1
         cv2_available = False
 
     if not cv2_available:
-        print("cv2 not available, video thumbnail creation is disabled")
+        logger.info("cv2 not available, video thumbnail creation is disabled")
         return False
 
     try:
@@ -144,7 +145,7 @@ def create_video_thumbnail(video_path: str, thumbnail_path: str, time: float = 1
         cap.release()
         return True
     except Exception as e:
-        print(f"Error creating video thumbnail: {str(e)}")
+        logger.error(f"Error creating video thumbnail: {str(e)}")
         return False
 
 
@@ -197,7 +198,7 @@ async def get_file_mime_type(file_hash: str, db=None) -> str:
         mime_type = magic.from_file(file_path, mime=True)
         return mime_type
     except Exception as e:
-        print(f"Error detecting file type: {str(e)}")
+        logger.error(f"Error detecting file type: {str(e)}")
         # 如果所有方法都失败，返回默认的octet-stream类型
         return 'application/octet-stream'
 

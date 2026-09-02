@@ -2,6 +2,7 @@
 安全工具模块
 包含输入验证、SQL注入防护、XSS防护等功能
 """
+from src.unified_logger import default_logger as logger
 import os
 import re
 import socket
@@ -46,10 +47,10 @@ def load_sensitive_words(file_path):
             sensitive_words = set(word.strip().lower() for word in file)
         return sensitive_words
     except FileNotFoundError:
-        print(f"敏感词文件不存在：{file_path}")
+        logger.info(f"敏感词文件不存在：{file_path}")
         return set()
     except IOError as e:
-        print(f"读取敏感词文件失败：{e}")
+        logger.info(f"读取敏感词文件失败：{e}")
         return set()
 
 
