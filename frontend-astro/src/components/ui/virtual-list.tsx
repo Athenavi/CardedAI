@@ -79,28 +79,27 @@ export function VirtualList<T = any>({
   const containerRef = useRef<HTMLDivElement>(null);
   const measureRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const [scrollTop, setScrollTop] = useState(0);
-  // 动态模式下存储每项实际高度
-  const [measures, setMeasures] = useRef<Map<number, ItemMeasure>>(new Map()).current;
+  const measuresRef = useRef<Map<number, ItemMeasure>>(new Map());
 
   const effectiveHeight = estimateHeight || itemHeight;
 
   // 计算偏移量表（动态模式下用于精确定位）
   const offsets = useMemo(() => {
     const result: number[] = [0];
+    const measures = measuresRef.current;
     for (let i = 0; i < items.length; i++) {
       const m = measures.get(i);
       const h = (m?.measured ? m.height : effectiveHeight) + itemPadding;
       result.push(result[i] + h);
     }
     return result;
-  }, [items.length, measures, effectiveHeight, itemPadding]);
+  }, [items.length, effectiveHeight, itemPadding, scrollTop]);
 
   // 计算可见范围
   const {startIdx, endIdx, offsetY} = useMemo(() => {
     const buffer = 5;
     const visibleHeight = height;
 
-    // 二分查找起始索引
     let lo = 0, hi = items.length;
     while (lo < hi) {
       const mid = (lo + hi) >> 1;
@@ -131,14 +130,14 @@ export function VirtualList<T = any>({
     if (dynamic) {
       requestAnimationFrame(() => {
         const h = el.offsetHeight;
-        const existing = measures.get(index);
+        const existing = measuresRef.current.get(index);
         if (!existing || !existing.measured || existing.height !== h) {
-          measures.set(index, {height: h, measured: true});
-          setScrollTop((prev: number) => prev); // 触发重新计算
+          measuresRef.current.set(index, {height: h, measured: true});
+          setScrollTop((prev: number) => prev);
         }
       });
     }
-  }, [dynamic, measures]);
+  }, [dynamic]);
 
   // 滚动处理
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {

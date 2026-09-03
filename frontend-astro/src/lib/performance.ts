@@ -68,12 +68,12 @@ function report(vital: VitalMetric) {
   metrics.push(vital);
 
   // Dev console 输出 (开发环境)
-  if (import.meta.env.DEV) {
+  if ((import.meta as any).env?.DEV) {
     console.log(`[Web Vitals] ${vital.name}:`, vital.value, `(${vital.rating})`);
   }
 
   // 生产环境通过 sendBeacon 上报
-  if (import.meta.env.PROD && typeof navigator.sendBeacon !== 'undefined') {
+  if ((import.meta as any).env?.PROD && typeof navigator.sendBeacon !== 'undefined') {
     const body = JSON.stringify({
       ...vital,
       url: typeof window !== 'undefined' ? window.location.href : '',
@@ -93,7 +93,7 @@ export function trackLCP() {
   try {
     new PerformanceObserver((entryList) => {
       const entries = entryList.getEntries();
-      const last = entries[entries.length - 1] as PerformancePaint_timing;
+      const last = entries[entries.length - 1] as any;
       const value = last?.startTime ?? 0;
       report({
         name: 'LCP',
@@ -120,7 +120,7 @@ export function trackCLS() {
     const po = new PerformanceObserver((entryList) => {
       for (const entry of entryList.getEntries()) {
         if (!(entry as any).hadRecentInput) {
-          const shiftValue = (entry as LayoutShift).value;
+          const shiftValue = (entry as any).value;
           value += shiftValue;
           entries.push(entry);
         }
@@ -147,7 +147,7 @@ export function trackFID() {
   try {
     new PerformanceObserver((entryList) => {
       for (const entry of entryList.getEntries()) {
-        const value = entry.processingStart - entry.startTime;
+        const value = (entry as any).processingStart - (entry as any).startTime;
         report({
           name: 'FID',
           value: Math.round(value),
@@ -264,7 +264,7 @@ export function onReactProfilerRender(
   _commitTime: number
 ) {
   // 仅开发环境输出，>50ms 的渲染告警
-  if (import.meta.env.DEV && actualDuration > 50) {
+  if ((import.meta as any).env?.DEV && actualDuration > 50) {
     console.warn(
       `[React Profiler] ${id} (${phase}): ` +
       `${actualDuration.toFixed(0)}ms actual / ${baseDuration.toFixed(0)}ms base`
@@ -275,7 +275,7 @@ export function onReactProfilerRender(
 // ─── why-did-you-render (Dev Only) ───────────────────────────────────
 // 在需要调试重复渲染的组件文件中使用，示例：
 //
-//   if (import.meta.env.DEV) {
+//   if ((import.meta as any).env?.DEV) {
 //     const WDYR = await import('why-did-you-render');
 //     WDYR.default(React, { trackAllPureComponents: true });
 //   }

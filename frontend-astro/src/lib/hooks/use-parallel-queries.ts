@@ -68,7 +68,11 @@ export function useParallelQueries<T extends Record<string, any>>(
           }
         } catch (e) {
           if (mountedRef.current) {
-            setError(prev => ({...(prev || {}), [specificKey]: e}));
+            setError(prev => {
+              const newErrors = prev || {} as ParallelQueriesErrors<T>;
+              (newErrors as Record<string, any>)[String(specificKey)] = e;
+              return newErrors;
+            });
           }
         }
       }
@@ -200,11 +204,10 @@ export function usePriorityFetch<T = any>(
     if (!enabled) return;
     mountedRef.current = true;
 
-    // 低优先级使用 requestIdleCallback
-    const fetch = async () => {
+    const doFetch = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(url, {credentials: 'include'});
+        const res = await globalThis.fetch(url, {credentials: 'include'});
         const json = await res.json();
         if (mountedRef.current) {
           setData(json);
@@ -217,18 +220,16 @@ export function usePriorityFetch<T = any>(
     };
 
     if (priority === 'high') {
-      fetch();
+      doFetch();
     } else {
-      // 低优先级：等主线程空闲
       if (typeof (window as any).requestIdleCallback === 'function') {
-        const handle = (window as any).requestIdleCallback(fetch);
+        const handle = (window as any).requestIdleCallback(doFetch);
         return () => {
           mountedRef.current = false;
           (window as any).cancelIdleCallback(handle);
         };
       }
-      // fallback: 延迟执行
-      const timer = setTimeout(fetch, 100);
+      const timer = setTimeout(doFetch, 100);
       return () => {
         mountedRef.current = false;
         clearTimeout(timer);

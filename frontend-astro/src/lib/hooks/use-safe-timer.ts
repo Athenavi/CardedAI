@@ -84,7 +84,7 @@ export function useSafeTimeout(
  * 安全的事件监听器
  * 自动清理，支持一次性事件
  */
-export function useEventSafely<T extends Window | Document | HTMLElement | any>(
+export function useEventSafely<T extends { addEventListener: (e: string, h: any, o?: any) => void; removeEventListener: (e: string, h: any, o?: any) => void }>(
   target: T | null,
   event: string,
   handler: (e: any) => void,
@@ -108,7 +108,7 @@ export function useEventSafely<T extends Window | Document | HTMLElement | any>(
 /**
  * 一次性事件监听（自动清理）
  */
-export function useEventOnce<T extends Window | Document | HTMLElement | any>(
+export function useEventOnce<T extends { addEventListener: (e: string, h: any) => void; removeEventListener: (e: string, h: any) => void }>(
   target: T | null,
   event: string,
   handler: (e: any) => void,

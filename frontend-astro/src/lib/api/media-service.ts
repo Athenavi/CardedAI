@@ -164,26 +164,30 @@ export class MediaService {
 
                     const progressInterval = simulateProgress();
 
-                    // 准备表单数据
-                    const formData = new FormData();
-                    formData.append('file', file);
+                    try {
+                        // 准备表单数据
+                        const formData = new FormData();
+                        formData.append('file', file);
 
-                    // 发送请求 - 使用 apiClient 保证认证信息正确传递
-                    const response = await apiClient.request('/media/upload', {
-                        method: 'POST',
-                        body: formData,
-                        credentials: 'include',
-                    });
+                        // 发送请求 - 使用 apiClient 保证认证信息正确传递
+                        const response = await apiClient.request('/media/upload', {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'include',
+                        });
 
-                    clearInterval(progressInterval);
+                        // 更新进度到100%
+                        if (onProgress) {
+                            onProgress(100, `已完成上传: ${file.name}`);
+                        }
 
-                    // 更新进度到100%
-                    if (onProgress) {
-                        onProgress(100, `已完成上传: ${file.name}`);
+                        // 直接返回apiClient的响应，它已经是ApiResponse格式
+                        resolve(response as ApiResponse<{ files?: MediaFile[], message?: string }>);
+                    } catch (error) {
+                        throw error; // re-throw to ensure cleanup
+                    } finally {
+                        clearInterval(progressInterval);
                     }
-
-                    // 直接返回apiClient的响应，它已经是ApiResponse格式
-                    resolve(response as ApiResponse<{ files?: MediaFile[], message?: string }>);
                 } catch (error) {
                     reject(error);
                 }

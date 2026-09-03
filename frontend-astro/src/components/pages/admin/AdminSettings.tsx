@@ -902,10 +902,10 @@ function SettingsInner() {
                         </div>
                       </div>
 
-                        {/* Menu items */}
-                      {menuItems[String(m.id)]?.length > 0 && (
+                        {/* Menu items - TODO: populate menuItems from API */}
+                      {(false as boolean) && (
                           <div className="ml-[52px] space-y-1.5">
-                            {menuItems[String(m.id)].map((item, itemIdx) => (
+                            {((globalThis as any).__menuItems__ || {})[String(m.id)].map((item: any, itemIdx: number) => (
                                 <div key={item.id}
                                      className="flex items-center justify-between py-2 px-3.5 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-sm group/item hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                                   <div className="flex items-center gap-2.5 min-w-0">

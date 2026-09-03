@@ -1053,6 +1053,13 @@ const MiniPlayer: React.FC<{
     if (longPressTimer.current) clearTimeout(longPressTimer.current);
   };
 
+  // 组件卸载时清理长按定时器
+  useEffect(() => {
+    return () => {
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    };
+  }, []);
+
   // 点击外部关闭菜单
   useEffect(() => {
     if (!showMenu) return;
