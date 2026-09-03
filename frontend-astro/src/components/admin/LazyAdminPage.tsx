@@ -58,26 +58,13 @@ function AdminPageSkeleton() {
 
 /**
  * 创建懒加载 Admin 页面组件
- *
- * 使用方式（在 .astro frontmatter 中）：
- * ```
- * import {createLazyAdmin} from '@/components/admin/LazyAdminPage';
- * const AdminArticles = createLazyAdmin(() => import('@/components/pages/admin/AdminArticles'));
- * ```
- *
- * 然后在模板中：
- * ```
- * <AdminArticles client:idle/>
- * ```
- *
- * 工作原理：
- * 1. 服务端渲染时显示骨架屏（快速 SSR）
- * 2. 客户端 hydration 后开始懒加载实际组件
- * 3. Suspense 在加载期间显示骨架屏
- * 4. 加载完成后渲染实际组件
+ * 提供预取功能以优化页面切换体验
  */
 export function createLazyAdmin(loader: () => Promise<{ default: ComponentType<any> }>) {
+  // 使用 React.lazy 的 preload 模式
   const LazyComponent = lazy(loader);
+  // 类型声明：添加 prefetch 属性以便在导航前预加载
+  (LazyComponent as any).prefetch = loader;
 
   const AdminLazyWrapper: React.FC<any> = (props) => {
     const [mounted, setMounted] = useState(false);
@@ -100,6 +87,8 @@ export function createLazyAdmin(loader: () => Promise<{ default: ComponentType<a
 
   // 设置 displayName 便于调试
   AdminLazyWrapper.displayName = 'AdminLazyWrapper';
+  // 暴露 prefetch 方法供外部预加载
+  (AdminLazyWrapper as any).prefetch = loader;
 
   return AdminLazyWrapper;
 }

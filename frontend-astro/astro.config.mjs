@@ -225,6 +225,35 @@ export default defineConfig({
         '@testing-library/jest-dom',
       ],
     },
+    // Tree shaking: 标记纯模块
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('/react/') || id.includes('/react-dom/')) return 'vendor-react';
+              if (id.includes('/@tanstack/react-query/')) return 'vendor-query';
+              if (id.includes('/framer-motion/')) return 'vendor-motion';
+              if (id.includes('/lucide-react/')) return 'vendor-icons';
+              if (id.includes('/@radix-ui/')) return 'vendor-radix';
+              if (id.includes('/@tiptap/') || id.includes('/lowlight/') || id.includes('/highlight.js/') || id.includes('/yjs/') || id.includes('/y-websocket/') || id.includes('/y-prosemirror/')) return 'vendor-editor';
+              if (id.includes('/chart.js/') || id.includes('/react-chartjs-2/')) return 'vendor-chart';
+              if (id.includes('/lodash-es/')) return 'vendor-lodash';
+              if (id.includes('/recharts/')) return 'vendor-recharts';
+              if (id.includes('/@dnd-kit/')) return 'vendor-dnd';
+              if (id.includes('/react-hook-form/') || id.includes('/@hookform/')) return 'vendor-form';
+              if (id.includes('/class-variance-authority/') || id.includes('/tailwind-merge/') || id.includes('/clsx/')) return 'vendor-ui-utils';
+            }
+            return 'vendor';
+          },
+          // Tree shaking 优化
+          treeshake: {
+            moduleSideEffects: false,
+            annotations: true,
+          },
+        },
+      },
+    },
   },
 
   i18n: {
