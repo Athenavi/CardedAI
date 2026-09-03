@@ -31,7 +31,7 @@ async def translate_text(
             api_key=api_key,
             secret_key=secret_key
         )
-        
+
         if result["success"]:
             return ApiResponse(
                 success=True,
@@ -44,7 +44,7 @@ async def translate_text(
             )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -64,7 +64,7 @@ async def batch_translate_texts(
                 success=False,
                 error="请提供要翻译的文本列表"
             )
-        
+
         result = await machine_translation_service.batch_translate(
             texts=texts,
             source_lang=source_lang,
@@ -72,7 +72,7 @@ async def batch_translate_texts(
             provider=provider,
             delay_between_requests=delay
         )
-        
+
         return ApiResponse(
             success=result["success"],
             message=f"成功翻译 {result['success_count']}/{result['total']} 条",
@@ -80,7 +80,7 @@ async def batch_translate_texts(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -91,7 +91,7 @@ async def get_translation_memory_stats(
     """获取翻译记忆库统计"""
     try:
         stats = machine_translation_service.get_translation_memory_stats()
-        
+
         return ApiResponse(
             success=True,
             data=stats
@@ -107,7 +107,7 @@ async def clear_translation_memory(
     """清空翻译记忆库"""
     try:
         result = machine_translation_service.clear_translation_memory()
-        
+
         return ApiResponse(
             success=result["success"],
             message=result["message"]
@@ -128,7 +128,7 @@ async def list_translation_providers():
             }
             for key, config in machine_translation_service.providers.items()
         ]
-        
+
         return ApiResponse(
             success=True,
             data={"providers": providers}

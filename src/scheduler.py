@@ -44,7 +44,7 @@ class SessionScheduler:
             except Exception as e:
                 logger.error(f"同步文章浏览量时出错：{e}")
                 import traceback
-                traceback.print_exc()
+                logger.error("", exc_info=True)
 
         # 添加定时任务（AsyncIOScheduler 直接支持异步协程）
         self.scheduler.add_job(

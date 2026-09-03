@@ -303,7 +303,7 @@ class DatabaseBackup:
         except Exception as e:
             logger.info(f"数据库结构备份错误: {str(e)}")
             import traceback
-            traceback.print_exc()
+            logger.error("", exc_info=True)
             return None
 
     def backup_data(self, filepath=None, compress=False, batch_size=1000):
@@ -470,7 +470,7 @@ class DatabaseBackup:
         except Exception as e:
             logger.info(f"数据库数据备份错误: {str(e)}")
             import traceback
-            traceback.print_exc()
+            logger.error("", exc_info=True)
             return None
 
     def backup_all(self, filepath=None, clean_temp_files=True):

@@ -320,5 +320,5 @@ async def get_all_menus_with_items_async(db: AsyncSession) -> Dict:
         # 如果数据库查询失败，返回空字典
         logger.info(f"获取所有菜单失败: {e}")
         import traceback
-        traceback.print_exc()  # 打印完整的堆栈跟踪
+        logger.error("", exc_info=True)  # 打印完整的堆栈跟踪
         return {}

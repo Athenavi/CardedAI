@@ -85,7 +85,7 @@ async def remove_exif(
         logger = _logger
         logger.error(f"移除EXIF失败: {e}")
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"移除EXIF失败: {str(e)}")
 
 
@@ -101,7 +101,7 @@ async def update_media_tags(
     支持 mode 参数：
     - add: 追加标签（默认）
     - replace: 替换全部标签
-    
+
     注意：每个媒体最多支持5个标签
     """
     body = await request.json()

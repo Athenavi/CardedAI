@@ -592,6 +592,6 @@ def create_app(config=None):
 try:
     app = create_app()
 except Exception as e:
-    traceback.print_exc()
+    logger.error("", exc_info=True)
     import sys
     sys.exit(1)

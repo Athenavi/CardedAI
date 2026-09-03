@@ -22,10 +22,10 @@ async def generate_hreflang(
     """生成 hreflang 标签"""
     try:
         import json
-        
+
         # 解析翻译数据
         trans_dict = json.loads(translations)
-        
+
         # 生成标签
         tags = hreflang_generator.generate_hreflang_tags(
             current_url=current_url,
@@ -33,10 +33,10 @@ async def generate_hreflang(
             default_language=default_language,
             include_x_default=include_x_default
         )
-        
+
         # 渲染HTML
         html = hreflang_generator.render_html_tags(tags)
-        
+
         return ApiResponse(
             success=True,
             data={
@@ -47,7 +47,7 @@ async def generate_hreflang(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -62,7 +62,7 @@ async def validate_hreflang(
     """验证 hreflang 双向链接"""
     try:
         result = hreflang_generator.validate_hreflang_pair(url1, lang1, url2, lang2)
-        
+
         return ApiResponse(
             success=result["valid"],
             data=result
@@ -83,9 +83,9 @@ async def generate_sitemap_entry(
     """生成 sitemap 条目（含多语言）"""
     try:
         import json
-        
+
         trans_dict = json.loads(translations)
-        
+
         entry = hreflang_generator.generate_sitemap_entry(
             url=url,
             translations=trans_dict,
@@ -93,7 +93,7 @@ async def generate_sitemap_entry(
             changefreq=changefreq,
             priority=priority
         )
-        
+
         return ApiResponse(
             success=True,
             data={"entry": entry}
@@ -107,7 +107,7 @@ async def list_supported_languages():
     """获取支持的语言列表"""
     try:
         languages = hreflang_generator.get_recommended_languages()
-        
+
         return ApiResponse(
             success=True,
             data={"languages": languages}

@@ -59,7 +59,7 @@ async def list_all_widgets(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"获取小部件列表失败: {str(e)}")
 
 
@@ -116,7 +116,7 @@ async def get_area_widgets(area_id: str, db: AsyncSession = Depends(get_async_db
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"获取小部件失败: {str(e)}")
 
 
@@ -243,7 +243,7 @@ async def create_widget(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"创建失败: {str(e)}")
 
 
@@ -283,7 +283,7 @@ async def update_widget(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"更新失败: {str(e)}")
 
 
@@ -316,7 +316,7 @@ async def toggle_widget(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"操作失败: {str(e)}")
 
 
@@ -369,7 +369,7 @@ async def reorder_single_widget(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"排序失败: {str(e)}")
 
 
@@ -408,7 +408,7 @@ async def batch_reorder_widgets(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"批量排序失败: {str(e)}")
 
 
@@ -453,7 +453,7 @@ async def render_widget(widget_id: int, db: AsyncSession = Depends(get_async_db)
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"渲染失败: {str(e)}")
 
 
@@ -481,7 +481,7 @@ async def get_recent_posts_data(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"获取失败: {str(e)}")
 
 
@@ -505,7 +505,7 @@ async def get_recent_comments_data(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"获取失败: {str(e)}")
 
 
@@ -529,7 +529,7 @@ async def get_tags_cloud_data(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"获取失败: {str(e)}")
 
 
@@ -553,7 +553,7 @@ async def get_categories_data(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"获取失败: {str(e)}")
 
 
@@ -577,7 +577,7 @@ async def get_archives_data(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"获取失败: {str(e)}")
 
 
@@ -601,7 +601,7 @@ async def get_popular_posts_data(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"获取失败: {str(e)}")
 
 
@@ -667,5 +667,5 @@ async def get_menu_data(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=f"获取失败: {str(e)}")

@@ -1,43 +1,90 @@
 /**
  * 移动端手势组件 - React 岛屿
+ *
+ * 优化项：
+ * - 使用 passive 触摸监听提升滚动性能
+ * - 添加触摸阈值防抖（避免误触）
+ * - 支持双击前进/后退
+ * - 减少不必要的重渲染
  */
 
 'use client';
 
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useCallback} from 'react';
 
-const MobileGestures = () => {
-    const touchStartX = useRef(0);
-    const touchStartY = useRef(0);
+interface GestureOptions {
+  /** 左滑返回阈值 (px)，默认 80 */
+  threshold?: number;
+  /** 左边缘触发区域 (px)，默认 50 */
+  edgeZone?: number;
+  /** 是否启用双击返回，默认 false */
+  enableDoubleTapBack?: boolean;
+}
 
-    useEffect(() => {
-        const handleTouchStart = (e: TouchEvent) => {
-            touchStartX.current = e.touches[0].clientX;
-            touchStartY.current = e.touches[0].clientY;
-        };
+const MobileGestures = ({
+  threshold = 80,
+  edgeZone = 50,
+  enableDoubleTapBack = false,
+}: GestureOptions = {}) => {
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchStartTime = useRef(0);
+  const lastTapTime = useRef(0);
 
-        const handleTouchEnd = (e: TouchEvent) => {
-            const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-            const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-            const absDeltaX = Math.abs(deltaX);
-            const absDeltaY = Math.abs(deltaY);
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartX.current = touch.clientX;
+    touchStartY.current = touch.clientY;
+    touchStartTime.current = Date.now();
+  }, []);
 
-            // 右滑返回（在屏幕左边缘）
-            if (deltaX > 80 && absDeltaX > absDeltaY && touchStartX.current < 50) {
-                window.history.back();
-            }
-        };
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - touchStartX.current;
+    const deltaY = touch.clientY - touchStartY.current;
+    const absDeltaX = Math.abs(deltaX);
+    const absDeltaY = Math.abs(deltaY);
+    const elapsed = Date.now() - touchStartTime.current;
 
-        window.addEventListener('touchstart', handleTouchStart);
-        window.addEventListener('touchend', handleTouchEnd);
+    // 快速滑动才触发（时间 < 300ms）
+    if (elapsed > 300) return;
 
-        return () => {
-            window.removeEventListener('touchstart', handleTouchStart);
-            window.removeEventListener('touchend', handleTouchEnd);
-        };
-    }, []);
+    // 右滑返回（在屏幕左边缘，水平滑动 > 垂直滑动）
+    if (
+      deltaX > threshold &&
+      absDeltaX > absDeltaY &&
+      touchStartX.current < edgeZone &&
+      absDeltaX > threshold
+    ) {
+      window.history.back();
+    }
 
-    return null;
+    // 双击返回（可选）
+    if (enableDoubleTapBack) {
+      const now = Date.now();
+      if (now - lastTapTime.current < 300) {
+        // 双击判定：两次坐标相近且水平滑动小
+        if (absDeltaX < 30 && absDeltaY < 30) {
+          const canGoBack = window.history.length > 1;
+          canGoBack ? window.history.back() : window.history.forward();
+        }
+      }
+      lastTapTime.current = now;
+    }
+  }, [threshold, edgeZone, enableDoubleTapBack]);
+
+  useEffect(() => {
+    // 使用 passive: true 提升滚动性能，避免主线程阻塞
+    window.addEventListener('touchstart', handleTouchStart, {passive: true});
+    window.addEventListener('touchend', handleTouchEnd, {passive: true});
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [handleTouchStart, handleTouchEnd]);
+
+  return null;
 };
 
 export default MobileGestures;

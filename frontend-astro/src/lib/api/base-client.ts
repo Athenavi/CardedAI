@@ -82,84 +82,182 @@ async function ensureTokenFresh(): Promise<boolean> {
   return result;
 }
 
+// ─── 请求超时控制 ────────────────────────────────
+const DEFAULT_TIMEOUT = 15_000; // 15秒超时
+
+function fetchWithTimeout(url: string, opts: RequestInit, timeout = DEFAULT_TIMEOUT): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+      reject(new Error(`请求超时 (${timeout / 1000}s)`));
+    }, timeout);
+
+    fetch(url, { ...opts, signal: controller.signal })
+      .then((res) => {
+        clearTimeout(timeoutId);
+        resolve(res);
+      })
+      .catch((err) => {
+        clearTimeout(timeoutId);
+        reject(err);
+      });
+  });
+}
+
+// ─── 请求去重（飞行中请求缓存） ───────────────────
+const inflightRequests = new Map<string, Promise<ApiResponse<any>>>();
+
+function getFlightKey(method: string, path: string, body?: any): string {
+  return `${method}:${path}:${body ? JSON.stringify(body) : ''}`;
+}
+
+// ─── 弱网络重试策略 ──────────────────────────────
+function getConnectionType(): string | null {
+  if (typeof navigator === 'undefined') return null;
+  return (navigator as any).connection?.effectiveType ?? null;
+}
+
+function isSlowConnection(): boolean {
+  const conn = getConnectionType();
+  return conn === 'slow-2g' || conn === '2g' || conn === '3g';
+}
+
+async function requestWithRetry<T = any>(
+  requestFn: () => Promise<ApiResponse<T>>,
+  maxRetries = 2,
+  baseDelay = 1000
+): Promise<ApiResponse<T>> {
+  let lastError: any;
+
+  for (let i = 0; i <= maxRetries; i++) {
+    try {
+      const result = await requestFn();
+      if (result.success !== false || i === maxRetries) return result;
+      lastError = result.error;
+    } catch (e: any) {
+      lastError = e;
+      if (i === maxRetries) throw e;
+    }
+
+    // 指数退避
+    const delay = baseDelay * Math.pow(2, i);
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+
+  throw new Error(lastError?.message || '请求失败');
+}
+
 async function request<T = any>(
     method: string,
     path: string,
     contentType?: string,
     body?: any,
-    params?: Record<string, any>
+    params?: Record<string, any>,
+    options?: { timeout?: number; dedupe?: boolean; retry?: boolean }
 ): Promise<ApiResponse<T>> {
-  try {
-    const url = buildUrl(path, params);
-    const opts: RequestInit = {
-      method,
-      credentials: 'include',
-    };
+  const timeout = options?.timeout ?? (isSlowConnection() ? 30_000 : DEFAULT_TIMEOUT);
+  const shouldDedupe = options?.dedupe ?? (method === 'GET');
+  const shouldRetry = options?.retry ?? isSlowConnection();
 
-    if (body && method !== 'GET') {
-      if (body instanceof FormData) {
-        opts.body = body;
-      } else if (contentType === 'application/x-www-form-urlencoded') {
-        opts.headers = {'Content-Type': 'application/x-www-form-urlencoded'};
-        opts.body = Object.entries(body)
-            .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
-            .join('&');
-      } else {
-        opts.headers = {'Content-Type': 'application/json'};
-        opts.body = JSON.stringify(body);
-      }
-    }
-    if (params && method !== 'GET') {
-      // (uncommon case: query + body)
-    }
+  const fn = async (): Promise<ApiResponse<T>> => {
+    try {
+      const url = buildUrl(path, params);
+      const opts: RequestInit = {
+        method,
+        credentials: 'include',
+      };
 
-    const accessToken = getCookie('access_token');
-    if (accessToken) {
-      opts.headers = { ...(opts.headers as Record<string, string> || {}), 'Authorization': `Bearer ${accessToken}` };
-    }
-
-    let res = await fetch(url, opts);
-
-    // ── Auto-refresh on 401 ──
-    if (res.status === 401 && !path.includes('/auth/token/refresh') && !path.includes('/auth/login')) {
-      const refreshed = await ensureTokenFresh();
-      if (refreshed) {
-        const newToken = getCookie('access_token');
-        if (newToken) {
-          opts.headers = { ...(opts.headers as Record<string, string> || {}), 'Authorization': `Bearer ${newToken}` };
+      if (body && method !== 'GET') {
+        if (body instanceof FormData) {
+          opts.body = body;
+        } else if (contentType === 'application/x-www-form-urlencoded') {
+          opts.headers = {'Content-Type': 'application/x-www-form-urlencoded'};
+          opts.body = Object.entries(body)
+              .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+              .join('&');
+        } else {
+          opts.headers = {'Content-Type': 'application/json'};
+          opts.body = JSON.stringify(body);
         }
-        res = await fetch(url, opts);
-      } else {
-        // Refresh failed — clear cookies and redirect to login
-        clearCookie('access_token');
-        clearCookie('refresh_token');
-        const currentPath = encodeURIComponent(window.location.pathname + window.location.search);
-        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
-          window.location.href = `/login?next=${currentPath}`;
-        }
-        return { success: false, error: '登录已过期，请重新登录' };
       }
-    }
 
-    const text = await res.text();
-    try { return JSON.parse(text); } catch { return {success: false, error: text}; }
-  } catch (e: any) {
-    return {success: false, error: e.message || '网络异常'};
+      const accessToken = getCookie('access_token');
+      if (accessToken) {
+        opts.headers = { ...(opts.headers as Record<string, string> || {}), 'Authorization': `Bearer ${accessToken}` };
+      }
+
+      let res = await fetchWithTimeout(url, opts, timeout);
+
+      // ── Auto-refresh on 401 ──
+      if (res.status === 401 && !path.includes('/auth/token/refresh') && !path.includes('/auth/login')) {
+        const refreshed = await ensureTokenFresh();
+        if (refreshed) {
+          const newToken = getCookie('access_token');
+          if (newToken) {
+            opts.headers = { ...(opts.headers as Record<string, string> || {}), 'Authorization': `Bearer ${newToken}` };
+          }
+          res = await fetchWithTimeout(url, opts, timeout);
+        } else {
+          // Refresh failed — clear cookies and redirect to login
+          clearCookie('access_token');
+          clearCookie('refresh_token');
+          const currentPath = encodeURIComponent(window.location.pathname + window.location.search);
+          if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+            window.location.href = `/login?next=${currentPath}`;
+          }
+          return { success: false, error: '登录已过期，请重新登录' };
+        }
+      }
+
+      const text = await res.text();
+      try { return JSON.parse(text); } catch { return {success: false, error: text}; }
+    } catch (e: any) {
+      return {success: false, error: e.message || '网络异常'};
+    }
+  };
+
+  // 请求去重
+  if (shouldDedupe) {
+    const key = getFlightKey(method, path, body);
+    const existing = inflightRequests.get(key);
+    if (existing) {
+      inflightRequests.delete(key);
+      return existing as Promise<ApiResponse<T>>;
+    }
+    const promise = (shouldRetry ? requestWithRetry(fn) : fn()) as Promise<ApiResponse<T>>;
+    inflightRequests.set(key, promise);
+    promise.finally(() => inflightRequests.delete(key));
+    return promise;
   }
+
+  return shouldRetry ? await requestWithRetry(fn) : fn();
 }
 
 export const apiClient = {
-  get: <T = any>(path: string, params?: Record<string, any>) => request<T>('GET', path, undefined, undefined, params),
-  post: <T = any>(path: string, body?: any, params?: Record<string, any>) => request<T>('POST', path, 'application/json', body, params),
-  postForm: <T = any>(path: string, body?: Record<string, any>, params?: Record<string, any>) => request<T>('POST', path, 'application/x-www-form-urlencoded', body, params),
-  put: <T = any>(path: string, body?: any, params?: Record<string, any>) => request<T>('PUT', path, 'application/json', body, params),
-  putForm: <T = any>(path: string, body?: Record<string, any>, params?: Record<string, any>) => request<T>('PUT', path, 'application/x-www-form-urlencoded', body, params),
-  patch: <T = any>(path: string, body?: any) => request<T>('PATCH', path, 'application/json', body),
-  delete: <T = any>(path: string) => request<T>('DELETE', path),
+  get: <T = any>(path: string, params?: Record<string, any>, options?: { timeout?: number; dedupe?: boolean; retry?: boolean }) =>
+    request<T>('GET', path, undefined, undefined, params, options),
+  post: <T = any>(path: string, body?: any, params?: Record<string, any>, options?: { timeout?: number; dedupe?: boolean; retry?: boolean }) =>
+    request<T>('POST', path, 'application/json', body, params, options),
+  postForm: <T = any>(path: string, body?: Record<string, any>, params?: Record<string, any>, options?: { timeout?: number; dedupe?: boolean; retry?: boolean }) =>
+    request<T>('POST', path, 'application/x-www-form-urlencoded', body, params, options),
+  put: <T = any>(path: string, body?: any, params?: Record<string, any>, options?: { timeout?: number; dedupe?: boolean; retry?: boolean }) =>
+    request<T>('PUT', path, 'application/json', body, params, options),
+  putForm: <T = any>(path: string, body?: Record<string, any>, params?: Record<string, any>, options?: { timeout?: number; dedupe?: boolean; retry?: boolean }) =>
+    request<T>('PUT', path, 'application/x-www-form-urlencoded', body, params, options),
+  patch: <T = any>(path: string, body?: any, options?: { timeout?: number; dedupe?: boolean; retry?: boolean }) =>
+    request<T>('PATCH', path, 'application/json', body, undefined, options),
+  delete: <T = any>(path: string, options?: { timeout?: number; dedupe?: boolean; retry?: boolean }) =>
+    request<T>('DELETE', path, undefined, undefined, undefined, options),
     /** 通用请求方法，支持任意 method + FormData 等 */
-    request: <T = any>(path: string, opts: { method?: string; body?: any; credentials?: string } = {}) => {
+    request: <T = any>(path: string, opts: { method?: string; body?: any; credentials?: string; timeout?: number; dedupe?: boolean; retry?: boolean } = {}) => {
         const method = (opts.method || 'GET').toUpperCase();
         const contentType = opts.body instanceof FormData ? undefined : 'application/json';
-        return request<T>(method, path, contentType, opts.body);
+        const options = {
+          timeout: opts.timeout,
+          dedupe: opts.dedupe ?? method === 'GET',
+          retry: opts.retry ?? isSlowConnection(),
+        };
+        return request<T>(method, path, contentType, opts.body, undefined, options);
     },
 };

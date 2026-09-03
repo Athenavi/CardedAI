@@ -72,7 +72,7 @@ async def send_subscription_confirmation_email(email: str):
     except Exception as e:
         logger(f"发送订阅确认邮件失败: {e}")
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
 
 
 @router.get("/data")

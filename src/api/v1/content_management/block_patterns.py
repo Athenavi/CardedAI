@@ -39,7 +39,7 @@ async def list_block_patterns(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -97,7 +97,7 @@ async def search_block_patterns(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -130,5 +130,5 @@ async def get_block_pattern(
         )
     except Exception as e:
         import traceback
-        traceback.print_exc()
+        logger.error("", exc_info=True)
         return ApiResponse(success=False, error=str(e))
