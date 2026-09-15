@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import jwt_required_dependency as jwt_required
 from src.extensions import get_async_db_session as get_async_db
+from src.unified_logger import default_logger as logger
 from src.utils.upload.public_upload import FileProcessor, process_single_file
 
 router = APIRouter(tags=["media-cover"])

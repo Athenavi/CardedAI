@@ -45,22 +45,10 @@ export function QueryProvider({children}: {children: React.ReactNode}) {
     if (performanceInit) return;
     performanceInit = true;
 
-    // 初始化 Web Vitals 监控
+    // Initialize performance monitoring
     import('@/lib/performance').then(({initPerformanceMonitoring}) => {
       initPerformanceMonitoring();
     }).catch(() => {});
-
-    // 开发环境：启用 why-did-you-render
-    if (process.env.NODE_ENV === 'development') {
-      import('react').then(R => {
-        // @ts-ignore - optional dev dependency
-        import('why-did-you-render').then((WDYR: any) => {
-          try {
-            WDYR.default?.(R.default, {trackAllPureComponents: true});
-          } catch {}
-        }).catch(() => {});
-      });
-    }
   }, []);
 
   return (

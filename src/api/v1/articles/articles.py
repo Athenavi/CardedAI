@@ -570,6 +570,16 @@ async def get_article_raw_content_api(
 
 
 # ---------- 创建文章 ----------
+@router.post("",
+             summary="创建文章（兼容路由）",)
+async def create_article_no_slash_api(
+        request: Request,
+        current_user=Depends(jwt_required),
+        db: AsyncSession = Depends(get_async_session)
+):
+    return await create_article_api(request, current_user, db)
+
+
 @router.post("/",
              summary=ARTICLE_CREATE_EXAMPLE["summary"],
              description=ARTICLE_CREATE_EXAMPLE["description"],

@@ -404,14 +404,6 @@ def register_middleware(app: FastAPI):
     except ImportError:
         pass
 
-    # 安全中间件（惰性加载：首次请求时才导入 security_middleware 模块）
-    try:
-        app.add_middleware(
-            _make_lazy_middleware("src.auth.security_middleware", "CSRFProtectionMiddleware")
-        )
-    except Exception:
-        pass
-
     # 速率限制已移除全局中间件，改为在特定路由上使用装饰器
 
     # API 版本响应头
@@ -423,15 +415,6 @@ def register_middleware(app: FastAPI):
 
     app.add_middleware(APIVersionMiddleware)
     logger.info("[API Version] 已添加版本响应头中间件")
-
-    # 性能监控中间件（惰性加载：避免启动时 import psutil）
-    try:
-        app.add_middleware(
-            _make_lazy_middleware("src.middleware.performance_monitor", "PerformanceMonitoringMiddleware")
-        )
-        logger.info("[Performance Monitor] 已添加性能监控中间件（惰性加载）")
-    except Exception as e:
-        logger.warning(f"[Performance Monitor] 加载失败: {e}")
 
 
 # ---------- 错误处理与静态文件 ----------
