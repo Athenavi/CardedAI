@@ -7,7 +7,10 @@ import type {ApiResponse} from '@/lib/api/base-types';
 function getCookie(name: string): string | null {
   if (typeof document === 'undefined') return null;
   for (const c of document.cookie.split(';')) {
-    const [n, v] = c.trim().split('=');
+    const idx = c.trim().indexOf('=');
+    if (idx === -1) continue;
+    const n = c.trim().substring(0, idx);
+    const v = c.trim().substring(idx + 1);
     if (n === name && v) return decodeURIComponent(v);
   }
   return null;
@@ -15,12 +18,12 @@ function getCookie(name: string): string | null {
 function setCookie(name: string, value: string, maxAgeSec: number) {
   if (typeof document === 'undefined') return;
   const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-  document.cookie = `${name}=${value}; path=/; max-age=${maxAgeSec}; SameSite=Strict${isHttps ? '; Secure' : ''}`;
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSec}; SameSite=Lax${isHttps ? '; Secure' : ''}`;
 }
 function clearCookie(name: string) {
   if (typeof document === 'undefined') return;
   const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict${isHttps ? '; Secure' : ''}`;
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax${isHttps ? '; Secure' : ''}`;
 }
 
 /** 构建完整 URL：补全 API 前缀 + 查询参数 */
