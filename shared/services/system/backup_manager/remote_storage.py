@@ -39,18 +39,18 @@ class RemoteStorageManager:
                 return {'success': False, 'error': f'不支持的远程存储类型: {remote_type}'}
 
             if not result.get('success'):
-                logger(f"[RemoteStorage] Upload failed, keeping zip file for retry")
+                logger.warning("[RemoteStorage] Upload failed, keeping zip file for retry")
 
             return result
         except Exception as e:
-            logger(f"[RemoteStorage] Remote upload failed: {e}")
+            logger.error(f"[RemoteStorage] Remote upload failed: {e}")
             return {'success': False, 'error': str(e)}
 
     def _compress_backup(self, backup_path: Path, zip_path: Path):
         """压缩备份文件夹"""
         import zipfile
 
-        logger(f"[RemoteStorage] Compressing backup...")
+        logger.info("[RemoteStorage] Compressing backup...")
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for file_path in backup_path.rglob('*'):
                 if file_path.is_file():
@@ -58,7 +58,7 @@ class RemoteStorageManager:
                     zipf.write(file_path, arcname)
 
         compressed_size = zip_path.stat().st_size
-        logger(f"[RemoteStorage] Backup compressed: {zip_path.name} ({compressed_size / 1024:.2f} KB)")
+        logger.info(f"[RemoteStorage] Backup compressed: {zip_path.name} ({compressed_size / 1024:.2f} KB)")
 
     def _upload_to_s3(self, zip_path: Path, config: Dict) -> Dict[str, Any]:
         """上传到AWS S3"""
