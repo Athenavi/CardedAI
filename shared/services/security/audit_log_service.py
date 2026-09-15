@@ -30,6 +30,15 @@ class AuditLogService:
         logger = logging.getLogger('audit')
         logger.info(f'[审计] {action} {resource_type}(id={resource_id}) by user={user_id}')
 
+    async def log_action(self, db=None, user_id: Optional[int] = None, user_name: Optional[str] = None,
+                         action: Optional[str] = None, resource_type: str = '',
+                         resource_id: Optional[Any] = None, description: Optional[str] = None,
+                         ip_address: Optional[str] = None, user_agent: Optional[str] = None) -> None:
+        """记录审计日志（兼容完整签名）"""
+        import logging
+        logger = logging.getLogger('audit')
+        logger.info(f'[审计] {action} {resource_type}(id={resource_id}) by user={user_name} | {description or ""} | ip={ip_address}')
+
 
 # 全局单例
 audit_log_service = AuditLogService()

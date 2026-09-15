@@ -15,6 +15,7 @@ from shared.models.category import Category
 from shared.models.user import User
 from src.api.v1.core.responses import ApiResponse
 from src.utils.database.main import get_async_session
+from src.unified_logger import default_logger as logger
 
 router = APIRouter(tags=["home"])
 
@@ -77,11 +78,11 @@ async def send_subscription_confirmation_email(email: str):
 
 @router.get("/data")
 async def get_home_data(
-        limit_featured: int = Query(4, description="特色文章数量"),
-        limit_popular: int = Query(5, description="热门文章数量"),
-        limit_recent: int = Query(9, description="最新文章数量"),
-        limit_categories: int = Query(8, description="分类数量"),
-        db: AsyncSession = Depends(get_async_session)
+    limit_featured: int = Query(4, description="特色文章数量"),
+    limit_popular: int = Query(5, description="热门文章数量"),
+    limit_recent: int = Query(9, description="最新文章数量"),
+    limit_categories: int = Query(8, description="分类数量"),
+    db: AsyncSession = Depends(get_async_session)
 ):
     """
     获取首页数据（不含配置）
@@ -106,7 +107,6 @@ async def get_home_data(
         return ApiResponse(success=True, data=data)
     except Exception as e:
 
-        from src.unified_logger import default_logger as logger
         logger.error(f"获取首页数据失败：{str(e)}")
         # 返回简化数据而不是错误
         return ApiResponse(success=True, data={
@@ -152,7 +152,7 @@ async def get_home_config(db: AsyncSession = Depends(get_async_session)):
                 if item:
                     config_dict[key] = item.setting_value
             except Exception as key_error:
-                from src.unified_logger import default_logger as logger
+
                 logger.warning(f"获取配置项 {key} 失败：{str(key_error)}")
                 continue
 
@@ -190,7 +190,6 @@ async def get_home_config(db: AsyncSession = Depends(get_async_session)):
         return ApiResponse(success=True, data=config)
     except Exception as e:
 
-        from src.unified_logger import default_logger as logger
         logger.error(f"获取首页配置失败: {str(e)}")
         return ApiResponse(success=True, data={
             "hero": {
@@ -219,8 +218,8 @@ async def get_home_config(db: AsyncSession = Depends(get_async_session)):
 
 @router.get("/featured")
 async def get_featured_articles(
-        limit: int = Query(4, description="返回文章数量"),
-        db: AsyncSession = Depends(get_async_session)
+    limit: int = Query(4, description="返回文章数量"),
+    db: AsyncSession = Depends(get_async_session)
 ):
     """
     获取特色文章
@@ -234,10 +233,10 @@ async def get_featured_articles(
 
 @router.get("/articles")
 async def get_home_articles_api(
-        request: Request,
-        page: int = Query(1, ge=1),
-        per_page: int = Query(9, ge=1, le=50),
-        db: AsyncSession = Depends(get_async_session)
+    request: Request,
+    page: int = Query(1, ge=1),
+    per_page: int = Query(9, ge=1, le=50),
+    db: AsyncSession = Depends(get_async_session)
 ):
     """
     获取首页文章列表（分页）
@@ -299,10 +298,10 @@ async def get_home_articles_api(
 
 @router.get("/recent")
 async def get_recent_articles(
-        page: int = Query(1, ge=1, description="页码"),
-        per_page: int = Query(9, ge=1, le=50, description="每页数量"),
-        category_id: Optional[int] = Query(None, description="分类ID"),
-        db: AsyncSession = Depends(get_async_session)
+    page: int = Query(1, ge=1, description="页码"),
+    per_page: int = Query(9, ge=1, le=50, description="每页数量"),
+    category_id: Optional[int] = Query(None, description="分类ID"),
+    db: AsyncSession = Depends(get_async_session)
 ):
     """
     获取最新文章（分页）- 别名接口，与 /articles 相同
@@ -319,9 +318,9 @@ async def get_recent_articles(
 
 @router.get("/popular")
 async def get_popular_articles(
-        limit: int = Query(5, description="返回文章数量"),
-        days: int = Query(30, description="统计天数"),
-        db: AsyncSession = Depends(get_async_session)
+    limit: int = Query(5, description="返回文章数量"),
+    days: int = Query(30, description="统计天数"),
+    db: AsyncSession = Depends(get_async_session)
 ):
     """
     获取热门文章（按浏览量排序）
@@ -335,8 +334,8 @@ async def get_popular_articles(
 
 @router.get("/categories")
 async def get_home_categories(
-        limit: int = Query(8, description="返回分类数量"),
-        db: AsyncSession = Depends(get_async_session)
+    limit: int = Query(8, description="返回分类数量"),
+    db: AsyncSession = Depends(get_async_session)
 ):
     """
     获取首页显示的分类
@@ -391,8 +390,8 @@ async def get_home_menus(request: Request = None):
                 await db.close()
     except Exception as e:
         import traceback
-        logger(f"Error in get_home_menus: {str(e)}")
-        logger(traceback.format_exc())
+        print(f"Error in get_home_menus: {str(e)}")
+        print(traceback.format_exc())
         # 出错时返回默认菜单
         from src.utils.menu_builder import get_default_menu
         default_items = get_default_menu()
@@ -409,10 +408,10 @@ async def get_home_menus(request: Request = None):
 
 @router.get("/search")
 async def search_home_articles(
-        q: str = Query(..., description="搜索关键词"),
-        page: int = Query(1, ge=1, description="页码"),
-        per_page: int = Query(10, ge=1, le=50, description="每页数量"),
-        db: AsyncSession = Depends(get_async_session)
+    q: str = Query(..., description="搜索关键词"),
+    page: int = Query(1, ge=1, description="页码"),
+    per_page: int = Query(10, ge=1, le=50, description="每页数量"),
+    db: AsyncSession = Depends(get_async_session)
 ):
     """
     首页文章搜索 - 使用批量查询优化
@@ -482,7 +481,6 @@ async def search_home_articles(
         })
     except Exception as e:
 
-        from src.unified_logger import default_logger as logger
         logger.error(f"搜索接口错误：{str(e)}")
         return ApiResponse(success=False, error="搜索服务暂时不可用")
 
@@ -514,7 +512,6 @@ async def _get_featured_articles(db: AsyncSession, limit: int) -> list:
         return [_format_article_with_category(article, categories_dict) for article in articles]
     except Exception as e:
 
-        from src.unified_logger import default_logger as logger
         logger.warning(f"获取特色文章失败：{str(e)}")
         return []
 
@@ -544,7 +541,6 @@ async def _get_recent_articles_simple(db: AsyncSession, limit: int) -> list:
         return [_format_article_with_category(article, categories_dict) for article in articles]
     except Exception as e:
 
-        from src.unified_logger import default_logger as logger
         logger.warning(f"获取最新文章失败：{str(e)}")
         return []
 
@@ -574,7 +570,6 @@ async def _get_popular_articles(db: AsyncSession, limit: int) -> list:
         return [_format_article_with_category(article, categories_dict) for article in articles]
     except Exception as e:
 
-        from src.unified_logger import default_logger as logger
         logger.warning(f"获取热门文章失败：{str(e)}")
         return []
 
@@ -603,7 +598,6 @@ async def _get_categories(db: AsyncSession, limit: int) -> list:
         } for cat, article_count in categories_with_count]
     except Exception as e:
 
-        from src.unified_logger import default_logger as logger
         logger.warning(f"获取分类失败：{str(e)}")
         return []
 
@@ -633,7 +627,6 @@ async def _get_site_stats(db: AsyncSession) -> Dict[str, Any]:
         }
     except Exception as e:
 
-        from src.unified_logger import default_logger as logger
         logger.warning(f"获取网站统计失败: {str(e)}")
         return {
             "totalArticles": 0,

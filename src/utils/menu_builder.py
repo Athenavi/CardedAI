@@ -153,7 +153,7 @@ def get_all_menus_with_items(db: Session) -> Dict:
         for menu in menus:
             # 获取该菜单下的所有菜单项
             from sqlalchemy import select
-                menu_items = []
+            menu_items = []
 
             # 构建菜单树
             menu_tree = []

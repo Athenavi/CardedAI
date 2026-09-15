@@ -19,7 +19,8 @@ export function getCookie(name: string): string | null {
  */
 export function setCookie(name: string, value: string, maxAgeSec: number): void {
     if (typeof document === 'undefined') return;
-    document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSec}; SameSite=Strict; Secure`;
+    const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+    document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeSec}; SameSite=Strict${isHttps ? '; Secure' : ''}`;
 }
 
 /**

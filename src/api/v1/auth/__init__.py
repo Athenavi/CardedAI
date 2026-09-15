@@ -359,10 +359,19 @@ async def login_api(
         if refresh_token:
             response_data["refresh_token"] = refresh_token
 
-        return ApiResponse(
-            success=True,
-            data=response_data,
+        # 返回 JSONResponse 并设置 access_token cookie
+        response = JSONResponse(
+            content=ApiResponse(success=True, data=response_data).model_dump(mode='json')
         )
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=False,
+            samesite="lax",
+            max_age=3600,
+        )
+        return response
     except Exception as e:
         logger.exception(f"Login failed for user")
 
