@@ -366,7 +366,7 @@ async def login_api(
         response.set_cookie(
             key="access_token",
             value=access_token,
-            httponly=True,
+            httponly=False,
             secure=False,
             samesite="lax",
             max_age=3600,

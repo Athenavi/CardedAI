@@ -45,8 +45,8 @@ def create_access_token(
 
     payload = {
         "sub": str(user_id),
-        "iat": datetime.datetime.now(),
-        "exp": datetime.datetime.now() + lifetime,
+        "iat": datetime.datetime.now(datetime.timezone.utc),
+        "exp": datetime.datetime.now(datetime.timezone.utc) + lifetime,
     }
     return jwt.encode(
         payload,
@@ -112,7 +112,15 @@ async def _authenticate_user(
     内部核心：根据请求中的 token 验证身份，返回用户或 None。
     `required=True` 时无有效 token 会抛 401；`required=False` 时返回 None。
     """
+    import logging
+    _dep_logger = logging.getLogger('auth_deps')
+    
     token = await _get_token_from_request(request)
+    _dep_logger.warning('[AUTH_DEBUG] path=%s, token_exists=%s, auth_header=%s, cookie_access_token=%s, cookies_keys=%s',
+                        request.url.path, bool(token),
+                        bool(request.headers.get("Authorization")),
+                        bool(request.cookies.get("access_token")),
+                        list(request.cookies.keys()))
     if not token:
         if required:
             raise HTTPException(
@@ -128,6 +136,8 @@ async def _authenticate_user(
     try:
         payload = jwt.decode(token, jwt_secret, algorithms=[jwt_algorithm])
     except InvalidTokenError as e:
+        _dep_logger.warning('[AUTH_DEBUG_DECODE] DECODE FAILED for path=%s, error=%s, token_type=%s, token_preview=%s',
+                            request.url.path, str(e), type(e).__name__, (token or '')[:30])
         if required:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
