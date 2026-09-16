@@ -128,7 +128,7 @@ async def check_username(username: str = Query(...), db: AsyncSession = Depends(
             "exists": existing is not None
         })
     except Exception as e:
-        logger.logger(f"f"Check username error: {e}")
+        logger.logger(f"Check username error: {e}")
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 
@@ -145,7 +145,7 @@ async def check_email(email: str = Query(...), db: AsyncSession = Depends(get_as
             "exists": existing is not None
         })
     except Exception as e:
-        logger.logger(f"f"Check email error: {e}")
+        logger.logger(f"Check email error: {e}")
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 
@@ -309,7 +309,7 @@ async def login_api(
                 user_agent=user_agent,
             )
         except Exception as e:
-            logger.logger(f"f"[Login API] Warning: Failed to create session record: {e}")
+            logger.logger(f"[Login API] Warning: Failed to create session record: {e}")
             # 会话创建失败不影响登录流程
 
         # 4. 更新最后登录时间
@@ -340,7 +340,7 @@ async def login_api(
         except ImportError as e:
             logger.warning(f"审计日志服务不可用: {e}")
         except Exception as e:
-            logger.logger(f"f"记录审计日志失败: {e}")
+            logger.logger(f"记录审计日志失败: {e}")
 
         response_data = {
             "user": {

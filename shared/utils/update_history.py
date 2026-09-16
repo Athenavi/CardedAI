@@ -29,7 +29,7 @@ class UpdateHistoryManager:
                 with open(self.history_file, 'r', encoding='utf-8') as f:
                     self.history_data = json.load(f)
             except Exception as e:
-                logger.logger(f"f"加载历史记录失败：{e}")
+                logger.logger(f"加载历史记录失败：{e}")
                 self.history_data = {'updates': [], 'last_update': None}
         self._save_history()
 
@@ -40,7 +40,7 @@ class UpdateHistoryManager:
             with open(self.history_file, 'w', encoding='utf-8') as f:
                 json.dump(self.history_data, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            logger.logger(f"f"保存历史记录失败：{e}")
+            logger.logger(f"保存历史记录失败：{e}")
 
     def add(self, from_version: str, to_version: str, status: str, **kwargs):
         """添加更新记录

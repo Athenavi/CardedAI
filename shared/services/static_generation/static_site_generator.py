@@ -286,7 +286,7 @@ class StaticSiteGenerator:
                 for result in results:
                     if isinstance(result, Exception):
                         failed_count += 1
-                        logger.logger(f"f"Failed to generate article: {result}")
+                        logger.logger(f"Failed to generate article: {result}")
                     elif result.get('success'):
                         if result.get('cached'):
                             cached_count += 1

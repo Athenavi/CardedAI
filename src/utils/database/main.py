@@ -91,9 +91,9 @@ def _import_models_once():
         logger.info(f"模型导入完成 (from {models_path})")
 
     except ImportError as e:
-        logger.logger(f"f"无法导入settings模块: {e}")
+        logger.logger(f"无法导入settings模块: {e}")
     except Exception as e:
-        logger.logger(f"f"导入模型时出错: {e}")
+        logger.logger(f"导入模型时出错: {e}")
         import traceback
         logger.logger(f"traceback.format_exc())
 
@@ -312,7 +312,7 @@ async def test_connection_async() -> bool:
             result = await session.execute(text("SELECT 1"))
             return result.scalar() == 1
     except Exception as e:
-        logger.logger(f"f"连接测试失败: {e}")
+        logger.logger(f"连接测试失败: {e}")
         return False
 
 
@@ -332,7 +332,7 @@ def test_connection() -> bool:
             # 没有运行的事件循环，直接使用 asyncio.run
             return asyncio.run(test_connection_async())
     except Exception as e:
-        logger.logger(f"f"连接测试失败: {e}")
+        logger.logger(f"连接测试失败: {e}")
         return False
 
 
@@ -376,7 +376,7 @@ def init_database(create_if_missing=True, check_consistency=True):
             # 没有运行的事件循环，直接使用 asyncio.run
             return asyncio.run(init_database_async(create_if_missing, check_consistency))
     except Exception as e:
-        logger.logger(f"f"数据库初始化失败: {e}")
+        logger.logger(f"数据库初始化失败: {e}")
         return False
 
 

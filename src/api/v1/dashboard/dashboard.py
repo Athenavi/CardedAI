@@ -416,7 +416,7 @@ async def get_my_articles(
                 content = content_result.scalar_one_or_none()
                 has_password = bool(content and content.passwd)
             except Exception as e:
-                logger.logger(f"f"检查文章密码状态失败: {e}")
+                logger.logger(f"检查文章密码状态失败: {e}")
 
             articles_data.append({
                 **article_dict,  # 展开模型的基础字段
@@ -658,7 +658,7 @@ async def get_users(
             roles_result = await db.execute(roles_query)
             user_roles = roles_result.scalars().all()
 
-            logger.logger(f"f"DEBUG: User {user.username} (ID: {user.id}) has {len(user_roles)} roles")
+            logger.logger(f"DEBUG: User {user.username} (ID: {user.id}) has {len(user_roles)} roles")
 
             # 构建角色数据
             roles_data = []
@@ -667,10 +667,10 @@ async def get_users(
                 try:
                     permissions_list = json.loads(role.permissions) if role.permissions else []
                 except Exception as e:
-                    logger.logger(f"f"DEBUG: Error parsing permissions for role {role.id}: {e}")
+                    logger.logger(f"DEBUG: Error parsing permissions for role {role.id}: {e}")
                     permissions_list = []
 
-                logger.logger(f"f"DEBUG: Role {role.name} (ID: {role.id}) has permissions: {permissions_list}")
+                logger.logger(f"DEBUG: Role {role.name} (ID: {role.id}) has permissions: {permissions_list}")
 
                 roles_data.append({
                     "id": role.id,
@@ -680,7 +680,7 @@ async def get_users(
                     "permissions": permissions_list  # 添加权限列表
                 })
 
-            logger.logger(f"f"DEBUG: User {user.username} roles_data: {roles_data}")
+            logger.logger(f"DEBUG: User {user.username} roles_data: {roles_data}")
 
             # 这里可以添加计算用户存储使用量的逻辑
             users_data.append({

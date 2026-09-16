@@ -98,7 +98,7 @@ class AIAgentRecommendations:
             }
 
         except Exception as e:
-            logger.logger(f"f"Tag recommendation failed: {e}")
+            logger.logger(f"Tag recommendation failed: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -313,7 +313,7 @@ class AIAgentRecommendations:
             return scored_articles[:limit]
 
         except Exception as e:
-            logger.logger(f"f"Related articles recommendation failed: {e}")
+            logger.logger(f"Related articles recommendation failed: {e}")
             return []
 
 

@@ -51,14 +51,14 @@ class FileProcessor:
 
         if mime_type not in self.allowed_mimes:
             error_msg = f"不支持的文件类型: {mime_type}"
-            logger.logger(f"f"[ERROR] {error_msg}")
-            logger.logger(f"f"   - 允许的 MIME 类型列表: {list(self.allowed_mimes)[:10]}...")  # 只显示前10个
+            logger.logger(f"[ERROR] {error_msg}")
+            logger.logger(f"   - 允许的 MIME 类型列表: {list(self.allowed_mimes)[:10]}...")  # 只显示前10个
             return False, error_msg
 
         file_size = len(file_data)
         if file_size > self.allowed_size:
             error_msg = f"文件大小超过限制: {self.allowed_size / 1024 / 1024}MB"
-            logger.logger(f"f"[ERROR] {error_msg}")
+            logger.logger(f"[ERROR] {error_msg}")
             return False, error_msg
 
         logger.info(f"[OK] 文件验证通过: {filename}")
@@ -291,7 +291,7 @@ class FileProcessor:
                 file_data = s3_storage.read_file(file_path)
 
                 if not file_data:
-                    logger.logger(f"f"无法读取视频文件: {file_path}")
+                    logger.logger(f"无法读取视频文件: {file_path}")
                     return
 
                 # 保存到本地临时文件
@@ -376,7 +376,7 @@ class FileProcessor:
             logger.info(f"视频处理完成: {media.filename}")
 
         except Exception as e:
-            logger.logger(f"f"视频后处理失败: {str(e)}", exc_info=True)
+            logger.logger(f"视频后处理失败: {str(e)}", exc_info=True)
 
 
 class ChunkedUploadProcessor:
@@ -566,7 +566,7 @@ class ChunkedUploadProcessor:
         except Exception as e:
             await db.rollback()
 
-            logger.logger(f"f"分块上传失败: {str(e)}")
+            logger.logger(f"分块上传失败: {str(e)}")
             return {'success': False, 'error': str(e)}
 
     async def _get_upload_task(self, upload_id: str,
@@ -685,7 +685,7 @@ class ChunkedUploadProcessor:
         except Exception as e:
             await db.rollback()
 
-            logger.logger(f"f"完成上传失败: {str(e)}")
+            logger.logger(f"完成上传失败: {str(e)}")
             return {'success': False, 'error': str(e)}
 
     async def _get_chunks(self, upload_id: str, db: AsyncSession) -> List[UploadChunk]:
@@ -849,7 +849,7 @@ async def process_single_file(processor: FileProcessor, file_data: bytes,
     except Exception as e:
         await db.rollback()
 
-        logger.logger(f"f"文件处理失败: {str(e)}")
+        logger.logger(f"文件处理失败: {str(e)}")
         return {'success': False, 'error': str(e)}
 
 

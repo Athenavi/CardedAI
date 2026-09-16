@@ -79,7 +79,7 @@ async def upload_settings_media(
             result = await process_single_file(processor, file_data, file.filename, db)
         except Exception as e:
             await db.rollback()
-            logger.logger(f"f"设置媒体文件处理失败: {file.filename} - {str(e)}", exc_info=True)
+            logger.logger(f"设置媒体文件处理失败: {file.filename} - {str(e)}", exc_info=True)
             return JSONResponse(
                 {'success': False, 'message': '文件处理失败', 'error': str(e)},
                 status_code=500
@@ -113,7 +113,7 @@ async def upload_settings_media(
         })
 
     except Exception as e:
-        logger.logger(f"f"设置媒体上传错误: {str(e)}", exc_info=True)
+        logger.logger(f"设置媒体上传错误: {str(e)}", exc_info=True)
         return JSONResponse(
             {'success': False, 'message': '上传失败', 'error': str(e)},
             status_code=500

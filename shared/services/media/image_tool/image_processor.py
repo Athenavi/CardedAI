@@ -134,7 +134,7 @@ class ImageProcessor:
             return output_buffer.getvalue(), mime_type
 
         except Exception as e:
-            logger.logger(f"f"图片处理失败: {e}")
+            logger.logger(f"图片处理失败: {e}")
             raise ValueError(f"图片处理失败: {str(e)}")
 
     def _crop(self, img: Image.Image, crop_params: Dict[str, int]) -> Image.Image:
@@ -361,7 +361,7 @@ class ImageProcessor:
             return info
 
         except Exception as e:
-            logger.logger(f"f"获取图片信息失败: {e}")
+            logger.logger(f"获取图片信息失败: {e}")
             raise ValueError(f"无法读取图片信息: {str(e)}")
 
     def validate_image(self, image_data: bytes, max_size_mb: float = 10) -> Dict[str, Any]:

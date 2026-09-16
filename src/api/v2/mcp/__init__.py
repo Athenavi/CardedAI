@@ -89,7 +89,7 @@ async def mcp_jsonrpc(
         result = await mcp_server.handle_request(rpc_request)
         return JSONResponse(content=result)
     except Exception as e:
-        logger.logger(f"f"MCP JSON-RPC error: {e}")
+        logger.logger(f"MCP JSON-RPC error: {e}")
         return JSONResponse(
             content={
                 "jsonrpc": "2.0",
@@ -139,7 +139,7 @@ async def mcp_batch_jsonrpc(
 
         return JSONResponse(content=responses)
     except Exception as e:
-        logger.logger(f"f"MCP batch error: {e}")
+        logger.logger(f"MCP batch error: {e}")
         return JSONResponse(
             content={
                 "jsonrpc": "2.0",
@@ -195,7 +195,7 @@ async def mcp_sse(request: Request):
         except asyncio.CancelledError:
             pass
         except Exception as e:
-            logger.logger(f"f"SSE error: {e}")
+            logger.logger(f"SSE error: {e}")
             yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
         finally:
             _active_sse_queues.pop(session_id, None)
@@ -247,7 +247,7 @@ async def mcp_sse_message(request: MCPRequest):
         # 无 SSE 连接时：同步返回（向后兼容）
         return JSONResponse(content=result)
     except Exception as e:
-        logger.logger(f"f"MCP message error: {e}")
+        logger.logger(f"MCP message error: {e}")
         return JSONResponse(
             content={
                 "jsonrpc": "2.0",

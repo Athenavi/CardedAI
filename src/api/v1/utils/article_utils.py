@@ -147,7 +147,7 @@ async def get_articles_with_filters(filters: List, db: AsyncSession, page: int, 
         # 在FastAPI中使用logging而不是current_app.logger
 
         from src.unified_logger import default_logger as logger
-        logger.logger(f"f"Database error: {e}")
+        logger.logger(f"Database error: {e}")
         raise
 
 
@@ -185,7 +185,7 @@ def set_article_password(aid: int, passwd: str, db: Session):
         db.commit()
         return True
     except Exception as e:
-        logger.logger(f"f"An error occurred: {e}")
+        logger.logger(f"An error occurred: {e}")
         db.rollback()
         return False
 
@@ -212,7 +212,7 @@ def get_article_password(aid: int, db: Session):
             return article_content.passwd
         return None
     except Exception as e:
-        logger.logger(f"f"An error occurred: {e}")
+        logger.logger(f"An error occurred: {e}")
         return None
 
 

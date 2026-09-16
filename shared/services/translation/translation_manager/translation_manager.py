@@ -54,7 +54,7 @@ class TranslationManager:
                 with open(translation_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
             except Exception as e:
-                logger.logger(f"f"加载翻译文件失败: {e}")
+                logger.logger(f"加载翻译文件失败: {e}")
 
         return {}
 
@@ -84,7 +84,7 @@ class TranslationManager:
 
             return True
         except Exception as e:
-            logger.logger(f"f"保存翻译失败: {e}")
+            logger.logger(f"保存翻译失败: {e}")
             return False
 
     def batch_translate(

@@ -92,7 +92,7 @@ class MediaFolderService:
             return {"success": True, "folder": folder.to_dict()}
         except Exception as e:
             await db.rollback()
-            logger.logger(f"f"创建文件夹失败: {e}")
+            logger.logger(f"创建文件夹失败: {e}")
             return {"success": False, "error": f"创建文件夹失败: {str(e)}"}
 
     async def get_folder_tree(
@@ -130,7 +130,7 @@ class MediaFolderService:
 
             return tree
         except Exception as e:
-            logger.logger(f"f"获取文件夹树失败: {e}", exc_info=True)
+            logger.logger(f"获取文件夹树失败: {e}", exc_info=True)
             return []
 
     async def get_folder_list(
@@ -147,7 +147,7 @@ class MediaFolderService:
             result = await db.execute(query)
             return [folder.to_dict() for folder in result.scalars().all()]
         except Exception as e:
-            logger.logger(f"f"获取文件夹列表失败: {e}")
+            logger.logger(f"获取文件夹列表失败: {e}")
             return []
 
     async def get_folder_detail(
@@ -170,7 +170,7 @@ class MediaFolderService:
             folder_data['media_count'] = count_result.scalar() or 0
             return folder_data
         except Exception as e:
-            logger.logger(f"f"获取文件夹详情失败: {e}")
+            logger.logger(f"获取文件夹详情失败: {e}")
             return None
 
     async def update_folder(
@@ -212,7 +212,7 @@ class MediaFolderService:
             return {"success": True, "folder": folder.to_dict()}
         except Exception as e:
             await db.rollback()
-            logger.logger(f"f"更新文件夹失败: {e}")
+            logger.logger(f"更新文件夹失败: {e}")
             return {"success": False, "error": f"更新文件夹失败: {str(e)}"}
 
     async def delete_folder(
@@ -252,7 +252,7 @@ class MediaFolderService:
             return {"success": True, "message": "文件夹删除成功"}
         except Exception as e:
             await db.rollback()
-            logger.logger(f"f"删除文件夹失败: {e}")
+            logger.logger(f"删除文件夹失败: {e}")
             return {"success": False, "error": f"删除文件夹失败: {str(e)}"}
 
     async def move_media_to_folder(
@@ -277,7 +277,7 @@ class MediaFolderService:
             return {"success": True, "moved_count": moved_count, "message": f"成功移动 {moved_count} 个文件"}
         except Exception as e:
             await db.rollback()
-            logger.logger(f"f"移动媒体文件失败: {e}")
+            logger.logger(f"移动媒体文件失败: {e}")
             return {"success": False, "error": f"移动媒体文件失败: {str(e)}"}
 
     async def copy_media_to_folder(

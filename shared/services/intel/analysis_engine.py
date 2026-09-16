@@ -175,7 +175,7 @@ class AnalysisEngine:
                     stats["errors"] += 1
                     logger.warning(f"分析条目 {item.id} 失败: {result.get('error')}")
             except Exception as e:
-                logger.logger(f"f"分析条目 {item.id} 异常: {e}")
+                logger.logger(f"分析条目 {item.id} 异常: {e}")
                 stats["errors"] += 1
 
         logger.info(
@@ -211,7 +211,7 @@ class AnalysisEngine:
                 else:
                     stats["errors"] += 1
             except Exception as e:
-                logger.logger(f"f"分析条目 {item.id} 异常: {e}")
+                logger.logger(f"分析条目 {item.id} 异常: {e}")
                 stats["errors"] += 1
 
         logger.info(

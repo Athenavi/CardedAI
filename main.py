@@ -47,28 +47,9 @@ def setup_signal_handlers():
     signal.signal(signal.SIGTERM, handler)
 
 
-def run_supervisor_mode():
-    try:
-        from process_supervisor.supervisor_launcher import SupervisedLauncher
-        supervisor = SupervisedLauncher()
-        supervisor.setup_signal_handlers()
-        if not supervisor.start_system():
-            logger.logger(f""监督器启动失败")
-            sys.exit(1)
-        supervisor.monitor_system()
-    except Exception as e:
-        logger.logger(f"f"监督器运行异常: {e}")
-        sys.exit(1)
-
-
 def main():
     setup_signal_handlers()
     args = parse_arguments()
-
-    if args.mode == 'supervisor':
-        run_supervisor_mode()
-        return
-
     # 日志系统已由 unified_logger 初始化，无需再次初始化
 
     # 简要输出启动信息
@@ -83,7 +64,7 @@ def main():
         # 使用应用实例而不是工厂函数
         from src.app import app as fastapi_app
         if fastapi_app is None:
-            logger.logger(f""FastAPI 应用实例创建失败")
+            logger.logger(f"FastAPI 应用实例创建失败")
             sys.exit(1)
 
         logger.info(f"FastAPI 应用已加载，准备启动服务器...")
@@ -100,7 +81,7 @@ def main():
     except KeyboardInterrupt:
         logger.info("服务器已关闭")
     except Exception as e:
-        logger.logger(f"f"FastAPI 启动失败: {e}")
+        logger.logger(f"FastAPI 启动失败: {e}")
         sys.exit(1)
 
 

@@ -251,7 +251,7 @@ class WorkflowEngine:
             instance.status = WorkflowStatus.FAILED
             instance.error = str(e)
             self._record_history(instance_id, 'error', {'exception': str(e)})
-            logger.logger(f"f"Workflow execution failed: {e}")
+            logger.logger(f"Workflow execution failed: {e}")
             return False
 
     async def _execute_node(self, instance: WorkflowInstance, node: WorkflowNode) -> bool:

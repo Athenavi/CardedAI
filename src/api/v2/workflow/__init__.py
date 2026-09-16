@@ -294,7 +294,7 @@ async def execute_workflow(
     except ValueError as exc:
         return ApiResponse.fail(message=str(exc))
     except Exception as exc:
-        logger.logger(f"f"工作流执行失败: {exc}")
+        logger.logger(f"工作流执行失败: {exc}")
         return ApiResponse.fail(message=f"执行失败: {exc}")
 
 
@@ -510,7 +510,7 @@ async def create_cron_trigger(
             pass
         return ApiResponse.ok(data=result, message="Cron 触发器创建成功")
     except Exception as e:
-        logger.logger(f"f"创建定时触发器失败: {e}")
+        logger.logger(f"创建定时触发器失败: {e}")
         return ApiResponse.fail(message=f"创建定时触发器失败: {str(e)}")
 
 
@@ -679,5 +679,5 @@ async def get_workflow_stats(current_user=Depends(jwt_required)):
             "triggers": {"total": triggers_total},
         })
     except Exception as e:
-        logger.logger(f"f"获取工作流统计失败: {e}")
+        logger.logger(f"获取工作流统计失败: {e}")
         return ApiResponse.fail(message=f"获取统计失败: {str(e)}")

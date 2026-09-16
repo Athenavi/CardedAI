@@ -70,7 +70,7 @@ class SearchCollector(BaseCollector):
             elif engine_name == "bing":
                 items = await self._collect_bing(engine, config, query, max_results, language)
         except Exception as e:
-            logger.logger(f"f"[SearchCollector] 采集失败: {e}")
+            logger.logger(f"[SearchCollector] 采集失败: {e}")
             raise
 
         return items

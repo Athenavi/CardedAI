@@ -78,7 +78,7 @@ async def upload_media_file(
                     )
                     results.append(result)
                 except Exception as e:
-                    logger.logger(f"f"处理文件 {file.filename} 失败: {str(e)}")
+                    logger.logger(f"处理文件 {file.filename} 失败: {str(e)}")
                     results.append({'success': False, 'error': str(e)})
 
         successful = [r for r in results if r.get('success')]
@@ -102,13 +102,13 @@ async def upload_media_file(
                             db=db
                         )
             except Exception as webhook_err:
-                logger.logger(f"f"Webhook trigger failed: {webhook_err}")
+                logger.logger(f"Webhook trigger failed: {webhook_err}")
 
             return JSONResponse({'success': True, 'message': '上传成功', 'data': {'files': successful}})
         errors = '; '.join([r.get('error', '未知错误') for r in results if not r.get('success')])
         return JSONResponse({'success': False, 'message': '文件上传失败', 'error': errors}, status_code=400)
     except Exception as e:
-        logger.logger(f"f"上传媒体文件错误: {str(e)}", exc_info=True)
+        logger.logger(f"上传媒体文件错误: {str(e)}", exc_info=True)
         return JSONResponse({'success': False, 'message': '服务器内部错误', 'error': str(e)}, status_code=500)
 
 
@@ -153,7 +153,7 @@ async def _process_single_file(user_id, file_data, filename, allowed_size, allow
     is_valid, validation_result = processor.validate_file(file_data, filename)
 
     if not is_valid:
-        logger.logger(f"f"文件验证失败: {filename} - {validation_result}")
+        logger.logger(f"文件验证失败: {filename} - {validation_result}")
         return {'success': False, 'error': validation_result}
 
     logger.info(f"文件验证通过: {filename}")
@@ -163,7 +163,7 @@ async def _process_single_file(user_id, file_data, filename, allowed_size, allow
         logger.info(f"文件处理成功: {filename}")
         return result
     except Exception as e:
-        logger.logger(f"f"文件处理失败: {filename} - {str(e)}", exc_info=True)
+        logger.logger(f"文件处理失败: {filename} - {str(e)}", exc_info=True)
         return {'success': False, 'error': str(e)}
 
 
@@ -184,7 +184,7 @@ async def chunked_upload_init(
             data = await request.json()
             logger.info(f"分块上传初始化请求: {data}")
         except Exception as json_err:
-            logger.logger(f"f"JSON 解析失败: {json_err}")
+            logger.logger(f"JSON 解析失败: {json_err}")
             return JSONResponse({
                 'success': False,
                 'error': f'JSON 解析失败: {str(json_err)}',
@@ -204,7 +204,7 @@ async def chunked_upload_init(
         logger.info(f"   - existing_upload_id: {existing_upload_id}")
 
         if not all([filename, total_size, total_chunks]):
-            logger.logger(f"f"缺少必要参数: filename={filename}, total_size={total_size}, total_chunks={total_chunks}")
+            logger.logger(f"缺少必要参数: filename={filename}, total_size={total_size}, total_chunks={total_chunks}")
             return JSONResponse({
                 'success': False,
                 'error': '缺少必要参数',
@@ -222,11 +222,11 @@ async def chunked_upload_init(
         if result.get('success'):
             logger.info(f"分块上传初始化成功: upload_id={result.get('upload_id')}")
         else:
-            logger.logger(f"f"分块上传初始化失败: {result.get('error')}")
+            logger.logger(f"分块上传初始化失败: {result.get('error')}")
 
         return JSONResponse(result, status_code=200 if result.get('success') else 400)
     except Exception as e:
-        logger.logger(f"f"分块上传初始化异常: {str(e)}", exc_info=True)
+        logger.logger(f"分块上传初始化异常: {str(e)}", exc_info=True)
         return JSONResponse({'success': False, 'error': str(e)}, status_code=500)
 
 

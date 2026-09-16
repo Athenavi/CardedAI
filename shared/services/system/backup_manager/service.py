@@ -89,7 +89,7 @@ class BackupService:
 
             return {'success': True, 'backup_name': backup_name, 'info': backup_info}
         except Exception as e:
-            logger.logger(f"f"[BackupService] Backup failed: {e}")
+            logger.logger(f"[BackupService] Backup failed: {e}")
             return {'success': False, 'error': str(e)}
 
     def restore_backup(self, backup_name: str, restore_files: bool = True) -> Dict[str, Any]:
@@ -150,7 +150,7 @@ class BackupService:
                 'restored_items': restored_items
             }
         except Exception as e:
-            logger.logger(f"f"[BackupService] Restore failed: {e}")
+            logger.logger(f"[BackupService] Restore failed: {e}")
             return {'success': False, 'error': str(e)}
 
     def list_backups(self) -> List[Dict[str, Any]]:
@@ -206,7 +206,7 @@ class BackupService:
 
             return False
         except Exception as e:
-            logger.logger(f"f"[BackupService] Failed to check file changes: {e}")
+            logger.logger(f"[BackupService] Failed to check file changes: {e}")
             return True
 
 
@@ -255,7 +255,7 @@ async def create_full_backup(db: AsyncSession) -> Dict[str, Any]:
             ]}
         }
     except Exception as e:
-        logger.logger(f"f"[BackupService] JSON backup failed: {e}")
+        logger.logger(f"[BackupService] JSON backup failed: {e}")
         return {'success': False, 'error': str(e)}
 
 

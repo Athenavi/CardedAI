@@ -124,7 +124,7 @@ async def generate_cover_url(
     except HTTPException:
         raise
     except Exception as e:
-        logger.logger(f"f"生成封面URL失败: {e}", exc_info=True)
+        logger.logger(f"生成封面URL失败: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"服务器内部错误: {str(e)}")
 
 
@@ -166,5 +166,5 @@ async def remove_cover(
     except HTTPException:
         raise
     except Exception as e:
-        logger.logger(f"f"删除封面失败: {e}", exc_info=True)
+        logger.logger(f"删除封面失败: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"服务器内部错误: {str(e)}")

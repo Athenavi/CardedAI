@@ -685,7 +685,7 @@ async def create_article_api(
                     change_summary=form_data.get('change_summary', '创建文章')
                 )
             except Exception as rev_err:
-                logger.logger(f"f"保存修订失败: {rev_err}")
+                logger.logger(f"保存修订失败: {rev_err}")
 
         await db.commit()
 
@@ -703,13 +703,13 @@ async def create_article_api(
                 }
             ))
         except Exception as webhook_err:
-            logger.logger(f"f"Webhook trigger failed: {webhook_err}")
+            logger.logger(f"Webhook trigger failed: {webhook_err}")
 
         # 触发 ISR 重新生成
         try:
             asyncio.create_task(isr_service.on_article_update(new_article.slug))
         except Exception as isr_err:
-            logger.logger(f"f"ISR trigger failed: {isr_err}")
+            logger.logger(f"ISR trigger failed: {isr_err}")
 
         # 记录审计日志
         try:
@@ -722,7 +722,7 @@ async def create_article_api(
                 user_agent=request.headers.get('user-agent'),
             )
         except Exception as audit_err:
-            logger.logger(f"f"审计日志记录失败: {audit_err}")
+            logger.logger(f"审计日志记录失败: {audit_err}")
 
         return ApiResponse(success=True, data={"message": "Article created successfully", "article_id": new_article.id})
     except Exception as e:
@@ -822,7 +822,7 @@ async def update_article_api(
         #     else:
         #         content_text = content_text_raw
         # except Exception as filter_err:
-        #     logger.logger(f"f"敏感词过滤失败: {filter_err}")
+        #     logger.logger(f"敏感词过滤失败: {filter_err}")
         #     content_text = form_data.get('content', '')
 
         article.updated_at = datetime.now()
@@ -848,7 +848,7 @@ async def update_article_api(
                     change_summary=form_data.get('change_summary', '手动保存')
                 )
             except Exception as rev_err:
-                logger.logger(f"f"保存修订失败: {rev_err}")
+                logger.logger(f"保存修订失败: {rev_err}")
 
         await db.commit()
 
@@ -867,7 +867,7 @@ async def update_article_api(
                 db=db
             )
         except Exception as webhook_err:
-            logger.logger(f"f"Webhook trigger failed: {webhook_err}")
+            logger.logger(f"Webhook trigger failed: {webhook_err}")
 
         # 记录审计日志
         try:
@@ -880,7 +880,7 @@ async def update_article_api(
                 user_agent=request.headers.get('user-agent'),
             )
         except Exception as audit_err:
-            logger.logger(f"f"审计日志记录失败: {audit_err}")
+            logger.logger(f"审计日志记录失败: {audit_err}")
 
         return ApiResponse(success=True, data={"message": "Article updated successfully"})
     except Exception as e:
@@ -934,7 +934,7 @@ async def delete_article_api(
                 db=db
             )
         except Exception as webhook_err:
-            logger.logger(f"f"Webhook trigger failed: {webhook_err}")
+            logger.logger(f"Webhook trigger failed: {webhook_err}")
 
         # 记录审计日志
         try:
@@ -947,7 +947,7 @@ async def delete_article_api(
                 user_agent=request.headers.get('user-agent'),
             )
         except Exception as audit_err:
-            logger.logger(f"f"审计日志记录失败: {audit_err}")
+            logger.logger(f"审计日志记录失败: {audit_err}")
 
         return ApiResponse(success=True, data={"message": "Article deleted successfully"})
     except Exception as e:

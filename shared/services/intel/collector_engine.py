@@ -121,7 +121,7 @@ class CollectorEngine:
                 results["processed"] += 1
                 results["success"] += 1
             except Exception as e:
-                logger.logger(f"f"队列采集任务执行失败 source_id={task.source_id}: {e}")
+                logger.logger(f"队列采集任务执行失败 source_id={task.source_id}: {e}")
                 await collection_queue.ack(msg_id)
                 await collection_queue.report_result(task, {
                     "status": "failed",
@@ -160,7 +160,7 @@ class CollectorEngine:
         with get_db() as db:
             source = db.get(DataSource, source_id)
             if not source:
-                logger.logger(f"f"数据源不存在: {source_id}")
+                logger.logger(f"数据源不存在: {source_id}")
                 return result
 
             if not source.is_active:
@@ -179,19 +179,19 @@ class CollectorEngine:
         # 2. 选择采集器
         collector = self.get_collector(source_type)
         if not collector:
-            logger.logger(f"f"未注册的采集器类型: {source_type}")
+            logger.logger(f"未注册的采集器类型: {source_type}")
             return result
 
         # 3. 验证配置
         if not await collector.validate_config(config):
-            logger.logger(f"f"采集器配置验证失败: {source_id} ({source_type})")
+            logger.logger(f"采集器配置验证失败: {source_id} ({source_type})")
             return result
 
         # 4. 执行采集
         try:
             items = await collector.collect(config, url)
         except Exception as e:
-            logger.logger(f"f"采集执行异常 source_id={source_id}: {e}")
+            logger.logger(f"采集执行异常 source_id={source_id}: {e}")
             return result
 
         result["total"] = len(items)
@@ -230,7 +230,7 @@ class CollectorEngine:
                     result["new"] += 1
 
                 except Exception as e:
-                    logger.logger(f"f"存储采集条目异常: {e}")
+                    logger.logger(f"存储采集条目异常: {e}")
                     result["errors"] += 1
 
             # 6. 更新采集时间
@@ -239,7 +239,7 @@ class CollectorEngine:
                 if source:
                     source.last_collected_at = datetime.now(timezone.utc)
             except Exception as e:
-                logger.logger(f"f"更新采集时间异常: {e}")
+                logger.logger(f"更新采集时间异常: {e}")
 
             # 7. 提交所有变更（采集条目 + 更新采集时间）
             db.commit()
@@ -263,7 +263,7 @@ class CollectorEngine:
         except ImportError:
             logger.debug("清洗管道模块尚未实现，跳过")
         except Exception as e:
-            logger.logger(f"f"触发清洗管道异常: {e}")
+            logger.logger(f"触发清洗管道异常: {e}")
 
     async def run_all_active(self, parallel: bool = True) -> Dict[str, Any]:
         """
@@ -293,7 +293,7 @@ class CollectorEngine:
             gathered = await asyncio.gather(*tasks, return_exceptions=True)
             for sid, res in zip(source_ids, gathered):
                 if isinstance(res, Exception):
-                    logger.logger(f"f"并行采集异常 source_id={sid}: {res}")
+                    logger.logger(f"并行采集异常 source_id={sid}: {res}")
                     results[sid] = {"total": 0, "new": 0, "skipped": 0, "errors": 1}
                 else:
                     results[sid] = res

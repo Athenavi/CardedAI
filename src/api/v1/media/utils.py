@@ -164,7 +164,7 @@ async def stream_s3_range(
 
             return response
     except ClientError as e:
-        logger.logger(f"f"S3范围请求失败: {str(e)}")
+        logger.logger(f"S3范围请求失败: {str(e)}")
         raise HTTPException(status_code=500, detail="文件获取失败")
 
 
@@ -209,7 +209,7 @@ async def stream_and_cache_s3(
                         temp_path.rename(cache_path)
                         logger.info(f"文件已缓存: {cache_path}")
                 except Exception as e:
-                    logger.logger(f"f"流式传输/缓存失败: {str(e)}")
+                    logger.logger(f"流式传输/缓存失败: {str(e)}")
                     if temp_path.exists():
                         temp_path.unlink()
                     raise

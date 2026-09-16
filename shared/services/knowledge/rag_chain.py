@@ -184,7 +184,7 @@ class RAGChain:
             )
 
         except Exception as e:
-            logger.logger(f"f"RAG 查询失败: {e}")
+            logger.logger(f"RAG 查询失败: {e}")
             return RAGResult(
                 success=False,
                 error=str(e),
@@ -255,7 +255,7 @@ class RAGChain:
 
             return results
         except Exception as e:
-            logger.logger(f"f"向量检索失败: {e}")
+            logger.logger(f"向量检索失败: {e}")
             return []
 
     async def ingest_document(
@@ -314,7 +314,7 @@ class RAGChain:
             return vector_ids
 
         except Exception as e:
-            logger.logger(f"f"文档导入失败: {e}")
+            logger.logger(f"文档导入失败: {e}")
             return []
 
     async def delete_document_vectors(
@@ -347,7 +347,7 @@ class RAGChain:
 
             return result
         except Exception as e:
-            logger.logger(f"f"删除向量失败: {e}")
+            logger.logger(f"删除向量失败: {e}")
             return False
 
     async def ensure_collection(
@@ -373,7 +373,7 @@ class RAGChain:
                 dimension=dim,
             )
         except Exception as e:
-            logger.logger(f"f"创建集合失败: {e}")
+            logger.logger(f"创建集合失败: {e}")
             return False
 
     @staticmethod

@@ -146,7 +146,7 @@ class BackupService:
             }
 
         except Exception as e:
-            logger.logger(f"f"Database backup failed: {e}")
+            logger.logger(f"Database backup failed: {e}")
             return {
                 'success': False,
                 'error': str(e)
@@ -226,7 +226,7 @@ class BackupService:
             }
 
         except Exception as e:
-            logger.logger(f"f"Files backup failed: {e}")
+            logger.logger(f"Files backup failed: {e}")
             return {
                 'success': False,
                 'error': str(e)
@@ -285,7 +285,7 @@ class BackupService:
             }
 
         except Exception as e:
-            logger.logger(f"f"Full backup failed: {e}")
+            logger.logger(f"Full backup failed: {e}")
             return {
                 'success': False,
                 'error': str(e)
@@ -381,7 +381,7 @@ class BackupService:
             }
 
         except Exception as e:
-            logger.logger(f"f"Database restore failed: {e}")
+            logger.logger(f"Database restore failed: {e}")
             return {
                 'success': False,
                 'error': str(e)
@@ -429,7 +429,7 @@ class BackupService:
             }
 
         except Exception as e:
-            logger.logger(f"f"Files restore failed: {e}")
+            logger.logger(f"Files restore failed: {e}")
             return {
                 'success': False,
                 'error': str(e)
@@ -506,7 +506,7 @@ class BackupService:
             return True
 
         except Exception as e:
-            logger.logger(f"f"Failed to delete backup: {e}")
+            logger.logger(f"Failed to delete backup: {e}")
             return False
 
     async def cleanup_old_backups(self, days: int = None) -> Dict[str, Any]:
@@ -559,7 +559,7 @@ class BackupService:
                                 'created_at': created_at_str
                             })
             except Exception as e:
-                logger.logger(f"f"Failed to process backup for cleanup: {e}")
+                logger.logger(f"Failed to process backup for cleanup: {e}")
 
         logger.info(
             f"Cleaned up {deleted_count} old backups (older than {retention_days} days), freed {self._format_size(freed_space)}")

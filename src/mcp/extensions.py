@@ -307,7 +307,7 @@ async def _search_intelligence_handler(arguments: Dict) -> Dict:
                 "items": [r.to_dict() for r in results],
             }
     except Exception as e:
-        logger.logger(f"f"MCP search_intelligence failed: {e}")
+        logger.logger(f"MCP search_intelligence failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -331,7 +331,7 @@ async def _get_latest_briefing_handler(arguments: Dict) -> Dict:
                 "items": [r.to_dict() for r in results],
             }
     except Exception as e:
-        logger.logger(f"f"MCP get_latest_briefing failed: {e}")
+        logger.logger(f"MCP get_latest_briefing failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -367,7 +367,7 @@ async def _create_data_source_handler(arguments: Dict) -> Dict:
                 "source_id": ds.id,
             }
     except Exception as e:
-        logger.logger(f"f"MCP create_data_source failed: {e}")
+        logger.logger(f"MCP create_data_source failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -383,7 +383,7 @@ async def _trigger_collection_handler(arguments: Dict) -> Dict:
         result = await collector_engine.run_collection(source_id)
         return {"success": True, "result": result}
     except Exception as e:
-        logger.logger(f"f"MCP trigger_collection failed: {e}")
+        logger.logger(f"MCP trigger_collection failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -403,7 +403,7 @@ async def _generate_briefing_handler(arguments: Dict) -> Dict:
         )
         return {"success": True, "briefing": result}
     except Exception as e:
-        logger.logger(f"f"MCP generate_briefing failed: {e}")
+        logger.logger(f"MCP generate_briefing failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -430,7 +430,7 @@ async def _query_knowledge_base_handler(arguments: Dict) -> Dict:
         )
         return {"success": True, "answer": result.get("answer", ""), "sources": result.get("sources", [])}
     except Exception as e:
-        logger.logger(f"f"MCP query_knowledge_base failed: {e}")
+        logger.logger(f"MCP query_knowledge_base failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -453,7 +453,7 @@ async def _semantic_search_handler(arguments: Dict) -> Dict:
         )
         return {"success": True, "count": len(results), "results": results}
     except Exception as e:
-        logger.logger(f"f"MCP semantic_search failed: {e}")
+        logger.logger(f"MCP semantic_search failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -476,7 +476,7 @@ async def _generate_report_handler(arguments: Dict) -> Dict:
         )
         return {"success": True, "report": result}
     except Exception as e:
-        logger.logger(f"f"MCP generate_report failed: {e}")
+        logger.logger(f"MCP generate_report failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -501,7 +501,7 @@ async def _list_knowledge_bases_handler(arguments: Dict) -> Dict:
                 "items": [b.to_dict() for b in items],
             }
     except Exception as e:
-        logger.logger(f"f"MCP list_knowledge_bases failed: {e}")
+        logger.logger(f"MCP list_knowledge_bases failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -551,7 +551,7 @@ async def _trigger_workflow_handler(arguments: Dict) -> Dict:
             "outputs": result.outputs,
         }
     except Exception as e:
-        logger.logger(f"f"MCP trigger_workflow failed: {e}")
+        logger.logger(f"MCP trigger_workflow failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -577,7 +577,7 @@ async def _list_workflows_handler(arguments: Dict) -> Dict:
                 "items": [w.to_dict() for w in results],
             }
     except Exception as e:
-        logger.logger(f"f"MCP list_workflows failed: {e}")
+        logger.logger(f"MCP list_workflows failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -607,7 +607,7 @@ async def _get_workflow_execution_handler(arguments: Dict) -> Dict:
                 "node_executions": [ne.to_dict() for ne in node_execs],
             }
     except Exception as e:
-        logger.logger(f"f"MCP get_workflow_execution failed: {e}")
+        logger.logger(f"MCP get_workflow_execution failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -634,7 +634,7 @@ async def _cancel_workflow_handler(arguments: Dict) -> Dict:
 
         return {"success": True, "message": f"Execution {execution_id} cancellation requested"}
     except Exception as e:
-        logger.logger(f"f"MCP cancel_workflow failed: {e}")
+        logger.logger(f"MCP cancel_workflow failed: {e}")
         return {"success": False, "error": str(e)}
 
 
@@ -652,7 +652,7 @@ async def _get_intel_sources_resource(params: Dict) -> List[Dict]:
             sources = db.query(DataSource).order_by(DataSource.created_at.desc()).all()
             return [s.to_dict() for s in sources]
     except Exception as e:
-        logger.logger(f"f"MCP intel sources resource failed: {e}")
+        logger.logger(f"MCP intel sources resource failed: {e}")
         return []
 
 
@@ -669,7 +669,7 @@ async def _get_intel_alerts_resource(params: Dict) -> Dict:
                 "total_rules": len(rules),
             }
     except Exception as e:
-        logger.logger(f"f"MCP intel alerts resource failed: {e}")
+        logger.logger(f"MCP intel alerts resource failed: {e}")
         return {"rules": [], "total_rules": 0}
 
 
@@ -683,7 +683,7 @@ async def _get_knowledge_bases_resource(params: Dict) -> List[Dict]:
             bases = db.query(KnowledgeBase).order_by(KnowledgeBase.created_at.desc()).all()
             return [b.to_dict() for b in bases]
     except Exception as e:
-        logger.logger(f"f"MCP knowledge bases resource failed: {e}")
+        logger.logger(f"MCP knowledge bases resource failed: {e}")
         return []
 
 
@@ -697,7 +697,7 @@ async def _get_workflow_definitions_resource(params: Dict) -> List[Dict]:
             defs = db.query(WorkflowDefinition).order_by(WorkflowDefinition.created_at.desc()).all()
             return [d.to_dict() for d in defs]
     except Exception as e:
-        logger.logger(f"f"MCP workflow definitions resource failed: {e}")
+        logger.logger(f"MCP workflow definitions resource failed: {e}")
         return []
 
 
@@ -711,7 +711,7 @@ async def _get_workflow_tools_resource(params: Dict) -> List[Dict]:
             tools = db.query(AgentTool).order_by(AgentTool.created_at.desc()).all()
             return [t.to_dict() for t in tools]
     except Exception as e:
-        logger.logger(f"f"MCP workflow tools resource failed: {e}")
+        logger.logger(f"MCP workflow tools resource failed: {e}")
         return []
 
 

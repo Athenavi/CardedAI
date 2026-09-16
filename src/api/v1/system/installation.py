@@ -412,7 +412,7 @@ async def create_admin_user_api(
                         error='数据库连接池初始化失败。请确认已完成“确认数据库配置并执行迁移”步骤。'
                     )
             except Exception as init_err:
-                logger.logger(f"f"数据库管理器初始化失败: {str(init_err)}", exc_info=True)
+                logger.logger(f"数据库管理器初始化失败: {str(init_err)}", exc_info=True)
                 return ApiResponse(
                     success=False,
                     error='数据库管理器初始化失败，请稍后重试'
@@ -566,7 +566,7 @@ async def complete_installation_api(
                 else:
                     logger.warning(f"✗ 示例数据导入失败: {result.error}")
             except Exception as e:
-                logger.logger(f"f"✗ 示例数据导入失败: {str(e)}")
+                logger.logger(f"✗ 示例数据导入失败: {str(e)}")
 
         return ApiResponse(
             success=True,
@@ -642,7 +642,7 @@ async def stream_migration_logs():
             # 检查 Alembic 是否可用
             if not migration_service.check_alembic_available():
                 error_msg = {'type': 'error', 'message': 'Alembic 未安装或不可用'}
-                logger.logger(f"f"[SSE] {error_msg}")
+                logger.logger(f"[SSE] {error_msg}")
                 yield f"data: {json.dumps(error_msg, ensure_ascii=False)}\n\n"
                 return
 
@@ -676,7 +676,7 @@ async def stream_migration_logs():
                 'type': 'error',
                 'message': '迁移执行失败，请稍后重试'
             }
-            logger.logger(f"f"[SSE ERROR] {error_msg}")
+            logger.logger(f"[SSE ERROR] {error_msg}")
             yield f"data: {json.dumps(error_msg, ensure_ascii=False)}\n\n"
 
     return StreamingResponse(

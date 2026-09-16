@@ -107,7 +107,7 @@ class BriefingGenerator:
                     content = result["content"]
 
             except Exception as e:
-                logger.logger(f"f"LLM 简报生成失败: {e}")
+                logger.logger(f"LLM 简报生成失败: {e}")
 
         if not content:
             # fallback：简单列表
@@ -237,7 +237,7 @@ class BriefingGenerator:
                 if result.get("success") and result.get("content"):
                     content = result["content"]
             except Exception as e:
-                logger.logger(f"f"LLM {briefing_type} 简报生成失败: {e}")
+                logger.logger(f"LLM {briefing_type} 简报生成失败: {e}")
 
         if not content:
             lines = [f"# {title}\n"]
@@ -348,7 +348,7 @@ class BriefingGenerator:
                     content = result["content"]
 
             except Exception as e:
-                logger.logger(f"f"LLM 主题简报生成失败: {e}")
+                logger.logger(f"LLM 主题简报生成失败: {e}")
 
         if not content:
             lines = [f"# {title}\n"]

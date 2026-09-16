@@ -106,7 +106,7 @@ class ImageVersionManager:
                 logger.info(f"已生成 {size_name} 版本: {relative_path}")
 
             except Exception as e:
-                logger.logger(f"f"生成 {size_name} 版本失败: {e}")
+                logger.logger(f"生成 {size_name} 版本失败: {e}")
                 continue
 
         return generated_versions
@@ -267,7 +267,7 @@ class ImageVersionManager:
                     deleted_files.append(version_path)
                     logger.info(f"已删除版本: {version_path}")
                 except Exception as e:
-                    logger.logger(f"f"删除版本失败 {version_path}: {e}")
+                    logger.logger(f"删除版本失败 {version_path}: {e}")
 
         return deleted_files
 

@@ -57,7 +57,7 @@ class MediaService:
                 thumb.save(thumb_path, optimize=True, quality=85)
                 thumbnails[size_name] = str(thumb_path)
         except Exception as e:
-            logger.logger(f"f"生成缩略图失败: {e}")
+            logger.logger(f"生成缩略图失败: {e}")
 
         return thumbnails
 
@@ -84,7 +84,7 @@ class MediaService:
             media.save()
             return True
         except Exception as e:
-            logger.logger(f"f"添加标签失败: {e}")
+            logger.logger(f"添加标签失败: {e}")
             return False
 
     def remove_tags(self, media_id: int, tags: List[str]) -> bool:
@@ -98,7 +98,7 @@ class MediaService:
             media.save()
             return True
         except Exception as e:
-            logger.logger(f"f"移除标签失败: {e}")
+            logger.logger(f"移除标签失败: {e}")
             return False
 
     def get_media_by_tag(self, tag: str) -> List[Dict[str, Any]]:
@@ -110,7 +110,7 @@ class MediaService:
 
             return [media.to_dict() for media in medias]
         except Exception as e:
-            logger.logger(f"f"查询标签媒体失败: {e}")
+            logger.logger(f"查询标签媒体失败: {e}")
             return []
 
     def get_all_tags(self) -> List[str]:
@@ -122,7 +122,7 @@ class MediaService:
                 all_tags.update(self._parse_tags(media.tags))
             return sorted(all_tags)
         except Exception as e:
-            logger.logger(f"f"获取所有标签失败: {e}")
+            logger.logger(f"获取所有标签失败: {e}")
             return []
 
     def categorize_media(self, media_id: int, category: str) -> bool:
@@ -135,7 +135,7 @@ class MediaService:
 
             return True
         except Exception as e:
-            logger.logger(f"f"分类媒体失败: {e}")
+            logger.logger(f"分类媒体失败: {e}")
             return False
 
     # ==================== 批量操作 ====================
@@ -163,7 +163,7 @@ class MediaService:
                     results['failed'] += 1
                     results['errors'].append({'media_id': media_id, 'error': str(e)})
         except Exception as e:
-            logger.logger(f"f"批量删除失败: {e}")
+            logger.logger(f"批量删除失败: {e}")
 
         return results
 
@@ -217,7 +217,7 @@ class MediaService:
 
             return exif_data
         except Exception as e:
-            logger.logger(f"f"提取EXIF失败: {e}")
+            logger.logger(f"提取EXIF失败: {e}")
             return {}
 
     def _parse_gps_info(self, gps_info: Dict) -> Optional[Dict[str, float]]:
@@ -240,7 +240,7 @@ class MediaService:
             img_without_exif.save(output_path or image_path, optimize=True, quality=90)
             return True
         except Exception as e:
-            logger.logger(f"f"移除EXIF失败: {e}")
+            logger.logger(f"移除EXIF失败: {e}")
             return False
 
 

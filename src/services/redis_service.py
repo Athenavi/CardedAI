@@ -164,7 +164,7 @@ class RedisService:
             await self._redis.ping()
             logger.info(f"Redis 连接成功: {self.url}")
         except Exception as e:
-            logger.logger(f"f"Redis 连接失败: {e}")
+            logger.logger(f"Redis 连接失败: {e}")
             logger.warning("降级为内置内存缓存（仅进程内有效）")
             self._redis = _MemoryRedis()
 
@@ -196,7 +196,7 @@ class RedisService:
             except (json.JSONDecodeError, TypeError):
                 return value
         except Exception as e:
-            logger.logger(f"f"Redis GET 错误 ({key}): {e}")
+            logger.logger(f"Redis GET 错误 ({key}): {e}")
             return None
 
     async def set(
@@ -223,7 +223,7 @@ class RedisService:
 
             return True
         except Exception as e:
-            logger.logger(f"f"Redis SET 错误 ({key}): {e}")
+            logger.logger(f"Redis SET 错误 ({key}): {e}")
             return False
 
     async def delete(self, *keys: str) -> int:
@@ -231,7 +231,7 @@ class RedisService:
         try:
             return await self.redis.delete(*keys)
         except Exception as e:
-            logger.logger(f"f"Redis DELETE 错误: {e}")
+            logger.logger(f"Redis DELETE 错误: {e}")
             return 0
 
     async def exists(self, key: str) -> bool:
@@ -239,7 +239,7 @@ class RedisService:
         try:
             return await self.redis.exists(key) > 0
         except Exception as e:
-            logger.logger(f"f"Redis EXISTS 错误: {e}")
+            logger.logger(f"Redis EXISTS 错误: {e}")
             return False
 
     async def expire(self, key: str, seconds: int) -> bool:
@@ -247,7 +247,7 @@ class RedisService:
         try:
             return await self.redis.expire(key, seconds)
         except Exception as e:
-            logger.logger(f"f"Redis EXPIRE 错误: {e}")
+            logger.logger(f"Redis EXPIRE 错误: {e}")
             return False
 
     # ==================== 批量操作 ====================
@@ -267,7 +267,7 @@ class RedisService:
                         result.append(value)
             return result
         except Exception as e:
-            logger.logger(f"f"Redis MGET 错误: {e}")
+            logger.logger(f"Redis MGET 错误: {e}")
             return []
 
     async def mset(self, mapping: dict, expire: Optional[int] = None) -> bool:
@@ -290,7 +290,7 @@ class RedisService:
 
             return True
         except Exception as e:
-            logger.logger(f"f"Redis MSET 错误: {e}")
+            logger.logger(f"Redis MSET 错误: {e}")
             return False
 
     # ==================== 计数器 ====================
@@ -300,7 +300,7 @@ class RedisService:
         try:
             return await self.redis.incr(key, amount)
         except Exception as e:
-            logger.logger(f"f"Redis INCR 错误: {e}")
+            logger.logger(f"Redis INCR 错误: {e}")
             return 0
 
     async def decr(self, key: str, amount: int = 1) -> int:
@@ -308,7 +308,7 @@ class RedisService:
         try:
             return await self.redis.decr(key, amount)
         except Exception as e:
-            logger.logger(f"f"Redis DECR 错误: {e}")
+            logger.logger(f"Redis DECR 错误: {e}")
             return 0
 
     # ==================== 列表操作 ====================
@@ -322,7 +322,7 @@ class RedisService:
             ]
             return await self.redis.lpush(key, *serialized)
         except Exception as e:
-            logger.logger(f"f"Redis LPUSH 错误: {e}")
+            logger.logger(f"Redis LPUSH 错误: {e}")
             return 0
 
     async def rpush(self, key: str, *values: Any) -> int:
@@ -334,7 +334,7 @@ class RedisService:
             ]
             return await self.redis.rpush(key, *serialized)
         except Exception as e:
-            logger.logger(f"f"Redis RPUSH 错误: {e}")
+            logger.logger(f"Redis RPUSH 错误: {e}")
             return 0
 
     async def lrange(self, key: str, start: int = 0, end: int = -1) -> list:
@@ -349,7 +349,7 @@ class RedisService:
                     result.append(value)
             return result
         except Exception as e:
-            logger.logger(f"f"Redis LRANGE 错误: {e}")
+            logger.logger(f"Redis LRANGE 错误: {e}")
             return []
 
     # ==================== 集合操作 ====================
@@ -363,7 +363,7 @@ class RedisService:
             ]
             return await self.redis.sadd(key, *serialized)
         except Exception as e:
-            logger.logger(f"f"Redis SADD 错误: {e}")
+            logger.logger(f"Redis SADD 错误: {e}")
             return 0
 
     async def smembers(self, key: str) -> set:
@@ -378,7 +378,7 @@ class RedisService:
                     result.add(member)
             return result
         except Exception as e:
-            logger.logger(f"f"Redis SMEMBERS 错误: {e}")
+            logger.logger(f"Redis SMEMBERS 错误: {e}")
             return set()
 
     # ==================== 缓存装饰器 ====================
@@ -451,7 +451,7 @@ class RedisService:
                 "keyspace_misses": info.get("keyspace_misses", 0),
             }
         except Exception as e:
-            logger.logger(f"f"获取 Redis 统计信息失败: {e}")
+            logger.logger(f"获取 Redis 统计信息失败: {e}")
             return {
                 "connected": False,
                 "error": str(e),
@@ -464,7 +464,7 @@ class RedisService:
             logger.warning("Redis 数据库已清空")
             return True
         except Exception as e:
-            logger.logger(f"f"Redis FLUSHDB 错误: {e}")
+            logger.logger(f"Redis FLUSHDB 错误: {e}")
             return False
 
 

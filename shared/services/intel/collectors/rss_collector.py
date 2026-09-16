@@ -87,7 +87,7 @@ class RSSCollector(BaseCollector):
                 feed = fp.parse(resp.text)
 
         except Exception as e:
-            logger.logger(f"f"RSS 采集异常 {url}: {e}")
+            logger.logger(f"RSS 采集异常 {url}: {e}")
             return []
 
         items: List[CollectedItemData] = []

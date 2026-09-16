@@ -39,7 +39,7 @@ class TranslationMemoryService:
             with open(self.memory_file, 'w', encoding='utf-8') as f:
                 json.dump(self.memory, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            logger.logger(f"f"Failed to save translation memory: {e}")
+            logger.logger(f"Failed to save translation memory: {e}")
 
     def add_translation(self, source_text: str, target_text: str,
                        source_lang: str, target_lang: str,
@@ -183,7 +183,7 @@ class TranslationMemoryService:
             self._save_memory()
             return True
         except Exception as e:
-            logger.logger(f"f"Failed to import translation memory: {e}")
+            logger.logger(f"Failed to import translation memory: {e}")
             return False
 
     def clear_memory(self, language_pair: Optional[str] = None):

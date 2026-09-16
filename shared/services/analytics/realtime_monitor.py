@@ -247,7 +247,7 @@ class RealTimeMonitorService:
             return metrics
 
         except Exception as e:
-            logger.logger(f"f"Failed to get system metrics: {str(e)}")
+            logger.logger(f"Failed to get system metrics: {str(e)}")
             return {
                 'error': str(e),
                 'timestamp': now.isoformat(),

@@ -25,7 +25,7 @@ async def get_user_storage_used(user_id: int, db: AsyncSession):
         storage_used = storage_used_result.scalar() or 0
         return int(storage_used)
     except Exception as e:
-        logger.logger(f"f"获取用户存储使用量失败: {str(e)}")
+        logger.logger(f"获取用户存储使用量失败: {str(e)}")
         return 0
 
 
@@ -49,5 +49,5 @@ async def get_user_storage_limit(user_id: int, db: AsyncSession):
             return base_limit * 40
         return base_limit
     except Exception as e:
-        logger.logger(f"f"获取用户存储限制失败: {str(e)}")
+        logger.logger(f"获取用户存储限制失败: {str(e)}")
         return BaseConfig.USER_FREE_STORAGE_LIMIT

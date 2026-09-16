@@ -35,7 +35,7 @@ async def process_image(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.logger(f"f"图片处理失败: {e}")
+        logger.logger(f"图片处理失败: {e}")
         raise HTTPException(status_code=500, detail=f"图片处理失败: {str(e)}")
 
 
@@ -55,7 +55,7 @@ async def get_image_info(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.logger(f"f"获取图片信息失败: {e}")
+        logger.logger(f"获取图片信息失败: {e}")
         raise HTTPException(status_code=500, detail=f"获取图片信息失败: {str(e)}")
 
 
@@ -71,7 +71,7 @@ async def validate_image(
         result = image_processor.validate_image(content, max_size_mb)
         return {'success': True, 'data': result}
     except Exception as e:
-        logger.logger(f"f"图片验证失败: {e}")
+        logger.logger(f"图片验证失败: {e}")
         raise HTTPException(status_code=500, detail=f"图片验证失败: {str(e)}")
 
 

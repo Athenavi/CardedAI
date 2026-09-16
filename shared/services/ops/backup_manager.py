@@ -137,7 +137,7 @@ class BackupManager:
             return backup_info
 
         except Exception as e:
-            logger.logger(f"f"Database backup failed: {e}")
+            logger.logger(f"Database backup failed: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -192,7 +192,7 @@ class BackupManager:
             return backup_info
 
         except Exception as e:
-            logger.logger(f"f"Files backup failed: {e}")
+            logger.logger(f"Files backup failed: {e}")
             return {
                 "success": False,
                 "error": str(e)
@@ -228,7 +228,7 @@ class BackupManager:
             return url
 
         except Exception as e:
-            logger.logger(f"f"S3 upload failed: {e}")
+            logger.logger(f"S3 upload failed: {e}")
             return None
 
     async def cleanup_old_backups(self, backup_type: str):
@@ -261,7 +261,7 @@ class BackupManager:
                 logger.info(f"Cleanup completed: {deleted_count} old backups deleted")
 
         except Exception as e:
-            logger.logger(f"f"Backup cleanup failed: {e}")
+            logger.logger(f"Backup cleanup failed: {e}")
 
     async def restore_database_backup(self, backup_filename: str) -> Dict[str, Any]:
         """
@@ -334,7 +334,7 @@ class BackupManager:
             }
 
         except Exception as e:
-            logger.logger(f"f"Database restore failed: {e}")
+            logger.logger(f"Database restore failed: {e}")
             return {
                 "success": False,
                 "error": str(e)

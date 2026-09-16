@@ -99,7 +99,7 @@ class TwoFactorAuthService:
             totp = pyotp.TOTP(secret)
             return totp.verify(token, valid_window=window)
         except Exception as e:
-            logger.logger(f"f"TOTP verification error: {e}")
+            logger.logger(f"TOTP verification error: {e}")
             return False
 
     def generate_backup_codes(self, count: Optional[int] = None) -> List[str]:
@@ -167,7 +167,7 @@ class TwoFactorAuthService:
 
             return False
         except Exception as e:
-            logger.logger(f"f"Backup code verification error: {e}")
+            logger.logger(f"Backup code verification error: {e}")
             return False
 
     def enable_2fa(self, user_id: int, secret: str, backup_codes: List[str], db_session) -> Dict[str, Any]:
@@ -209,7 +209,7 @@ class TwoFactorAuthService:
             }
         except Exception as e:
             db_session.rollback()
-            logger.logger(f"f"Enable 2FA error: {e}")
+            logger.logger(f"Enable 2FA error: {e}")
             return {'success': False, 'error': str(e)}
 
     def disable_2fa(self, user_id: int, db_session) -> Dict[str, Any]:
@@ -244,7 +244,7 @@ class TwoFactorAuthService:
             return {'success': True, 'message': '2FA已禁用'}
         except Exception as e:
             db_session.rollback()
-            logger.logger(f"f"Disable 2FA error: {e}")
+            logger.logger(f"Disable 2FA error: {e}")
             return {'success': False, 'error': str(e)}
 
     def regenerate_backup_codes(self, user_id: int, db_session) -> Dict[str, Any]:
@@ -285,7 +285,7 @@ class TwoFactorAuthService:
             }
         except Exception as e:
             db_session.rollback()
-            logger.logger(f"f"Regenerate backup codes error: {e}")
+            logger.logger(f"Regenerate backup codes error: {e}")
             return {'success': False, 'error': str(e)}
 
     def verify_2fa_login(self, user_id: int, token: str, db_session) -> Dict[str, Any]:
@@ -326,7 +326,7 @@ class TwoFactorAuthService:
 
             return {'success': False, 'error': '验证码错误'}
         except Exception as e:
-            logger.logger(f"f"2FA login verification error: {e}")
+            logger.logger(f"2FA login verification error: {e}")
             return {'success': False, 'error': str(e)}
 
 

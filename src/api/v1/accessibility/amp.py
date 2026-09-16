@@ -79,7 +79,7 @@ async def get_article_amp_api(
 
         if not validation['valid']:
             # 如果验证失败,记录错误但仍返回(开发阶段)
-            logger.logger(f"f"AMP Validation Errors: {validation['errors']}")
+            logger.logger(f"AMP Validation Errors: {validation['errors']}")
 
         # 返回AMP HTML
         from fastapi.responses import HTMLResponse

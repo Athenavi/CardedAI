@@ -365,11 +365,11 @@ class IncrementalStaticRegenerator:
             if result.get('success'):
                 logger.info(f"Revalidation completed: {page.path}")
             else:
-                logger.logger(f"f"Revalidation failed: {page.path} - {result.get('error')}")
+                logger.logger(f"Revalidation failed: {page.path} - {result.get('error')}")
                 self.stats['failed_revalidations'] += 1
 
         except Exception as e:
-            logger.logger(f"f"Revalidation error for {page.path}: {e}", exc_info=True)
+            logger.logger(f"Revalidation error for {page.path}: {e}", exc_info=True)
             self.stats['failed_revalidations'] += 1
 
         finally:

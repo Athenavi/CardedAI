@@ -204,7 +204,7 @@ class UnifiedDatabaseManager:
             logger.info("Async database engine initialized successfully")
 
         except Exception as e:
-            logger.logger(f"f"Failed to initialize database engine: {e}", exc_info=True)
+            logger.logger(f"Failed to initialize database engine: {e}", exc_info=True)
             raise
 
     @property

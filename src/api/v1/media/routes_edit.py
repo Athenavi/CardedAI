@@ -71,7 +71,7 @@ async def delete_user_media_api(
         return JSONResponse({'success': True, 'data': {'deleted_count': len(target_files)}, 'message': "删除成功"})
     except Exception as e:
         await db.rollback()
-        logger.logger(f"f"批量删除失败: {e}", exc_info=True)
+        logger.logger(f"批量删除失败: {e}", exc_info=True)
         return JSONResponse({'success': False, 'message': '数据库操作失败'}, status_code=500)
 
 
@@ -500,7 +500,7 @@ async def upload_edited_image(
 
     except Exception as e:
         await db.rollback()
-        logger.logger(f"f"保存图片失败: {e}")
+        logger.logger(f"保存图片失败: {e}")
         import traceback
         return JSONResponse(
             content={"success": False, "error": str(e), "traceback": traceback.format_exc()},

@@ -89,7 +89,7 @@ class APICollector(BaseCollector):
                     elif method == "POST":
                         resp = await client.post(current_url, headers=headers, params=current_params, json=body)
                     else:
-                        logger.logger(f"f"不支持的 HTTP 方法: {method}")
+                        logger.logger(f"不支持的 HTTP 方法: {method}")
                         return []
 
                     if resp.status_code != 200:
@@ -128,7 +128,7 @@ class APICollector(BaseCollector):
                     page += 1
 
         except Exception as e:
-            logger.logger(f"f"API 采集异常 {url}: {e}")
+            logger.logger(f"API 采集异常 {url}: {e}")
 
         logger.info(f"API 采集完成 {url}: {len(all_items)} 条")
         return all_items

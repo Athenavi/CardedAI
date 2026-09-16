@@ -68,10 +68,10 @@ async def send_subscription_confirmation_email(email: str):
             text_content=text_content
         )
 
-        logger.logger(f"f"订阅确认邮件已发送到: {email}")
+        logger.logger(f"订阅确认邮件已发送到: {email}")
 
     except Exception as e:
-        logger.logger(f"f"发送订阅确认邮件失败: {e}")
+        logger.logger(f"发送订阅确认邮件失败: {e}")
         import traceback
         logger.logger(f""", exc_info=True)
 
@@ -107,7 +107,7 @@ async def get_home_data(
         return ApiResponse(success=True, data=data)
     except Exception as e:
 
-        logger.logger(f"f"获取首页数据失败：{str(e)}")
+        logger.logger(f"获取首页数据失败：{str(e)}")
         # 返回简化数据而不是错误
         return ApiResponse(success=True, data={
             "featuredArticles": [],
@@ -190,7 +190,7 @@ async def get_home_config(db: AsyncSession = Depends(get_async_session)):
         return ApiResponse(success=True, data=config)
     except Exception as e:
 
-        logger.logger(f"f"获取首页配置失败: {str(e)}")
+        logger.logger(f"获取首页配置失败: {str(e)}")
         return ApiResponse(success=True, data={
             "hero": {
                 "title": "用文字连接每一个想法",
@@ -481,7 +481,7 @@ async def search_home_articles(
         })
     except Exception as e:
 
-        logger.logger(f"f"搜索接口错误：{str(e)}")
+        logger.logger(f"搜索接口错误：{str(e)}")
         return ApiResponse(success=False, error="搜索服务暂时不可用")
 
 

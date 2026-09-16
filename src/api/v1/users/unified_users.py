@@ -567,7 +567,7 @@ async def update_avatar_api(
         logger.info(f"[Avatar Upload] Success! Avatar URL: {avatar_url}")
         return JSONResponse(content={"success": True, "avatar_url": avatar_url})
     except Exception as e:
-        logger.logger(f"f"[Avatar Upload] Error: {str(e)}", exc_info=True)
+        logger.logger(f"[Avatar Upload] Error: {str(e)}", exc_info=True)
         return JSONResponse(content={"error": f"头像更新失败: {str(e)}"}, status_code=500)
 
 

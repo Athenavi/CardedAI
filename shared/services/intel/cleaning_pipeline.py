@@ -75,7 +75,7 @@ class CleaningPipeline:
                 current_metadata = result.get("metadata", current_metadata)
 
             except Exception as e:
-                logger.logger(f"f"清洗器 {cleaner.name} 处理条目 {item_id} 异常: {e}")
+                logger.logger(f"清洗器 {cleaner.name} 处理条目 {item_id} 异常: {e}")
                 status = "clean_error"
                 break
 
@@ -135,7 +135,7 @@ class CleaningPipeline:
                     stats["success"] += 1
 
                 except Exception as e:
-                    logger.logger(f"f"清洗条目 {item.id} 异常: {e}")
+                    logger.logger(f"清洗条目 {item.id} 异常: {e}")
                     item.status = "clean_error"
                     stats["errors"] += 1
 

@@ -42,7 +42,7 @@ class SessionScheduler:
                         logger.warning(f"同步错误: {result['errors'][:5]}")  # 只显示前5个错误
 
             except Exception as e:
-                logger.logger(f"f"同步文章浏览量时出错：{e}")
+                logger.logger(f"同步文章浏览量时出错：{e}")
                 import traceback
                 logger.logger(f""", exc_info=True)
 

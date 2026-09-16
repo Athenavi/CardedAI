@@ -94,7 +94,7 @@ class TokenBlacklistManager:
                 logger.debug(f"Token 已加入 Redis 黑名单，TTL: {ttl}s")
                 return True
         except Exception as e:
-            logger.logger(f"f"添加 Token 到 Redis 黑名单失败：{e}")
+            logger.logger(f"添加 Token 到 Redis 黑名单失败：{e}")
 
         return False
 
@@ -175,7 +175,7 @@ class TokenBlacklistManager:
             key = f"token_blacklist:{self._get_token_identifier(token)}"
             return self.redis_client.exists(key) == 1
         except Exception as e:
-            logger.logger(f"f"检查 Redis Token 黑名单失败：{e}")
+            logger.logger(f"检查 Redis Token 黑名单失败：{e}")
             return False
 
     async def is_blacklisted_async(self, token: str) -> bool:

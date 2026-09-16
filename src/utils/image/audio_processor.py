@@ -92,7 +92,7 @@ def extract_audio_cover(audio_path: str) -> Optional[bytes]:
         logger.logger(f""mutagen 库未安装，请运行: pip install mutagen")
         return None
     except Exception as e:
-        logger.logger(f"f"提取音频封面失败: {audio_path}, 错误: {e}")
+        logger.logger(f"提取音频封面失败: {audio_path}, 错误: {e}")
         import traceback
         logger.debug(traceback.format_exc())
         return None
@@ -141,7 +141,7 @@ def create_audio_thumbnail(audio_path: str, thumbnail_path: str, size: Tuple[int
         return True
 
     except Exception as e:
-        logger.logger(f"f"创建音频缩略图失败: {e}")
+        logger.logger(f"创建音频缩略图失败: {e}")
         import traceback
         logger.debug(traceback.format_exc())
         return False
@@ -195,7 +195,7 @@ def _create_default_audio_thumbnail(thumbnail_path: str, size: Tuple[int, int] =
         return True
 
     except Exception as e:
-        logger.logger(f"f"创建默认音频缩略图失败: {e}")
+        logger.logger(f"创建默认音频缩略图失败: {e}")
         return False
 
 

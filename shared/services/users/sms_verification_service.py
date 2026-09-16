@@ -114,12 +114,12 @@ class SMSVerificationService:
             是否发送成功
         """
         logger.info(f"[SMS MOCK] Phone: {phone}, Code: {code}")
-        logger.logger(f"f"\n{'=' * 60}")
-        logger.logger(f"f"📱 短信验证码 (MOCK模式)")
-        logger.logger(f"f"手机号: {phone}")
-        logger.logger(f"f"验证码: {code}")
-        logger.logger(f"f"有效期: {self.EXPIRE_MINUTES} 分钟")
-        logger.logger(f"f"{'=' * 60}\n")
+        logger.logger(f"\n{'=' * 60}")
+        logger.logger(f"📱 短信验证码 (MOCK模式)")
+        logger.logger(f"手机号: {phone}")
+        logger.logger(f"验证码: {code}")
+        logger.logger(f"有效期: {self.EXPIRE_MINUTES} 分钟")
+        logger.logger(f"{'=' * 60}\n")
         return True
 
     def _send_sms_aliyun(self, phone: str, code: str) -> bool:
@@ -172,7 +172,7 @@ class SMSVerificationService:
                 logger.info(f"SMS sent successfully via Aliyun to {phone}")
                 return True
             else:
-                logger.logger(f"f"Aliyun SMS failed: {response.body.message}")
+                logger.logger(f"Aliyun SMS failed: {response.body.message}")
                 return False
 
         except ImportError:
@@ -181,7 +181,7 @@ class SMSVerificationService:
                 return False
             return self._send_sms_mock(phone, code)
         except Exception as e:
-            logger.logger(f"f"Failed to send SMS via Aliyun: {str(e)}")
+            logger.logger(f"Failed to send SMS via Aliyun: {str(e)}")
             return False
 
     def _send_sms_tencent(self, phone: str, code: str) -> bool:
@@ -235,7 +235,7 @@ class SMSVerificationService:
                 return True
             else:
                 error_msg = resp.SendStatusSet[0].Message if resp.SendStatusSet else 'Unknown error'
-                logger.logger(f"f"Tencent SMS failed: {error_msg}")
+                logger.logger(f"Tencent SMS failed: {error_msg}")
                 return False
 
         except ImportError:
@@ -244,7 +244,7 @@ class SMSVerificationService:
                 return False
             return self._send_sms_mock(phone, code)
         except Exception as e:
-            logger.logger(f"f"Failed to send SMS via Tencent: {str(e)}")
+            logger.logger(f"Failed to send SMS via Tencent: {str(e)}")
             return False
 
     def _send_sms_twilio(self, phone: str, code: str) -> bool:
@@ -292,7 +292,7 @@ class SMSVerificationService:
                 return False
             return self._send_sms_mock(phone, code)
         except Exception as e:
-            logger.logger(f"f"Failed to send SMS via Twilio: {str(e)}")
+            logger.logger(f"Failed to send SMS via Twilio: {str(e)}")
             return False
 
     def _send_sms(self, phone: str, code: str) -> bool:

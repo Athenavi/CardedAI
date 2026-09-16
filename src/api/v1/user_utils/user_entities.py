@@ -22,7 +22,7 @@ def auth_by_uid(article_id: int, user_id: int, db: Session) -> bool:
         article = article_result.scalar_one_or_none()
         return article is not None
     except SQLAlchemyError as e:
-        logger.logger(f"f"An error occurred: {e}")
+        logger.logger(f"An error occurred: {e}")
         return False
 
 
@@ -104,7 +104,7 @@ async def save_uploaded_avatar(file: UploadFile, user_id: int, db):
 
         return avatar_uuid  # 返回不含扩展名的UUID，扩展名将通过get_avatar函数动态确定
     except SQLAlchemyError as e:
-        logger.logger(f"f"Database error saving avatar: {e} by user {user_id}")
+        logger.logger(f"Database error saving avatar: {e} by user {user_id}")
         if isinstance(db, AsyncSession):
             await db.rollback()
         else:

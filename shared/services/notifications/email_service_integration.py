@@ -270,11 +270,11 @@ class EmailServiceIntegration:
             elif config.provider == 'smtp':
                 return self._send_via_smtp(config, to_email, subject, html_content, text_content, sender_name)
             else:
-                logger.logger(f"f"Unsupported email provider: {config.provider}")
+                logger.logger(f"Unsupported email provider: {config.provider}")
                 return False
 
         except Exception as e:
-            logger.logger(f"f"Failed to send email via {config.provider}: {e}")
+            logger.logger(f"Failed to send email via {config.provider}: {e}")
             return False
 
     async def send_batch_emails(
@@ -385,7 +385,7 @@ class EmailServiceIntegration:
                 logger.info(f"SendGrid: Email sent to {to_email}")
                 return True
             else:
-                logger.logger(f"f"SendGrid: Failed to send email: {response.status_code} {response.text}")
+                logger.logger(f"SendGrid: Failed to send email: {response.status_code} {response.text}")
                 return False
 
     async def _send_via_mailgun(
@@ -435,7 +435,7 @@ class EmailServiceIntegration:
                 logger.info(f"Mailgun: Email sent to {to_email}")
                 return True
             else:
-                logger.logger(f"f"Mailgun: Failed to send email: {response.status_code} {response.text}")
+                logger.logger(f"Mailgun: Failed to send email: {response.status_code} {response.text}")
                 return False
 
     def _send_via_smtp(
@@ -481,7 +481,7 @@ class EmailServiceIntegration:
             return True
 
         except Exception as e:
-            logger.logger(f"f"SMTP: Failed to send email: {e}")
+            logger.logger(f"SMTP: Failed to send email: {e}")
             return False
 
 

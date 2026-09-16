@@ -43,7 +43,7 @@ class CollectorNodeExecutor(BaseNodeExecutor):
                     **outcome,
                 })
             except Exception as exc:
-                logger.logger(f"f"[CollectorNode] 数据源 {sid} 采集失败: {exc}")
+                logger.logger(f"[CollectorNode] 数据源 {sid} 采集失败: {exc}")
                 errors.append({"source_id": sid, "error": str(exc)})
 
         total_items = sum(r.get("item_count", 0) for r in results)

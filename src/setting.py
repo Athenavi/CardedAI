@@ -404,7 +404,7 @@ class AliPayConfig:
                     self.ALIPAY_PRIVATE_KEY_STRING = private_key_path.read_bytes().decode('utf-8', errors='ignore')
             except Exception as e:
                 # 其他错误也应妥善处理
-                logger.logger(f"f"读取支付宝私钥文件失败: {str(e)}")
+                logger.logger(f"读取支付宝私钥文件失败: {str(e)}")
                 self.ALIPAY_PRIVATE_KEY_STRING = None
         else:
             self.ALIPAY_PRIVATE_KEY_STRING = None
@@ -422,7 +422,7 @@ class AliPayConfig:
                     self.ALIPAY_PUBLIC_KEY_STRING = public_key_path.read_bytes().decode('utf-8', errors='ignore')
             except Exception as e:
                 # 其他错误也应妥善处理
-                logger.logger(f"f"读取支付宝公钥文件失败: {str(e)}")
+                logger.logger(f"读取支付宝公钥文件失败: {str(e)}")
                 self.ALIPAY_PUBLIC_KEY_STRING = None
         else:
             self.ALIPAY_PUBLIC_KEY_STRING = None
