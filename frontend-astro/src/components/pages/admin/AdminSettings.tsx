@@ -1,7 +1,7 @@
 'use client';
 
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {AuthGuard} from '@/components/AuthGuard';
 import {QueryProvider} from '@/components/QueryProvider';
 import {AdminShell} from '@/components/admin/AdminShell';
@@ -17,24 +17,15 @@ import {
   ChevronDown,
   Clock,
   Download,
-  Edit3,
-  ExternalLink,
-  Eye,
-  FileCode,
   FileText,
   Film,
   Globe,
   Hash,
-  Home,
   Image,
   Layers,
   Layout,
-  Link2,
   Loader,
-  Mail,
-  Menu,
   Monitor,
-  Plus,
   Save,
   Search,
   Settings as SettingsIcon,
@@ -43,13 +34,10 @@ import {
   Type,
   Upload,
   X,
-  XCircle,
-  Zap
+  XCircle
 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────
-interface Menu {id: number; name: string; slug: string; description: string; is_active: boolean; created_at?: string; updated_at?: string;}
-interface MenuItem {id: number; title: string; url: string; target: string; parent_id: number | null; order_index: number; is_active?: boolean; created_at?: string;}
 interface Page {id: number; title: string; slug: string; content: string; excerpt: string; template: string; status: number; parent_id: number | null; order_index: number; meta_title?: string; meta_description?: string; meta_keywords?: string; created_at?: string;}
 
 // ─── Tab configuration ────────────────────────────────
@@ -61,9 +49,7 @@ const TABS = [
     desc: '站点基本信息配置',
     gradient: 'from-blue-500 to-cyan-500'
   },
-  {key: 'home', label: '首页配置', icon: Home, desc: '首页展示与布局', gradient: 'from-purple-500 to-pink-500'},
   {key: 'system', label: '系统选项', icon: Shield, desc: '系统功能开关', gradient: 'from-emerald-500 to-teal-500'},
-  {key: 'menus', label: '菜单管理', icon: Menu, desc: '导航菜单配置', gradient: 'from-amber-500 to-orange-500'},
   {key: 'integrations', label: '第三方登录', icon: Globe, desc: 'OAuth 登录配置', gradient: 'from-indigo-500 to-purple-500'},
 ];
 
@@ -131,39 +117,6 @@ const SETTINGS_FIELDS: FieldDef[] = [
     icon: Hash,
     desc: '用于SEO优化，逗号分隔'
   },
-  // home
-  {key: 'home_hero_title', label: 'Hero 标题', category: 'home', placeholder: '欢迎来到我的博客', icon: Type},
-  {key: 'home_hero_subtitle', label: 'Hero 副标题', category: 'home', placeholder: '分享知识与见解', icon: FileText},
-  {key: 'home_hero_cta_text', label: 'CTA 按钮文本', category: 'home', placeholder: '开始阅读', icon: Zap},
-  {key: 'home_hero_cta_link', label: 'CTA 按钮链接', category: 'home', placeholder: '/articles', icon: Link2},
-  {
-    key: 'home_cta_target',
-    label: 'CTA 跳转方式',
-    type: 'select',
-    category: 'home',
-    options: [{label: '当前窗口', value: '_self'}, {label: '新窗口', value: '_blank'}],
-    icon: ExternalLink
-  },
-  {
-    key: 'home_hero_background_image',
-    label: 'Hero 背景媒体',
-    type: 'media',
-    category: 'home',
-    placeholder: '输入媒体 URL 或上传图片/视频',
-    icon: Film
-  },
-  {key: 'home_featured_title', label: '精选区域标题', category: 'home', placeholder: '精选文章', icon: Layers},
-  {key: 'home_main_title', label: '主内容区标题', category: 'home', placeholder: '最新文章', icon: Type},
-  {key: 'home_newsletter_title', label: '订阅区标题', category: 'home', placeholder: '订阅更新', icon: Mail},
-  {
-    key: 'home_newsletter_subtitle',
-    label: '订阅区副标题',
-    category: 'home',
-    placeholder: '获取最新文章推送',
-    icon: Mail
-  },
-  {key: 'home_newsletter_button_text', label: '订阅按钮文本', category: 'home', placeholder: '订阅', icon: Zap},
-  {key: 'home_no_summary_msg', label: '无摘要消息', category: 'home', placeholder: '暂无摘要', icon: FileText},
   // system
   {
     key: 'user_registration',
@@ -173,14 +126,6 @@ const SETTINGS_FIELDS: FieldDef[] = [
     options: [{label: '开启', value: 'true'}, {label: '关闭', value: 'false'}],
     icon: Shield,
     desc: '控制是否允许新用户注册'
-  },
-  {
-    key: 'menu_slug',
-    label: '当前使用菜单标识',
-    category: 'system',
-    placeholder: 'main',
-    icon: Menu,
-    desc: '指定前台导航使用的菜单'
   },
 ];
 
@@ -223,23 +168,6 @@ const SettingsSkeleton = () => (
     </div>
 );
 
-const MenuSkeleton = () => (
-    <div className="space-y-4 animate-pulse">
-      {[1, 2, 3].map(i => (
-          <div key={i} className="p-5 bg-gray-100 dark:bg-gray-800 rounded-xl">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded-lg w-32"/>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-full w-12"/>
-            </div>
-            <div className="ml-4 space-y-2">
-              {[1, 2].map(j => (
-                  <div key={j} className="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg w-full"/>
-              ))}
-            </div>
-          </div>
-      ))}
-    </div>
-);
 
 const PageSkeleton = () => (
     <div className="space-y-0 animate-pulse">
@@ -570,7 +498,7 @@ function SettingsInner() {
 
   // ── Delete confirm state ──
   const [deleteTarget, setDeleteTarget] = useState<{
-    type: 'menu' | 'menuItem' | 'page';
+    type: 'page';
     id: number;
     name: string
   } | null>(null);
@@ -589,18 +517,15 @@ function SettingsInner() {
         setLocalSettings(prev => Object.keys(norm).length > 0 ? norm : prev);
         return r.data;
       }
-      return {settings:{}, menus:[]};
     },
   });
 
   const settings: Record<string, string> = localSettings;
-  const menus: Menu[] = Array.isArray(fullData?.menus) ? fullData.menus : [];
 
   // ── Stats ──
   const stats = useMemo(() => ({
     totalSettings: Object.keys(settings).filter(k => settings[k]).length,
-    activeMenus: menus.filter(m => m.is_active).length,
-  }), [settings, menus]);
+  }), [settings]);
 
   // ── Save settings ──
   const saveSettings = async () => {
@@ -625,7 +550,7 @@ function SettingsInner() {
 
   // ── Export settings ──
   const exportSettings = useCallback(() => {
-    const data = {settings: localSettings, menus, exportedAt: new Date().toISOString()};
+    const data = {settings: localSettings, exportedAt: new Date().toISOString()};
     const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -633,22 +558,11 @@ function SettingsInner() {
     a.download = `Carded AI-settings-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [localSettings, menus]);
+  }, [localSettings]);
 
-  // ── Menu mutations ──
-  const createMenuMut = useMutation({mutationFn:(d:any)=>apiClient.post('/system/settings/menus', d), onSuccess:()=>qc.invalidateQueries({queryKey:['admin-system-settings']})});
-  const updateMenuMut = useMutation({mutationFn:({id,...d}:any)=>apiClient.put(`/system/settings/menus/${id}`, d), onSuccess:()=>qc.invalidateQueries({queryKey:['admin-system-settings']})});
-  const delMenuMut = useMutation({mutationFn:(id:number)=>apiClient.delete(`/system/settings/menus/${id}`), onSuccess:()=>qc.invalidateQueries({queryKey:['admin-system-settings']})});
-  const createMenuItemMut = useMutation({mutationFn:(d:any)=>apiClient.post('/system/settings/menu-items', d), onSuccess:()=>qc.invalidateQueries({queryKey:['admin-system-settings']})});
-  const delMenuItemMut = useMutation({mutationFn:(id:number)=>apiClient.delete(`/system/settings/menu-items/${id}`), onSuccess:()=>qc.invalidateQueries({queryKey:['admin-system-settings']})});
 
   // ── Page mutations ── 已移除（使用 PageBuilder 管理页面）
 
-  // ── Menus dialog state ──
-  const [menuModal, setMenuModal] = useState<{mode:'create'|'edit'; menu?: Menu} | null>(null);
-  const [menuForm, setMenuForm] = useState({name:'', slug:'', description:''});
-  const [itemModal, setItemModal] = useState<{menuId: number|null} | null>(null);
-  const [itemForm, setItemForm] = useState({title: '', url: '', menu_id: 0, target: '_self', parent_id: ''});
 
   // ── Pages dialog state ── 已移除（使用 PageBuilder 管理页面）
 
@@ -663,16 +577,8 @@ function SettingsInner() {
   // ── Handle delete confirm ──
   const handleDeleteConfirm = useCallback(() => {
     if (!deleteTarget) return;
-    switch (deleteTarget.type) {
-      case 'menu':
-        delMenuMut.mutate(deleteTarget.id);
-        break;
-      case 'menuItem':
-        delMenuItemMut.mutate(deleteTarget.id);
-        break;
-    }
     setDeleteTarget(null);
-  }, [deleteTarget, delMenuMut, delMenuItemMut]);
+  }, [deleteTarget]);
 
   // ── Render tab content ──
   const renderTabContent = () => {
@@ -685,9 +591,8 @@ function SettingsInner() {
     }
 
     switch (activeTab) {
-      // ── Basic + Home + System (Settings fields) ──
+      // ── Basic + System (Settings fields) ──
       case 'basic':
-      case 'home':
       case 'system': {
         const tabConfig = TABS.find(tb => tb.key === activeTab)!;
         const localeNames: Record<Locale, string> = {
@@ -832,217 +737,6 @@ function SettingsInner() {
         );
       }
 
-      // ── Menus ──
-      case 'menus':
-        return (
-          <div className="space-y-6">
-            <div
-                className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 overflow-hidden">
-              <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800">
-                <SectionTitle icon={Menu} title="导航菜单" subtitle={`共 ${menus.length} 个菜单`}
-                              action={
-                                <button onClick={() => {
-                                  setMenuForm({name: '', slug: '', description: ''});
-                                  setMenuModal({mode: 'create'});
-                                }}
-                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-xl transition-all shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40">
-                                  <Plus className="w-4 h-4"/>新建菜单
-                                </button>
-                              }
-                />
-              </div>
-
-              {isLoading ? (
-                  <div className="p-6"><MenuSkeleton/></div>
-              ) : menus.length === 0 ? (
-                  <EmptyState icon={Menu} title="暂无菜单" desc="创建您的第一个导航菜单"
-                              action={
-                                <button onClick={() => {
-                                  setMenuForm({name: '', slug: '', description: ''});
-                                  setMenuModal({mode: 'create'});
-                                }}
-                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-xl transition-colors">
-                                  <Plus className="w-4 h-4"/>新建菜单
-                                </button>
-                              }
-                  />
-              ) : (
-                <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {menus.map((m, idx) => (
-                      <div key={m.id}
-                           className="px-6 py-5 hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors group">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                            <div
-                                className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
-                              <Menu className="w-5 h-5 text-white"/>
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-gray-900 dark:text-white">{m.name}</span>
-                                <StatusBadge active={m.is_active}/>
-                              </div>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[10px] text-gray-400 font-mono">{m.slug}</span>
-                                {m.description && <span className="text-[10px] text-gray-400">· {m.description}</span>}
-                              </div>
-                            </div>
-                        </div>
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => { setMenuForm({name:m.name, slug:m.slug, description:m.description}); setMenuModal({mode:'edit', menu:m}); }}
-                                  className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors"
-                                  title="编辑">
-                            <Edit3 className="w-4 h-4"/>
-                          </button>
-                            <button onClick={() => setDeleteTarget({type: 'menu', id: m.id, name: m.name})}
-                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
-                                    title="删除">
-                              <Trash2 className="w-4 h-4"/>
-                            </button>
-                        </div>
-                      </div>
-
-                        {/* Menu items - TODO: populate menuItems from API */}
-                      {(false as boolean) && (
-                          <div className="ml-[52px] space-y-1.5">
-                            {((globalThis as any).__menuItems__ || {})[String(m.id)].map((item: any, itemIdx: number) => (
-                                <div key={item.id}
-                                     className="flex items-center justify-between py-2 px-3.5 bg-gray-50 dark:bg-gray-800/50 rounded-xl text-sm group/item hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                  <div className="flex items-center gap-2.5 min-w-0">
-                                <span
-                                  className="w-5 h-5 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-mono text-gray-500 dark:text-gray-400 shrink-0">
-                                  {itemIdx + 1}
-                                </span>
-                                    <span
-                                        className="text-gray-700 dark:text-gray-300 truncate font-medium">{item.title}</span>
-                                    <span className="text-[10px] text-gray-400 truncate font-mono">{item.url}</span>
-                                    {item.target === '_blank' && (
-                                        <span
-                                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded text-[10px] font-medium shrink-0">
-                                    <ExternalLink className="w-2.5 h-2.5"/>新窗口
-                                  </span>
-                                    )}
-                              </div>
-                                  <button
-                                      onClick={() => setDeleteTarget({type: 'menuItem', id: item.id, name: item.title})}
-                                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors opacity-0 group-hover/item:opacity-100 shrink-0 ml-2">
-                                    <Trash2 className="w-3.5 h-3.5"/>
-                                  </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      <button onClick={() => { setItemForm({title:'', url:'', menu_id:m.id, target:'_self', parent_id:''}); setItemModal({menuId:m.id}); }}
-                              className="ml-[52px] mt-2.5 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 inline-flex items-center gap-1 font-medium hover:underline">
-                        <Plus className="w-3.5 h-3.5"/>添加菜单项
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Menu modal */}
-            <Modal open={!!menuModal} onClose={() => setMenuModal(null)}
-                   title={menuModal?.mode === 'create' ? '新建菜单' : '编辑菜单'}
-                   subtitle={menuModal?.mode === 'create' ? '创建一个新的导航菜单' : `编辑菜单「${menuModal?.menu?.name}」`}>
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">名称</label>
-                  <input value={menuForm.name} onChange={e => setMenuForm(p=>({...p,name:e.target.value}))}
-                         className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
-                         placeholder="主导航菜单"/>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">标识
-                    (slug)</label>
-                  <input value={menuForm.slug} onChange={e => setMenuForm(p=>({...p,slug:e.target.value}))} disabled={menuModal?.mode==='edit'}
-                         className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-mono"
-                         placeholder="main-nav"/>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">描述</label>
-                  <input value={menuForm.description} onChange={e => setMenuForm(p=>({...p,description:e.target.value}))}
-                         className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
-                         placeholder="菜单用途说明（可选）"/>
-                </div>
-                <div className="flex justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                  <button onClick={() => setMenuModal(null)}
-                          className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors">
-                    取消
-                  </button>
-                  <button onClick={() => {
-                    if (menuModal?.mode === 'create') createMenuMut.mutate(menuForm);
-                    else if (menuModal?.menu) updateMenuMut.mutate({id: menuModal.menu.id, ...menuForm, is_active: menuModal.menu.is_active});
-                    setMenuModal(null);
-                  }}
-                          className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-xl transition-all shadow-lg shadow-blue-500/25">
-                    {menuModal?.mode === 'create' ? '创建菜单' : '保存更改'}
-                  </button>
-                </div>
-              </div>
-            </Modal>
-
-            {/* Menu item modal */}
-            <Modal open={!!itemModal} onClose={() => setItemModal(null)} title="添加菜单项"
-                   subtitle="为菜单添加一个新的导航项">
-              <div className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">标题</label>
-                  <input value={itemForm.title} onChange={e => setItemForm(p=>({...p,title:e.target.value}))}
-                         className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
-                         placeholder="菜单项名称"/>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">链接 URL</label>
-                  <input value={itemForm.url} onChange={e => setItemForm(p=>({...p,url:e.target.value}))}
-                         className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all font-mono"
-                         placeholder="/articles 或 https://..."/>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">打开方式</label>
-                    <div className="relative">
-                      <select value={itemForm.target} onChange={e => setItemForm(p => ({...p, target: e.target.value}))}
-                              className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 appearance-none pr-10 transition-all">
-                        <option value="_self">当前窗口</option>
-                        <option value="_blank">新窗口</option>
-                      </select>
-                      <ChevronDown
-                          className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"/>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">父级 ID</label>
-                    <input value={itemForm.parent_id} onChange={e => setItemForm(p=>({...p,parent_id:e.target.value}))}
-                           className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
-                           placeholder="留空=顶级"/>
-                  </div>
-                </div>
-                <div className="flex justify-end gap-3 pt-3 border-t border-gray-100 dark:border-gray-800">
-                  <button onClick={() => setItemModal(null)}
-                          className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors">
-                    取消
-                  </button>
-                  <button onClick={() => {
-                    createMenuItemMut.mutate({
-                      title: itemForm.title,
-                      url: itemForm.url,
-                      menu_id: itemForm.menu_id,
-                      target: itemForm.target,
-                      parent_id: itemForm.parent_id ? parseInt(itemForm.parent_id) : undefined,
-                    });
-                    setItemModal(null);
-                  }}
-                          className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-xl transition-all shadow-lg shadow-blue-500/25">
-                    添加菜单项
-                  </button>
-                </div>
-              </div>
-            </Modal>
-          </div>
-        );
       // ── Pages ── 已移除（使用 PageBuilder 管理页面）
 
       // ── Integrations ──
@@ -1079,7 +773,6 @@ function SettingsInner() {
         <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
           <StatCard icon={SettingsIcon} label="已配置项" value={stats.totalSettings}
                     gradient="from-blue-500 to-blue-600"/>
-          <StatCard icon={Menu} label="激活菜单" value={stats.activeMenus} gradient="from-amber-500 to-amber-600"/>
 
         </div>
 
@@ -1111,11 +804,11 @@ function SettingsInner() {
         <Modal open={!!deleteTarget} onClose={() => setDeleteTarget(null)} title="确认删除">
           {deleteTarget && (
               <DeleteConfirm
-                  title={`删除${deleteTarget.type === 'menu' ? '菜单' : '菜单项'}`}
+                title="删除内容"
                   desc={`确定要删除「${deleteTarget.name}」吗？此操作不可撤销。`}
                   onConfirm={handleDeleteConfirm}
                   onCancel={() => setDeleteTarget(null)}
-                  isPending={delMenuMut.isPending || delMenuItemMut.isPending}
+                isPending={false}
               />
           )}
         </Modal>

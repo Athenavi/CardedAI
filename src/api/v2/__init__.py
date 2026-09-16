@@ -37,7 +37,6 @@ ROUTE_REGISTRY_V2 = [
     # ==================== 仪表板（V2 聚合路由器）====================
     # V2 Dashboard 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
     ("src.api.v2.dashboard", "/api/v2/dashboard", ["dashboard-v2"], True),
-    ("src.api.v1.core.system", "/api/v2/system", ["system"], True),
 
     # ==================== 文章核心（V2 聚合路由器）====================
     # V2 Articles 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
@@ -129,10 +128,6 @@ ROUTE_REGISTRY_V2 = [
 
     # ==================== 用户安全管理（字段权限/会话/邮件订阅）====================
     ("src.api.v1.users.user_security_management", "/api/v2/users/security", ["user-security-management"], False),
-    # ==================== 可访问性（V2 聚合路由器）====================
-    # V2 Accessibility 模块采用包级别聚合模式，所有子模块通过 __init__.py 统一注册
-    ("src.api.v2.accessibility", "/api/v2/accessibility", ["accessibility-v2"], True),
-    # V1 accessibility 各子模块已废弃，功能已迁移到 V2 聚合路由器
     # ==================== 社交（V2 聚合路由器）====================
 
     # ==================== 示例和工具端点（集中管理）====================

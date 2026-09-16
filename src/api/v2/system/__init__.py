@@ -27,7 +27,6 @@ def _build_router():
     from src.api.v1.system.resource_transfer import router as resource_transfer_router
     from src.api.v1.system.webhook_management import router as webhook_management_router
     from src.api.v1.system.workflow import router as workflow_router
-    from src.api.v2.system.accessibility import router as accessibility_router
 
     router.include_router(admin_settings_router, prefix="/settings")
     router.include_router(database_migration_router, prefix="/db/database-migration")
@@ -40,7 +39,6 @@ def _build_router():
     router.include_router(migrations_router, prefix="/migrations")
     router.include_router(resource_transfer_router, prefix="/transfer")
     router.include_router(workflow_router, prefix="/workflow")
-    router.include_router(accessibility_router)
 
     _router = router
     return _router

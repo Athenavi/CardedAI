@@ -6,21 +6,15 @@ import {
   BarChart3,
   Brain,
   ChevronLeft,
-  Eye,
   FileText,
   FolderTree,
   Image,
   LogIn,
   LogOut,
-  MessageSquare,
-  PenLine,
-  PieChart,
-  Server,
   Settings,
   TrendingUp,
   Users,
-  X,
-  Zap
+  X
 } from 'lucide-react';
 import {useTranslation} from '@/lib/i18n';
 
@@ -38,11 +32,9 @@ export const navConfig: NavItem[] = [
   {labelKey: 'nav.categories', href: '/admin/categories', icon: FolderTree},
   {labelKey: 'nav.media', href: '/admin/media', icon: Image},
   {labelKey: 'nav.users', href: '/admin/users', icon: Users},
-  
+
   {labelKey: 'nav.analytics', href: '/admin/analytics', icon: TrendingUp},
-  {labelKey: 'nav.system', href: '/admin/system', icon: Server},
   {labelKey: 'nav.aiTools', href: '/admin/ai', icon: Brain},
-  {labelKey: 'nav.accessibility', href: '/admin/accessibility', icon: Eye},
   {labelKey: 'nav.oauth', href: '/admin/settings?tab=integrations', icon: LogIn},
   {sepKey: 'nav.advancedManagement'},
     {labelKey: 'nav.migration', href: '/admin/migration', icon: ArrowRightLeft},

@@ -9,101 +9,6 @@ from src.api.v1.core.responses import ApiResponse
 router = APIRouter(tags=["examples-tools"])
 
 
-@router.get("/accessibility", summary="无障碍性审计示例", description="获取无障碍性审计使用示例")
-async def get_accessibility_examples():
-    """获取使用示例"""
-    examples = {
-        "single_page_audit": {
-            'description': '单页审计',
-            'example': '''
-    POST /api/v1/accessibility/audit
-    {
-      "html_content": "<html><body>...</body></html>",
-      "url": "https://example.com/page",
-      "level": "AA"
-    }
-                '''.strip()
-        },
-        "batch_audit": {
-            'description': '批量审计',
-            'example': '''
-    POST /api/v1/accessibility/audit/batch
-    {
-      "pages": [
-        {"url": "/", "html": "<html>...</html>"},
-        {"url": "/about", "html": "<html>...</html>"},
-        {"url": "/contact", "html": "<html>...</html>"}
-      ],
-      "level": "AA"
-    }
-                '''.strip()
-        },
-        "frontend_integration": {
-            'description': '前端集成',
-            'code_example': '''
-    // React组件示例
-    function AccessibilityChecker({ html }) {
-      const [report, setReport] = useState(null);
-
-      useEffect(() => {
-        fetch('/api/v1/accessibility/audit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            html_content: html,
-            level: 'AA',
-          })
-        })
-        .then(res => res.json())
-        .then(data => setReport(data.data));
-      }, [html]);
-
-      if (!report) return null;
-
-      return (
-        <div className="a11y-report">
-          <h3>无障碍性评分: {report.summary.score}/100</h3>
-          <span className="grade">{report.summary.grade}</span>
-
-          <div className="violations">
-            <h4>发现的问题 ({report.summary.violations})</h4>
-            <ul>
-              {report.violations.map((violation, index) => (
-                <li key={index}>
-                  <strong>{violation.rule_name}</strong>: {violation.message}
-                  <p>建议: {violation.recommendation}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      );
-    }
-                '''.strip()
-        },
-        "best_practices": {
-            'description': '最佳实践',
-            'practices': [
-                '在开发过程中定期进行无障碍性审计',
-                '将无障碍性测试集成到CI/CD流程',
-                '使用自动化工具和手动测试相结合',
-                '邀请残障用户进行真实测试',
-                '遵循渐进增强原则',
-                '使用语义化HTML',
-                '提供多种导航方式',
-                '确保足够的颜色对比度',
-                '测试键盘导航',
-                '验证屏幕阅读器兼容性',
-            ]
-        }
-    }
-
-    return ApiResponse(
-        success=True,
-        data=examples
-    )
-
-
 @router.get("/performance", summary="性能优化示例", description="获取性能优化相关示例")
 async def get_performance_examples():
     """获取性能优化相关的使用示例"""
@@ -1169,7 +1074,6 @@ async def get_article_detail(article_id: int):
 async def get_all_examples():
     """获取所有功能的示例汇总"""
     all_examples = {
-        "accessibility": await get_accessibility_examples(),
         "performance": await get_performance_examples(),
         "security": await get_security_examples(),
         "seo": await get_seo_examples(),
