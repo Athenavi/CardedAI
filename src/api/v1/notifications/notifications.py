@@ -27,7 +27,7 @@ async def read_notification_api(
         return result
     except Exception as e:
         import traceback
-        logger.logger(f"Error in read_notification_api: {str(e)}")
+        logger.error(f"Error in read_notification_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
@@ -44,7 +44,7 @@ async def fetch_message_api(
         return result
     except Exception as e:
         import traceback
-        logger.logger(f"Error in fetch_message_api: {str(e)}")
+        logger.error(f"Error in fetch_message_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
@@ -61,7 +61,7 @@ async def mark_all_as_read_api(
         return result
     except Exception as e:
         import traceback
-        logger.logger(f"Error in mark_all_as_read_api: {str(e)}")
+        logger.error(f"Error in mark_all_as_read_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
@@ -91,7 +91,7 @@ async def clean_notification_api(
         return {"success": True}
     except Exception as e:
         import traceback
-        logger.logger(f"Error in clean_notification_api: {str(e)}")
+        logger.error(f"Error in clean_notification_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
@@ -115,7 +115,7 @@ async def mark_notification_as_read_api(
             return JSONResponse({"success": False, "error": "无法标记通知为已读"}, status_code=400)
     except Exception as e:
         import traceback
-        logger.logger(f"Error in mark_notification_as_read_api: {str(e)}")
+        logger.error(f"Error in mark_notification_as_read_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
@@ -138,7 +138,7 @@ async def delete_notification_api(
             return JSONResponse({"success": False, "error": "无法删除通知"}, status_code=400)
     except Exception as e:
         import traceback
-        logger.logger(f"Error in delete_notification_api: {str(e)}")
+        logger.error(f"Error in delete_notification_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
@@ -171,6 +171,6 @@ async def get_notifications_api(
         return {"success": True, "data": notification_list}
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_notifications_api: {str(e)}")
+        logger.error(f"Error in get_notifications_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)

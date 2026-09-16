@@ -27,7 +27,7 @@ def safe_run(func_name: str, func, *args, **kwargs):
         logger.info(f"[{func_name}] 完成")
         return result
     except Exception as e:
-        logger.logger(f"[{func_name}] 失败: {e}", exc_info=True)
+        logger.error(f"[{func_name}] 失败: {e}", exc_info=True)
         return None
 
 
@@ -43,7 +43,7 @@ async def safe_run_async(func_name: str, func, *args, **kwargs):
         logger.info(f"[{func_name}] 完成")
         return result
     except Exception as e:
-        logger.logger(f"[{func_name}] 失败: {e}", exc_info=True)
+        logger.error(f"[{func_name}] 失败: {e}", exc_info=True)
         return None
 
 
@@ -128,7 +128,7 @@ def register_all_routes(app: FastAPI, worker_info: str):
 
             if error is not None:
                 if req:
-                    logger.logger(f"{worker_info} v2 必需模块加载失败: {module_path} - {error}")
+                    logger.error(f"{worker_info} v2 必需模块加载失败: {module_path} - {error}")
                     raise error
                 else:
                     failed_count += 1
@@ -162,7 +162,7 @@ def register_all_routes(app: FastAPI, worker_info: str):
         logger.info(f"{worker_info} API v2 路由注册完成 (成功: {loaded_count}, 失败: {failed_count}, "
               f"加载: {load_elapsed:.2f}s, 注册: {register_elapsed:.2f}s, 总耗时: {routes_elapsed:.2f}s)")
     except ImportError as e:
-        logger.logger(f"{worker_info} API v2 模块未找到: {e}")
+        logger.error(f"{worker_info} API v2 模块未找到: {e}")
         raise
 
 
@@ -490,7 +490,7 @@ def register_error_handlers(app: FastAPI):
     @app.exception_handler(Exception)
     async def general_exception_handler(request: Request, exc: Exception):
         from src.unified_logger import default_logger as logger
-        logger.logger(f"General error: {exc}")
+        logger.error(f"General error: {exc}")
         if any(kw in str(exc).lower() for kw in ["not found", "no result", "does not exist"]):
             from src.error import error
             return error(404, "Page Not Found")
@@ -575,6 +575,6 @@ def create_app(config=None):
 try:
     app = create_app()
 except Exception as e:
-    logger.logger(f""", exc_info=True)
+    logger.error(f"[App Startup] 创建应用实例时出错: {e}", exc_info=True)
     import sys
     sys.exit(1)

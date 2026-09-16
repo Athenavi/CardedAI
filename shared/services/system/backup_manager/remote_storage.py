@@ -43,7 +43,7 @@ class RemoteStorageManager:
 
             return result
         except Exception as e:
-            logger.logger(f"[RemoteStorage] Remote upload failed: {e}")
+            logger.error(f"[RemoteStorage] Remote upload failed: {e}")
             return {'success': False, 'error': str(e)}
 
     def _compress_backup(self, backup_path: Path, zip_path: Path):

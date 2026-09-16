@@ -109,7 +109,7 @@ class StaticSiteGenerator:
             }
 
         except Exception as e:
-            logger.logger(f"Error generating article page {article_id}: {e}", exc_info=True)
+            logger.error(f"Error generating article page {article_id}: {e}", exc_info=True)
             return {'success': False, 'error': str(e)}
 
     async def generate_category_page(self, db: AsyncSession, category_id: int,
@@ -186,7 +186,7 @@ class StaticSiteGenerator:
             }
 
         except Exception as e:
-            logger.logger(f"Error generating category page {category_id}: {e}", exc_info=True)
+            logger.error(f"Error generating category page {category_id}: {e}", exc_info=True)
             return {'success': False, 'error': str(e)}
 
     async def generate_homepage(self, db: AsyncSession, per_page: int = 20,
@@ -240,7 +240,7 @@ class StaticSiteGenerator:
             }
 
         except Exception as e:
-            logger.logger(f"Error generating homepage: {e}", exc_info=True)
+            logger.error(f"Error generating homepage: {e}", exc_info=True)
             return {'success': False, 'error': str(e)}
 
     async def generate_all_articles(self, db: AsyncSession, batch_size: int = 50,
@@ -286,7 +286,7 @@ class StaticSiteGenerator:
                 for result in results:
                     if isinstance(result, Exception):
                         failed_count += 1
-                        logger.logger(f"Failed to generate article: {result}")
+                        logger.error(f"Failed to generate article: {result}")
                     elif result.get('success'):
                         if result.get('cached'):
                             cached_count += 1
@@ -306,7 +306,7 @@ class StaticSiteGenerator:
             }
 
         except Exception as e:
-            logger.logger(f"Error generating all articles: {e}", exc_info=True)
+            logger.error(f"Error generating all articles: {e}", exc_info=True)
             return {'success': False, 'error': str(e)}
 
     async def clean_old_files(self, max_age_days: int = 30) -> Dict[str, Any]:
@@ -341,7 +341,7 @@ class StaticSiteGenerator:
             }
 
         except Exception as e:
-            logger.logger(f"Error cleaning old files: {e}", exc_info=True)
+            logger.error(f"Error cleaning old files: {e}", exc_info=True)
             return {'success': False, 'error': str(e)}
 
     def get_generation_stats(self) -> Dict[str, Any]:
@@ -436,7 +436,7 @@ class StaticSiteGenerator:
                 generated_at=datetime.now().isoformat()
             )
         except Exception as e:
-            logger.logger(f"Error rendering article template: {e}")
+            logger.error(f"Error rendering article template: {e}")
             return self._generate_simple_article_html(article)
 
     async def _render_category_template(self, category: Category, articles: List[Article],
@@ -456,7 +456,7 @@ class StaticSiteGenerator:
                 generated_at=datetime.now().isoformat()
             )
         except Exception as e:
-            logger.logger(f"Error rendering category template: {e}")
+            logger.error(f"Error rendering category template: {e}")
             return self._generate_simple_category_html(category, articles, page, total_pages, total_count)
 
     async def _render_homepage_template(self, articles: List[Article]) -> str:
@@ -471,7 +471,7 @@ class StaticSiteGenerator:
                 generated_at=datetime.now().isoformat()
             )
         except Exception as e:
-            logger.logger(f"Error rendering homepage template: {e}")
+            logger.error(f"Error rendering homepage template: {e}")
             return self._generate_simple_homepage_html(articles)
 
     def _generate_simple_article_html(self, article: Article) -> str:

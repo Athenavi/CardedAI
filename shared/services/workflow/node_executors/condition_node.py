@@ -64,7 +64,7 @@ class ConditionNodeExecutor(BaseNodeExecutor):
                 "branch": "true" if result else "false",
             }
         except Exception as exc:
-            logger.logger(f"[ConditionNode] 条件评估失败: {exc}")
+            logger.error(f"[ConditionNode] 条件评估失败: {exc}")
             return {
                 "condition_result": False,
                 "branch": "false",

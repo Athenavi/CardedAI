@@ -234,7 +234,7 @@ class LocalizationService:
             tz = ZoneInfo(user_timezone)
             return dt.astimezone(tz)
         except Exception as e:
-            logger.logger(f"Failed to convert timezone: {str(e)}")
+            logger.error(f"Failed to convert timezone: {str(e)}")
             return dt
 
     def format_date(self, dt: datetime, locale: str = 'en-US',
@@ -259,7 +259,7 @@ class LocalizationService:
         try:
             return local_dt.strftime(format_template)
         except Exception as e:
-            logger.logger(f"Failed to format date: {str(e)}")
+            logger.error(f"Failed to format date: {str(e)}")
             return local_dt.strftime('%Y-%m-%d')
 
     def format_datetime(self, dt: datetime, locale: str = 'en-US',
@@ -284,7 +284,7 @@ class LocalizationService:
         try:
             return local_dt.strftime(format_template)
         except Exception as e:
-            logger.logger(f"Failed to format datetime: {str(e)}")
+            logger.error(f"Failed to format datetime: {str(e)}")
             return local_dt.strftime('%Y-%m-%d %H:%M:%S')
 
     def format_relative_time(self, dt: datetime, locale: str = 'en-US',
@@ -484,7 +484,7 @@ class LocalizationService:
             sign = '+' if total_seconds >= 0 else '-'
             return f"{sign}{hours:02d}:{minutes:02d}"
         except Exception as e:
-            logger.logger(f"Failed to get timezone offset: {str(e)}")
+            logger.error(f"Failed to get timezone offset: {str(e)}")
             return '+00:00'
 
 

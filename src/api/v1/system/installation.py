@@ -29,7 +29,7 @@ async def check_prerequisites_api():
             data=result
         )
     except Exception as e:
-        logger.logger(f"Error in check_prerequisites_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in check_prerequisites_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="前置条件检查失败，请稍后重试")
 
 
@@ -108,7 +108,7 @@ async def configure_database_api(
             data=result
         )
     except Exception as e:
-        logger.logger(f"Error in configure_database_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in configure_database_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="数据库配置失败，请稍后重试")
 
 
@@ -266,7 +266,7 @@ async def import_sample_data_api(
         )
 
     except Exception as e:
-        logger.logger(f"Error in import_sample_data_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in import_sample_data_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="示例数据导入失败，请稍后重试")
 
 
@@ -284,7 +284,7 @@ async def get_installation_status_api():
             data=status
         )
     except Exception as e:
-        logger.logger(f"Error in get_installation_status_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in get_installation_status_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="获取安装状态失败，请稍后重试")
 
 
@@ -305,7 +305,7 @@ async def get_installation_steps_api():
             }
         )
     except Exception as e:
-        logger.logger(f"Error in get_installation_steps_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in get_installation_steps_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="获取安装步骤失败，请稍后重试")
 
 
@@ -325,7 +325,7 @@ async def check_database_connection_api(
             data=result
         )
     except Exception as e:
-        logger.logger(f"Error in check_database_connection_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in check_database_connection_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="数据库连接检查失败，请稍后重试")
 
 
@@ -412,7 +412,7 @@ async def create_admin_user_api(
                         error='数据库连接池初始化失败。请确认已完成“确认数据库配置并执行迁移”步骤。'
                     )
             except Exception as init_err:
-                logger.logger(f"数据库管理器初始化失败: {str(init_err)}", exc_info=True)
+                logger.error(f"数据库管理器初始化失败: {str(init_err)}", exc_info=True)
                 return ApiResponse(
                     success=False,
                     error='数据库管理器初始化失败，请稍后重试'
@@ -476,7 +476,7 @@ async def create_admin_user_api(
                 raise
 
     except Exception as e:
-        logger.logger(f"Error in create_admin_user_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in create_admin_user_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="管理员账号创建失败，请稍后重试")
 
 
@@ -517,7 +517,7 @@ async def configure_site_settings_api(
             data=result
         )
     except Exception as e:
-        logger.logger(f"Error in configure_site_settings_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in configure_site_settings_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="站点配置失败，请稍后重试")
 
 
@@ -566,7 +566,7 @@ async def complete_installation_api(
                 else:
                     logger.warning(f"✗ 示例数据导入失败: {result.error}")
             except Exception as e:
-                logger.logger(f"✗ 示例数据导入失败: {str(e)}")
+                logger.error(f"✗ 示例数据导入失败: {str(e)}")
 
         return ApiResponse(
             success=True,
@@ -577,7 +577,7 @@ async def complete_installation_api(
             }
         )
     except Exception as e:
-        logger.logger(f"Error in complete_installation_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in complete_installation_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="安装完成步骤失败，请稍后重试")
 
 
@@ -602,7 +602,7 @@ async def confirm_database_and_migrate_api():
             data=result
         )
     except Exception as e:
-        logger.logger(f"Error in confirm_database_and_migrate_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in confirm_database_and_migrate_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="数据库配置确认失败，请稍后重试")
 
 
@@ -620,7 +620,7 @@ async def reset_installation_api():
             data=result
         )
     except Exception as e:
-        logger.logger(f"Error in reset_installation_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in reset_installation_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="安装状态重置失败，请稍后重试")
 
 
@@ -642,7 +642,7 @@ async def stream_migration_logs():
             # 检查 Alembic 是否可用
             if not migration_service.check_alembic_available():
                 error_msg = {'type': 'error', 'message': 'Alembic 未安装或不可用'}
-                logger.logger(f"[SSE] {error_msg}")
+                logger.error(f"[SSE] {error_msg}")
                 yield f"data: {json.dumps(error_msg, ensure_ascii=False)}\n\n"
                 return
 
@@ -671,12 +671,12 @@ async def stream_migration_logs():
 
         except Exception as e:
             # 仅记录 traceback 到日志，不返回给客户端
-            logger.logger(f""[SSE ERROR] 迁移流出错", exc_info=True)
+            logger.error(f"[SSE ERROR] 迁移流出错", exc_info=True)
             error_msg = {
                 'type': 'error',
                 'message': '迁移执行失败，请稍后重试'
             }
-            logger.logger(f"[SSE ERROR] {error_msg}")
+            logger.error(f"[SSE ERROR] {error_msg}")
             yield f"data: {json.dumps(error_msg, ensure_ascii=False)}\n\n"
 
     return StreamingResponse(

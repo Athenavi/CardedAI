@@ -32,7 +32,7 @@ def json_filter(value):
     try:
         return json.loads(value)
     except (ValueError, TypeError) as e:
-        logger.logger(f"Error parsing JSON: {e}, Value: {value}")
+        logger.error(f"Error parsing JSON: {e}, Value: {value}")
         return None
 
 def string_split(value, delimiter=','):
@@ -43,7 +43,7 @@ def string_split(value, delimiter=','):
     try:
         return value.split(delimiter)
     except Exception as e:
-        logger.logger(f"Error splitting string: {e}, Value: {value}")
+        logger.error(f"Error splitting string: {e}, Value: {value}")
         return []
 
 def relative_time_filter(dt):
@@ -111,7 +111,7 @@ def f2list(input_value, delimiter=';'):
             return [tag.strip() for tag in input_value.split(delimiter) if tag.strip()]
         return [str(input_value).strip()]
     except (ValueError, TypeError, AttributeError) as e:
-        logger.logger(f"Error converting to list: {e}, Input: {input_value}")
+        logger.error(f"Error converting to list: {e}, Input: {input_value}")
         return [str(input_value)] if input_value else []
 
 

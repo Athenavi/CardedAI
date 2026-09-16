@@ -42,7 +42,7 @@ try:
 except ImportError:
     logger.warning("sentry-sdk not installed, skipping Sentry initialization")
 except Exception as e:
-    logger.logger(f"Failed to initialize Sentry: {e}")
+    logger.error(f"Failed to initialize Sentry: {e}")
 
 # 创建SQLAlchemy基类
 Base = declarative_base()
@@ -458,7 +458,7 @@ def init_extensions(app):
         else:
             logger.warning("slowapi 未安装，限流已禁用")
     except Exception as e:
-        logger.logger(f"Failed to initialize rate limiter: {e}")
+        logger.error(f"Failed to initialize rate limiter: {e}")
 
     # 【移除】不再在这里创建表，由 Alembic 迁移管理
     # Base.metadata.create_all(bind=engine)  # 已删除
@@ -486,7 +486,7 @@ def _get_sync_session_factory():
             db_url = db_manager.database_url if hasattr(db_manager, 'database_url') else None
 
         if not db_url:
-            logger.logger(f""No database URL available for sync session factory")
+            logger.error(f"No database URL available for sync session factory")
             return None
 
         # 将异步驱动转换为同步驱动
@@ -527,7 +527,7 @@ def _get_sync_session_factory():
         logger.info("Created sync session factory from database URL")
         return _sync_session_factory
     except Exception as e:
-        logger.logger(f"Failed to create sync session factory: {e}")
+        logger.error(f"Failed to create sync session factory: {e}")
         return None
 
 @contextmanager

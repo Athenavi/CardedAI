@@ -186,7 +186,7 @@ class MediaEnhancementService:
                 }
             return None
         except Exception as e:
-            logger.logger(f"Duplicate detection error: {e}")
+            logger.error(f"Duplicate detection error: {e}")
             return None
 
     def extract_exif_data(self, image_path: str) -> Dict[str, Any]:

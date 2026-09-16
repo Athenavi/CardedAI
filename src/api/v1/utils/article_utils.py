@@ -147,7 +147,7 @@ async def get_articles_with_filters(filters: List, db: AsyncSession, page: int, 
         # 在FastAPI中使用logging而不是current_app.logger
 
         from src.unified_logger import default_logger as logger
-        logger.logger(f"Database error: {e}")
+        logger.error(f"Database error: {e}")
         raise
 
 
@@ -185,7 +185,7 @@ def set_article_password(aid: int, passwd: str, db: Session):
         db.commit()
         return True
     except Exception as e:
-        logger.logger(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
         db.rollback()
         return False
 
@@ -212,7 +212,7 @@ def get_article_password(aid: int, db: Session):
             return article_content.passwd
         return None
     except Exception as e:
-        logger.logger(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
         return None
 
 
@@ -351,7 +351,7 @@ def check_apw_form(aid: int, new_password: str, db: Session):
         </div>
         '''
     except (TypeError, AttributeError) as e:
-        logger.logger(f"e)
+        logger.error(f"e)
         return '''
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">

@@ -64,7 +64,7 @@ def main():
         # 使用应用实例而不是工厂函数
         from src.app import app as fastapi_app
         if fastapi_app is None:
-            logger.logger(f"FastAPI 应用实例创建失败")
+            logger.error(f"FastAPI 应用实例创建失败")
             sys.exit(1)
 
         logger.info(f"FastAPI 应用已加载，准备启动服务器...")
@@ -81,7 +81,7 @@ def main():
     except KeyboardInterrupt:
         logger.info("服务器已关闭")
     except Exception as e:
-        logger.logger(f"FastAPI 启动失败: {e}")
+        logger.error(f"FastAPI 启动失败: {e}")
         sys.exit(1)
 
 

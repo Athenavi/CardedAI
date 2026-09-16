@@ -41,7 +41,7 @@ async def site_health_check_api(
             data=health_data
         )
     except Exception as e:
-        logger.logger(f"Error in site_health_check_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in site_health_check_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="健康检查失败，请稍后重试")
 
 
@@ -76,5 +76,5 @@ async def system_info_api(
             data=info
         )
     except Exception as e:
-        logger.logger(f"Error in system_info_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in system_info_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error="获取系统信息失败，请稍后重试")

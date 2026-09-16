@@ -93,7 +93,7 @@ class NotificationService:
             return False
 
         if not HAS_AIOHTTP:
-            logger.logger(f""aiohttp not installed")
+            logger.error(f"aiohttp not installed")
             return False
 
         try:
@@ -124,11 +124,11 @@ class NotificationService:
                         logger.info("Slack notification sent successfully")
                         return True
                     else:
-                        logger.logger(f"Slack notification failed: {response.status}")
+                        logger.error(f"Slack notification failed: {response.status}")
                         return False
 
         except Exception as e:
-            logger.logger(f"Failed to send Slack notification: {e}")
+            logger.error(f"Failed to send Slack notification: {e}")
             return False
 
     async def send_discord_notification(
@@ -155,7 +155,7 @@ class NotificationService:
             return False
 
         if not HAS_AIOHTTP:
-            logger.logger(f""aiohttp not installed")
+            logger.error(f"aiohttp not installed")
             return False
 
         try:
@@ -186,11 +186,11 @@ class NotificationService:
                         logger.info("Discord notification sent successfully")
                         return True
                     else:
-                        logger.logger(f"Discord notification failed: {response.status}")
+                        logger.error(f"Discord notification failed: {response.status}")
                         return False
 
         except Exception as e:
-            logger.logger(f"Failed to send Discord notification: {e}")
+            logger.error(f"Failed to send Discord notification: {e}")
             return False
 
     def send_email_notification(
@@ -247,7 +247,7 @@ class NotificationService:
             return True
 
         except Exception as e:
-            logger.logger(f"Failed to send email notification: {e}")
+            logger.error(f"Failed to send email notification: {e}")
             return False
 
     async def send_article_published_notification(

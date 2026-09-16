@@ -69,5 +69,5 @@ class RAGNodeExecutor(BaseNodeExecutor):
                 "query": query,
             }
         except Exception as exc:
-            logger.logger(f"[RAGNode] RAG 执行失败: {exc}")
+            logger.error(f"[RAGNode] RAG 执行失败: {exc}")
             return {"success": False, "error": str(exc)}

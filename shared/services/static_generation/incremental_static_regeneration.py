@@ -336,7 +336,7 @@ class IncrementalStaticRegenerator:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.logger(f"Error in revalidation worker: {e}", exc_info=True)
+                logger.error(f"Error in revalidation worker: {e}", exc_info=True)
 
     async def _queue_revalidation(self, page: ISRPage,
                                   generator_func: Callable,
@@ -365,11 +365,11 @@ class IncrementalStaticRegenerator:
             if result.get('success'):
                 logger.info(f"Revalidation completed: {page.path}")
             else:
-                logger.logger(f"Revalidation failed: {page.path} - {result.get('error')}")
+                logger.error(f"Revalidation failed: {page.path} - {result.get('error')}")
                 self.stats['failed_revalidations'] += 1
 
         except Exception as e:
-            logger.logger(f"Revalidation error for {page.path}: {e}", exc_info=True)
+            logger.error(f"Revalidation error for {page.path}: {e}", exc_info=True)
             self.stats['failed_revalidations'] += 1
 
         finally:
@@ -422,7 +422,7 @@ class IncrementalStaticRegenerator:
             }
 
         except Exception as e:
-            logger.logger(f"Error generating page {page.path}: {e}", exc_info=True)
+            logger.error(f"Error generating page {page.path}: {e}", exc_info=True)
             return {'success': False, 'error': str(e)}
 
     async def _read_file_async(self, file_path: Path) -> str:

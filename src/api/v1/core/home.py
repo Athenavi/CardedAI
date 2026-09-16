@@ -68,12 +68,12 @@ async def send_subscription_confirmation_email(email: str):
             text_content=text_content
         )
 
-        logger.logger(f"订阅确认邮件已发送到: {email}")
+        logger.error(f"订阅确认邮件已发送到: {email}")
 
     except Exception as e:
-        logger.logger(f"发送订阅确认邮件失败: {e}")
+        logger.error(f"发送订阅确认邮件失败: {e}")
         import traceback
-        logger.logger(f""", exc_info=True)
+        logger.error(exc_info=True)
 
 
 @router.get("/data")
@@ -84,10 +84,6 @@ async def get_home_data(
     limit_categories: int = Query(8, description="分类数量"),
     db: AsyncSession = Depends(get_async_session)
 ):
-    """
-    获取首页数据（不含配置）
-    使用简化查询避免 greenlet 错误
-    """
     try:
         # 简化数据获取 - 逐一查询避免复杂并行查询
         featured_articles = await _get_featured_articles(db, limit_featured)
@@ -107,7 +103,7 @@ async def get_home_data(
         return ApiResponse(success=True, data=data)
     except Exception as e:
 
-        logger.logger(f"获取首页数据失败：{str(e)}")
+        logger.error(f"获取首页数据失败：{str(e)}")
         # 返回简化数据而不是错误
         return ApiResponse(success=True, data={
             "featuredArticles": [],
@@ -190,7 +186,7 @@ async def get_home_config(db: AsyncSession = Depends(get_async_session)):
         return ApiResponse(success=True, data=config)
     except Exception as e:
 
-        logger.logger(f"获取首页配置失败: {str(e)}")
+        logger.error(f"获取首页配置失败: {str(e)}")
         return ApiResponse(success=True, data={
             "hero": {
                 "title": "用文字连接每一个想法",
@@ -292,7 +288,7 @@ async def get_home_articles_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_home_articles_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in get_home_articles_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -481,7 +477,7 @@ async def search_home_articles(
         })
     except Exception as e:
 
-        logger.logger(f"搜索接口错误：{str(e)}")
+        logger.error(f"搜索接口错误：{str(e)}")
         return ApiResponse(success=False, error="搜索服务暂时不可用")
 
 

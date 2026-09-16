@@ -193,14 +193,14 @@ if __name__ == '__main__':
     logger("=== 当前版本信息 ===")
     all_versions = vm.get_all_versions()
     for component, info in all_versions.items():
-        logger.logger(f"\n{component.upper()}:")
+        logger.error(f"\n{component.upper()}:")
         for key, value in info.items():
-            logger.logger(f"  {key}: {value}")
+            logger.error(f"  {key}: {value}")
 
     logger("\n=== 版本摘要 ===")
     summary = get_version_summary()
     for key, value in summary.items():
-        logger.logger(f"  {key}: {value}")
+        logger.error(f"  {key}: {value}")
 
     # 同步前端版本
-    logger.logger(f"\n同步前端版本: {vm.sync_frontend_version()}")
+    logger.error(f"\n同步前端版本: {vm.sync_frontend_version()}")

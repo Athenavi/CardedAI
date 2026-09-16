@@ -161,7 +161,7 @@ class WebPushService:
                     failed_subscriptions.append(subscription.get('endpoint'))
 
             except Exception as e:
-                logger.logger(f"Failed to send push notification: {str(e)}")
+                logger.error(f"Failed to send push notification: {str(e)}")
                 failed_subscriptions.append(subscription.get('endpoint'))
 
         # 清理失败的订阅
@@ -215,7 +215,7 @@ class WebPushService:
                     )
                     return True
                 except WebPushException as e:
-                    logger.logger(f"WebPush error: {str(e)}")
+                    logger.error(f"WebPush error: {str(e)}")
                     # 410 Gone 或 404 表示订阅已失效
                     if hasattr(e, 'response') and e.response is not None:
                         if e.response.status_code in (404, 410):
@@ -228,7 +228,7 @@ class WebPushService:
                 return True
 
         except Exception as e:
-            logger.logger(f"Push send failed: {str(e)}")
+            logger.error(f"Push send failed: {str(e)}")
             return False
 
     def send_to_multiple_users(self, user_ids: List[int],

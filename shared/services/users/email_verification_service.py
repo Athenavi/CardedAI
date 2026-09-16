@@ -150,7 +150,7 @@ class EmailVerificationService:
             return True
 
         except Exception as e:
-            logger.logger(f"Failed to send email to {to_email}: {str(e)}")
+            logger.error(f"Failed to send email to {to_email}: {str(e)}")
             return False
 
     def send_verification_code(self, email: str) -> dict:

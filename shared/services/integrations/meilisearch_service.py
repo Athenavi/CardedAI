@@ -79,7 +79,7 @@ class MeilisearchService:
             return True
 
         except Exception as e:
-            logger.logger(f"Failed to initialize Meilisearch: {e}")
+            logger.error(f"Failed to initialize Meilisearch: {e}")
             return False
 
     async def _configure_index(self):
@@ -167,7 +167,7 @@ class MeilisearchService:
             return True
 
         except Exception as e:
-            logger.logger(f"Failed to index article {article_data.get('id')}: {e}")
+            logger.error(f"Failed to index article {article_data.get('id')}: {e}")
             return False
 
     async def update_article(self, article_data: Dict[str, Any]) -> bool:
@@ -190,7 +190,7 @@ class MeilisearchService:
             return True
 
         except Exception as e:
-            logger.logger(f"Failed to update article index {article_data.get('id')}: {e}")
+            logger.error(f"Failed to update article index {article_data.get('id')}: {e}")
             return False
 
     async def delete_article(self, article_id: int) -> bool:
@@ -213,7 +213,7 @@ class MeilisearchService:
             return True
 
         except Exception as e:
-            logger.logger(f"Failed to delete article index {article_id}: {e}")
+            logger.error(f"Failed to delete article index {article_id}: {e}")
             return False
 
     async def bulk_index_articles(self, articles: List[Dict[str, Any]]) -> bool:
@@ -239,7 +239,7 @@ class MeilisearchService:
             return True
 
         except Exception as e:
-            logger.logger(f"Failed to bulk index articles: {e}")
+            logger.error(f"Failed to bulk index articles: {e}")
             return False
 
     async def search(
@@ -367,7 +367,7 @@ class MeilisearchService:
             }
 
         except Exception as e:
-            logger.logger(f"Search failed: {e}")
+            logger.error(f"Search failed: {e}")
             return {
                 'articles': [],
                 'total': 0,
@@ -469,7 +469,7 @@ class MeilisearchService:
                     'local_search': True,
                 }
         except Exception as e:
-            logger.logger(f"Local search failed: {e}")
+            logger.error(f"Local search failed: {e}")
             return {
                 'articles': [],
                 'total': 0,
@@ -498,7 +498,7 @@ class MeilisearchService:
                 )).scalars().all()
                 return [t for t in rows if t][:limit]
         except Exception as e:
-            logger.logger(f"Local search suggestions failed: {e}")
+            logger.error(f"Local search suggestions failed: {e}")
             return []
 
     async def get_search_suggestions(
@@ -530,7 +530,7 @@ class MeilisearchService:
             return suggestions[:limit]
 
         except Exception as e:
-            logger.logger(f"Failed to get search suggestions: {e}")
+            logger.error(f"Failed to get search suggestions: {e}")
             return []
 
     async def rebuild_index(self, articles: List[Dict[str, Any]]) -> bool:
@@ -557,7 +557,7 @@ class MeilisearchService:
             return True
 
         except Exception as e:
-            logger.logger(f"Failed to rebuild index: {e}")
+            logger.error(f"Failed to rebuild index: {e}")
             return False
 
     async def get_index_stats(self) -> Dict[str, Any]:
@@ -583,7 +583,7 @@ class MeilisearchService:
                     'local_search': True,
                 }
             except Exception as e:
-                logger.logger(f"Local index stats failed: {e}")
+                logger.error(f"Local index stats failed: {e}")
                 return {}
         try:
             stats = await self.index.get_stats()
@@ -595,7 +595,7 @@ class MeilisearchService:
             }
 
         except Exception as e:
-            logger.logger(f"Failed to get index stats: {e}")
+            logger.error(f"Failed to get index stats: {e}")
             return {}
 
     def calculate_content_hash(self, article_data: Dict[str, Any]) -> str:

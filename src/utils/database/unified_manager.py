@@ -204,7 +204,7 @@ class UnifiedDatabaseManager:
             logger.info("Async database engine initialized successfully")
 
         except Exception as e:
-            logger.logger(f"Failed to initialize database engine: {e}", exc_info=True)
+            logger.error(f"Failed to initialize database engine: {e}", exc_info=True)
             raise
 
     @property
@@ -250,7 +250,7 @@ class UnifiedDatabaseManager:
                     "Please ensure you have completed the database configuration step "
                     "before attempting to use the database."
                 )
-                logger.logger(f"error_msg)
+                logger.error(f"error_msg")
                 raise RuntimeError(error_msg)
 
         session = self.async_session_factory()
@@ -290,7 +290,7 @@ class UnifiedDatabaseManager:
                         await session.rollback()
                         logger.debug(f"Session rolled back: {id(session)}")
                     except Exception as rollback_err:
-                        logger.logger(f"Error during rollback: {rollback_err}")
+                        logger.error(f"Error during rollback: {rollback_err}")
                 raise
         except Exception as e:
             # 发生异常时回滚
@@ -310,7 +310,7 @@ class UnifiedDatabaseManager:
                 await session.rollback()
                 logger.debug(f"Session rolled back after exception: {id(session)}")
             except Exception as rollback_err:
-                logger.logger(f"Error during rollback: {rollback_err}")
+                logger.error(f"Error during rollback: {rollback_err}")
             raise
         finally:
             # 确保会话总是被关闭
@@ -347,7 +347,7 @@ class UnifiedDatabaseManager:
                     "Please ensure you have completed the database configuration step "
                     "before attempting to use the database."
                 )
-                logger.logger(f"error_msg)
+                logger.error(f"error_msg")
                 raise RuntimeError(error_msg)
 
         session = self.async_session_factory()
@@ -372,7 +372,7 @@ class UnifiedDatabaseManager:
                 await session.rollback()
                 logger.debug(f"Session rolled back after exception: {id(session)}")
             except Exception as rollback_err:
-                logger.logger(f"Error during rollback: {rollback_err}")
+                logger.error(f"Error during rollback: {rollback_err}")
             raise
         finally:
             # 确保会话总是被关闭
@@ -390,7 +390,7 @@ class UnifiedDatabaseManager:
                 await self._async_engine.dispose()
                 logger.info("Database engine disposed")
             except Exception as e:
-                logger.logger(f"Error disposing database engine: {e}")
+                logger.error(f"Error disposing database engine: {e}")
             finally:
                 self._async_engine = None
                 self._async_session_factory = None

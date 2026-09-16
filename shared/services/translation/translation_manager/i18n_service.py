@@ -251,7 +251,7 @@ class I18nService:
             with open(translation_file, 'w', encoding='utf-8') as f:
                 json.dump(translations, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            logger.logger(f"Error saving translations: {e}")
+            logger.error(f"Error saving translations: {e}")
 
     def generate_translation_template(self) -> Dict[str, str]:
         """生成翻译模板(基于默认语言)"""

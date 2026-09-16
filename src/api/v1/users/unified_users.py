@@ -112,7 +112,7 @@ async def get_users_list_api(
             }
         )
     except Exception as e:
-        logger.logger(f"Error in get_users_list_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in get_users_list_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -220,7 +220,7 @@ async def import_users_csv_api(
             }
         )
     except Exception as e:
-        logger.logger(f"Error in import_users_csv_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in import_users_csv_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -272,7 +272,7 @@ async def export_users_csv_api(
             }
         )
     except Exception as e:
-        logger.logger(f"Error in export_users_csv_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in export_users_csv_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -297,7 +297,7 @@ async def download_sample_csv_api(
             }
         )
     except Exception as e:
-        logger.logger(f"Error in download_sample_csv_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in download_sample_csv_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -456,7 +456,7 @@ async def update_current_user_profile_api(
             data=user_data
         )
     except Exception as e:
-        logger.logger(f"Error in update_current_user_profile_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in update_current_user_profile_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -513,7 +513,7 @@ async def change_password_api(
     except HTTPException:
         raise
     except Exception as e:
-        logger.logger(f"Error in change_password_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in change_password_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=f"密码修改失败: {str(e)}")
 
 
@@ -567,7 +567,7 @@ async def update_avatar_api(
         logger.info(f"[Avatar Upload] Success! Avatar URL: {avatar_url}")
         return JSONResponse(content={"success": True, "avatar_url": avatar_url})
     except Exception as e:
-        logger.logger(f"[Avatar Upload] Error: {str(e)}", exc_info=True)
+        logger.error(f"[Avatar Upload] Error: {str(e)}", exc_info=True)
         return JSONResponse(content={"error": f"头像更新失败: {str(e)}"}, status_code=500)
 
 
@@ -669,7 +669,7 @@ async def get_followers(
             }
         )
     except Exception as e:
-        logger.logger(f"Error in get_followers: {str(e)}", exc_info=True)
+        logger.error(f"Error in get_followers: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -715,7 +715,7 @@ async def get_following(
             }
         )
     except Exception as e:
-        logger.logger(f"Error in get_following: {str(e)}", exc_info=True)
+        logger.error(f"Error in get_following: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 # ==================== 其他用户公开信息 (/{user_id}) ====================
@@ -808,7 +808,7 @@ async def follow_user(
             message="关注成功"
         )
     except Exception as e:
-        logger.logger(f"Error in follow_user: {str(e)}", exc_info=True)
+        logger.error(f"Error in follow_user: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -845,7 +845,7 @@ async def unfollow_user(
             message="取消关注成功"
         )
     except Exception as e:
-        logger.logger(f"Error in unfollow_user: {str(e)}", exc_info=True)
+        logger.error(f"Error in unfollow_user: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -892,7 +892,7 @@ async def get_user_followers(
             }
         )
     except Exception as e:
-        logger.logger(f"Error in get_user_followers: {str(e)}", exc_info=True)
+        logger.error(f"Error in get_user_followers: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -939,7 +939,7 @@ async def get_user_following(
             }
         )
     except Exception as e:
-        logger.logger(f"Error in get_user_following: {str(e)}", exc_info=True)
+        logger.error(f"Error in get_user_following: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -1050,7 +1050,7 @@ async def recommend_users(
             }
         )
     except Exception as e:
-        logger.logger(f"Error in recommend_users: {str(e)}", exc_info=True)
+        logger.error(f"Error in recommend_users: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 

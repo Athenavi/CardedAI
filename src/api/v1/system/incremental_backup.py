@@ -66,7 +66,7 @@ async def create_incremental_backup(
             )
 
     except Exception as e:
-        logger.logger(f"Error creating incremental backup: {e}", exc_info=True)
+        logger.error(f"Error creating incremental backup: {e}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -108,7 +108,7 @@ async def create_differential_backup(
             )
 
     except Exception as e:
-        logger.logger(f"Error creating differential backup: {e}", exc_info=True)
+        logger.error(f"Error creating differential backup: {e}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -159,7 +159,7 @@ async def restore_incremental_backup(
             )
 
     except Exception as e:
-        logger.logger(f"Error restoring incremental backup: {e}", exc_info=True)
+        logger.error(f"Error restoring incremental backup: {e}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -180,7 +180,7 @@ async def get_backup_statistics(
         )
 
     except Exception as e:
-        logger.logger(f"Error getting backup statistics: {e}", exc_info=True)
+        logger.error(f"Error getting backup statistics: {e}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -228,7 +228,7 @@ async def get_backup_chain(
 
     except Exception as e:
         import traceback
-        logger.logger(f"Error getting backup chain: {str(e)}")
+        logger.error(f"Error getting backup chain: {str(e)}")
         logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -259,6 +259,6 @@ async def cleanup_old_backups(
 
     except Exception as e:
         import traceback
-        logger.logger(f"Error cleaning up old backups: {str(e)}")
+        logger.error(f"Error cleaning up old backups: {str(e)}")
         logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))

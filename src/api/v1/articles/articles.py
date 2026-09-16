@@ -286,7 +286,7 @@ async def get_articles_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_articles_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in get_articles_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -363,7 +363,7 @@ async def get_home_articles_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_home_articles_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in get_home_articles_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -425,7 +425,7 @@ async def get_user_articles_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_user_articles_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in get_user_articles_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -444,7 +444,7 @@ async def get_user_articles_stats_api(
                            data={"articles_count": articles_count, "followers_count": 0, "following_count": 0})
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_user_articles_stats_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in get_user_articles_stats_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -475,7 +475,7 @@ async def get_article_by_slug_api(
         return ApiResponse(success=True, data={"article": data})
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_article_by_slug_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in get_article_by_slug_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -503,7 +503,7 @@ async def get_article_by_id_html_api(
         return ApiResponse(success=True, data={"article": data, "aid": article_id})
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_article_by_id_html_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in get_article_by_id_html_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -566,7 +566,7 @@ async def get_article_raw_content_api(
         })
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_article_raw_content_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in get_article_raw_content_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -685,7 +685,7 @@ async def create_article_api(
                     change_summary=form_data.get('change_summary', '创建文章')
                 )
             except Exception as rev_err:
-                logger.logger(f"保存修订失败: {rev_err}")
+                logger.error(f"保存修订失败: {rev_err}")
 
         await db.commit()
 
@@ -703,13 +703,13 @@ async def create_article_api(
                 }
             ))
         except Exception as webhook_err:
-            logger.logger(f"Webhook trigger failed: {webhook_err}")
+            logger.error(f"Webhook trigger failed: {webhook_err}")
 
         # 触发 ISR 重新生成
         try:
             asyncio.create_task(isr_service.on_article_update(new_article.slug))
         except Exception as isr_err:
-            logger.logger(f"ISR trigger failed: {isr_err}")
+            logger.error(f"ISR trigger failed: {isr_err}")
 
         # 记录审计日志
         try:
@@ -722,13 +722,13 @@ async def create_article_api(
                 user_agent=request.headers.get('user-agent'),
             )
         except Exception as audit_err:
-            logger.logger(f"审计日志记录失败: {audit_err}")
+            logger.error(f"审计日志记录失败: {audit_err}")
 
         return ApiResponse(success=True, data={"message": "Article created successfully", "article_id": new_article.id})
     except Exception as e:
         await db.rollback()
         import traceback
-        logger.logger(f"Error in create_article_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in create_article_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -822,7 +822,7 @@ async def update_article_api(
         #     else:
         #         content_text = content_text_raw
         # except Exception as filter_err:
-        #     logger.logger(f"敏感词过滤失败: {filter_err}")
+        #     logger.error(f"敏感词过滤失败: {filter_err}")
         #     content_text = form_data.get('content', '')
 
         article.updated_at = datetime.now()
@@ -848,7 +848,7 @@ async def update_article_api(
                     change_summary=form_data.get('change_summary', '手动保存')
                 )
             except Exception as rev_err:
-                logger.logger(f"保存修订失败: {rev_err}")
+                logger.error(f"保存修订失败: {rev_err}")
 
         await db.commit()
 
@@ -867,7 +867,7 @@ async def update_article_api(
                 db=db
             )
         except Exception as webhook_err:
-            logger.logger(f"Webhook trigger failed: {webhook_err}")
+            logger.error(f"Webhook trigger failed: {webhook_err}")
 
         # 记录审计日志
         try:
@@ -880,13 +880,13 @@ async def update_article_api(
                 user_agent=request.headers.get('user-agent'),
             )
         except Exception as audit_err:
-            logger.logger(f"审计日志记录失败: {audit_err}")
+            logger.error(f"审计日志记录失败: {audit_err}")
 
         return ApiResponse(success=True, data={"message": "Article updated successfully"})
     except Exception as e:
         await db.rollback()
         import traceback
-        logger.logger(f"Error in update_article_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in update_article_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -934,7 +934,7 @@ async def delete_article_api(
                 db=db
             )
         except Exception as webhook_err:
-            logger.logger(f"Webhook trigger failed: {webhook_err}")
+            logger.error(f"Webhook trigger failed: {webhook_err}")
 
         # 记录审计日志
         try:
@@ -947,12 +947,12 @@ async def delete_article_api(
                 user_agent=request.headers.get('user-agent'),
             )
         except Exception as audit_err:
-            logger.logger(f"审计日志记录失败: {audit_err}")
+            logger.error(f"审计日志记录失败: {audit_err}")
 
         return ApiResponse(success=True, data={"message": "Article deleted successfully"})
     except Exception as e:
         import traceback
-        logger.logger(f"Error in delete_article_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in delete_article_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -1006,7 +1006,7 @@ async def get_articles_by_tag_api(
         return ApiResponse(success=True, data={"tag_name": tag_name, "articles": articles_data})
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_articles_by_tag_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in get_articles_by_tag_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -1058,7 +1058,7 @@ async def get_featured_articles_api(
         return ApiResponse(success=True, data={"featured_articles": articles_data})
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_featured_articles_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in get_featured_articles_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -1079,7 +1079,7 @@ async def submit_contribution_api(request: Request, article_id: int):
         return ApiResponse(success=True, data={"message": "Translation submitted successfully", "i18n_id": 1})
     except Exception as e:
         import traceback
-        logger.logger(f"Error in submit_contribution_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in submit_contribution_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -1127,7 +1127,7 @@ async def get_edit_article_api(
         })
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_edit_article_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in get_edit_article_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -1145,7 +1145,7 @@ async def get_new_article_form_api(
         })
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_new_article_form_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in get_new_article_form_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -1185,7 +1185,7 @@ async def toggle_article_sticky_api(
         })
     except Exception as e:
         import traceback
-        logger.logger(f"Error in toggle_article_sticky_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in toggle_article_sticky_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -1203,7 +1203,7 @@ async def clean_expired_sticky_articles_api(
                            data={"message": f"Cleaned {cleaned} expired sticky articles", "cleaned_count": cleaned})
     except Exception as e:
         import traceback
-        logger.logger(f"Error in clean_expired_sticky_articles_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in clean_expired_sticky_articles_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -1273,7 +1273,7 @@ async def reorder_articles_api(
     except Exception as e:
         await db.rollback()
         import traceback
-        logger.logger(f"Error in reorder_articles_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in reorder_articles_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -1350,5 +1350,5 @@ async def batch_article_operation_api(
     except Exception as e:
         await db.rollback()
         import traceback
-        logger.logger(f"Error in batch_article_operation_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in batch_article_operation_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))

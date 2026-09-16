@@ -28,8 +28,8 @@ def handle_api_exception(e: Exception, default_message: str = "操作失败，�
         str: 可以安全返回给用户的错误消息
     """
     # 记录详细的错误日志（仅在后端日志中）
-    logger.logger(f"API 错误：{str(e)}")
-    logger.logger(f"traceback.format_exc())
+    logger.error(f"API 错误：{str(e)}")
+    logger.error(traceback.format_exc())
 
     # 如果是 SafeException，返回具体消息
     if isinstance(e, SafeException):

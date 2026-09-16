@@ -76,7 +76,7 @@ async def get_all_categories_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_all_categories_api: {str(e)}")
+        logger.error(f"Error in get_all_categories_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -120,7 +120,7 @@ async def get_public_categories_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_public_categories_api: {str(e)}")
+        logger.error(f"Error in get_public_categories_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -224,7 +224,7 @@ async def get_category_by_name_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_category_by_name_api: {str(e)}")
+        logger.error(f"Error in get_category_by_name_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -285,7 +285,7 @@ async def get_all_categories_root_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_all_categories_root_api: {str(e)}")
+        logger.error(f"Error in get_all_categories_root_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -346,7 +346,7 @@ async def subscribe_category_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in subscribe_category_api: {str(e)}")
+        logger.error(f"Error in subscribe_category_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -394,6 +394,6 @@ async def unsubscribe_category_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in unsubscribe_category_api: {str(e)}")
+        logger.error(f"Error in unsubscribe_category_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))

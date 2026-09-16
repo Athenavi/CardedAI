@@ -43,7 +43,7 @@ async def get_search_history(
             'data': history_data
         }
     except Exception as e:
-        logger.logger(f"获取搜索历史失败：{str(e)}")
+        logger.error(f"获取搜索历史失败：{str(e)}")
         return {
             'success': False,
             'error': str(e)
@@ -72,7 +72,7 @@ async def clear_search_history(
             'message': '搜索历史已清除'
         }
     except Exception as e:
-        logger.logger(f"清除搜索历史失败：{str(e)}")
+        logger.error(f"清除搜索历史失败：{str(e)}")
         return {
             'success': False,
             'error': str(e)
@@ -115,7 +115,7 @@ async def delete_search_history_item(
             'message': '搜索历史记录已删除'
         }
     except Exception as e:
-        logger.logger(f"删除搜索历史记录失败：{str(e)}")
+        logger.error(f"删除搜索历史记录失败：{str(e)}")
         return {
             'success': False,
             'error': str(e)

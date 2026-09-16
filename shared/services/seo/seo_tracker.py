@@ -136,7 +136,7 @@ class SEOTracker:
                 'keyword': keyword,
             }
         except Exception as e:
-            logger.logger(f"Error analyzing referrer: {e}")
+            logger.error(f"Error analyzing referrer: {e}")
             return None
 
     def get_search_traffic_summary(self, days: int = 30) -> Dict:

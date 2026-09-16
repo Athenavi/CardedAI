@@ -75,7 +75,7 @@ async def export_users(
         )
 
     except Exception as e:
-        logger.logger(f"导出用户列表失败: {str(e)}")
+        logger.error(f"导出用户列表失败: {str(e)}")
         return ApiResponse(success=False, error=f"导出失败: {str(e)}")
 
 
@@ -137,7 +137,7 @@ async def export_articles(
         )
 
     except Exception as e:
-        logger.logger(f"导出文章列表失败: {str(e)}")
+        logger.error(f"导出文章列表失败: {str(e)}")
         return ApiResponse(success=False, error=f"导出失败: {str(e)}")
 
 
@@ -196,7 +196,7 @@ async def export_comments(
         )
 
     except Exception as e:
-        logger.logger(f"导出评论列表失败: {str(e)}")
+        logger.error(f"导出评论列表失败: {str(e)}")
         return ApiResponse(success=False, error=f"导出失败: {str(e)}")
 
 
@@ -267,7 +267,7 @@ async def export_analytics(
         )
 
     except Exception as e:
-        logger.logger(f"导出分析数据失败: {str(e)}")
+        logger.error(f"导出分析数据失败: {str(e)}")
         return ApiResponse(success=False, error=f"导出失败: {str(e)}")
 
 
@@ -351,5 +351,5 @@ async def export_custom_data(
         )
 
     except Exception as e:
-        logger.logger(f"自定义导出失败: {str(e)}")
+        logger.error(f"自定义导出失败: {str(e)}")
         return ApiResponse(success=False, error=f"导出失败: {str(e)}")

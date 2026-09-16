@@ -47,7 +47,7 @@ async def generate_hreflang(
         )
     except Exception as e:
         import traceback
-        logger.logger(f""", exc_info=True)
+        logger.error(exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 

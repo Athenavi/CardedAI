@@ -68,7 +68,7 @@ async def upload_cover(
         except Exception as e:
             await db.rollback()
             import traceback
-            logger.logger(f""", exc_info=True)
+            logger.error(exc_info=True)
             return JSONResponse({'code': 500, 'msg': '文件处理失败', 'error': str(e)}, status_code=500)
 
         if not result['success']:
@@ -89,5 +89,5 @@ async def upload_cover(
 
     except Exception as e:
         import traceback
-        logger.logger(f""", exc_info=True)
+        logger.error(exc_info=True)
         return JSONResponse({'code': 500, 'msg': '上传失败', 'error': str(e)}, status_code=500)

@@ -71,7 +71,7 @@ class ScheduledPublishScheduler:
 
                 await self._check_and_publish()
             except Exception as e:
-                logger.logger(f"Error in scheduled publish scheduler: {e}")
+                logger.error(f"Error in scheduled publish scheduler: {e}")
 
             # 等待下一个检查周期
             await asyncio.sleep(self.check_interval)
@@ -94,14 +94,14 @@ class ScheduledPublishScheduler:
 
                         if result['failed_articles']:
                             for failed in result['failed_articles']:
-                                logger.logger(f"
+                                logger.error(
                                     f"Failed to publish article {failed['article_id']}: "
                                     f"{failed['error']}"
                                 )
 
                     await db.commit()
                 except Exception as e:
-                    logger.logger(f"Error checking scheduled publishes: {e}")
+                    logger.error(f"Error checking scheduled publishes: {e}")
                     await db.rollback()
         except ConnectionRefusedError:
             logger.warning("定时发布检查: 数据库连接被拒绝, 跳过本轮检查")

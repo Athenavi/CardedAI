@@ -70,7 +70,7 @@ async def create_category_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in create_category_api: {str(e)}")
+        logger.error(f"Error in create_category_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -133,7 +133,7 @@ async def update_category_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in update_category_api: {str(e)}")
+        logger.error(f"Error in update_category_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -220,7 +220,7 @@ async def get_categories_with_stats_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in get_categories_with_stats_api: {str(e)}")
+        logger.error(f"Error in get_categories_with_stats_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -266,7 +266,7 @@ async def delete_category_api(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error in delete_category_api: {str(e)}")
+        logger.error(f"Error in delete_category_api: {str(e)}")
         logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -336,5 +336,5 @@ async def reorder_categories_api(
     except Exception as e:
         await db.rollback()
         import traceback
-        logger.logger(f"Error in reorder_categories_api: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error in reorder_categories_api: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=str(e))

@@ -60,7 +60,7 @@ class PluginDatabaseInitializer:
                     })
 
             except Exception as e:
-                logger.logger(f"[PluginDBInit] Failed to read metadata for {item.name}: {e}")
+                logger.error(f"[PluginDBInit] Failed to read metadata for {item.name}: {e}")
 
         return plugins
 
@@ -79,7 +79,7 @@ class PluginDatabaseInitializer:
             plugin_path = self.plugins_dir / plugin_slug / "plugin.py"
 
             if not plugin_path.exists():
-                logger.logger(f"[PluginDBInit] Plugin file not found: {plugin_slug}")
+                logger.error(f"[PluginDBInit] Plugin file not found: {plugin_slug}")
                 return False
 
             # 动态导入插件模块
@@ -97,14 +97,14 @@ class PluginDatabaseInitializer:
             if hasattr(module, init_func_name):
                 init_func = getattr(module, init_func_name)
                 init_func()
-                logger.logger(f"[PluginDBInit] ✓ Initialized database for {plugin_slug}")
+                logger.error(f"[PluginDBInit] ✓ Initialized database for {plugin_slug}")
                 return True
             else:
-                logger.logger(f"[PluginDBInit] ⚠ No init function found for {plugin_slug}")
+                logger.error(f"[PluginDBInit] ⚠ No init function found for {plugin_slug}")
                 return False
 
         except Exception as e:
-            logger.logger(f"[PluginDBInit] ✗ Failed to initialize {plugin_slug}: {e}")
+            logger.error(f"[PluginDBInit] ✗ Failed to initialize {plugin_slug}: {e}")
             import traceback
             traceback.print_exc()
             return False
@@ -122,7 +122,7 @@ class PluginDatabaseInitializer:
             logger("[PluginDBInit] No plugins requiring database found")
             return {}
 
-        logger.logger(f"[PluginDBInit] Found {len(plugins)} plugins requiring database initialization")
+        logger.error(f"[PluginDBInit] Found {len(plugins)} plugins requiring database initialization")
         logger("=" * 60)
 
         results = {}
@@ -133,7 +133,7 @@ class PluginDatabaseInitializer:
             slug = plugin_info['slug']
             name = plugin_info['name']
 
-            logger.logger(f"\nInitializing: {name} ({slug})...")
+            logger.error(f"\nInitializing: {name} ({slug})...")
             success = self.initialize_plugin_db(slug)
 
             results[slug] = success
@@ -143,10 +143,10 @@ class PluginDatabaseInitializer:
                 fail_count += 1
 
         logger("\n" + "=" * 60)
-        logger.logger(f"[PluginDBInit] Initialization complete:")
-        logger.logger(f"  Total: {len(plugins)}")
-        logger.logger(f"  Success: {success_count}")
-        logger.logger(f"  Failed: {fail_count}")
+        logger.error(f"[PluginDBInit] Initialization complete:")
+        logger.error(f"  Total: {len(plugins)}")
+        logger.error(f"  Success: {success_count}")
+        logger.error(f"  Failed: {fail_count}")
 
         return results
 
@@ -170,17 +170,17 @@ class PluginDatabaseInitializer:
             是否成功
         """
         try:
-            logger.logger(f"[PluginDBInit] Resetting database for {plugin_slug}...")
+            logger.error(f"[PluginDBInit] Resetting database for {plugin_slug}...")
 
             # 删除现有数据库
             if plugin_db.delete_plugin_db(plugin_slug):
-                logger.logger(f"[PluginDBInit] Deleted existing database")
+                logger.error(f"[PluginDBInit] Deleted existing database")
 
             # 重新初始化
             return self.initialize_plugin_db(plugin_slug)
 
         except Exception as e:
-            logger.logger(f"[PluginDBInit] Failed to reset database: {e}")
+            logger.error(f"[PluginDBInit] Failed to reset database: {e}")
             return False
 
 
@@ -237,7 +237,7 @@ if __name__ == "__main__":
             logger("-" * 60)
             for db in databases:
                 size_kb = db['size_bytes'] / 1024
-                logger.logger(f"  {db['plugin_slug']:30s} {size_kb:8.2f} KB")
+                logger.error(f"  {db['plugin_slug']:30s} {size_kb:8.2f} KB")
         else:
             logger("No plugin databases found")
 

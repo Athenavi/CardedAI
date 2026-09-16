@@ -140,7 +140,7 @@ class TriggerService:
             if graph_data is None:
                 graph_data = await self._load_graph_from_db(workflow_id)
                 if graph_data is None:
-                    logger.logger(f"[TriggerService] 无法加载工作流 {workflow_id} 的图结构")
+                    logger.error(f"[TriggerService] 无法加载工作流 {workflow_id} 的图结构")
                     return
 
             # 保存执行记录到数据库
@@ -164,7 +164,7 @@ class TriggerService:
                 f"status={result.status}"
             )
         except Exception as exc:
-            logger.logger(f"[TriggerService] Cron 触发执行失败: {exc}")
+            logger.error(f"[TriggerService] Cron 触发执行失败: {exc}")
 
     # ------------------------------------------------------------------
     # Event 事件触发
@@ -206,7 +206,7 @@ class TriggerService:
                 if wf_graph is None:
                     wf_graph = await self._load_graph_from_db(workflow_id)
                     if wf_graph is None:
-                        logger.logger(f"[TriggerService] 无法加载工作流 {workflow_id}")
+                        logger.error(f"[TriggerService] 无法加载工作流 {workflow_id}")
                         return
 
                 execution_id = await self._create_execution_record(workflow_id, "event")
@@ -223,7 +223,7 @@ class TriggerService:
                 await self._update_execution_record(execution_id, result)
                 logger.info(f"[TriggerService] 事件触发完成: workflow={workflow_id}, status={result.status}")
             except Exception as exc:
-                logger.logger(f"[TriggerService] 事件触发执行失败: {exc}")
+                logger.error(f"[TriggerService] 事件触发执行失败: {exc}")
 
         if event_name not in self._event_handlers:
             self._event_handlers[event_name] = []
@@ -484,7 +484,7 @@ class TriggerService:
                     return wf.graph  # JSON 字符串，dag_engine 会自动解析
             return None
         except Exception as exc:
-            logger.logger(f"[TriggerService] 加载工作流 {workflow_id} 失败: {exc}")
+            logger.error(f"[TriggerService] 加载工作流 {workflow_id} 失败: {exc}")
             return None
 
     async def _create_execution_record(self, workflow_id: int, trigger_type: str) -> Optional[int]:

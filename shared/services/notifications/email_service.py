@@ -73,7 +73,7 @@ class EmailService:
             return True
 
         except Exception as e:
-            logger.logger(f"邮件发送失败: {str(e)}")
+            logger.error(f"邮件发送失败: {str(e)}")
             return False
 
     def send_batch_emails(

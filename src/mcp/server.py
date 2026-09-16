@@ -652,7 +652,7 @@ class MCPServer:
                 ]
             return []
         except Exception as e:
-            logger.logger(f"MCP search failed: {e}")
+            logger.error(f"MCP search failed: {e}")
             return []
 
     async def _generate_seo_description_tool(self, arguments: Dict) -> Dict:

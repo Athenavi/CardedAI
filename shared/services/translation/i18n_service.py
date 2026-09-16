@@ -65,7 +65,7 @@ class TranslationService:
                         self.translation_cache[lang_code] = json.load(f)
                     logger.info(f"Loaded translations for {lang_code}")
                 except Exception as e:
-                    logger.logger(f"Failed to load translations for {lang_code}: {e}")
+                    logger.error(f"Failed to load translations for {lang_code}: {e}")
                     self.translation_cache[lang_code] = {}
             else:
                 self.translation_cache[lang_code] = {}
@@ -125,7 +125,7 @@ class TranslationService:
                 json.dump(self.translation_cache.get(language, {}), f, ensure_ascii=False, indent=2)
             logger.info(f"Saved translations for {language}")
         except Exception as e:
-            logger.logger(f"Failed to save translations for {language}: {e}")
+            logger.error(f"Failed to save translations for {language}: {e}")
 
     def get_supported_languages(self) -> List[Dict[str, Any]]:
         """
@@ -217,11 +217,11 @@ class TranslationService:
                         translated_text = data['data']['translations'][0]['translatedText']
                         return translated_text
                     else:
-                        logger.logger(f"Translation API error: {response.status}")
+                        logger.error(f"Translation API error: {response.status}")
                         return text
 
         except Exception as e:
-            logger.logger(f"Auto translation failed: {e}")
+            logger.error(f"Auto translation failed: {e}")
             return text
 
     def get_missing_translations(self, language: str) -> List[str]:

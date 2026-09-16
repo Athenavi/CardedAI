@@ -142,7 +142,7 @@ async def save_article_revision(
 
     except Exception as e:
         await db.rollback()
-        logger.logger(f"保存修订失败: {e}", exc_info=True)
+        logger.error(f"保存修订失败: {e}", exc_info=True)
         return None
 
 
@@ -200,7 +200,7 @@ async def get_article_revisions(
         }
 
     except Exception as e:
-        logger.logger(f"获取修订历史失败: {e}", exc_info=True)
+        logger.error(f"获取修订历史失败: {e}", exc_info=True)
         return {
             "revisions": [],
             "pagination": {
@@ -241,7 +241,7 @@ async def get_revision_detail(
         return revision.to_dict()
 
     except Exception as e:
-        logger.logger(f"获取修订详情失败: {e}", exc_info=True)
+        logger.error(f"获取修订详情失败: {e}", exc_info=True)
         return None
 
 
@@ -331,7 +331,7 @@ async def rollback_to_revision(
 
     except Exception as e:
         await db.rollback()
-        logger.logger(f"回滚失败: {e}", exc_info=True)
+        logger.error(f"回滚失败: {e}", exc_info=True)
         return False
 
 
@@ -383,7 +383,7 @@ async def compare_revisions(
         }
 
     except Exception as e:
-        logger.logger(f"比较修订失败: {e}", exc_info=True)
+        logger.error(f"比较修订失败: {e}", exc_info=True)
         return None
 
 
@@ -423,5 +423,5 @@ async def delete_revision(
 
     except Exception as e:
         await db.rollback()
-        logger.logger(f"删除修订失败: {e}", exc_info=True)
+        logger.error(f"删除修订失败: {e}", exc_info=True)
         return False

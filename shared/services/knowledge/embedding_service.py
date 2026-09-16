@@ -71,7 +71,7 @@ class LocalEmbeddingBackend(EmbeddingBackend):
             except ImportError:
                 raise ImportError("请安装 sentence-transformers: pip install sentence-transformers")
             except Exception as e:
-                logger.logger(f"Embedding 模型加载失败: {e}")
+                logger.error(f"Embedding 模型加载失败: {e}")
                 raise
 
     async def embed(self, texts: List[str]) -> List[List[float]]:
@@ -86,7 +86,7 @@ class LocalEmbeddingBackend(EmbeddingBackend):
             )
             return embeddings.tolist()
         except Exception as e:
-            logger.logger(f"本地 Embedding 生成失败: {e}")
+            logger.error(f"本地 Embedding 生成失败: {e}")
             return []
 
     def get_dimension(self) -> int:
@@ -109,7 +109,7 @@ class OpenAIEmbeddingBackend(EmbeddingBackend):
 
     async def embed(self, texts: List[str]) -> List[List[float]]:
         if not self._api_key:
-            logger.logger(f""OPENAI_API_KEY 未设置")
+            logger.error(f"OPENAI_API_KEY 未设置")
             return []
 
         try:
@@ -127,7 +127,7 @@ class OpenAIEmbeddingBackend(EmbeddingBackend):
                 sorted_data = sorted(data["data"], key=lambda x: x["index"])
                 return [item["embedding"] for item in sorted_data]
         except Exception as e:
-            logger.logger(f"OpenAI Embedding 生成失败: {e}")
+            logger.error(f"OpenAI Embedding 生成失败: {e}")
             return []
 
     def get_dimension(self) -> int:

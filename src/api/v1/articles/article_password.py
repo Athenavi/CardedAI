@@ -54,7 +54,7 @@ async def set_article_password_api(
             data=result
         )
     except Exception as e:
-        logger.logger(f"Error in set_article_password_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in set_article_password_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -81,7 +81,7 @@ async def verify_article_password_api(
             data=result
         )
     except Exception as e:
-        logger.logger(f"Error in verify_article_password_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in verify_article_password_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -106,5 +106,5 @@ async def check_article_access_api(
             data=result
         )
     except Exception as e:
-        logger.logger(f"Error in check_article_access_api: {str(e)}", exc_info=True)
+        logger.error(f"Error in check_article_access_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))

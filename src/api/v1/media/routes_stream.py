@@ -74,7 +74,7 @@ async def get_cover_image(filename: str):
     except HTTPException:
         raise
     except Exception as e:
-        logger.logger(f"获取封面图片失败: {e}")
+        logger.error(f"获取封面图片失败: {e}")
         raise HTTPException(status_code=500, detail="服务器内部错误")
 
 
@@ -95,7 +95,7 @@ async def get_media_file_by_id(
         media = media_result.scalar_one_or_none()
 
         if not media:
-            logger.logger(f"[ERROR] 媒体文件不存在 - ID: {media_id}")
+            logger.error(f"[ERROR] 媒体文件不存在 - ID: {media_id}")
             raise HTTPException(status_code=404, detail="文件不存在")
 
         logger.debug(
@@ -145,7 +145,7 @@ async def get_media_file_by_id(
                 # 如果文件不存在，使用 hash 作为 ETag
                 etag = f'"{media.hash}"'
         except Exception as e:
-            logger.logger(f"生成 ETag 失败: {e}")
+            logger.error(f"生成 ETag 失败: {e}")
             etag = f'"{media.hash}"'
 
         # 检查客户端是否有缓存（If-None-Match）
@@ -211,9 +211,9 @@ async def get_media_file_by_id(
             )
         else:
             # 如果 storage_path 为空或无效，但文件也不存在于标准路径
-            logger.logger(f"  [ERROR] 不支持的存储类型: '{file_hash.storage_path}'")
-            logger.logger(f"  文件是否存在于标准路径: {file_path.exists()}")
-            logger.logger(f"
+            logger.error(f"  [ERROR] 不支持的存储类型: '{file_hash.storage_path}'")
+            logger.error(f"  文件是否存在于标准路径: {file_path.exists()}")
+            logger.error(f"
                 f"  FileHash 完整信息: id={file_hash.id}, hash={file_hash.hash}, filename={file_hash.filename}")
 
             # 如果文件实际上存在于标准路径但没有被检测到（可能是权限问题）

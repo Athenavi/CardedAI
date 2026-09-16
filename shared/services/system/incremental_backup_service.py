@@ -30,7 +30,7 @@ class IncrementalBackupService:
                 with open(self.metadata_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
             except Exception as e:
-                logger.logger(f"[IncrementalBackup] Failed to load metadata: {e}")
+                logger.error(f"[IncrementalBackup] Failed to load metadata: {e}")
                 return {}
         return {}
 
@@ -40,7 +40,7 @@ class IncrementalBackupService:
             with open(self.metadata_file, 'w', encoding='utf-8') as f:
                 json.dump(self.metadata, f, indent=2, default=str)
         except Exception as e:
-            logger.logger(f"[IncrementalBackup] Failed to save metadata: {e}")
+            logger.error(f"[IncrementalBackup] Failed to save metadata: {e}")
 
     async def create_incremental_backup(
             self,
@@ -141,7 +141,7 @@ class IncrementalBackupService:
             }
 
         except Exception as e:
-            logger.logger(f"[IncrementalBackup] Error creating incremental backup: {e}")
+            logger.error(f"[IncrementalBackup] Error creating incremental backup: {e}")
             import traceback
             traceback.print_exc()
             return {
@@ -195,7 +195,7 @@ class IncrementalBackupService:
             return result
 
         except Exception as e:
-            logger.logger(f"[IncrementalBackup] Error creating differential backup: {e}")
+            logger.error(f"[IncrementalBackup] Error creating differential backup: {e}")
             return {
                 'success': False,
                 'error': str(e)
@@ -266,7 +266,7 @@ class IncrementalBackupService:
             }
 
         except Exception as e:
-            logger.logger(f"[IncrementalBackup] Error restoring backup chain: {e}")
+            logger.error(f"[IncrementalBackup] Error restoring backup chain: {e}")
             return {
                 'success': False,
                 'error': str(e)
@@ -335,7 +335,7 @@ class IncrementalBackupService:
             logger("[IncrementalBackup] asyncpg not available, assuming all tables changed")
             return tables or []
         except Exception as e:
-            logger.logger(f"[IncrementalBackup] Error detecting changed tables: {e}")
+            logger.error(f"[IncrementalBackup] Error detecting changed tables: {e}")
             # 出错时返回所有表以确保数据安全
             return tables or []
 
@@ -398,7 +398,7 @@ class IncrementalBackupService:
                 await conn.close()
 
         except Exception as e:
-            logger.logger(f"[IncrementalBackup] Error calculating checksums: {e}")
+            logger.error(f"[IncrementalBackup] Error calculating checksums: {e}")
             return {}
 
     async def _perform_incremental_dump(
@@ -469,7 +469,7 @@ class IncrementalBackupService:
                 'error': 'pg_dump not found. Please install PostgreSQL client tools.'
             }
         except Exception as e:
-            logger.logger(f"[IncrementalBackup] Error performing dump: {e}")
+            logger.error(f"[IncrementalBackup] Error performing dump: {e}")
             return {
                 'success': False,
                 'error': str(e)
@@ -542,7 +542,7 @@ class IncrementalBackupService:
                 'error': 'pg_restore not found. Please install PostgreSQL client tools.'
             }
         except Exception as e:
-            logger.logger(f"[IncrementalBackup] Error restoring backup: {e}")
+            logger.error(f"[IncrementalBackup] Error restoring backup: {e}")
             return {
                 'success': False,
                 'error': str(e)
@@ -674,7 +674,7 @@ class IncrementalBackupService:
                         # 从元数据中删除
                         del self.metadata[backup_id]
                     except Exception as e:
-                        logger.logger(f"[IncrementalBackup] Failed to delete {filename}: {e}")
+                        logger.error(f"[IncrementalBackup] Failed to delete {filename}: {e}")
 
         self._save_metadata()
 

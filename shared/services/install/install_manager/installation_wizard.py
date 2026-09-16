@@ -359,8 +359,8 @@ class InstallationWizardService:
                     logger.info(content)
                     logger.info("=" * 60)
             else:
-                logger.logger(f"\n[ERROR] ✗ .env 文件写入后仍然不存在！")
-                logger.logger(f"[ERROR] 请检查以下可能的问题:")
+                logger.error(f"\n[ERROR] ✗ .env 文件写入后仍然不存在！")
+                logger.error(f"[ERROR] 请检查以下可能的问题:")
                 logger.info(f"  1. 父目录是否存在: {self.config_file.parent.exists()}")
                 logger.info(f"  2. 父目录是否可写: {os.access(str(self.config_file.parent), os.W_OK)}")
                 logger.info(f"  3. 当前工作目录: {Path.cwd().absolute()}")
@@ -369,7 +369,7 @@ class InstallationWizardService:
         except Exception as e:
             import traceback
             error_msg = f"更新 .env 文件失败: {str(e)}"
-            logger.logger(f"\n[ERROR] {error_msg}")
+            logger.error(f"\n[ERROR] {error_msg}")
             logger.info(traceback.format_exc())
             raise
 
@@ -545,7 +545,7 @@ class InstallationWizardService:
                         # 运行异步函数
                         return new_loop.run_until_complete(_import_data())
                     except Exception as e:
-                        logger.logger(f"导入示例数据时事件循环异常: {e}")
+                        logger.error(f"导入示例数据时事件循环异常: {e}")
                         raise
                     finally:
                         new_loop.close()
@@ -565,8 +565,8 @@ class InstallationWizardService:
 
         except Exception as e:
             import traceback
-            logger.logger(f"导入示例数据失败: {str(e)}")
-            logger.logger(f"traceback.format_exc())
+            logger.error(f"导入示例数据失败: {str(e)}")
+            logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'error': f'导入示例数据失败: {str(e)}'
@@ -755,8 +755,8 @@ class InstallationWizardService:
 
         except Exception as e:
             import traceback
-            logger.logger(f"创建管理员账号失败: {str(e)}")
-            logger.logger(f"traceback.format_exc())
+            logger.error(f"创建管理员账号失败: {str(e)}")
+            logger.error(traceback.format_exc())
             return {
                 'success': False,
                 'error': f'创建管理员账号失败: {str(e)}'
@@ -875,7 +875,7 @@ class InstallationWizardService:
             except Exception as init_err:
                 import traceback
                 error_msg = f'数据库管理器初始化失败: {str(init_err)}'
-                logger.logger(f"✗ {error_msg}")
+                logger.error(f"✗ {error_msg}")
                 logger.info(traceback.format_exc())
                 return {
                     'success': False,
@@ -917,14 +917,14 @@ class InstallationWizardService:
 
             except ImportError:
                 error_msg = '缺少 psycopg2 库，请安装: pip install psycopg2-binary'
-                logger.logger(f"✗ {error_msg}")
+                logger.error(f"✗ {error_msg}")
                 return {
                     'success': False,
                     'error': error_msg
                 }
             except Exception as e:
                 error_msg = f'数据库连接失败: {str(e)}'
-                logger.logger(f"✗ {error_msg}")
+                logger.error(f"✗ {error_msg}")
                 return {
                     'success': False,
                     'error': error_msg
@@ -970,7 +970,7 @@ class InstallationWizardService:
                         error_msg += f'\n{result.stderr}'
                     if result.stdout:
                         error_msg += f'\n{result.stdout}'
-                    logger.logger(f"✗ {error_msg}")
+                    logger.error(f"✗ {error_msg}")
                     return {
                         'success': False,
                         'error': error_msg
@@ -1025,7 +1025,7 @@ class InstallationWizardService:
                     error_msg += f'\n{result.stderr}'
                 if result.stdout:
                     error_msg += f'\n{result.stdout}'
-                logger.logger(f"✗ {error_msg}")
+                logger.error(f"✗ {error_msg}")
                 return {
                     'success': False,
                     'error': error_msg
@@ -1033,7 +1033,7 @@ class InstallationWizardService:
 
         except subprocess.TimeoutExpired:
             error_msg = '迁移超时（超过5分钟）'
-            logger.logger(f"✗ {error_msg}")
+            logger.error(f"✗ {error_msg}")
             return {
                 'success': False,
                 'error': error_msg
@@ -1041,7 +1041,7 @@ class InstallationWizardService:
         except Exception as e:
             import traceback
             error_msg = f'数据库初始化失败: {str(e)}'
-            logger.logger(f"✗ {error_msg}")
+            logger.error(f"✗ {error_msg}")
             logger.info(traceback.format_exc())
             return {
                 'success': False,
@@ -1085,7 +1085,7 @@ class InstallationWizardService:
                 if sample_result['success']:
                     logger.info(f"✓ {sample_result['message']}")
                 else:
-                    logger.logger(f"✗ 示例数据导入失败: {sample_result.get('error', '未知错误')}")
+                    logger.error(f"✗ 示例数据导入失败: {sample_result.get('error', '未知错误')}")
 
             return {
                 "success": True,

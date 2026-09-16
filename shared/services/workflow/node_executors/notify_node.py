@@ -55,7 +55,7 @@ class NotifyNodeExecutor(BaseNodeExecutor):
                 else:
                     results[channel] = f"unknown channel: {channel}"
             except Exception as exc:
-                logger.logger(f"[NotifyNode] 通知发送失败 ({channel}): {exc}")
+                logger.error(f"[NotifyNode] 通知发送失败 ({channel}): {exc}")
                 results[channel] = f"error: {exc}"
 
         return {

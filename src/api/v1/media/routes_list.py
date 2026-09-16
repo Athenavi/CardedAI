@@ -203,7 +203,7 @@ async def list_media(
     except Exception as e:
         import traceback
         error_trace = traceback.format_exc()
-        logger.logger(f"获取媒体列表失败: {str(e)}\n{error_trace}")
+        logger.error(f"获取媒体列表失败: {str(e)}\n{error_trace}")
         return JSONResponse(
             {'success': False, 'message': '获取媒体文件列表失败', 'error': str(e), 'traceback': error_trace},
             status_code=500
@@ -335,7 +335,7 @@ async def get_video_thumbnail(
         )
 
     except Exception as e:
-        logger.logger(f"获取视频缩略图失败: {str(e)}", exc_info=True)
+        logger.error(f"获取视频缩略图失败: {str(e)}", exc_info=True)
         return JSONResponse(
             content={"success": False, "error": str(e)},
             status_code=500

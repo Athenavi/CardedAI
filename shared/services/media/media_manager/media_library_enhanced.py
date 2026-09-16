@@ -156,7 +156,7 @@ class MediaLibraryService:
                 except Exception as e:
                     error_msg = f"删除 {media_id} 失败: {str(e)}"
                     errors.append(error_msg)
-                    logger.logger(f"error_msg, exc_info=True)
+                    logger.error(f"error_msg, exc_info=True)
 
             await db.commit()
             logger.info(f"批量删除完成: 成功{deleted_count}个, 失败{len(errors)}个")
@@ -168,7 +168,7 @@ class MediaLibraryService:
         except Exception as e:
             await db.rollback()
             error_msg = f"批量删除失败: {str(e)}"
-            logger.logger(f"error_msg, exc_info=True)
+            logger.error(f"error_msg, exc_info=True)
             return {"success": False, "error": error_msg}
 
     async def batch_update_metadata(

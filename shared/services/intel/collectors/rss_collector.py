@@ -52,12 +52,12 @@ class RSSCollector(BaseCollector):
         """
         fp = _get_feedparser()
         if fp is None:
-            logger.logger(f""feedparser 未安装，无法采集 RSS 源（请执行: pip install feedparser）")
+            logger.error(f"feedparser 未安装，无法采集 RSS 源（请执行: pip install feedparser）")
             return []
 
         hx = _get_httpx()
         if hx is None:
-            logger.logger(f""httpx 未安装，无法发起 HTTP 请求（请执行: pip install httpx）")
+            logger.error(f"httpx 未安装，无法发起 HTTP 请求（请执行: pip install httpx）")
             return []
 
         etag = source_config.get("etag")
@@ -87,7 +87,7 @@ class RSSCollector(BaseCollector):
                 feed = fp.parse(resp.text)
 
         except Exception as e:
-            logger.logger(f"RSS 采集异常 {url}: {e}")
+            logger.error(f"RSS 采集异常 {url}: {e}")
             return []
 
         items: List[CollectedItemData] = []

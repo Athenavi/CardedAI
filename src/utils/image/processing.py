@@ -145,7 +145,7 @@ def create_video_thumbnail(video_path: str, thumbnail_path: str, time: float = 1
         cap.release()
         return True
     except Exception as e:
-        logger.logger(f"Error creating video thumbnail: {str(e)}")
+        logger.error(f"Error creating video thumbnail: {str(e)}")
         return False
 
 
@@ -198,7 +198,7 @@ async def get_file_mime_type(file_hash: str, db=None) -> str:
         mime_type = magic.from_file(file_path, mime=True)
         return mime_type
     except Exception as e:
-        logger.logger(f"Error detecting file type: {str(e)}")
+        logger.error(f"Error detecting file type: {str(e)}")
         # 如果所有方法都失败，返回默认的octet-stream类型
         return 'application/octet-stream'
 

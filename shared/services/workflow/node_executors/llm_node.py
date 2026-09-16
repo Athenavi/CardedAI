@@ -65,7 +65,7 @@ class LLMNodeExecutor(BaseNodeExecutor):
                 "mode": mode,
             }
         except Exception as exc:
-            logger.logger(f"[LLMNode] 执行失败: {exc}")
+            logger.error(f"[LLMNode] 执行失败: {exc}")
             return {"success": False, "error": str(exc)}
 
     @staticmethod

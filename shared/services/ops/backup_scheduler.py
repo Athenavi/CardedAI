@@ -35,7 +35,7 @@ class BackupScheduler:
         if result['success']:
             logger.info(f"Daily backup completed: {result['filename']}")
         else:
-            logger.logger(f"Daily backup failed: {result.get('error')}")
+            logger.error(f"Daily backup failed: {result.get('error')}")
 
     async def weekly_backup_job(self):
         """每周备份任务"""
@@ -50,7 +50,7 @@ class BackupScheduler:
         if db_result['success'] and files_result['success']:
             logger.info("Weekly full backup completed")
         else:
-            logger.logger(f""Weekly backup partially failed")
+            logger.error(f"Weekly backup partially failed")
 
     async def monthly_backup_job(self):
         """每月备份任务"""
@@ -60,7 +60,7 @@ class BackupScheduler:
         if result['success']:
             logger.info(f"Monthly backup completed: {result['filename']}")
         else:
-            logger.logger(f"Monthly backup failed: {result.get('error')}")
+            logger.error(f"Monthly backup failed: {result.get('error')}")
 
     async def hourly_health_check(self):
         """每小时健康检查"""

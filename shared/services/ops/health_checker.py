@@ -96,7 +96,7 @@ class HealthChecker:
                 }
 
         except Exception as e:
-            logger.logger(f"Database health check failed: {e}")
+            logger.error(f"Database health check failed: {e}")
             await self._send_alert(
                 "database_down",
                 f"数据库连接失败: {str(e)}",
@@ -174,7 +174,7 @@ class HealthChecker:
             }
 
         except Exception as e:
-            logger.logger(f"System resource check failed: {e}")
+            logger.error(f"System resource check failed: {e}")
             return {
                 "status": "error",
                 "error": str(e)
@@ -208,7 +208,7 @@ class HealthChecker:
             }
 
         except Exception as e:
-            logger.logger(f"Application health check failed: {e}")
+            logger.error(f"Application health check failed: {e}")
             return {
                 "status": "error",
                 "error": str(e),
@@ -244,14 +244,14 @@ class HealthChecker:
             try:
                 await self._send_webhook_notification(alert_data)
             except Exception as e:
-                logger.logger(f"Webhook notification failed: {e}")
+                logger.error(f"Webhook notification failed: {e}")
 
         # 异步发送邮件通知（仅对 warning/critical 级别发送）
         if self.email_config and severity in ("warning", "critical"):
             try:
                 await self._send_email_notification(alert_data)
             except Exception as e:
-                logger.logger(f"Email notification failed: {e}")
+                logger.error(f"Email notification failed: {e}")
 
     def _send_alert_sync(self, alert_type: str, message: str, severity: str = "warning"):
         """同步版本的告警发送"""
@@ -283,7 +283,7 @@ class HealthChecker:
                 await asyncio.sleep(self.check_interval)
 
             except Exception as e:
-                logger.logger(f"Monitoring loop error: {e}")
+                logger.error(f"Monitoring loop error: {e}")
                 await asyncio.sleep(self.check_interval)
 
     def stop_monitoring(self):
@@ -385,7 +385,7 @@ class HealthChecker:
             async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 if resp.status >= 400:
                     body = await resp.text()
-                    logger.logger(f"Webhook notification failed ({resp.status}): {body}")
+                    logger.error(f"Webhook notification failed ({resp.status}): {body}")
                 else:
                     logger.info(f"Webhook notification sent successfully for alert: {alert_data.get('type')}")
 
@@ -438,7 +438,7 @@ class HealthChecker:
             await loop.run_in_executor(None, self._send_email_sync, cfg, msg, smtp_port, use_tls)
             logger.info(f"Email notification sent for alert: {alert_data.get('type')}")
         except Exception as e:
-            logger.logger(f"Email notification failed: {e}")
+            logger.error(f"Email notification failed: {e}")
 
     @staticmethod
     def _send_email_sync(cfg: dict, msg: MIMEMultipart, smtp_port: int, use_tls: bool):

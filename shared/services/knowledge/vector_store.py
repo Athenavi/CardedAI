@@ -98,7 +98,7 @@ class MilvusBackend(VectorStoreBackend):
             except ImportError:
                 raise ImportError("请安装 pymilvus: pip install pymilvus")
             except Exception as e:
-                logger.logger(f"Milvus 连接失败: {e}")
+                logger.error(f"Milvus 连接失败: {e}")
                 raise
         return self._client
 
@@ -138,7 +138,7 @@ class MilvusBackend(VectorStoreBackend):
             logger.info(f"Milvus 集合已创建: {collection_name} (dim={dimension})")
             return True
         except Exception as e:
-            logger.logger(f"Milvus 创建集合失败: {e}")
+            logger.error(f"Milvus 创建集合失败: {e}")
             return False
 
     async def insert(self, collection_name: str, vectors: List[List[float]],
@@ -154,7 +154,7 @@ class MilvusBackend(VectorStoreBackend):
             logger.debug(f"Milvus 插入 {len(vectors)} 条向量到 {collection_name}")
             return ids
         except Exception as e:
-            logger.logger(f"Milvus 插入失败: {e}")
+            logger.error(f"Milvus 插入失败: {e}")
             return []
 
     async def search(self, collection_name: str, query_vector: List[float],
@@ -192,7 +192,7 @@ class MilvusBackend(VectorStoreBackend):
                     })
             return hits
         except Exception as e:
-            logger.logger(f"Milvus 搜索失败: {e}")
+            logger.error(f"Milvus 搜索失败: {e}")
             return []
 
     async def delete(self, collection_name: str, ids: List[str]) -> bool:
@@ -202,7 +202,7 @@ class MilvusBackend(VectorStoreBackend):
             logger.debug(f"Milvus 删除 {len(ids)} 条向量从 {collection_name}")
             return True
         except Exception as e:
-            logger.logger(f"Milvus 删除失败: {e}")
+            logger.error(f"Milvus 删除失败: {e}")
             return False
 
     async def drop_collection(self, collection_name: str) -> bool:
@@ -212,7 +212,7 @@ class MilvusBackend(VectorStoreBackend):
             logger.info(f"Milvus 集合已删除: {collection_name}")
             return True
         except Exception as e:
-            logger.logger(f"Milvus 删除集合失败: {e}")
+            logger.error(f"Milvus 删除集合失败: {e}")
             return False
 
     async def get_collection_info(self, collection_name: str) -> Optional[Dict[str, Any]]:
@@ -228,7 +228,7 @@ class MilvusBackend(VectorStoreBackend):
                 "stats": stats,
             }
         except Exception as e:
-            logger.logger(f"Milvus 获取集合信息失败: {e}")
+            logger.error(f"Milvus 获取集合信息失败: {e}")
             return None
 
 
@@ -269,7 +269,7 @@ class QdrantBackend(VectorStoreBackend):
             logger.info(f"Qdrant 集合已创建: {collection_name} (dim={dimension})")
             return True
         except Exception as e:
-            logger.logger(f"Qdrant 创建集合失败: {e}")
+            logger.error(f"Qdrant 创建集合失败: {e}")
             return False
 
     async def insert(self, collection_name: str, vectors: List[List[float]],
@@ -286,7 +286,7 @@ class QdrantBackend(VectorStoreBackend):
             client.upsert(collection_name=collection_name, points=points)
             return ids
         except Exception as e:
-            logger.logger(f"Qdrant 插入失败: {e}")
+            logger.error(f"Qdrant 插入失败: {e}")
             return []
 
     async def search(self, collection_name: str, query_vector: List[float],
@@ -314,7 +314,7 @@ class QdrantBackend(VectorStoreBackend):
                 for hit in results
             ]
         except Exception as e:
-            logger.logger(f"Qdrant 搜索失败: {e}")
+            logger.error(f"Qdrant 搜索失败: {e}")
             return []
 
     async def delete(self, collection_name: str, ids: List[str]) -> bool:
@@ -323,7 +323,7 @@ class QdrantBackend(VectorStoreBackend):
             client.delete(collection_name=collection_name, points_selector=ids)
             return True
         except Exception as e:
-            logger.logger(f"Qdrant 删除失败: {e}")
+            logger.error(f"Qdrant 删除失败: {e}")
             return False
 
     async def drop_collection(self, collection_name: str) -> bool:
@@ -332,7 +332,7 @@ class QdrantBackend(VectorStoreBackend):
             client.delete_collection(collection_name)
             return True
         except Exception as e:
-            logger.logger(f"Qdrant 删除集合失败: {e}")
+            logger.error(f"Qdrant 删除集合失败: {e}")
             return False
 
     async def get_collection_info(self, collection_name: str) -> Optional[Dict[str, Any]]:
@@ -341,7 +341,7 @@ class QdrantBackend(VectorStoreBackend):
             info = client.get_collection(collection_name)
             return {"name": collection_name, "info": info.dict() if hasattr(info, 'dict') else str(info)}
         except Exception as e:
-            logger.logger(f"Qdrant 获取集合信息失败: {e}")
+            logger.error(f"Qdrant 获取集合信息失败: {e}")
             return None
 
 
@@ -399,7 +399,7 @@ class LocalBackend(VectorStoreBackend):
             logger.info(f"本地向量集合已创建: {collection_name} (dim={dimension})")
             return True
         except Exception as e:
-            logger.logger(f"本地向量集合创建失败: {e}")
+            logger.error(f"本地向量集合创建失败: {e}")
             return False
 
     async def insert(self, collection_name: str, vectors: List[List[float]],
@@ -419,7 +419,7 @@ class LocalBackend(VectorStoreBackend):
             await conn.commit()
             return ids
         except Exception as e:
-            logger.logger(f"本地向量插入失败: {e}")
+            logger.error(f"本地向量插入失败: {e}")
             return []
 
     async def search(self, collection_name: str, query_vector: List[float],
@@ -449,7 +449,7 @@ class LocalBackend(VectorStoreBackend):
             results.sort(key=lambda r: r["score"], reverse=True)
             return results[:top_k]
         except Exception as e:
-            logger.logger(f"本地向量搜索失败: {e}")
+            logger.error(f"本地向量搜索失败: {e}")
             return []
 
     async def delete(self, collection_name: str, ids: List[str]) -> bool:
@@ -462,7 +462,7 @@ class LocalBackend(VectorStoreBackend):
             await conn.commit()
             return True
         except Exception as e:
-            logger.logger(f"本地向量删除失败: {e}")
+            logger.error(f"本地向量删除失败: {e}")
             return False
 
     async def drop_collection(self, collection_name: str) -> bool:
@@ -473,7 +473,7 @@ class LocalBackend(VectorStoreBackend):
             await conn.commit()
             return True
         except Exception as e:
-            logger.logger(f"本地向量集合删除失败: {e}")
+            logger.error(f"本地向量集合删除失败: {e}")
             return False
 
     async def get_collection_info(self, collection_name: str) -> Optional[Dict[str, Any]]:
@@ -491,7 +491,7 @@ class LocalBackend(VectorStoreBackend):
             count = (await cursor.fetchone())[0]
             return {"name": row[0], "dimension": row[1], "metric": row[2], "vector_count": count}
         except Exception as e:
-            logger.logger(f"本地向量集合信息获取失败: {e}")
+            logger.error(f"本地向量集合信息获取失败: {e}")
             return None
 
 

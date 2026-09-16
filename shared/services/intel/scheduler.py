@@ -51,7 +51,7 @@ def _generate_daily_briefing_job():
         result = loop.run_until_complete(briefing_generator.generate_daily_briefing())
         logger.info(f"[IntelScheduler] 每日简报生成完成: success={result.get('success')}, count={result.get('intelligence_count')}")
     except Exception as e:
-        logger.logger(f"[IntelScheduler] 每日简报生成失败: {e}")
+        logger.error(f"[IntelScheduler] 每日简报生成失败: {e}")
     finally:
         loop.close()
 
@@ -64,6 +64,6 @@ def _generate_weekly_briefing_job():
         result = loop.run_until_complete(briefing_generator.generate_weekly_briefing())
         logger.info(f"[IntelScheduler] 每周简报生成完成: success={result.get('success')}, count={result.get('intelligence_count')}")
     except Exception as e:
-        logger.logger(f"[IntelScheduler] 每周简报生成失败: {e}")
+        logger.error(f"[IntelScheduler] 每周简报生成失败: {e}")
     finally:
         loop.close()

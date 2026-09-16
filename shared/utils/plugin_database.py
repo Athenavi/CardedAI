@@ -105,7 +105,7 @@ class PluginDatabaseManager:
 
             return True
         except Exception as e:
-            logger.logger(f"[PluginDB] Failed to delete database for {plugin_slug}: {e}")
+            logger.error(f"[PluginDB] Failed to delete database for {plugin_slug}: {e}")
             return False
 
     def list_plugin_databases(self) -> List[Dict[str, Any]]:

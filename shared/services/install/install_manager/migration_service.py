@@ -144,8 +144,8 @@ class DatabaseMigrationService:
 
             # 执行 alembic upgrade head（使用同步 subprocess，避免 Windows asyncio 问题）
             cmd = [sys.executable, "-m", "alembic", "upgrade", "head"]
-            logger.logger(f"\n[Migration] 执行命令: {' '.join(cmd)}")
-            logger.logger(f"[Migration] 工作目录: {self.project_root}")
+            logger.error(f"\n[Migration] 执行命令: {' '.join(cmd)}")
+            logger.error(f"[Migration] 工作目录: {self.project_root}")
 
             # 在线程池中执行同步 subprocess
             loop = asyncio.get_event_loop()
@@ -163,7 +163,7 @@ class DatabaseMigrationService:
 
             # 输出 stdout
             if result.stdout:
-                logger.logger(f"[Migration STDOUT]\n{result.stdout}")
+                logger.error(f"[Migration STDOUT]\n{result.stdout}")
                 for line in result.stdout.split('\n'):
                     if line.strip():
                         yield {
@@ -175,7 +175,7 @@ class DatabaseMigrationService:
 
             # 输出 stderr
             if result.stderr:
-                logger.logger(f"[Migration STDERR]\n{result.stderr}")
+                logger.error(f"[Migration STDERR]\n{result.stderr}")
                 for line in result.stderr.split('\n'):
                     if line.strip():
                         is_error = any(keyword in line for keyword in ['ERROR', 'Error', 'Traceback', 'Exception'])
@@ -186,7 +186,7 @@ class DatabaseMigrationService:
                         }
                         await asyncio.sleep(0.01)
 
-            logger.logger(f"[Migration] 退出码: {result.returncode}")
+            logger.error(f"[Migration] 退出码: {result.returncode}")
 
             if result.returncode == 0:
                 yield {
@@ -206,7 +206,7 @@ class DatabaseMigrationService:
 
         except FileNotFoundError as e:
             error_msg = f'错误: 找不到命令或文件 - {str(e)}'
-            logger.logger(f"[Migration ERROR] {error_msg}")
+            logger.error(f"[Migration ERROR] {error_msg}")
             yield {
                 'type': 'error',
                 'message': error_msg,
@@ -214,7 +214,7 @@ class DatabaseMigrationService:
             }
         except subprocess.TimeoutExpired:
             error_msg = '迁移超时（超过5分钟）'
-            logger.logger(f"[Migration ERROR] {error_msg}")
+            logger.error(f"[Migration ERROR] {error_msg}")
             yield {
                 'type': 'error',
                 'message': error_msg,
@@ -224,7 +224,7 @@ class DatabaseMigrationService:
             import traceback
             error_msg = f'迁移过程出错: {str(e)}'
             traceback_str = traceback.format_exc()
-            logger.logger(f"[Migration ERROR] {error_msg}")
+            logger.error(f"[Migration ERROR] {error_msg}")
             logger(traceback_str)
 
             yield {

@@ -39,7 +39,7 @@ async def get_folder_tree(
         )
         return ApiResponse(success=True, data={"tree": tree})
     except Exception as e:
-        logger.logger(f"获取文件夹树失败: {e}")
+        logger.error(f"获取文件夹树失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -67,7 +67,7 @@ async def get_folder_list(
         )
         return ApiResponse(success=True, data={"folders": folders, "count": len(folders)})
     except Exception as e:
-        logger.logger(f"获取文件夹列表失败: {e}")
+        logger.error(f"获取文件夹列表失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -99,7 +99,7 @@ async def get_folder_detail(
 
         return ApiResponse(success=True, data=folder)
     except Exception as e:
-        logger.logger(f"获取文件夹详情失败: {e}")
+        logger.error(f"获取文件夹详情失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -145,7 +145,7 @@ async def create_folder(
             return ApiResponse(success=False, error=result['error'])
 
     except Exception as e:
-        logger.logger(f"创建文件夹失败: {e}")
+        logger.error(f"创建文件夹失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -189,7 +189,7 @@ async def update_folder(
             return ApiResponse(success=False, error=result['error'])
 
     except Exception as e:
-        logger.logger(f"更新文件夹失败: {e}")
+        logger.error(f"更新文件夹失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -226,7 +226,7 @@ async def delete_folder(
             return ApiResponse(success=False, error=result['error'])
 
     except Exception as e:
-        logger.logger(f"删除文件夹失败: {e}")
+        logger.error(f"删除文件夹失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -304,7 +304,7 @@ async def move_media_to_folder(
             return ApiResponse(success=False, error=result['error'])
 
     except Exception as e:
-        logger.logger(f"移动媒体文件失败: {e}")
+        logger.error(f"移动媒体文件失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -347,5 +347,5 @@ async def copy_media_to_folder(
             return ApiResponse(success=False, error=result['error'])
 
     except Exception as e:
-        logger.logger(f"复制媒体文件失败: {e}")
+        logger.error(f"复制媒体文件失败: {e}")
         return ApiResponse(success=False, error=str(e))

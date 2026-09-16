@@ -57,7 +57,7 @@ class LoginSecurityService:
 
             return {'status': 'recorded', 'attempt_id': attempt.id if hasattr(attempt, 'id') else None}
         except Exception as e:
-            logger.logger(f"Failed to record login attempt: {e}")
+            logger.error(f"Failed to record login attempt: {e}")
             if db:
                 await db.rollback()
             return {'status': 'error', 'message': str(e)}
@@ -118,7 +118,7 @@ class LoginSecurityService:
 
             return False, None
         except Exception as e:
-            logger.logger(f"Failed to check account lock status: {e}")
+            logger.error(f"Failed to check account lock status: {e}")
             return False, None
 
     async def get_failed_attempts_count_async(self, username: str, db: AsyncSession = None) -> int:
@@ -151,7 +151,7 @@ class LoginSecurityService:
             )
             return result.scalar() or 0
         except Exception as e:
-            logger.logger(f"Failed to get failed attempts count: {e}")
+            logger.error(f"Failed to get failed attempts count: {e}")
             return 0
 
     async def clear_failed_attempts_async(self, username: str, db: AsyncSession = None) -> bool:
@@ -188,7 +188,7 @@ class LoginSecurityService:
             logger.info(f"Cleared failed attempts for user: {username}")
             return True
         except Exception as e:
-            logger.logger(f"Failed to clear failed attempts: {e}")
+            logger.error(f"Failed to clear failed attempts: {e}")
             if db:
                 await db.rollback()
             return False
@@ -228,7 +228,7 @@ class LoginSecurityService:
                 for attempt in attempts
             ]
         except Exception as e:
-            logger.logger(f"Failed to get login history: {e}")
+            logger.error(f"Failed to get login history: {e}")
             return []
 
     async def get_security_stats_async(self, username: str, db: AsyncSession = None) -> Dict:
@@ -323,7 +323,7 @@ class LoginSecurityService:
                 'is_locked': is_locked,
             }
         except Exception as e:
-            logger.logger(f"Failed to get security stats: {e}")
+            logger.error(f"Failed to get security stats: {e}")
             return {}
 
     async def get_locked_users_async(self, db: AsyncSession = None) -> List[Dict]:
@@ -377,7 +377,7 @@ class LoginSecurityService:
 
             return locked_users
         except Exception as e:
-            logger.logger(f"Failed to get locked users: {e}")
+            logger.error(f"Failed to get locked users: {e}")
             return []
 
     def _generate_device_fingerlogger(self, device_info: Dict,

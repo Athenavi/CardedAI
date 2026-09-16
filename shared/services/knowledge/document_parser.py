@@ -108,7 +108,7 @@ class DocumentParser:
             else:
                 return ParseResult(success=False, error=f"未实现的解析器: {file_type}")
         except Exception as e:
-            logger.logger(f"文档解析失败 [{file_path}]: {e}")
+            logger.error(f"文档解析失败 [{file_path}]: {e}")
             return ParseResult(success=False, error=str(e), file_type=file_type)
 
     async def parse_text(self, text: str, content_type: str = "txt") -> ParseResult:
@@ -129,7 +129,7 @@ class DocumentParser:
             else:
                 return ParseResult(text=text, file_type="txt", page_count=1)
         except Exception as e:
-            logger.logger(f"文本解析失败: {e}")
+            logger.error(f"文本解析失败: {e}")
             return ParseResult(success=False, error=str(e))
 
     def _detect_type(self, file_path: str) -> str:
@@ -187,7 +187,7 @@ class DocumentParser:
         except ImportError:
             raise
         except Exception as e:
-            logger.logger(f"PDF 解析失败 [{file_path}]: {e}")
+            logger.error(f"PDF 解析失败 [{file_path}]: {e}")
             return ParseResult(success=False, error=str(e), file_type="pdf")
 
     async def _parse_docx(self, file_path: str) -> ParseResult:
@@ -245,7 +245,7 @@ class DocumentParser:
         except ImportError:
             raise
         except Exception as e:
-            logger.logger(f"DOCX 解析失败 [{file_path}]: {e}")
+            logger.error(f"DOCX 解析失败 [{file_path}]: {e}")
             return ParseResult(success=False, error=str(e), file_type="docx")
 
     async def _parse_html_file(self, file_path: str) -> ParseResult:
@@ -273,7 +273,7 @@ class DocumentParser:
             html_content = await loop.run_in_executor(None, _read_html)
             return self._parse_html_content(html_content, source=file_path)
         except Exception as e:
-            logger.logger(f"HTML 文件解析失败 [{file_path}]: {e}")
+            logger.error(f"HTML 文件解析失败 [{file_path}]: {e}")
             return ParseResult(success=False, error=str(e), file_type="html")
 
     async def _parse_url(self, url: str) -> ParseResult:
@@ -302,14 +302,14 @@ class DocumentParser:
             result.metadata["status_code"] = response.status_code
             return result
         except httpx.HTTPStatusError as e:
-            logger.logger(f"URL 抓取 HTTP 错误 [{url}]: {e.response.status_code}")
+            logger.error(f"URL 抓取 HTTP 错误 [{url}]: {e.response.status_code}")
             return ParseResult(
                 success=False,
                 error=f"HTTP {e.response.status_code}: {e.response.reason_phrase}",
                 file_type="url",
             )
         except Exception as e:
-            logger.logger(f"URL 抓取失败 [{url}]: {e}")
+            logger.error(f"URL 抓取失败 [{url}]: {e}")
             return ParseResult(success=False, error=str(e), file_type="url")
 
     async def _parse_txt(self, file_path: str) -> ParseResult:
@@ -343,7 +343,7 @@ class DocumentParser:
                 page_count=1,
             )
         except Exception as e:
-            logger.logger(f"TXT 解析失败 [{file_path}]: {e}")
+            logger.error(f"TXT 解析失败 [{file_path}]: {e}")
             return ParseResult(success=False, error=str(e), file_type="txt")
 
     def _parse_html_content(self, html_content: str, source: str = "") -> ParseResult:

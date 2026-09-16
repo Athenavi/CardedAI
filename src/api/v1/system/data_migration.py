@@ -68,7 +68,7 @@ async def migrate_from_wordpress(
         }
 
     except Exception as e:
-        logger.logger(f"WordPress migration failed: {e}", exc_info=True)
+        logger.error(f"WordPress migration failed: {e}", exc_info=True)
         return {
             'success': False,
             'error': 'Migration failed. Please check the server logs for details.',
@@ -134,7 +134,7 @@ async def migrate_from_ghost(
         }
 
     except Exception as e:
-        logger.logger(f"Ghost migration failed: {e}", exc_info=True)
+        logger.error(f"Ghost migration failed: {e}", exc_info=True)
         return {
             'success': False,
             'error': 'Migration failed. Please check the server logs for details.',
@@ -190,7 +190,7 @@ async def migrate_from_json(
         }
 
     except Exception as e:
-        logger.logger(f"JSON migration failed: {e}", exc_info=True)
+        logger.error(f"JSON migration failed: {e}", exc_info=True)
         return {
             'success': False,
             'error': 'Migration failed. Please check the server logs for details.',
@@ -241,7 +241,7 @@ async def migrate_from_csv(
         }
 
     except Exception as e:
-        logger.logger(f"CSV migration failed: {e}", exc_info=True)
+        logger.error(f"CSV migration failed: {e}", exc_info=True)
         return {
             'success': False,
             'error': 'Migration failed. Please check the server logs for details.',
@@ -284,7 +284,7 @@ async def generate_redirects(
         }
 
     except Exception as e:
-        logger.logger(f"Redirect generation failed: {e}", exc_info=True)
+        logger.error(f"Redirect generation failed: {e}", exc_info=True)
         return {
             'success': False,
             'error': 'Failed to generate redirects. Please check the server logs for details.',

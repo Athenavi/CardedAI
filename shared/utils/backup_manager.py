@@ -67,7 +67,7 @@ class BackupManager:
                 with open(self.backup_info_file, 'r', encoding='utf-8') as f:
                     self.backups = json.load(f)
             except Exception as e:
-                logger.logger(f"加载备份索引失败：{e}")
+                logger.error(f"加载备份索引失败：{e}")
                 self.backups = []
         else:
             self._scan_existing_backups()
@@ -93,7 +93,7 @@ class BackupManager:
             self.backups.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
             self._save_backups()
         except Exception as e:
-            logger.logger(f"扫描备份失败：{e}")
+            logger.error(f"扫描备份失败：{e}")
 
     def _save_backups(self):
         """保存备份索引"""
@@ -101,7 +101,7 @@ class BackupManager:
             with open(self.backup_info_file, 'w', encoding='utf-8') as f:
                 json.dump(self.backups, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            logger.logger(f"保存备份索引失败：{e}")
+            logger.error(f"保存备份索引失败：{e}")
 
     def create(self, source_path: str, version: str = None) -> Optional[Dict]:
         """创建备份"""
@@ -133,7 +133,7 @@ class BackupManager:
             return backup_info
 
         except Exception as e:
-            logger.logger(f"创建备份失败：{e}")
+            logger.error(f"创建备份失败：{e}")
             return None
 
     def get(self, backup_id: str) -> Optional[Dict]:
@@ -152,12 +152,12 @@ class BackupManager:
         try:
             backup = self.get(backup_id)
             if not backup:
-                logger.logger(f"备份不存在：{backup_id}")
+                logger.error(f"备份不存在：{backup_id}")
                 return False
 
             backup_path = Path(backup['path'])
             if not backup_path.exists():
-                logger.logger(f"备份文件不存在：{backup_path}")
+                logger.error(f"备份文件不存在：{backup_path}")
                 return False
 
             logger.info(f"开始恢复备份：{backup_path} -> {target_path}")
@@ -171,7 +171,7 @@ class BackupManager:
             return True
 
         except Exception as e:
-            logger.logger(f"恢复备份失败：{e}")
+            logger.error(f"恢复备份失败：{e}")
             return False
 
     def delete(self, backup_id: str) -> bool:
@@ -179,7 +179,7 @@ class BackupManager:
         try:
             backup = self.get(backup_id)
             if not backup:
-                logger.logger(f"备份不存在：{backup_id}")
+                logger.error(f"备份不存在：{backup_id}")
                 return False
 
             backup_path = Path(backup['path'])
@@ -194,7 +194,7 @@ class BackupManager:
             return True
 
         except Exception as e:
-            logger.logger(f"删除备份失败：{e}")
+            logger.error(f"删除备份失败：{e}")
             return False
 
     # ==================== 自动化备份功能 ====================
@@ -225,7 +225,7 @@ class BackupManager:
             return True
 
         except Exception as e:
-            logger.logger(f"设置自动备份调度失败: {e}")
+            logger.error(f"设置自动备份调度失败: {e}")
             return False
 
     def _auto_backup_job(self, backup_type: str = "full"):
@@ -249,10 +249,10 @@ class BackupManager:
                 # 清理过期备份
                 self.cleanup_old_backups()
             else:
-                logger.logger(f""自动备份失败")
+                logger.error(f"自动备份失败")
 
         except Exception as e:
-            logger.logger(f"自动备份任务执行失败: {e}", exc_info=True)
+            logger.error(f"自动备份任务执行失败: {e}", exc_info=True)
 
     def create_full_backup(self, source_paths: List[str] = None) -> Optional[Dict]:
         """
@@ -316,7 +316,7 @@ class BackupManager:
             return backup_info
 
         except Exception as e:
-            logger.logger(f"创建完整备份失败: {e}", exc_info=True)
+            logger.error(f"创建完整备份失败: {e}", exc_info=True)
             return None
 
     def create_incremental_backup(self, last_backup_id: str = None) -> Optional[Dict]:
@@ -341,7 +341,7 @@ class BackupManager:
 
             last_backup = self.get(last_backup_id)
             if not last_backup:
-                logger.logger(f"找不到备份: {last_backup_id}")
+                logger.error(f"找不到备份: {last_backup_id}")
                 return None
 
             timestamp = datetime.now()
@@ -388,7 +388,7 @@ class BackupManager:
             return backup_info
 
         except Exception as e:
-            logger.logger(f"创建增量备份失败: {e}", exc_info=True)
+            logger.error(f"创建增量备份失败: {e}", exc_info=True)
             return None
 
     def _detect_changes(self, base_path: Path, current_path: Path, diff_path: Path) -> List[str]:
@@ -431,7 +431,7 @@ class BackupManager:
                         changed_files.append(str(rel_path))
 
         except Exception as e:
-            logger.logger(f"检测文件变化失败: {e}")
+            logger.error(f"检测文件变化失败: {e}")
 
         return changed_files
 
@@ -491,11 +491,11 @@ class BackupManager:
             elif provider == 'oss':
                 return self._upload_to_oss(backup_path)
             else:
-                logger.logger(f"不支持的云存储提供商: {provider}")
+                logger.error(f"不支持的云存储提供商: {provider}")
                 return False
 
         except Exception as e:
-            logger.logger(f"上传到云存储失败: {e}")
+            logger.error(f"上传到云存储失败: {e}")
             return False
 
     def _upload_to_s3(self, backup_path: str) -> bool:
@@ -529,10 +529,10 @@ class BackupManager:
             return True
 
         except ImportError:
-            logger.logger(f""boto3库未安装，请运行: pip install boto3")
+            logger.error(f"boto3库未安装，请运行: pip install boto3")
             return False
         except Exception as e:
-            logger.logger(f"S3上传失败: {e}")
+            logger.error(f"S3上传失败: {e}")
             return False
 
     def _upload_to_oss(self, backup_path: str) -> bool:
@@ -563,10 +563,10 @@ class BackupManager:
             return True
 
         except ImportError:
-            logger.logger(f""oss2库未安装，请运行: pip install oss2")
+            logger.error(f"oss2库未安装，请运行: pip install oss2")
             return False
         except Exception as e:
-            logger.logger(f"OSS上传失败: {e}")
+            logger.error(f"OSS上传失败: {e}")
             return False
 
     # ==================== 备份清理策略 ====================
@@ -603,7 +603,7 @@ class BackupManager:
                 logger.info(f"已清理 {deleted_count} 个过期备份")
 
         except Exception as e:
-            logger.logger(f"清理旧备份失败: {e}")
+            logger.error(f"清理旧备份失败: {e}")
 
     # ==================== 备份验证 ====================
 
@@ -651,7 +651,7 @@ class BackupManager:
             }
 
         except Exception as e:
-            logger.logger(f"验证备份失败: {e}")
+            logger.error(f"验证备份失败: {e}")
             return {'valid': False, 'error': str(e)}
 
 

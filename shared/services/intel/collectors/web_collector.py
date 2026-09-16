@@ -53,7 +53,7 @@ class WebCollector(BaseCollector):
             List[CollectedItemData]
         """
         if httpx is None:
-            logger.logger(f""httpx 未安装，无法采集网页")
+            logger.error(f"httpx 未安装，无法采集网页")
             return []
 
         timeout = source_config.get("timeout", 30)
@@ -71,7 +71,7 @@ class WebCollector(BaseCollector):
                 html = resp.text
 
         except Exception as e:
-            logger.logger(f"网页采集异常 {url}: {e}")
+            logger.error(f"网页采集异常 {url}: {e}")
             return []
 
         follow_links = source_config.get("follow_links", False)
@@ -116,7 +116,7 @@ class WebCollector(BaseCollector):
                         logger.warning(f"详情页采集失败 {link}: {e}")
 
         except Exception as e:
-            logger.logger(f"详情页采集批量异常: {e}")
+            logger.error(f"详情页采集批量异常: {e}")
 
         logger.info(f"网页采集完成 {base_url}: {len(items)} 条（跟踪链接模式）")
         return items

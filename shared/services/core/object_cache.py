@@ -186,7 +186,7 @@ class ObjectCacheService:
         # 清除标签索引
         self.cache.delete(index_key)
 
-        logger.logger(f"[ObjectCache] Invalidated {deleted_count} objects with tag: {tag}")
+        logger.error(f"[ObjectCache] Invalidated {deleted_count} objects with tag: {tag}")
         return deleted_count
 
     async def invalidate_by_tags(self, tags: List[str]) -> int:

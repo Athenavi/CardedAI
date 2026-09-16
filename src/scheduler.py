@@ -42,9 +42,9 @@ class SessionScheduler:
                         logger.warning(f"同步错误: {result['errors'][:5]}")  # 只显示前5个错误
 
             except Exception as e:
-                logger.logger(f"同步文章浏览量时出错：{e}")
+                logger.error(f"同步文章浏览量时出错：{e}")
                 import traceback
-                logger.logger(f""", exc_info=True)
+                logger.error(exc_info=True)
 
         # 添加定时任务（AsyncIOScheduler 直接支持异步协程）
         self.scheduler.add_job(

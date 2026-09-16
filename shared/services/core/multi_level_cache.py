@@ -351,7 +351,7 @@ class MultiLevelCache:
                     return value
             return None
         except Exception as e:
-            logger.logger(f"[MultiLevelCache] Redis获取失败: {e}")
+            logger.error(f"[MultiLevelCache] Redis获取失败: {e}")
             self.redis_stats['errors'] += 1
             return None
 
@@ -368,7 +368,7 @@ class MultiLevelCache:
 
             self.redis_client.setex(key, ttl, serialized)
         except Exception as e:
-            logger.logger(f"[MultiLevelCache] Redis设置失败: {e}")
+            logger.error(f"[MultiLevelCache] Redis设置失败: {e}")
             self.redis_stats['errors'] += 1
 
     def _delete_from_redis(self, key: str):
@@ -376,7 +376,7 @@ class MultiLevelCache:
         try:
             self.redis_client.delete(key)
         except Exception as e:
-            logger.logger(f"[MultiLevelCache] Redis删除失败: {e}")
+            logger.error(f"[MultiLevelCache] Redis删除失败: {e}")
 
     # ========== L3 文件缓存操作 ==========
 
@@ -411,7 +411,7 @@ class MultiLevelCache:
                 return content
 
         except Exception as e:
-            logger.logger(f"[MultiLevelCache] 文件缓存读取失败: {e}")
+            logger.error(f"[MultiLevelCache] 文件缓存读取失败: {e}")
             self.file_cache_stats['errors'] += 1
             return None
 
@@ -444,7 +444,7 @@ class MultiLevelCache:
                 json.dump(meta, f, ensure_ascii=False)
 
         except Exception as e:
-            logger.logger(f"[MultiLevelCache] 文件缓存设置失败: {e}")
+            logger.error(f"[MultiLevelCache] 文件缓存设置失败: {e}")
             self.file_cache_stats['errors'] += 1
 
     def _delete_from_file(self, key: str):
@@ -456,7 +456,7 @@ class MultiLevelCache:
             file_path.unlink(missing_ok=True)
             meta_path.unlink(missing_ok=True)
         except Exception as e:
-            logger.logger(f"[MultiLevelCache] 文件缓存删除失败: {e}")
+            logger.error(f"[MultiLevelCache] 文件缓存删除失败: {e}")
 
 
 # 全局实例

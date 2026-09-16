@@ -110,7 +110,7 @@ async def create_annotation(
     except Exception as e:
         await db.rollback()
         import traceback
-        logger.logger(f"Error creating annotation: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error creating annotation: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=f"创建批注失败: {str(e)}")
 
 
@@ -194,7 +194,7 @@ async def get_article_annotations(
         )
     except Exception as e:
         import traceback
-        logger.logger(f"Error getting annotations: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error getting annotations: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=f"获取批注失败: {str(e)}")
 
 
@@ -258,7 +258,7 @@ async def update_annotation(
     except Exception as e:
         await db.rollback()
         import traceback
-        logger.logger(f"Error updating annotation: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error updating annotation: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=f"更新批注失败: {str(e)}")
 
 
@@ -305,5 +305,5 @@ async def delete_annotation(
     except Exception as e:
         await db.rollback()
         import traceback
-        logger.logger(f"Error deleting annotation: {e}\n{traceback.format_exc()}")
+        logger.error(f"Error deleting annotation: {e}\n{traceback.format_exc()}")
         return ApiResponse(success=False, error=f"删除批注失败: {str(e)}")
