@@ -273,7 +273,7 @@ export default function LoginPage() {
 
   if (checking) return (
       <div
-          className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+        className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
             <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 rounded-full animate-spin"/>
@@ -287,19 +287,19 @@ export default function LoginPage() {
 
   return (
       <div
-          className="min-h-screen flex bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+        className="min-h-screen flex bg-background">
         {/* ═══ Left Panel - Branding ═══ */}
         <div className="hidden lg:flex lg:w-1/2 xl:w-[45%] relative overflow-hidden">
           {/* Gradient Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700"/>
+          <div className="absolute inset-0 bg-primary"/>
 
           {/* Animated Orbs */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl animate-pulse"
                  style={{animationDuration: '4s'}}/>
-            <div className="absolute bottom-20 right-10 w-60 h-60 bg-purple-400/20 rounded-full blur-3xl animate-pulse"
+            <div className="absolute bottom-20 right-10 w-60 h-60 bg-primary/20 rounded-full blur-3xl animate-pulse"
                  style={{animationDuration: '6s'}}/>
-            <div className="absolute top-1/3 left-1/3 w-40 h-40 bg-indigo-400/20 rounded-full blur-3xl animate-pulse"
+            <div className="absolute top-1/3 left-1/3 w-40 h-40 bg-primary/20 rounded-full blur-3xl animate-pulse"
                  style={{animationDuration: '5s'}}/>
           </div>
 
@@ -340,7 +340,7 @@ export default function LoginPage() {
                   const Icon = feat.icon;
                   return (
                       <div key={i}
-                           className="group p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300">
+                           className="group p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300">
                         <Icon className="w-6 h-6 text-blue-200 mb-3 group-hover:scale-110 transition-transform"/>
                         <h3 className="text-sm font-semibold text-white mb-1">{t(feat.titleKey)}</h3>
                         <p className="text-xs text-blue-100/70 leading-relaxed">{t(feat.descKey)}</p>
@@ -376,7 +376,7 @@ export default function LoginPage() {
             {/* Mobile Logo */}
             <div className="lg:hidden flex items-center gap-3 mb-8">
               <div
-                  className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200/50 dark:shadow-blue-900/30">
+                className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-blue-200/50 dark:shadow-blue-900/30">
                 <BookOpen className="w-5 h-5 text-white"/>
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">Carded AI</span>
@@ -395,7 +395,7 @@ export default function LoginPage() {
             {/* Error Message */}
             {err && (
                 <div
-                    className="mb-6 flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200/60 dark:border-red-800/40 rounded-2xl text-sm">
+                  className="mb-6 flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200/60 dark:border-red-800/40 rounded-lg text-sm">
                   <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"/>
                   <span className="text-red-600 dark:text-red-400">{err}</span>
                 </div>
@@ -406,9 +406,9 @@ export default function LoginPage() {
               <FormProvider {...twoFAForm}>
                 <div className="space-y-6">
                   <div
-                      className="text-center p-6 bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/30">
+                    className="text-center p-6 bg-secondary rounded-lg border border-primary dark:border-primary/30">
                     <div
-                        className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
+                      className="w-16 h-16 mx-auto mb-4 bg-primary rounded-lg flex items-center justify-center shadow-lg">
                       <Smartphone className="w-8 h-8 text-white"/>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -429,7 +429,7 @@ export default function LoginPage() {
                             value={field.value}
                             onChange={e => field.onChange(e.target.value.replace(/\D/g, '').slice(0, backup ? 8 : 6))}
                             placeholder={backup ? t('login.twoFactorPlaceholder') : '000000'}
-                            className="w-full text-center text-3xl tracking-[0.5em] px-6 py-5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 dark:text-white font-mono transition-all"
+                            className="w-full text-center text-3xl tracking-[0.5em] px-6 py-5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 dark:text-white font-mono transition-all"
                           />
                           {twoFAForm.formState.errors.code && (
                             <p className="text-xs text-red-500 dark:text-red-400 text-center mt-2">
@@ -443,7 +443,7 @@ export default function LoginPage() {
                     <button
                         type="submit"
                         disabled={busy}
-                        className="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 active:scale-[0.98]"
+                        className="w-full py-4 bg-primary text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary hover:shadow-sm hover:shadow-primary active:scale-[0.98]"
                     >
                       {busy ? (
                           <span className="flex items-center justify-center gap-2">
@@ -457,7 +457,7 @@ export default function LoginPage() {
                         setBackup(!backup);
                         twoFAForm.reset({code: ''});
                       }}
-                              className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-medium">
+                              className="text-sm text-primary hover:text-primary dark:text-primary font-medium">
                         {backup ? t('login.twoFactorUseCode') : t('login.twoFactorUseBackup')}
                       </button>
                       <button type="button" onClick={() => {
@@ -475,7 +475,7 @@ export default function LoginPage() {
             ) : (
                 <>
                   {/* Mode Switch */}
-                  <div className="flex p-1.5 bg-gray-100 dark:bg-gray-800 rounded-2xl mb-6">
+                  <div className="flex p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg mb-6">
                     <button
                         onClick={() => {
                           setMode('password');
@@ -526,7 +526,7 @@ export default function LoginPage() {
                                 onBlur={() => setFocusedField(null)}
                                 placeholder={t('login.usernameOrEmailPlaceholder')}
                                 autoFocus
-                                className={`w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-800 border-2 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all ${
+                                className={`w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-800 border-2 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all ${
                                   loginForm.formState.errors.username
                                     ? 'border-red-400 dark:border-red-500'
                                     : 'border-gray-200 dark:border-gray-700'
@@ -563,7 +563,7 @@ export default function LoginPage() {
                                 onFocus={() => setFocusedField('password')}
                                 onBlur={() => setFocusedField(null)}
                                 placeholder={t('login.passwordPlaceholder')}
-                                className={`w-full pl-12 pr-12 py-4 bg-white dark:bg-gray-800 border-2 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all ${
+                                className={`w-full pl-12 pr-12 py-4 bg-white dark:bg-gray-800 border-2 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all ${
                                   loginForm.formState.errors.password
                                     ? 'border-red-400 dark:border-red-500'
                                     : 'border-gray-200 dark:border-gray-700'
@@ -613,7 +613,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={busy}
-                            className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 active:scale-[0.98] flex items-center justify-center gap-2"
+                            className="w-full py-4 bg-primary text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25 hover:shadow-sm hover:shadow-blue-500/30 active:scale-[0.98] flex items-center justify-center gap-2"
                         >
                           {busy ? (
                               <>
@@ -640,13 +640,13 @@ export default function LoginPage() {
                         <div className="grid grid-cols-2 gap-3">
                           <button
                               type="button"
-                              className="flex items-center justify-center gap-2 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-gray-300 dark:hover:border-gray-600 transition-all active:scale-[0.98]"
+                              className="flex items-center justify-center gap-2 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-gray-300 dark:hover:border-gray-600 transition-all active:scale-[0.98]"
                           >
                             <GitBranch className="w-5 h-5"/> GitHub
                           </button>
                           <button
                               type="button"
-                              className="flex items-center justify-center gap-2 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-2xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-gray-300 dark:hover:border-gray-600 transition-all active:scale-[0.98]"
+                              className="flex items-center justify-center gap-2 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-gray-300 dark:hover:border-gray-600 transition-all active:scale-[0.98]"
                           >
                             <Globe className="w-5 h-5"/> Google
                           </button>
@@ -668,24 +668,24 @@ export default function LoginPage() {
                   {mode === 'qrcode' && (
                       <div className="space-y-6">
                         <div
-                            className="bg-white dark:bg-gray-800 rounded-3xl p-8 border border-gray-100 dark:border-gray-700 shadow-sm">
+                          className="bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-100 dark:border-gray-700 shadow-sm">
                           <div className="text-center space-y-5">
                             {/* QR Display */}
                             <div className="flex justify-center">
                               {qrStatus === 'loading' ? (
                                   <div
-                                      className="w-[220px] h-[220px] bg-gray-50 dark:bg-gray-900 rounded-2xl animate-pulse flex items-center justify-center">
+                                    className="w-[220px] h-[220px] bg-gray-50 dark:bg-gray-900 rounded-lg animate-pulse flex items-center justify-center">
                                     <div className="flex flex-col items-center gap-3">
                                       <Loader className="w-8 h-8 animate-spin text-blue-500"/>
                                       <span className="text-sm text-gray-400">{t('login.qrGenerating')}</span>
                                     </div>
                                   </div>
                               ) : qrImg ? (
-                                  <div className="relative p-4 bg-white rounded-2xl border-2 border-gray-100 shadow-lg">
+                                <div className="relative p-4 bg-white rounded-lg border-2 border-gray-100 shadow-lg">
                                     <img src={qrImg} alt="Login QR Code" className="w-[200px] h-[200px]"/>
                                     {qrStatus === 'success' && (
                                         <div
-                                            className="absolute inset-0 bg-green-500/90 rounded-2xl flex items-center justify-center">
+                                          className="absolute inset-0 bg-green-500/90 rounded-lg flex items-center justify-center">
                                           <svg className="w-16 h-16 text-white" fill="none" viewBox="0 0 24 24"
                                                stroke="currentColor" strokeWidth={2.5}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
@@ -694,7 +694,7 @@ export default function LoginPage() {
                                     )}
                                     {qrStatus === 'expired' && (
                                       <div
-                                        className="absolute inset-0 bg-orange-500/85 rounded-2xl flex flex-col items-center justify-center gap-2">
+                                        className="absolute inset-0 bg-orange-500/85 rounded-lg flex flex-col items-center justify-center gap-2">
                                         <svg className="w-14 h-14 text-white" fill="none" viewBox="0 0 24 24"
                                              stroke="currentColor" strokeWidth={2}>
                                           <circle cx="12" cy="12" r="10"/>
@@ -707,7 +707,7 @@ export default function LoginPage() {
                                   </div>
                               ) : (
                                   <div
-                                      className="w-[220px] h-[220px] bg-gray-50 dark:bg-gray-900 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
+                                    className="w-[220px] h-[220px] bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
                                       onClick={generateQR}>
                                     <QrCode className="w-10 h-10 text-gray-300 dark:text-gray-600"/>
                                     <span className="text-sm text-gray-400">{t('login.qrClickToGenerate')}</span>
@@ -743,7 +743,7 @@ export default function LoginPage() {
                             {(qrStatus === 'expired' || qrStatus === 'idle') && (
                                 <button
                                     onClick={generateQR}
-                                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
+                                    className="px-6 py-3 bg-primary text-white text-sm font-semibold rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
                                 >
                                   {qrStatus === 'expired' ? t('login.qrRegenerate') : t('login.qrGenerate')}
                                 </button>
@@ -753,7 +753,7 @@ export default function LoginPage() {
 
                         {/* Instructions */}
                         <div
-                            className="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-5 border border-gray-100 dark:border-gray-800">
+                          className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-5 border border-gray-100 dark:border-gray-800">
                           <h3
                             className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{t('login.scanSteps')}</h3>
                           <ol className="space-y-2.5">

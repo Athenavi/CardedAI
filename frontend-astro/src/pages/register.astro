@@ -1,6 +1,9 @@
 ---
-import '../styles/globals.css';
-// 注册页
+// 注册页 — 统一到 Layout（含导航/页脚/主题同步）
+import Layout from '@/layouts/Layout.astro';
 import RegisterPage from '@/components/pages/RegisterPage';
 ---
-<html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>注册 - FastBlog</title></head><body><RegisterPage client:load /></body></html>
+
+<Layout title="注册 - Carded AI" description="创建 Carded AI 账号">
+    <RegisterPage client:load/>
+</Layout>

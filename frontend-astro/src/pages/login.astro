@@ -1,6 +1,9 @@
 ---
-import '../styles/globals.css';
-// 登录页
+// 登录页 — 统一到 Layout（含导航/页脚/主题同步）
+import Layout from '@/layouts/Layout.astro';
 import LoginPage from '@/components/pages/LoginPage';
 ---
-<html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>登录 - FastBlog</title></head><body><LoginPage client:load /></body></html>
+
+<Layout title="登录 - Carded AI" description="登录 Carded AI 账号">
+    <LoginPage client:load/>
+</Layout>

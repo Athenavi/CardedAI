@@ -4,6 +4,8 @@ import Layout from '@/layouts/Layout.astro';
 import UserProfile from '@/components/pages/UserProfile';
 ---
 
-<Layout title="个人资料 - FastBlog">
-    <UserProfile client:idle/>
+<Layout title="个人资料 - Carded AI" description="查看与管理个人资料">
+    <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <UserProfile client:load/>
+    </div>
 </Layout>

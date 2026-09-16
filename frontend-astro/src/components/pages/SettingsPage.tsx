@@ -209,7 +209,7 @@ function Settings() {
     const pwStrengthLabels = ['弱', '一般', '良好', '强', '非常强'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-950 dark:to-gray-900">
+    <div className="min-h-screen bg-background">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
             <div className="mb-8">
@@ -221,7 +221,7 @@ function Settings() {
                 {/* ═══ Sidebar Navigation ═══ */}
                 <div className="lg:w-64 shrink-0">
                     <nav
-                        className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden p-1.5">
+                      className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden p-1.5">
                         {TABS.map((t, i) => {
                             const Icon = t.icon;
                             return (
@@ -230,7 +230,7 @@ function Settings() {
                                     onClick={() => setTab(i)}
                                     className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all duration-200 ${
                                         tab === i
-                                            ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 shadow-sm'
+                                          ? 'bg-secondary text-blue-700 dark:text-blue-300 shadow-sm'
                                             : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-750'
                                     }`}
                                 >
@@ -272,22 +272,22 @@ function Settings() {
                         <div className="space-y-6">
                             {/* Avatar Section */}
                             <div
-                                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-                                <div className="h-20 bg-gradient-to-r from-blue-500 to-indigo-500"/>
+                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                              <div className="h-20 bg-primary"/>
                                 <div className="px-6 pb-6">
                                     <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-10">
                                         <div className="relative group">
                                             <img
                                                 src={av}
                                                 alt=""
-                                                className="w-20 h-20 rounded-2xl object-cover border-4 border-white dark:border-gray-800 shadow-lg bg-gray-100"
+                                                className="w-20 h-20 rounded-lg object-cover border-4 border-white dark:border-gray-800 shadow-lg bg-gray-100"
                                                 onError={e => {
                                                     (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(p?.username || 'U')}&background=random`
                                                 }}
                                             />
                                             <button
                                                 onClick={() => avRef.current?.click()}
-                                                className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                                                className="absolute inset-0 bg-black/40 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                                             >
                                                 <Camera className="w-6 h-6 text-white"/>
                                             </button>
@@ -319,7 +319,7 @@ function Settings() {
 
                             {/* Username */}
                             <div
-                                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <label
                                     className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">用户名</label>
                                 <div className="flex gap-3">
@@ -341,7 +341,7 @@ function Settings() {
 
                             {/* Bio */}
                             <div
-                                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <label
                                     className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">个人简介</label>
                                 <textarea
@@ -365,7 +365,7 @@ function Settings() {
 
                             {/* Language & Privacy */}
                             <div
-                                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <div className="grid sm:grid-cols-2 gap-6">
                                     <div>
                                         <label
@@ -414,7 +414,7 @@ function Settings() {
                         <div className="space-y-6">
                             {/* Password Change */}
                             <div
-                                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div
                                         className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
@@ -498,7 +498,7 @@ function Settings() {
 
                             {/* 2FA */}
                             <div
-                                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <div className="flex items-start justify-between mb-6">
                                     <div className="flex items-center gap-3">
                                         <div
@@ -533,7 +533,7 @@ function Settings() {
                                     <div className="mt-4 space-y-4 border-t border-gray-100 dark:border-gray-700 pt-6">
                                         <div className="text-center">
                                             <img src={qr} alt="2FA QR"
-                                                 className="w-40 h-40 mx-auto rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm"/>
+                                                 className="w-40 h-40 mx-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm"/>
                                             {secret && (
                                                 <div className="mt-3 flex items-center justify-center gap-2">
                                                     <code
@@ -564,7 +564,7 @@ function Settings() {
 
                                 {codes.length > 0 && (
                                     <div
-                                        className="mt-4 p-5 bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-200 dark:border-amber-800/30">
+                                      className="mt-4 p-5 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800/30">
                                         <div className="flex items-center gap-2 mb-3">
                                             <AlertCircle className="w-4 h-4 text-amber-600"/>
                                             <span
@@ -587,11 +587,11 @@ function Settings() {
                     {tab === 2 && (
                         <div className="space-y-6">
                             <div
-                                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div
-                                        className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                                        <Palette className="w-5 h-5 text-purple-600 dark:text-purple-400"/>
+                                      className="w-10 h-10 bg-primary dark:bg-primary/30 rounded-xl flex items-center justify-center">
+                                      <Palette className="w-5 h-5 text-primary dark:text-primary"/>
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-gray-900 dark:text-white">主题设置</h3>
@@ -605,22 +605,22 @@ function Settings() {
                                             id: 'light',
                                             label: '浅色',
                                             icon: Sun,
-                                            gradient: 'from-amber-50 to-orange-50',
+                                          gradient: '',
                                             activeBorder: 'border-amber-400'
                                         },
                                         {
                                             id: 'dark',
                                             label: '深色',
                                             icon: Moon,
-                                            gradient: 'from-gray-800 to-gray-900',
+                                          gradient: '',
                                             activeBorder: 'border-blue-400'
                                         },
                                         {
                                             id: 'system',
                                             label: '跟随系统',
                                             icon: Monitor,
-                                            gradient: 'from-blue-50 to-indigo-50',
-                                            activeBorder: 'border-indigo-400'
+                                          gradient: '',
+                                          activeBorder: 'border-primary'
                                         },
                                     ].map(t => {
                                         const Icon = t.icon;
@@ -629,9 +629,9 @@ function Settings() {
                                             <button
                                                 key={t.id}
                                                 onClick={() => setTheme(t.id as any)}
-                                                className={`relative p-5 rounded-2xl border-2 transition-all duration-200 ${
+                                                className={`relative p-5 rounded-lg border-2 transition-all duration-200 ${
                                                     isActive
-                                                        ? `${t.activeBorder} bg-gradient-to-br ${t.gradient} dark:from-gray-700 dark:to-gray-800 shadow-md`
+                                                      ? `${t.activeBorder} bg-secondary`
                                                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
                                                 }`}
                                             >
@@ -659,7 +659,7 @@ function Settings() {
                     {tab === 3 && (
                         <div className="space-y-6">
                             <div
-                                className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <div className="flex items-center justify-between mb-6">
                                     <div className="flex items-center gap-3">
                                         <div

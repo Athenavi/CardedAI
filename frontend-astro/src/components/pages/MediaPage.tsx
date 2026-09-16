@@ -101,14 +101,14 @@ const FolderTree: React.FC<{
 /* ---------- StorageStats ---------- */
 const StorageStats: React.FC<{ stats: any; loading: boolean }> = ({stats, loading}) => {
   const items = [
-    {label: '图片', count: stats.image_count || 0, color: 'from-blue-500 to-cyan-500', icon: ImageIcon},
-    {label: '视频', count: stats.video_count || 0, color: 'from-purple-500 to-pink-500', icon: Video},
-    {label: '已用空间', count: stats.storage_used || '0 MB', color: 'from-green-500 to-emerald-500', icon: Upload},
+    {label: '图片', count: stats.image_count || 0, color: 'bg-primary', icon: ImageIcon},
+    {label: '视频', count: stats.video_count || 0, color: 'bg-primary/80', icon: Video},
+    {label: '已用空间', count: stats.storage_used || '0 MB', color: 'bg-primary/60', icon: Upload},
   ];
   return (<div className="space-y-3">
     <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">存储</h3>
     {items.map(item => {const Icon = item.icon; return (
-      <div key={item.label} className={`p-4 rounded-xl bg-gradient-to-br ${item.color} text-white`}>
+      <div key={item.label} className={`p-4 rounded-md ${item.color} text-primary-foreground`}>
         <div className="flex items-center gap-2 text-sm opacity-80"><Icon className="w-4 h-4"/>{item.label}</div>
         <p className="text-xl font-bold mt-1">{loading ? '...' : item.count}</p>
       </div>
@@ -129,7 +129,7 @@ const UploadArea: React.FC<{onUpload: (files: File[]) => void; uploading: boolea
       {collapsed ? <ChevronRight className="w-4 h-4"/> : <ChevronDown className="w-4 h-4"/>} 上传文件
     </button>
     {!collapsed && (<div onDragOver={e => {e.preventDefault(); setDragOver(true);}} onDragLeave={() => setDragOver(false)} onDrop={e => {e.preventDefault(); setDragOver(false); if (e.dataTransfer.files.length) onUpload(Array.from(e.dataTransfer.files));}}
-      className={`border-2 border-dashed rounded-2xl p-8 text-center transition-colors cursor-pointer ${dragOver ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700 hover:border-blue-400'}`}
+                         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${dragOver ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700 hover:border-blue-400'}`}
       onClick={() => inputRef.current?.click()}>
       <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3"/>
       <p className="text-gray-600 dark:text-gray-400 font-medium">{uploading ? '上传中...' : '拖拽文件到此处或点击上传'}</p>
@@ -224,7 +224,8 @@ const MediaGrid: React.FC<{files: MediaFile[]; loading: boolean; viewMode: 'grid
               {f.tags && onEditTags && (
                   <p className="flex flex-wrap gap-1 mt-1 cursor-pointer hover:opacity-80" onClick={(e) => { e.stopPropagation(); onEditTags(f); }}>
                     {(f.tags as string).split(',').filter(Boolean).slice(0, 3).map((tag: string) => (
-                        <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">{tag.trim()}</span>
+                      <span key={tag}
+                            className="text-[10px] px-1.5 py-0.5 rounded bg-primary dark:bg-primary/30 text-primary dark:text-primary">{tag.trim()}</span>
                     ))}
                     {(f.tags as string).split(',').filter(Boolean).length > 3 && (
                         <span className="text-[10px] text-gray-400">+{(f.tags as string).split(',').filter(Boolean).length - 3}</span>
@@ -282,9 +283,10 @@ const MediaGrid: React.FC<{files: MediaFile[]; loading: boolean; viewMode: 'grid
                     <span className="text-xs text-red-600 dark:text-red-400 font-medium">PDF</span>
                   </div>
           ) : isAudio ? (
-                  <div className="w-full h-full flex flex-col items-center justify-center cursor-pointer bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/10 dark:to-pink-900/10" onClick={() => onPreview(f)}>
-                    <Music className="w-12 h-12 text-purple-500 mb-2"/>
-                    <span className="text-xs text-purple-600 dark:text-purple-400 font-medium">AUDIO</span>
+              <div className="w-full h-full flex flex-col items-center justify-center cursor-pointer bg-muted"
+                   onClick={() => onPreview(f)}>
+                <Music className="w-12 h-12 text-primary mb-2"/>
+                <span className="text-xs text-primary dark:text-primary font-medium">AUDIO</span>
                   </div>
               ) :
               <div className="w-full h-full flex items-center justify-center cursor-pointer" onClick={() => onPreview(f)}>{React.createElement(Icon, {className: 'w-10 h-10 text-gray-400'})}</div>}
@@ -295,12 +297,14 @@ const MediaGrid: React.FC<{files: MediaFile[]; loading: boolean; viewMode: 'grid
                 </span>
               </div>
           )}
-          <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+          <div
+            className="absolute inset-x-0 bottom-0 p-2 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
             <p className="text-xs text-white truncate">{f.original_filename}</p>
             {(f.tags || (onEditTags && !f.tags)) && (
                 <div className="flex flex-wrap gap-1 mt-1 cursor-pointer hover:opacity-80" onClick={(e) => { e.stopPropagation(); onEditTags && onEditTags(f); }}>
                   {f.tags ? (f.tags as string).split(',').filter(Boolean).slice(0, 2).map((tag: string) => (
-                      <span key={tag} className="text-[9px] px-1 py-0.5 rounded bg-purple-600/60 text-white/90">{tag.trim()}</span>
+                    <span key={tag}
+                          className="text-[9px] px-1 py-0.5 rounded bg-primary/60 text-white/90">{tag.trim()}</span>
                   )) : <span className="text-[9px] text-white/50 italic">+标签</span>}
                 </div>
             )}
@@ -618,7 +622,7 @@ const AudioPlayer: React.FC<{
               {/* 黑胶唱片 */}
               <motion.div
                   ref={vinylRef}
-                  className="w-72 h-72 xl:w-80 xl:h-80 rounded-full bg-gradient-to-br from-gray-800 via-gray-900 to-black shadow-2xl flex items-center justify-center relative"
+                  className="w-72 h-72 xl:w-80 xl:h-80 rounded-full bg-gray-900 shadow-sm flex items-center justify-center relative"
                   style={{
                     boxShadow: isPlaying
                       ? '0 0 100px rgba(147, 51, 234, 0.35), inset 0 0 80px rgba(0,0,0,0.6)'
@@ -639,7 +643,7 @@ const AudioPlayer: React.FC<{
                 ))}
 
                 {/* 反光 */}
-                <div className="absolute inset-2 rounded-full bg-gradient-to-br from-white/[0.06] via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-2 rounded-full bg-white/5 pointer-events-none"/>
 
                 {/* 中心标签 */}
                 <div className="w-28 h-28 xl:w-32 xl:h-32 rounded-full overflow-hidden shadow-lg relative z-10 ring-2 ring-white/10">
@@ -650,7 +654,7 @@ const AudioPlayer: React.FC<{
                           className="w-full h-full object-cover"
                       />
                   ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                    <div className="w-full h-full bg-primary flex items-center justify-center">
                         {loadingMetadata ? (
                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"/>
                         ) : (
@@ -684,7 +688,7 @@ const AudioPlayer: React.FC<{
                 {coverImage ? (
                     <img src={coverImage} alt="cover" className="w-full h-full object-cover" />
                 ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                  <div className="w-full h-full bg-primary flex items-center justify-center">
                       <Music className="w-6 h-6 text-white/80"/>
                     </div>
                 )}
@@ -739,7 +743,7 @@ const AudioPlayer: React.FC<{
                                 {/* 背景进度条 */}
                                 {isActive && (
                                     <motion.div
-                                        className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/8 via-pink-500/8 to-transparent pointer-events-none"
+                                      className="absolute inset-0 rounded-xl bg-primary/5 pointer-events-none"
                                         animate={{width: `${karaokeProgress * 100}%`}}
                                         transition={{duration: 0.08, ease: 'linear'}}
                                     />
@@ -764,7 +768,7 @@ const AudioPlayer: React.FC<{
                                       </span>
                                           {/* 高亮渐变层 */}
                                           {isHighlighted && (
-                                              <span className="absolute inset-0 bg-gradient-to-r from-purple-400 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent"
+                                            <span className="absolute inset-0 bg-primary bg-clip-text text-transparent"
                                                     style={{
                                                       WebkitBackgroundClip: 'text',
                                                       filter: isActive ? 'drop-shadow(0 0 10px rgba(168,85,247,0.5))' : 'none',
@@ -776,7 +780,7 @@ const AudioPlayer: React.FC<{
                                           {/* 过渡 clipPath */}
                                           {isTransitioning && (
                                               <span className="absolute inset-0 overflow-hidden" style={{color: 'transparent'}}>
-                                            <span className="absolute inset-0 bg-gradient-to-r from-purple-400 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent"
+                                            <span className="absolute inset-0 bg-primary bg-clip-text text-transparent"
                                                   style={{
                                                     WebkitBackgroundClip: 'text',
                                                     clipPath: `inset(0 ${(1 - tokenClipProgress) * 100}% 0 0)`,
@@ -843,7 +847,7 @@ const AudioPlayer: React.FC<{
               {/* 视觉进度条 */}
               <div className="w-full h-1 rounded-full bg-white/15 overflow-hidden pointer-events-none">
                 <div
-                    className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-75"
+                  className="h-full rounded-full bg-primary transition-all duration-75"
                     style={{width: `${duration ? (currentTime / duration) * 100 : 0}%`}}
                 />
               </div>
@@ -868,7 +872,7 @@ const AudioPlayer: React.FC<{
                 {coverImage ? (
                     <img src={coverImage} alt="" className="w-full h-full object-cover" />
                 ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                  <div className="w-full h-full bg-primary flex items-center justify-center">
                       <Music className="w-5 h-5 text-white/70"/>
                     </div>
                 )}
@@ -915,7 +919,7 @@ const AudioPlayer: React.FC<{
               <motion.button
                   whileTap={{scale: 0.9}}
                   onClick={togglePlay}
-                  className="w-12 h-12 sm:w-11 sm:h-11 bg-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all mx-1"
+                  className="w-12 h-12 sm:w-11 sm:h-11 bg-white rounded-full flex items-center justify-center shadow-lg hover:shadow-sm transition-all mx-1"
                   aria-label={isPlaying ? '暂停' : '播放'}
               >
                 {isPlaying ? (
@@ -963,7 +967,8 @@ const AudioPlayer: React.FC<{
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
                 {repeatMode === 'one' && (
-                    <span className="absolute top-0 right-0 w-3 h-3 bg-purple-500 rounded-full flex items-center justify-center text-[8px] font-bold text-white">1</span>
+                  <span
+                    className="absolute top-0 right-0 w-3 h-3 bg-primary rounded-full flex items-center justify-center text-[8px] font-bold text-white">1</span>
                 )}
               </motion.button>
 
@@ -980,7 +985,8 @@ const AudioPlayer: React.FC<{
                   </svg>
                 </motion.button>
                 {showVolumeSlider && (
-                    <div className="absolute bottom-full right-0 mb-2 p-3 bg-neutral-900/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-xl">
+                  <div
+                    className="absolute bottom-full right-0 mb-2 p-3 bg-neutral-900/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-sm">
                       <input
                           type="range"
                           min="0"
@@ -988,7 +994,7 @@ const AudioPlayer: React.FC<{
                           step="0.01"
                           value={volume}
                           onChange={handleVolumeChange}
-                          className="w-24 h-1.5 bg-white/20 rounded-full appearance-none cursor-pointer accent-purple-500"
+                          className="w-24 h-1.5 bg-white/20 rounded-full appearance-none cursor-pointer accent-primary"
                           style={{
                             background: `linear-gradient(to right, #a855f7 ${volume * 100}%, rgba(255,255,255,0.15) ${volume * 100}%)`,
                           }}
@@ -1075,7 +1081,7 @@ const MiniPlayer: React.FC<{
             initial={{x: -100, opacity: 0}}
             animate={{x: 0, opacity: 1}}
             exit={{x: -100, opacity: 0}}
-            className="hidden sm:flex fixed bottom-4 left-4 z-[60] bg-black/90 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
+            className="hidden sm:flex fixed bottom-4 left-4 z-[60] bg-black/90 backdrop-blur-2xl rounded-lg border border-white/10 shadow-sm overflow-hidden"
             style={{paddingBottom: 'env(safe-area-inset-bottom, 0px)'}}
         >
           <div className="flex items-center gap-3 p-3 min-w-[260px] max-w-[320px]">
@@ -1090,7 +1096,7 @@ const MiniPlayer: React.FC<{
               {coverImage ? (
                   <img src={coverImage} alt="" className="w-full h-full object-cover"/>
               ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                <div className="w-full h-full bg-primary flex items-center justify-center">
                     <Music className="w-6 h-6 text-white/70"/>
                   </div>
               )}
@@ -1100,7 +1106,7 @@ const MiniPlayer: React.FC<{
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-medium truncate cursor-pointer" onClick={onRestore}>{media.original_filename}</p>
               <div className="w-full h-0.5 rounded-full bg-white/10 mt-1.5 overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-200"
+                <div className="h-full bg-primary rounded-full transition-all duration-200"
                      style={{width: `${duration ? (currentTime / duration) * 100 : 0}%`}}
                 />
               </div>
@@ -1139,14 +1145,14 @@ const MiniPlayer: React.FC<{
             onClick={onTogglePlay}
         >
           <motion.div
-              className="w-16 h-16 rounded-full overflow-hidden shadow-2xl border-2 border-white/20 cursor-pointer relative"
+            className="w-16 h-16 rounded-full overflow-hidden shadow-sm border-2 border-white/20 cursor-pointer relative"
               animate={isPlaying ? {rotate: 360} : {rotate: 0}}
               transition={isPlaying ? {duration: 8, ease: 'linear', repeat: Infinity} : {duration: 0.4}}
           >
             {coverImage ? (
                 <img src={coverImage} alt="" className="w-full h-full object-cover"/>
             ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+              <div className="w-full h-full bg-primary flex items-center justify-center">
                   <Music className="w-8 h-8 text-white/80"/>
                 </div>
             )}
@@ -1165,7 +1171,7 @@ const MiniPlayer: React.FC<{
               <motion.div
                   initial={{y: 100, opacity: 0}}
                   animate={{y: 0, opacity: 1}}
-                  className="bg-neutral-900/95 backdrop-blur-2xl rounded-2xl w-64 p-4 border border-white/10 shadow-2xl"
+                  className="bg-neutral-900/95 backdrop-blur-2xl rounded-lg w-64 p-4 border border-white/10 shadow-sm"
                   onClick={e => e.stopPropagation()}
               >
                 <p className="text-white font-semibold text-center mb-4 truncate">{media.original_filename}</p>
@@ -1404,7 +1410,7 @@ const PreviewModal: React.FC<{media: MediaFile|null; onClose: ()=>void}> = ({med
 
   return (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={onClose}>
     <div
-        className="w-[90vw] max-w-7xl max-h-[95vh] bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+      className="w-[90vw] max-w-7xl max-h-[95vh] bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-sm flex flex-col"
         onClick={e => e.stopPropagation()}>
       {media.mime_type === 'application/pdf' && fullUrl ? (
           <div className="flex-1 bg-gray-100 dark:bg-gray-800 min-h-[80vh]">
@@ -1432,7 +1438,8 @@ const PreviewModal: React.FC<{media: MediaFile|null; onClose: ()=>void}> = ({med
 
 const DeleteConfirm: React.FC<{item: MediaFile; onCancel: ()=>void; onConfirm: ()=>void}> = ({item, onCancel, onConfirm}) => (
   <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onCancel}>
-    <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-sm w-full shadow-xl" onClick={e=>e.stopPropagation()}>
+    <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-sm w-full shadow-sm"
+         onClick={e => e.stopPropagation()}>
       <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">确认删除</h3>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">确定要删除 <span
         className="font-medium">{item.original_filename}</span> 吗？</p>
@@ -1449,7 +1456,8 @@ const MoveDialog: React.FC<{open: boolean; onClose: ()=>void; folders: FolderNod
     </button>
   );
   return (<div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-    <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-md w-full shadow-xl" onClick={e=>e.stopPropagation()}>
+    <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md w-full shadow-sm"
+         onClick={e => e.stopPropagation()}>
       <h3 className="text-lg font-bold mb-2">移动文件</h3>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">将选中的 {mediaCount} 个文件移动到：</p>
       <div className="space-y-2 max-h-64 overflow-y-auto mb-4">
@@ -1467,7 +1475,8 @@ const CreateFolderDialog: React.FC<{open: boolean; onClose: ()=>void; onCreate: 
   const [name, setName] = useState('');
   if(!open) return null;
   return (<div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-    <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-sm w-full shadow-xl" onClick={e=>e.stopPropagation()}>
+    <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-sm w-full shadow-sm"
+         onClick={e => e.stopPropagation()}>
       <h3 className="text-lg font-bold mb-4">新建文件夹</h3>
       <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="文件夹名称" className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white mb-4" autoFocus onKeyDown={e=>{if(e.key==='Enter' && name.trim()) {onCreate(name.trim()); setName('');}}}/>
       <div className="flex justify-end gap-3"><button onClick={onClose} className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium">取消</button><button onClick={()=>{if(name.trim()){onCreate(name.trim()); setName('');}}} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">创建</button></div>
@@ -1712,7 +1721,11 @@ const MediaPage: React.FC = () => {
                 <span className="text-sm text-blue-600 font-medium">{selected.length} 已选</span>
                 <button onClick={()=>setSelected([])} className="px-3 py-2 text-sm bg-gray-200 dark:bg-gray-700 rounded-lg">取消</button>
                 <button onClick={()=>{if(selected.length)setShowMoveDialog(true);}} className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"><FolderClosed className="w-4 h-4 inline mr-1"/>移动</button>
-                <button onClick={()=>{if(selected.length)setTagEditorMedia({id:0, tags:'', multiple:true});}} className="px-3 py-2 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700"><Tag className="w-4 h-4 inline mr-1"/>标签</button>
+                <button onClick={() => {
+                  if (selected.length) setTagEditorMedia({id: 0, tags: '', multiple: true});
+                }} className="px-3 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary"><Tag
+                  className="w-4 h-4 inline mr-1"/>标签
+                </button>
                 <button onClick={async () => {
                   if (selected.length) setCategoryEditorMedia({id: 0, category: null, multiple: true});
                 }} className="px-3 py-2 text-sm bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"><FolderClosed
@@ -1784,7 +1797,7 @@ const MediaPage: React.FC = () => {
                                         }}
                                         className={`px-2.5 py-1 rounded-lg text-xs transition-colors ${
                                             selectedTagIds.includes(tag.id)
-                                                ? 'bg-purple-600 text-white'
+                                              ? 'bg-primary text-white'
                                                 : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                                         }`}
                                 >{tag.name}</button>
@@ -1833,9 +1846,13 @@ const MediaPage: React.FC = () => {
                           {selectedTagIds.map(id => {
                             const tag = allTags.find(t => t.id === id);
                             return tag ? (
-                                <span key={id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 text-xs">
+                              <span key={id}
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary dark:bg-primary/20 text-primary dark:text-primary text-xs">
                               {tag.name}
-                                  <button onClick={() => { setSelectedTagIds(prev => prev.filter(i => i !== id)); setPage(1); }} className="hover:text-purple-800">✕</button>
+                                <button onClick={() => {
+                                  setSelectedTagIds(prev => prev.filter(i => i !== id));
+                                  setPage(1);
+                                }} className="hover:text-primary">✕</button>
                             </span>
                             ) : null;
                           })}
@@ -1961,7 +1978,8 @@ const TagEditor: React.FC<{
 
   return (
       <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 w-full max-w-md"
+             onClick={e => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">编辑标签</h3>
             <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400">✕</button>
@@ -1972,7 +1990,7 @@ const TagEditor: React.FC<{
           <div className="flex flex-wrap gap-2 mb-3 min-h-[32px] p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
             {tags.map(tag => (
                 <span key={tag}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium">
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-primary dark:bg-primary/30 text-primary dark:text-primary text-xs font-medium">
                   {tag}
                   <button onClick={() => removeTag(tag)} className="hover:text-red-500">✕</button>
                 </span>
@@ -1986,7 +2004,7 @@ const TagEditor: React.FC<{
                    onChange={e => setInputVal(e.target.value)}
                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(inputVal); } }}
                    placeholder="输入标签名称..."
-                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:text-white"
+                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:text-white"
                    disabled={tags.length >= 5}
             />
             {suggestions.length > 0 && (
@@ -1994,7 +2012,7 @@ const TagEditor: React.FC<{
                   {suggestions.map(s => (
                       <button key={s.id} onClick={() => addTag(s.name)}
                               className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                        <Tag className="w-3 h-3 text-purple-500"/>
+                        <Tag className="w-3 h-3 text-primary"/>
                         {s.name}
                       </button>
                   ))}
@@ -2009,7 +2027,7 @@ const TagEditor: React.FC<{
                 <div className="flex flex-wrap gap-1.5">
                   {allTags.filter(t => !tags.includes(t.name)).slice(0, 10).map(t => (
                       <button key={t.id} onClick={() => addTag(t.name)}
-                              className="px-2 py-1 rounded-lg text-xs bg-gray-100 dark:bg-gray-800 hover:bg-purple-100 dark:hover:bg-purple-900/30 text-gray-600 dark:text-gray-400 hover:text-purple-600 transition-colors">
+                              className="px-2 py-1 rounded-lg text-xs bg-gray-100 dark:bg-gray-800 hover:bg-primary dark:hover:bg-primary/30 text-gray-600 dark:text-gray-400 hover:text-primary transition-colors">
                         {t.name}
                       </button>
                   ))}
@@ -2018,7 +2036,7 @@ const TagEditor: React.FC<{
           )}
 
           <button onClick={handleSave} disabled={saving}
-                  className="w-full py-2.5 rounded-xl bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 disabled:opacity-50 transition-colors">
+                  className="w-full py-2.5 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary disabled:opacity-50 transition-colors">
             {saving ? '保存中...' : '保存标签'}
           </button>
         </div>
@@ -2049,7 +2067,8 @@ const BatchTagDialog: React.FC<{
 
   return (
       <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 w-full max-w-sm"
+             onClick={e => e.stopPropagation()}>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">批量添加标签</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">将为 {mediaCount} 个文件添加标签</p>
 
@@ -2057,7 +2076,7 @@ const BatchTagDialog: React.FC<{
                  onChange={e => setInputVal(e.target.value)}
                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSave(); } }}
                  placeholder="输入标签名称..."
-                 className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-800 dark:text-white mb-3"
+                 className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white mb-3"
                  autoFocus
           />
 
@@ -2067,7 +2086,7 @@ const BatchTagDialog: React.FC<{
               取消
             </button>
             <button onClick={handleSave} disabled={saving || !inputVal.trim()}
-                    className="flex-1 py-2 rounded-xl bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 disabled:opacity-50 transition-colors">
+                    className="flex-1 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary disabled:opacity-50 transition-colors">
               {saving ? '添加中...' : '添加标签'}
             </button>
           </div>
@@ -2106,7 +2125,8 @@ const CategoryEditor: React.FC<{
 
   return (
       <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 w-full max-w-md"
+             onClick={e => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">设置分类</h3>
             <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400">✕</button>
@@ -2177,7 +2197,8 @@ const BatchCategoryDialog: React.FC<{
 
   return (
       <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 w-full max-w-sm"
+             onClick={e => e.stopPropagation()}>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">批量设置分类</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">将为 {mediaCount} 个文件设置分类</p>
 
@@ -2262,7 +2283,7 @@ const _ImageCropDialog: React.FC<{
 
   return (
       <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col"
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm w-full max-w-4xl max-h-[90vh] flex flex-col"
              onClick={e => e.stopPropagation()}>
           <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">图像裁剪与优化</h3>

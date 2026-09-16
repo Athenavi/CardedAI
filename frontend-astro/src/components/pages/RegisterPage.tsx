@@ -1,27 +1,26 @@
 ﻿'use client';
 
 import React, {useState} from 'react';
-import {useForm, FormProvider} from 'react-hook-form';
+import {FormProvider, useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {apiClient} from '@/lib/api/base-client';
-import {registerSchema, type RegisterFormData} from '@/lib/schemas';
+import {type RegisterFormData, registerSchema} from '@/lib/schemas';
 import {useTranslation} from '@/lib/i18n';
 import {
-  Check,
-  Eye,
-  EyeOff,
-  UserPlus,
-  Mail,
-  Lock,
-  User,
-  Globe,
+  AlertCircle,
   ArrowLeft,
   ArrowRight,
-  AlertCircle,
   BookOpen,
-  Sparkles,
+  Check,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Globe,
   Loader,
-  CheckCircle2
+  Lock,
+  Mail,
+  Sparkles,
+  User
 } from 'lucide-react';
 
 const passwordStrength = (pw: string): { level: number; labelKey: string; color: string } => {
@@ -169,21 +168,21 @@ export default function RegisterPage() {
 
   return (
       <div
-          className="min-h-screen flex bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+        className="min-h-screen flex bg-background">
           {/* ═══ Left Panel - Branding ═══ */}
           <div className="hidden lg:flex lg:w-1/2 xl:w-[45%] relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600"/>
+            <div className="absolute inset-0 bg-primary"/>
 
               {/* Animated Orbs */}
               <div className="absolute inset-0 overflow-hidden">
                   <div
-                      className="absolute -top-20 -right-20 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl animate-pulse"
+                    className="absolute -top-20 -right-20 w-80 h-80 bg-primary/20 rounded-full blur-3xl animate-pulse"
                       style={{animationDuration: '5s'}}/>
                   <div
-                      className="absolute bottom-10 left-10 w-60 h-60 bg-pink-400/20 rounded-full blur-3xl animate-pulse"
+                    className="absolute bottom-10 left-10 w-60 h-60 bg-primary/20 rounded-full blur-3xl animate-pulse"
                       style={{animationDuration: '7s'}}/>
                   <div
-                      className="absolute top-1/2 right-1/3 w-40 h-40 bg-indigo-400/20 rounded-full blur-3xl animate-pulse"
+                    className="absolute top-1/2 right-1/3 w-40 h-40 bg-primary/20 rounded-full blur-3xl animate-pulse"
                       style={{animationDuration: '4s'}}/>
               </div>
 
@@ -210,7 +209,7 @@ export default function RegisterPage() {
             <div>
               <h2 className="text-3xl xl:text-4xl font-bold text-white leading-tight mb-4"
                   dangerouslySetInnerHTML={{__html: t('register.branding.tagline').replace(/\n/g, '<br/>')}}/>
-                <p className="text-purple-100/80 text-lg leading-relaxed max-w-md">
+              <p className="text-primary/80 text-lg leading-relaxed max-w-md">
                   {t('register.branding.description')}
                 </p>
             </div>
@@ -219,29 +218,29 @@ export default function RegisterPage() {
                       <div className="grid grid-cols-2 gap-4">
                           {benefits.map((b, i) => (
                               <div key={i}
-                                   className="group p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300">
+                                   className="group p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300">
                                   <span className="text-2xl block mb-2">{b.icon}</span>
                                 <h3 className="text-sm font-semibold text-white mb-1">{t(b.titleKey)}</h3>
-                                <p className="text-xs text-purple-100/70 leading-relaxed">{t(b.descKey)}</p>
+                                <p className="text-xs text-primary/70 leading-relaxed">{t(b.descKey)}</p>
                               </div>
                           ))}
                       </div>
                   </div>
 
                   {/* Testimonial */}
-                  <div className="p-5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10">
+                <div className="p-5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10">
                       <p className="text-white/90 text-sm italic mb-3">
                         "{t('register.branding.testimonial.quote')}"
                       </p>
                       <div className="flex items-center gap-3">
                           <div
-                            className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-400 rounded-full flex items-center justify-center text-xs font-bold text-white">
+                            className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-xs font-bold text-white">
                             {t('register.branding.testimonial.author').charAt(0)}
                           </div>
                           <div>
                             <p
                               className="text-sm font-medium text-white">{t('register.branding.testimonial.author')}</p>
-                            <p className="text-xs text-purple-100/60">{t('register.branding.testimonial.role')}</p>
+                            <p className="text-xs text-primary/60">{t('register.branding.testimonial.role')}</p>
                           </div>
                       </div>
                   </div>
@@ -254,7 +253,7 @@ export default function RegisterPage() {
                   {/* Mobile Logo */}
                   <div className="lg:hidden flex items-center gap-3 mb-8">
                       <div
-                          className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg">
                           <BookOpen className="w-5 h-5 text-white"/>
             </div>
                       <span className="text-xl font-bold text-gray-900 dark:text-white">Carded AI</span>
@@ -278,7 +277,7 @@ export default function RegisterPage() {
                                   <div
                                       className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
                                           i < step ? 'bg-green-500 text-white' :
-                                              i === step ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-md' :
+                                            i === step ? 'bg-primary text-white shadow-md' :
                                                   'bg-gray-200 dark:bg-gray-700 text-gray-400'
                                       }`}>
                                       {i < step ? <Check className="w-4 h-4"/> : i + 1}
@@ -298,14 +297,14 @@ export default function RegisterPage() {
                   {/* Error */}
                   {err && (
                       <div
-                          className="mb-6 flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200/60 dark:border-red-800/40 rounded-2xl text-sm">
+                        className="mb-6 flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200/60 dark:border-red-800/40 rounded-lg text-sm">
                           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"/>
                           <span className="text-red-600 dark:text-red-400">{err}</span>
                       </div>
                   )}
 
                   <div
-                      className="bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-8 shadow-xl border border-gray-100 dark:border-gray-700">
+                    className="bg-white dark:bg-gray-800 rounded-lg p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
                       {/* Step 0: Basic Info */}
                       {step === 0 && (
                         <FormProvider {...form}>
@@ -318,7 +317,7 @@ export default function RegisterPage() {
                                       className={`relative transition-all duration-200 ${focusedField === 'username' ? 'scale-[1.01]' : ''}`}>
                                       <div className="absolute left-4 top-1/2 -translate-y-1/2">
                                           <User
-                                              className={`w-5 h-5 transition-colors ${focusedField === 'username' ? 'text-indigo-500' : 'text-gray-400'}`}/>
+                                            className={`w-5 h-5 transition-colors ${focusedField === 'username' ? 'text-primary' : 'text-gray-400'}`}/>
                                       </div>
                                       <input
                                           type="text"
@@ -336,7 +335,7 @@ export default function RegisterPage() {
                                           }}
                                           placeholder={t('register.usernamePlaceholder')}
                                           autoFocus
-                                          className={`w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-gray-900 border-2 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all ${errors.username ? 'border-red-400 focus:border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-indigo-500'}`}
+                                          className={`w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-gray-900 border-2 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all ${errors.username ? 'border-red-400 focus:border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-primary'}`}
                                       />
                                       <div className="absolute right-4 top-1/2 -translate-y-1/2">
                                           {uOk === true && <CheckCircle2 className="w-5 h-5 text-green-500"/>}
@@ -359,7 +358,7 @@ export default function RegisterPage() {
                                       className={`relative transition-all duration-200 ${focusedField === 'email' ? 'scale-[1.01]' : ''}`}>
                                       <div className="absolute left-4 top-1/2 -translate-y-1/2">
                                           <Mail
-                                              className={`w-5 h-5 transition-colors ${focusedField === 'email' ? 'text-indigo-500' : 'text-gray-400'}`}/>
+                                            className={`w-5 h-5 transition-colors ${focusedField === 'email' ? 'text-primary' : 'text-gray-400'}`}/>
                                       </div>
                                       <input
                                           type="email"
@@ -376,7 +375,7 @@ export default function RegisterPage() {
                                               checkE();
                                           }}
                                           placeholder={t('register.emailPlaceholder')}
-                                          className={`w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-gray-900 border-2 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all ${errors.email ? 'border-red-400 focus:border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-indigo-500'}`}
+                                          className={`w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-gray-900 border-2 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all ${errors.email ? 'border-red-400 focus:border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-primary'}`}
                                       />
                                       <div className="absolute right-4 top-1/2 -translate-y-1/2">
                                           {eOk === true && <CheckCircle2 className="w-5 h-5 text-green-500"/>}
@@ -394,7 +393,7 @@ export default function RegisterPage() {
                               <button
                                   type="button"
                                   onClick={next}
-                                  className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/25 hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-2"
+                                  className="w-full py-4 bg-primary text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary hover:shadow-sm active:scale-[0.98] flex items-center justify-center gap-2"
                               >
                                 {t('register.nextStep')} <ArrowRight className="w-5 h-5"/>
                               </button>
@@ -414,7 +413,7 @@ export default function RegisterPage() {
                               className={`relative transition-all duration-200 ${focusedField === 'password' ? 'scale-[1.01]' : ''}`}>
                               <div className="absolute left-4 top-1/2 -translate-y-1/2">
                                 <Lock
-                                  className={`w-5 h-5 transition-colors ${focusedField === 'password' ? 'text-indigo-500' : 'text-gray-400'}`}/>
+                                  className={`w-5 h-5 transition-colors ${focusedField === 'password' ? 'text-primary' : 'text-gray-400'}`}/>
                               </div>
                               <input
                                 type={pv ? 'text' : 'password'}
@@ -430,7 +429,7 @@ export default function RegisterPage() {
                                 }}
                                 placeholder={t('register.passwordPlaceholder')}
                                 autoFocus
-                                className={`w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-gray-900 border-2 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all ${errors.password ? 'border-red-400 focus:border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-indigo-500'}`}
+                                className={`w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-gray-900 border-2 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all ${errors.password ? 'border-red-400 focus:border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-primary'}`}
                               />
                               <button type="button" onClick={() => setPv(!pv)}
                                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -463,7 +462,7 @@ export default function RegisterPage() {
                               className={`relative transition-all duration-200 ${focusedField === 'confirm' ? 'scale-[1.01]' : ''}`}>
                               <div className="absolute left-4 top-1/2 -translate-y-1/2">
                                 <Lock
-                                  className={`w-5 h-5 transition-colors ${focusedField === 'confirm' ? 'text-indigo-500' : 'text-gray-400'}`}/>
+                                  className={`w-5 h-5 transition-colors ${focusedField === 'confirm' ? 'text-primary' : 'text-gray-400'}`}/>
                               </div>
                               <input
                                 type="password"
@@ -478,7 +477,7 @@ export default function RegisterPage() {
                                   setFocusedField(null);
                                 }}
                                 placeholder={t('register.confirmPasswordPlaceholder')}
-                                className={`w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-gray-900 border-2 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all ${errors.confirmPassword ? 'border-red-400 focus:border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-indigo-500'}`}
+                                className={`w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-gray-900 border-2 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all ${errors.confirmPassword ? 'border-red-400 focus:border-red-500' : 'border-gray-200 dark:border-gray-600 focus:border-primary'}`}
                               />
                               {watchedConfirm && (
                                 <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -494,7 +493,7 @@ export default function RegisterPage() {
 
                           {/* Password Requirements */}
                           <div
-                            className="p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700">
+                            className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-700">
                             <p
                               className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">{t('register.passwordRequirements.title')}</p>
                             <div className="grid grid-cols-2 gap-1.5">
@@ -531,13 +530,13 @@ export default function RegisterPage() {
                               setStep(0);
                               setErr('');
                             }}
-                                    className="flex-1 py-4 border-2 border-gray-200 dark:border-gray-600 rounded-2xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors flex items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
+                                    className="flex-1 py-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors flex items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
                               <ArrowLeft className="w-4 h-4"/> {t('register.prevStep')}
                             </button>
                             <button
                               type="button"
                               onClick={next}
-                              className="flex-1 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/25 active:scale-[0.98] flex items-center justify-center gap-2"
+                              className="flex-1 py-4 bg-primary text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary active:scale-[0.98] flex items-center justify-center gap-2"
                             >
                               {t('register.nextStep')} <ArrowRight className="w-4 h-4"/>
                             </button>
@@ -552,7 +551,7 @@ export default function RegisterPage() {
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                           {/* Summary */}
                           <div
-                            className="p-5 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/30">
+                            className="p-5 bg-secondary rounded-lg border border-primary dark:border-primary/30">
                             <h3
                               className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
                               <CheckCircle2 className="w-4 h-4 text-green-500"/> {t('register.confirmInfo.title')}
@@ -589,7 +588,7 @@ export default function RegisterPage() {
                             </label>
                             <select
                               {...register('locale')}
-                              className="w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-600 rounded-2xl text-sm text-gray-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                              className="w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
                             >
                               <option value="zh_CN">🇨🇳 简体中文</option>
                               <option value="en_US">🇺🇸 English</option>
@@ -598,11 +597,11 @@ export default function RegisterPage() {
 
                           {/* Terms */}
                           <label
-                            className="flex items-start gap-3 cursor-pointer group p-4 rounded-2xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-800 transition-colors">
+                            className="flex items-start gap-3 cursor-pointer group p-4 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 hover:border-primary dark:hover:border-primary transition-colors">
                             <div className="relative mt-0.5">
                               <input type="checkbox" {...register('terms')} className="peer sr-only"/>
                               <div
-                                className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded-lg peer-checked:border-indigo-500 peer-checked:bg-indigo-500 transition-all flex items-center justify-center">
+                                className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded-lg peer-checked:border-primary peer-checked:bg-primary transition-all flex items-center justify-center">
                                 {watch('terms') &&
                                   <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"
                                        stroke="currentColor" strokeWidth={3}>
@@ -614,10 +613,10 @@ export default function RegisterPage() {
                             <span className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                      {t('register.agreeTerms')}{' '}
                               <a href="/terms"
-                                 className="text-indigo-600 hover:underline dark:text-indigo-400 font-medium">{t('register.termsOfService')}</a>
+                                 className="text-primary hover:underline dark:text-primary font-medium">{t('register.termsOfService')}</a>
                               {' '}{t('common.and')}{' '}
                               <a href="/privacy"
-                                 className="text-indigo-600 hover:underline dark:text-indigo-400 font-medium">{t('register.privacyPolicy')}</a>
+                                 className="text-primary hover:underline dark:text-primary font-medium">{t('register.privacyPolicy')}</a>
                    </span>
                           </label>
                           {errors.terms && <p className="text-xs text-red-500">{errors.terms.message}</p>}
@@ -627,13 +626,13 @@ export default function RegisterPage() {
                               setStep(1);
                               setErr('');
                             }}
-                                    className="flex-1 py-4 border-2 border-gray-200 dark:border-gray-600 rounded-2xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors flex items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
+                                    className="flex-1 py-4 border-2 border-gray-200 dark:border-gray-600 rounded-lg text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors flex items-center justify-center gap-2 text-gray-700 dark:text-gray-300">
                               <ArrowLeft className="w-4 h-4"/> {t('register.prevStep')}
                             </button>
                             <button
                               type="submit"
                               disabled={busy || !watch('terms')}
-                              className="flex-1 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-500/25 hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-2"
+                              className="flex-1 py-4 bg-primary text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-500/25 hover:shadow-sm active:scale-[0.98] flex items-center justify-center gap-2"
                             >
                               {busy ? (
                                 <><Loader className="w-5 h-5 animate-spin"/> {t('register.creating')}</>
@@ -651,7 +650,7 @@ export default function RegisterPage() {
                   <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
                     {t('register.hasAccount')}{' '}
                       <a href="/login"
-                         className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold hover:underline">
+                         className="text-primary hover:text-primary dark:text-primary font-semibold hover:underline">
                         {t('register.loginNow')}
                       </a>
                   </p>
