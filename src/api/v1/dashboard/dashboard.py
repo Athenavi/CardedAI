@@ -645,44 +645,8 @@ async def get_users(
         # 构建响应数据
         users_data = []
         for user in users:
-            # 查询用户的角色
-            from shared.models.user_role import UserRole
-            from shared.models.role import Role
-            import json
-
-            roles_query = select(Role).join(
-                UserRole, Role.id == UserRole.role_id
-            ).where(
-                UserRole.user_id == user.id
-            )
-            roles_result = await db.execute(roles_query)
-            user_roles = roles_result.scalars().all()
-
-            logger.error(f"DEBUG: User {user.username} (ID: {user.id}) has {len(user_roles)} roles")
-
-            # 构建角色数据
-            roles_data = []
-            for role in user_roles:
-                # 解析权限列表
-                try:
-                    permissions_list = json.loads(role.permissions) if role.permissions else []
-                except Exception as e:
-                    logger.error(f"DEBUG: Error parsing permissions for role {role.id}: {e}")
-                    permissions_list = []
-
-                logger.error(f"DEBUG: Role {role.name} (ID: {role.id}) has permissions: {permissions_list}")
-
-                roles_data.append({
-                    "id": role.id,
-                    "name": role.name,
-                    "slug": role.slug,
-                    "description": role.description or "",
-                    "permissions": permissions_list  # 添加权限列表
-                })
-
-            logger.error(f"DEBUG: User {user.username} roles_data: {roles_data}")
-
-            # 这里可以添加计算用户存储使用量的逻辑
+            # 角色系统已移除（shared.models.user_role / shared.models.role 不再存在，
+            # 数据库中也没有 roles / user_roles 表），这里保留空数组以维持响应结构兼容。
             users_data.append({
                 "id": user.id,
                 "username": user.username,
@@ -694,7 +658,7 @@ async def get_users(
                 "is_active": user.is_active,
                 "is_superuser": user.is_superuser,
                 "storage_used": 0,  # 占位符，实际应计算存储使用量
-                "roles": roles_data  # 添加角色信息
+                "roles": []  # 角色系统已移除
             })
 
         return ApiResponse(
