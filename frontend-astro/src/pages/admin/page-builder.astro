@@ -1,16 +1,9 @@
 ---
-import '../../styles/globals.css';
+// 页面构建器
+import AdminLayout from '@/layouts/AdminLayout.astro';
 import PageBuilder from '@/components/pages/admin/PageBuilder';
 ---
 
-<!doctype html>
-<html lang="zh-CN">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>页面构建器 - FastBlog</title>
-</head>
-<body>
-<PageBuilder client:load/>
-</body>
-</html>
+<AdminLayout title="页面构建器">
+    <PageBuilder client:idle/>
+</AdminLayout>

@@ -1,19 +1,42 @@
 'use client';
 
-import React, {useState, useRef, useEffect, useMemo, useCallback} from 'react';
-import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {AuthGuard} from '@/components/AuthGuard';
 import {QueryProvider} from '@/components/QueryProvider';
 import {AdminShell} from '@/components/admin/AdminShell';
 import {StatCard} from '@/components/admin/shared-ui';
 import {apiClient} from '@/lib/api/base-client';
 import {useDebounce} from '@/lib/hooks';
-import {getFullMediaUrl, formatBytes} from '@/lib/utils';
+import {formatBytes, getFullMediaUrl} from '@/lib/utils';
 import {
-  ChevronLeft, ChevronRight, FileText, Image, Music, Search, Trash2,
-  Video, X, Upload, Grid, List, Copy, Eye, HardDrive, File,
-  ArrowUp, ArrowDown, AlertTriangle, Download, Clock, CheckCircle2,
-  RotateCcw, Ban, CheckSquare, Square, ArrowRightLeft, FolderOpen
+  AlertTriangle,
+  ArrowDown,
+  ArrowRightLeft,
+  ArrowUp,
+  Ban,
+  CheckCircle2,
+  CheckSquare,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Copy,
+  Download,
+  Eye,
+  File,
+  FileText,
+  FolderOpen,
+  Grid,
+  HardDrive,
+  Image,
+  List,
+  Music,
+  RotateCcw,
+  Search,
+  Trash2,
+  Upload,
+  Video,
+  X
 } from 'lucide-react';
 
 /* ── 类型定义 ── */
@@ -234,7 +257,7 @@ const MediaGridCard: React.FC<{
                 e.stopPropagation();
                 onPreview(file);
               }}
-                        className="p-2 bg-white/90 rounded-xl hover:bg-white transition-colors shadow-lg">
+                      className="p-2 bg-card/90 rounded-md hover:bg-card transition-colors shadow-sm">
                   <Eye className="w-4 h-4 text-gray-700"/>
                 </button>
             )}
@@ -242,7 +265,7 @@ const MediaGridCard: React.FC<{
               e.stopPropagation();
               onDelete(file);
             }}
-                    className="p-2 bg-white/90 rounded-xl hover:bg-white transition-colors shadow-lg">
+                    className="p-2 bg-card/90 rounded-md hover:bg-card transition-colors shadow-sm">
               <Trash2 className="w-4 h-4 text-red-600"/>
             </button>
           </div>

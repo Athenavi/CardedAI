@@ -1,14 +1,11 @@
 ---
-import '../../styles/globals.css';
+// AI 助手
+import Layout from '@/layouts/Layout.astro';
 import AiPage from '@/components/pages/AiPage';
 ---
-<html lang="zh-CN">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>AI 助手 - FastBlog</title>
-</head>
-<body>
-<AiPage client:idle/>
-</body>
-</html>
+
+<Layout title="AI 助手">
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <AiPage client:load/>
+    </div>
+</Layout>

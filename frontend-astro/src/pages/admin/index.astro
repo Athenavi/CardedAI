@@ -1,16 +1,9 @@
 ---
-import '../../styles/globals.css';
+// 仪表盘
+import AdminLayout from '@/layouts/AdminLayout.astro';
 import AdminDashboard from '@/components/pages/admin/AdminDashboard';
 ---
 
-<!doctype html>
-<html lang="zh-CN">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>仪表盘 - FastBlog</title>
-</head>
-<body>
-<AdminDashboard client:idle/>
-</body>
-</html>
+<AdminLayout title="仪表盘">
+    <AdminDashboard client:idle/>
+</AdminLayout>

@@ -1,10 +1,9 @@
 ---
-import '../../styles/globals.css';
+// 写文章
+import AdminLayout from '@/layouts/AdminLayout.astro';
 import ArticleEditor from '@/components/pages/admin/ArticleEditor';
 ---
 
-<!doctype html>
-<html lang="zh-CN">
-  <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>写文章 - FastBlog</title></head>
-  <body><ArticleEditor client:load /></body>
-</html>
+<AdminLayout title="写文章">
+    <ArticleEditor client:idle/>
+</AdminLayout>

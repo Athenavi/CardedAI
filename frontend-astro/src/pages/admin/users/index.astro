@@ -1,12 +1,9 @@
 ---
-import '../../../styles/globals.css';
+// 用户管理
+import AdminLayout from '@/layouts/AdminLayout.astro';
 import AdminUsers from '@/components/pages/admin/AdminUsers';
 ---
 
-<!doctype html>
-<html lang="zh-CN">
-  <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>用户管理 - FastBlog</title></head>
-  <body>
+<AdminLayout title="用户管理">
   <AdminUsers client:idle/>
-  </body>
-</html>
+</AdminLayout>

@@ -49,6 +49,8 @@
         font-family: var(--font-sans);
         line-height: 1.6;
         color: var(--color-text);
+      /* 暗色模式下必须有底色，否则退回浏览器默认白底 */
+      background-color: var(--background);
     }
 
     ::selection {
@@ -1077,4 +1079,58 @@ body {
 .a11y-skip-links .skip-link:focus {
     top: 0;
     outline: none;
+}
+
+/* ═══════════════════════════════════════════
+   暗色覆盖：后端 markdown_to_html 生成的正文 HTML
+   自带一套写死浅色主题的 <style>（.markdown-content），
+   在暗色模式下会出现"白底浅字"。这里用更高特异性覆盖。
+   注意：必须写在顶层（不放进 @layer），否则比不过未分层的内联样式。
+   ═══════════════════════════════════════════ */
+.dark .markdown-content {
+  color: var(--foreground);
+  background-color: transparent;
+}
+
+.dark .markdown-content h1,
+.dark .markdown-content h2 {
+  border-bottom-color: var(--border);
+}
+
+.dark .markdown-content h3,
+.dark .markdown-content h4,
+.dark .markdown-content h5,
+.dark .markdown-content h6 {
+  color: var(--foreground);
+}
+
+.dark .markdown-content code {
+  background-color: color-mix(in srgb, var(--foreground) 12%, transparent);
+  color: var(--foreground);
+}
+
+.dark .markdown-content pre {
+  background-color: var(--color-gray-950);
+  color: var(--color-gray-100);
+  border: 1px solid var(--border);
+}
+
+.dark .markdown-content blockquote {
+  border-left-color: var(--border);
+  color: var(--muted-foreground);
+}
+
+.dark .markdown-content table,
+.dark .markdown-content th,
+.dark .markdown-content td {
+  border-color: var(--border);
+}
+
+.dark .markdown-content a {
+  color: var(--primary);
+}
+
+.dark .markdown-content hr {
+  background-color: var(--border);
+  border-color: var(--border);
 }

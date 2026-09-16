@@ -681,7 +681,7 @@ export default function LoginPage() {
                                     </div>
                                   </div>
                               ) : qrImg ? (
-                                <div className="relative p-4 bg-white rounded-lg border-2 border-gray-100 shadow-lg">
+                                <div className="relative p-4 bg-card rounded-lg border border-border shadow-sm">
                                     <img src={qrImg} alt="Login QR Code" className="w-[200px] h-[200px]"/>
                                     {qrStatus === 'success' && (
                                         <div

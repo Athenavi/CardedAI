@@ -1,16 +1,9 @@
 ---
-import '../../../styles/globals.css';
+// 媒体库- FastBlog
+import AdminLayout from '@/layouts/AdminLayout.astro';
 import AdminMedia from '@/components/pages/admin/AdminMedia';
 ---
 
-<!doctype html>
-<html lang="zh-CN">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>媒体�?- FastBlog</title>
-</head>
-<body>
-<AdminMedia client:idle/>
-</body>
-</html>
+<AdminLayout title="媒体库">
+    <AdminMedia client:idle/>
+</AdminLayout>

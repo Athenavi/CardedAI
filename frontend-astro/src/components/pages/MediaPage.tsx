@@ -919,7 +919,7 @@ const AudioPlayer: React.FC<{
               <motion.button
                   whileTap={{scale: 0.9}}
                   onClick={togglePlay}
-                  className="w-12 h-12 sm:w-11 sm:h-11 bg-white rounded-full flex items-center justify-center shadow-lg hover:shadow-sm transition-all mx-1"
+                  className="w-12 h-12 sm:w-11 sm:h-11 bg-card rounded-full flex items-center justify-center shadow-sm hover:shadow-sm transition-all mx-1"
                   aria-label={isPlaying ? '暂停' : '播放'}
               >
                 {isPlaying ? (

@@ -1,6 +1,11 @@
 ---
-import '../../../styles/globals.css';
 // 创建文章
+import Layout from '@/layouts/Layout.astro';
 import ArticleEditorPage from '@/components/pages/my/ArticleEditorPage';
 ---
-<html lang="zh-CN"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>创建文章 - FastBlog</title></head><body><ArticleEditorPage mode="create" client:load /></body></html>
+
+<Layout title="创建文章">
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <ArticleEditorPage client:load/>
+    </div>
+</Layout>

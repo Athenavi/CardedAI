@@ -1,14 +1,9 @@
 ---
-import '../../../styles/globals.css';
+// AI 工具
+import AdminLayout from '@/layouts/AdminLayout.astro';
 import AdminAI from '@/components/pages/admin/AdminAI';
 ---
-<html lang="zh-CN">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>AI 工具 - FastBlog</title>
-</head>
-<body>
-<AdminAI client:idle/>
-</body>
-</html>
+
+<AdminLayout title="AI 工具">
+    <AdminAI client:idle/>
+</AdminLayout>

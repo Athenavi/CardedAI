@@ -1,14 +1,11 @@
 ---
-import '../../styles/globals.css';
+// 版本信息
+import Layout from '@/layouts/Layout.astro';
 import VersionPage from '@/components/pages/VersionPage';
 ---
-<html lang="zh-CN">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>版本信息 - FastBlog</title>
-</head>
-<body>
-<VersionPage client:idle/>
-</body>
-</html>
+
+<Layout title="版本信息">
+    <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <VersionPage client:load/>
+    </div>
+</Layout>

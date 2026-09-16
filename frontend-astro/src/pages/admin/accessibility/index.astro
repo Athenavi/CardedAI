@@ -1,14 +1,9 @@
 ---
-import '../../../styles/globals.css';
+// 无障碍- FastBlog
+import AdminLayout from '@/layouts/AdminLayout.astro';
 import AdminAccessibility from '@/components/pages/admin/AdminAccessibility';
 ---
-<html lang="zh-CN">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>无障�?- FastBlog</title>
-</head>
-<body>
-<AdminAccessibility client:idle/>
-</body>
-</html>
+
+<AdminLayout title="无障碍">
+    <AdminAccessibility client:idle/>
+</AdminLayout>
