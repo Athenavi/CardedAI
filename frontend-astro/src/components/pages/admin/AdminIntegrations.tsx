@@ -1,22 +1,8 @@
 'use client';
 
 import React, {useCallback, useMemo, useState} from 'react';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
 import {apiClient} from '@/lib/api/base-client';
-import {
-  Eye,
-  EyeOff,
-  GitBranch,
-  Globe,
-  Loader,
-  MessageCircle,
-  Save,
-  Shield,
-  Star,
-  CheckCircle2,
-  XCircle,
-  ExternalLink,
-} from 'lucide-react';
+import {CheckCircle2, ExternalLink, Eye, EyeOff, GitBranch, Globe, Loader, Save, XCircle,} from 'lucide-react';
 
 // ─── OAuth Provider Configuration ──────────────────────
 
@@ -45,30 +31,6 @@ const OAUTH_PROVIDERS: OAuthProviderConfig[] = [
     color: 'from-blue-500 to-blue-600',
     docUrl: 'https://console.cloud.google.com/apis/credentials',
     scopes: 'openid email profile',
-  },
-  {
-    key: 'wechat',
-    label: '微信',
-    icon: MessageCircle,
-    color: 'from-green-500 to-green-600',
-    docUrl: 'https://open.weixin.qq.com/',
-    scopes: 'snsapi_userinfo',
-  },
-  {
-    key: 'qq',
-    label: 'QQ',
-    icon: Star,
-    color: 'from-blue-400 to-blue-500',
-    docUrl: 'https://connect.qq.com/',
-    scopes: 'get_user_info',
-  },
-  {
-    key: 'weibo',
-    label: '微博',
-    icon: Shield,
-    color: 'from-red-500 to-red-600',
-    docUrl: 'https://open.weibo.com/',
-    scopes: 'email',
   },
 ];
 
@@ -153,8 +115,8 @@ export default function AdminIntegrations({settings, onSave}: Props) {
 
         {saveMsg && (
           <div className={`px-4 py-3 rounded-xl text-sm ${
-            saveMsg.includes('成功') 
-              ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800' 
+            saveMsg.includes('成功')
+              ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
               : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
           }`}>
             {saveMsg}

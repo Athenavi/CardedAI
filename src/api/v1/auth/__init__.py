@@ -4,11 +4,10 @@
 """
 import json
 import re
-import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy import select, func
@@ -26,8 +25,12 @@ from src.extensions import get_async_db_session as get_async_db
 from src.setting import settings
 from src.unified_logger import default_logger as logger
 
-
 router = APIRouter(tags=["auth"])
+
+# 第三方登录（OAuth 2.0）：端点落在 /api/v2/auth/oauth/*
+from src.api.v1.auth import oauth as oauth_routes  # noqa: E402
+
+router.include_router(oauth_routes.router, prefix="/oauth")
 
 
 # ---------------------------------------------------------------------------

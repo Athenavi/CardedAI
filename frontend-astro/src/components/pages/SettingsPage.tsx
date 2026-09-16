@@ -5,6 +5,7 @@ import {apiClient} from '@/lib/api/base-client';
 import {useDarkMode} from '@/lib/dark-mode-manager';
 import {getAccessTokenFromCookie} from '@/lib/auth-utils';
 import {AuthGuard} from '@/components/AuthGuard';
+import OAuthBindings from '@/components/pages/OAuthBindings';
 import {QueryProvider} from '@/components/QueryProvider';
 import {useConfirm} from '@/components/ui/confirm-provider';
 import {
@@ -42,6 +43,14 @@ function Settings() {
   const confirm = useConfirm();
   const {theme, setTheme} = useDarkMode();
   const [tab, setTab] = useState(0);
+
+  // 支持通过 ?tab=<id> 直接定位到某个分区（如第三方绑定回调后的 /settings?tab=security）
+  useEffect(() => {
+    const key = new URLSearchParams(window.location.search).get('tab');
+    if (!key) return;
+    const index = TABS.findIndex(item => item.id === key);
+    if (index >= 0) setTab(index);
+  }, []);
   const [p, setP] = useState<any>(null);
   const [av, setAv] = useState('');
   const [busy, setBusy] = useState(false);
@@ -412,6 +421,8 @@ function Settings() {
                     {/* Security Tab */}
                     {tab === 1 && (
                         <div className="space-y-6">
+                          {/* 第三方账号绑定（GitHub / Google） */}
+                          <OAuthBindings/>
                             {/* Password Change */}
                             <div
                               className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">

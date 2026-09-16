@@ -31,6 +31,49 @@ export default function LoginPage() {
   const [mode, setMode] = useState<'password'|'qrcode'>('password');
   const [pv, setPv] = useState(false); const [err, setErr] = useState(''); const [busy, setBusy] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  // 第三方登录（GitHub / Google）：启用状态由后台配置决定
+  const [oauthProviders, setOauthProviders] = useState<Array<{
+    key: string;
+    label: string;
+    enabled: boolean;
+    configured: boolean
+  }>>([]);
+
+  useEffect(() => {
+    fetch('/api/v2/auth/oauth/providers')
+      .then(r => r.json())
+      .then(d => {
+        if (d?.success && Array.isArray(d.data)) setOauthProviders(d.data);
+      })
+      .catch(() => {
+      });
+
+    const oauthError = new URLSearchParams(window.location.search).get('oauth_error');
+    if (oauthError) {
+      const messages: Record<string, string> = {
+        unsupported_provider: '不支持的第三方登录方式',
+        provider_disabled: '该第三方登录未启用，请联系管理员',
+        provider_not_configured: '该第三方登录尚未配置完成',
+        invalid_state: '登录会话已失效，请重新尝试',
+        provider_denied: '你取消了第三方授权',
+        missing_code: '授权失败：缺少授权码',
+        exchange_failed: '与第三方平台通信失败，请稍后重试',
+        profile_incomplete: '未能获取第三方账号信息',
+        account_link_failed: '账号关联失败，请稍后重试',
+      };
+      setErr(messages[oauthError] || '第三方登录失败，请稍后重试');
+    }
+  }, []);
+
+  const oauthReady = (key: string) => {
+    const provider = oauthProviders.find(item => item.key === key);
+    return provider ? provider.configured : true;
+  };
+
+  const startOauthLogin = (key: string) => {
+    const target = new URLSearchParams(window.location.search).get('next') || '/';
+    window.location.href = `/api/v2/auth/oauth/${key}/authorize?next=${encodeURIComponent(target)}`;
+  };
 
   const features = [
     {icon: Sparkles, titleKey: 'login.features.aiWriting', descKey: 'login.features.aiWritingDesc'},
@@ -640,13 +683,19 @@ export default function LoginPage() {
                         <div className="grid grid-cols-2 gap-3">
                           <button
                               type="button"
-                              className="flex items-center justify-center gap-2 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-gray-300 dark:hover:border-gray-600 transition-all active:scale-[0.98]"
+                              onClick={() => startOauthLogin('github')}
+                              disabled={busy || !oauthReady('github')}
+                              title={oauthReady('github') ? '使用 GitHub 账号登录' : '管理员尚未启用 GitHub 登录'}
+                              className="flex items-center justify-center gap-2 py-3.5 bg-card border border-border rounded-md text-sm font-medium text-foreground hover:bg-accent transition-colors active:translate-y-[0.5px] disabled:opacity-50 disabled:pointer-events-none"
                           >
                             <GitBranch className="w-5 h-5"/> GitHub
                           </button>
                           <button
                               type="button"
-                              className="flex items-center justify-center gap-2 py-3.5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 hover:border-gray-300 dark:hover:border-gray-600 transition-all active:scale-[0.98]"
+                              onClick={() => startOauthLogin('google')}
+                              disabled={busy || !oauthReady('google')}
+                              title={oauthReady('google') ? '使用 Google 账号登录' : '管理员尚未启用 Google 登录'}
+                              className="flex items-center justify-center gap-2 py-3.5 bg-card border border-border rounded-md text-sm font-medium text-foreground hover:bg-accent transition-colors active:translate-y-[0.5px] disabled:opacity-50 disabled:pointer-events-none"
                           >
                             <Globe className="w-5 h-5"/> Google
                           </button>
