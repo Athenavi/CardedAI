@@ -80,7 +80,7 @@ async def get_dashboard_stats(
             "visitors": total_views,  # 使用真实浏览量
             "articles": total_articles,
             "comments": 0,  # 暂时设为0，因为评论模型未定义
-            "likes": total_likes,
+            "likes": 0,
             "users": total_users,
             "new_users": new_users
         }

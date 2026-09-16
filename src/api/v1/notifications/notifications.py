@@ -1,7 +1,7 @@
 """
 通知相关API - 处理用户通知功能
 """
-from fastapi import APIRouter, Request, Depends, Query
+from fastapi import APIRouter, Request, Depends, Query, logger
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 

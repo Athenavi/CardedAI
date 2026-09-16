@@ -1,9 +1,8 @@
 import importlib
-
+import logging
 import sys
-from contextlib import contextmanager
 from pathlib import Path
-from typing import AsyncGenerator, List, Dict, Tuple
+from typing import AsyncGenerator, List
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -11,10 +10,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, configure_mappers
 from sqlalchemy.pool import QueuePool
 
+from src.unified_logger import default_logger as logger
 # 导入统一管理器
 from src.utils.database.unified_manager import db_manager as unified_db_manager
 
-from src.unified_logger import default_logger as logger
 Base = declarative_base()
 _models_imported = False  # 防止重复导入模型
 

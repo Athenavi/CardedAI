@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from shared.models.media import Media
 from src.auth.auth_deps import jwt_required_dependency as jwt_required
 from src.extensions import get_async_db_session as get_async_db
+from src.setting import settings
 from src.unified_logger import default_logger as logger
 
 router = APIRouter(tags=["audio-metadata"])
@@ -100,7 +101,6 @@ def extract_cover_from_audio(media: Media) -> Optional[bytes]:
             try:
                 import tempfile
                 import boto3
-                from src.config import settings
 
                 # 解析 S3 路径 (s3://bucket/key)
                 parts = file_path.replace('s3://', '').split('/', 1)

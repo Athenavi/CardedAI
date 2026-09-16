@@ -14,17 +14,13 @@ MCP (Model Context Protocol) Server 实现
 
 import json
 from datetime import datetime
-from pathlib import Path
 from typing import Dict, Any, List, Callable
 
 # 引入 FastBlog 核心依赖以实现真正的 AI 代理功能
-from sqlalchemy import select, update, delete
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
 from shared.models.article import Article
 from shared.models.article_content import ArticleContent
-from shared.models.category import Category
-from shared.models.user import User
-from shared.models.ai_workflow import AIWorkflow
 from shared.models.audit_log import AuditLog
 from src.utils.database.main import get_async_session
 
@@ -652,7 +648,7 @@ class MCPServer:
                 ]
             return []
         except Exception as e:
-            logger.error(f"MCP search failed: {e}")
+            print(f"MCP search failed: {e}")
             return []
 
     async def _generate_seo_description_tool(self, arguments: Dict) -> Dict:

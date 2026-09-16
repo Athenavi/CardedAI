@@ -213,8 +213,7 @@ async def get_media_file_by_id(
             # 如果 storage_path 为空或无效，但文件也不存在于标准路径
             logger.error(f"  [ERROR] 不支持的存储类型: '{file_hash.storage_path}'")
             logger.error(f"  文件是否存在于标准路径: {file_path.exists()}")
-            logger.error(f"
-                f"  FileHash 完整信息: id={file_hash.id}, hash={file_hash.hash}, filename={file_hash.filename}")
+            logger.error(f" FileHash 完整信息: id={file_hash.id}, hash={file_hash.hash}, filename={file_hash.filename}")
 
             # 如果文件实际上存在于标准路径但没有被检测到（可能是权限问题）
             if file_path.exists():

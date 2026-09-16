@@ -4,7 +4,7 @@ MCP Server API 端点
 提供 HTTP 接口供 AI 客户端调用
 """
 
-from typing import Any
+from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, Request, Body
 
@@ -23,7 +23,7 @@ async def handle_mcp_request(
 ):
     """
     处理 MCP 请求
-    
+
     统一的请求处理入口，支持资源读取、工具调用等
     """
     result = await mcp_server.handle_request(body)
@@ -38,7 +38,7 @@ async def handle_mcp_request(
 async def get_server_info(current_user=Depends(jwt_required)):
     """
     获取 MCP Server 信息
-    
+
     返回服务器版本、支持的资源和工具数量
     """
     info = mcp_server.get_server_info()
@@ -53,7 +53,7 @@ async def get_server_info(current_user=Depends(jwt_required)):
 async def list_resources(current_user=Depends(jwt_required)):
     """
     列出所有可用资源
-    
+
     返回可访问的资源列表及其描述
     """
     resources = [
@@ -79,7 +79,7 @@ async def list_resources(current_user=Depends(jwt_required)):
 async def list_tools(current_user=Depends(jwt_required)):
     """
     列出所有可用工具
-    
+
     返回可调用的工具列表及其参数定义
     """
     tools = [
@@ -104,7 +104,7 @@ async def list_tools(current_user=Depends(jwt_required)):
 async def list_prompts(current_user=Depends(jwt_required)):
     """
     列出所有提示词模板
-    
+
     返回可用的提示词模板列表
     """
     prompts = [
@@ -128,7 +128,7 @@ async def list_prompts(current_user=Depends(jwt_required)):
 async def test_connection(current_user=Depends(jwt_required)):
     """
     测试 MCP Server 连接
-    
+
     用于客户端验证连接是否正常
     """
     return ApiResponse(
