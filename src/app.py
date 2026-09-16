@@ -13,6 +13,7 @@ from typing import AsyncGenerator
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.routing import Match, Mount, get_route_path
 from starlette.staticfiles import StaticFiles
 
 from src.unified_logger import default_logger as logger
@@ -498,6 +499,28 @@ def register_error_handlers(app: FastAPI):
         return error(500, "Internal Server Error")
 
 
+# ---------- SPA 静态兜底挂载 ----------
+class ApiAwareStaticMount(Mount):
+    """SPA 静态兜底挂载：只接管非 API 路径，把 /api/* 交还给路由表。
+
+    背景：Starlette 只在“没有任何 FULL 匹配”时才执行 redirect_slashes 尾斜杠重定向。
+    挂在根路径的 Mount 会 FULL 匹配一切路径，所以 /api/v2/articles 这类无尾斜杠
+    请求会被静态兜底直接截走 —— GET 得到 SPA 的 404 HTML，POST 被 StaticFiles
+    判为 405 Method Not Allowed，永远拿不到指向 /api/v2/articles/ 的 307。
+
+    因此这里对 /api 前缀返回 Match.NONE，让 API 请求回到路由表处理
+    （尾斜杠重定向、JSON 404 等）。
+    """
+
+    def matches(self, scope):
+        match, child_scope = super().matches(scope)
+        if match == Match.FULL:
+            route_path = get_route_path(scope)
+            if route_path == "/api" or route_path.startswith("/api/"):
+                return Match.NONE, {}
+        return match, child_scope
+
+
 # ---------- 应用工厂 ----------
 def create_app(config=None):
     """创建 FastAPI 应用实例"""
@@ -558,9 +581,15 @@ def create_app(config=None):
         app.mount("/api/v2/assets/themes", StaticFiles(directory=themes_dir), name="themes")
 
     # 前端静态资源（同源部署）：Astro 构建产物，挂载到根路径（须在所有路由/挂载之后）
+    # 不能直接用 app.mount("/", StaticFiles(...))：app.mount 只会创建标准 Mount，
+    # 它会 FULL 匹配包括 /api/* 在内的一切路径，把 API 请求（尤其无尾斜杠的
+    # /api/v2/articles）挡在路由表之外。这里直接挂 ApiAwareStaticMount，
+    # 让 /api/* 继续由路由表处理（307 尾斜杠重定向 / JSON 404）。
     frontend_dist = os.path.join(os.path.dirname(__file__), "..", "frontend-astro", "dist")
     if os.path.isdir(frontend_dist):
-        app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
+        app.router.routes.append(
+            ApiAwareStaticMount("/", app=StaticFiles(directory=frontend_dist, html=True), name="frontend")
+        )
         logger.info(f"[Frontend] 前端静态资源已挂载: {frontend_dist}")
     else:
         logger.info(f"[Frontend] 未找到前端构建产物: {frontend_dist}（可先运行 npm run build 构建）")
