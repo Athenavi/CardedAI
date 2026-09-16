@@ -21,7 +21,7 @@ class ScheduledPublishScheduler:
     def __init__(self, db_session_factory, check_interval: int = 60):
         """
         初始化调度器
-        
+
         Args:
             db_session_factory: 数据库会话工厂
             check_interval: 检查间隔（秒），默认60秒
@@ -68,10 +68,10 @@ class ScheduledPublishScheduler:
                     logger.debug("System not installed, skipping scheduled publish check")
                     await asyncio.sleep(self.check_interval)
                     continue
-                
+
                 await self._check_and_publish()
             except Exception as e:
-                logger.error(f"Error in scheduled publish scheduler: {e}")
+                logger.logger(f"Error in scheduled publish scheduler: {e}")
 
             # 等待下一个检查周期
             await asyncio.sleep(self.check_interval)
@@ -94,14 +94,14 @@ class ScheduledPublishScheduler:
 
                         if result['failed_articles']:
                             for failed in result['failed_articles']:
-                                logger.error(
+                                logger.logger(f"
                                     f"Failed to publish article {failed['article_id']}: "
                                     f"{failed['error']}"
                                 )
 
                     await db.commit()
                 except Exception as e:
-                    logger.error(f"Error checking scheduled publishes: {e}")
+                    logger.logger(f"Error checking scheduled publishes: {e}")
                     await db.rollback()
         except ConnectionRefusedError:
             logger.warning("定时发布检查: 数据库连接被拒绝, 跳过本轮检查")
@@ -114,11 +114,11 @@ scheduler: Optional[ScheduledPublishScheduler] = None
 def init_scheduler(db_session_factory, check_interval: int = 60) -> ScheduledPublishScheduler:
     """
     初始化全局调度器
-    
+
     Args:
         db_session_factory: 数据库会话工厂
         check_interval: 检查间隔（秒）
-        
+
     Returns:
         调度器实例
     """

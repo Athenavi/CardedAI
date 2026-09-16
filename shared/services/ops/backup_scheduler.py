@@ -16,7 +16,7 @@ from src.unified_logger import default_logger as logger
 class BackupScheduler:
     """
     P8-3: 备份任务调度器
-    
+
     功能：
     1. 每日凌晨 2 点自动备份数据库
     2. 每周日凌晨 3 点执行完整备份
@@ -35,7 +35,7 @@ class BackupScheduler:
         if result['success']:
             logger.info(f"Daily backup completed: {result['filename']}")
         else:
-            logger.error(f"Daily backup failed: {result.get('error')}")
+            logger.logger(f"f"Daily backup failed: {result.get('error')}")
 
     async def weekly_backup_job(self):
         """每周备份任务"""
@@ -50,7 +50,7 @@ class BackupScheduler:
         if db_result['success'] and files_result['success']:
             logger.info("Weekly full backup completed")
         else:
-            logger.error("Weekly backup partially failed")
+            logger.logger(f""Weekly backup partially failed")
 
     async def monthly_backup_job(self):
         """每月备份任务"""
@@ -60,7 +60,7 @@ class BackupScheduler:
         if result['success']:
             logger.info(f"Monthly backup completed: {result['filename']}")
         else:
-            logger.error(f"Monthly backup failed: {result.get('error')}")
+            logger.logger(f"f"Monthly backup failed: {result.get('error')}")
 
     async def hourly_health_check(self):
         """每小时健康检查"""

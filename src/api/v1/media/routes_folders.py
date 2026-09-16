@@ -27,7 +27,7 @@ async def get_folder_tree(
 ):
     """
     获取文件夹树形结构
-    
+
     Returns:
         文件夹树形结构列表
     """
@@ -39,7 +39,7 @@ async def get_folder_tree(
         )
         return ApiResponse(success=True, data={"tree": tree})
     except Exception as e:
-        logger.error(f"获取文件夹树失败: {e}")
+        logger.logger(f"f"获取文件夹树失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -52,10 +52,10 @@ async def get_folder_list(
 ):
     """
     获取文件夹列表（扁平结构）
-    
+
     Args:
         parent_id: 父文件夹ID
-        
+
     Returns:
         文件夹列表
     """
@@ -67,7 +67,7 @@ async def get_folder_list(
         )
         return ApiResponse(success=True, data={"folders": folders, "count": len(folders)})
     except Exception as e:
-        logger.error(f"获取文件夹列表失败: {e}")
+        logger.logger(f"f"获取文件夹列表失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -80,10 +80,10 @@ async def get_folder_detail(
 ):
     """
     获取文件夹详情
-    
+
     Args:
         folder_id: 文件夹ID
-        
+
     Returns:
         文件夹详情
     """
@@ -93,13 +93,13 @@ async def get_folder_detail(
             folder_id,
             current_user.id
         )
-        
+
         if not folder:
             return ApiResponse(success=False, error="文件夹不存在或无权访问")
-        
+
         return ApiResponse(success=True, data=folder)
     except Exception as e:
-        logger.error(f"获取文件夹详情失败: {e}")
+        logger.logger(f"f"获取文件夹详情失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -112,7 +112,7 @@ async def create_folder(
 ):
     """
     创建新文件夹
-    
+
     Request Body:
         name: 文件夹名称（必填）
         parent_id: 父文件夹ID（可选）
@@ -122,10 +122,10 @@ async def create_folder(
     try:
         body = await request.json()
         name = body.get('name')
-        
+
         if not name:
             return ApiResponse(success=False, error="文件夹名称不能为空")
-        
+
         result = await media_folder_service.create_folder(
             db,
             current_user.id,
@@ -134,7 +134,7 @@ async def create_folder(
             description=body.get('description', ''),
             is_public=body.get('is_public', True)
         )
-        
+
         if result['success']:
             return ApiResponse(
                 success=True,
@@ -143,9 +143,9 @@ async def create_folder(
             )
         else:
             return ApiResponse(success=False, error=result['error'])
-            
+
     except Exception as e:
-        logger.error(f"创建文件夹失败: {e}")
+        logger.logger(f"f"创建文件夹失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -159,10 +159,10 @@ async def update_folder(
 ):
     """
     更新文件夹信息
-    
+
     Args:
         folder_id: 文件夹ID
-        
+
     Request Body:
         name: 文件夹名称（可选）
         description: 描述（可选）
@@ -171,14 +171,14 @@ async def update_folder(
     """
     try:
         body = await request.json()
-        
+
         result = await media_folder_service.update_folder(
             db,
             folder_id,
             current_user.id,
             **body
         )
-        
+
         if result['success']:
             return ApiResponse(
                 success=True,
@@ -187,9 +187,9 @@ async def update_folder(
             )
         else:
             return ApiResponse(success=False, error=result['error'])
-            
+
     except Exception as e:
-        logger.error(f"更新文件夹失败: {e}")
+        logger.logger(f"f"更新文件夹失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -203,11 +203,11 @@ async def delete_folder(
 ):
     """
     删除文件夹
-    
+
     Args:
         folder_id: 文件夹ID
         delete_media: 是否同时删除媒体文件
-        
+
     Note:
         - 如果文件夹包含子文件夹，必须先删除子文件夹
         - 如果不删除媒体文件，媒体将被移动到根目录
@@ -219,14 +219,14 @@ async def delete_folder(
             current_user.id,
             delete_media
         )
-        
+
         if result['success']:
             return ApiResponse(success=True, message=result['message'])
         else:
             return ApiResponse(success=False, error=result['error'])
-            
+
     except Exception as e:
-        logger.error(f"删除文件夹失败: {e}")
+        logger.logger(f"f"删除文件夹失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -240,7 +240,7 @@ async def move_media_to_folder(
 ):
     """
     批量移动媒体文件到文件夹
-    
+
     Args:
         media_ids: 媒体文件ID列表
         folder_path: 目标文件夹路径（支持多级，如 "Photos/2024"）
@@ -248,23 +248,23 @@ async def move_media_to_folder(
     try:
         if not media_ids:
             return ApiResponse(success=False, error="请选择要移动的文件")
-        
+
         # 如果指定了文件夹路径，需要查找最终的文件夹ID
         target_folder_id = None
         if folder_path:
             from urllib.parse import unquote
             from shared.models.media_folder import MediaFolder
-            
+
             # 解码 URL 编码的路径
             decoded_path = unquote(folder_path)
-            
+
             # 分割路径
             path_parts = [p.strip() for p in decoded_path.split('/') if p.strip()]
-            
+
             if path_parts:
                 # 逐级查找文件夹
                 current_parent_id = None
-                
+
                 for i, part_name in enumerate(path_parts):
                     folder_query = select(MediaFolder.id).where(
                         MediaFolder.name == part_name,
@@ -273,27 +273,27 @@ async def move_media_to_folder(
                     )
                     folder_result = await db.execute(folder_query)
                     folder_id = folder_result.scalar_one_or_none()
-                    
+
                     if not folder_id:
                         return ApiResponse(
-                            success=False, 
+                            success=False,
                             error=f"文件夹路径不存在: {decoded_path}"
                         )
-                    
+
                     # 如果是最后一级，记录目标文件夹 ID
                     if i == len(path_parts) - 1:
                         target_folder_id = folder_id
                     else:
                         # 否则继续查找下一级
                         current_parent_id = folder_id
-        
+
         result = await media_folder_service.move_media_to_folder(
             db,
             media_ids,
             target_folder_id,
             current_user.id
         )
-        
+
         if result['success']:
             return ApiResponse(
                 success=True,
@@ -302,9 +302,9 @@ async def move_media_to_folder(
             )
         else:
             return ApiResponse(success=False, error=result['error'])
-            
+
     except Exception as e:
-        logger.error(f"移动媒体文件失败: {e}")
+        logger.logger(f"f"移动媒体文件失败: {e}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -318,25 +318,25 @@ async def copy_media_to_folder(
 ):
     """
     批量复制媒体文件到文件夹
-    
+
     Args:
         media_ids: 媒体文件ID列表
         folder_id: 目标文件夹ID
-        
+
     Note:
         目前实现为逻辑复制（改变folder_id），物理复制需要额外实现
     """
     try:
         if not media_ids:
             return ApiResponse(success=False, error="请选择要复制的文件")
-        
+
         result = await media_folder_service.copy_media_to_folder(
             db,
             media_ids,
             folder_id,
             current_user.id
         )
-        
+
         if result['success']:
             return ApiResponse(
                 success=True,
@@ -345,7 +345,7 @@ async def copy_media_to_folder(
             )
         else:
             return ApiResponse(success=False, error=result['error'])
-            
+
     except Exception as e:
-        logger.error(f"复制媒体文件失败: {e}")
+        logger.logger(f"f"复制媒体文件失败: {e}")
         return ApiResponse(success=False, error=str(e))

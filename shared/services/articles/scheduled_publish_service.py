@@ -58,7 +58,7 @@ async def check_and_publish_scheduled_articles(db: AsyncSession) -> Dict[str, An
                 published_count += 1
 
             except Exception as e:
-                logger(f"发布文章 {article.id} 失败: {e}")
+                logger.logger(f"f"发布文章 {article.id} 失败: {e}")
                 failed_count += 1
 
         # 提交所有更改
@@ -75,7 +75,7 @@ async def check_and_publish_scheduled_articles(db: AsyncSession) -> Dict[str, An
 
     except Exception as e:
         await db.rollback()
-        logger(f"检查定时发布失败: {e}")
+        logger.logger(f"f"检查定时发布失败: {e}")
         import traceback
         traceback.print_exc()
 
@@ -165,7 +165,7 @@ async def get_scheduled_articles(
         }
 
     except Exception as e:
-        logger(f"获取定时文章列表失败: {e}")
+        logger.logger(f"f"获取定时文章列表失败: {e}")
         import traceback
         traceback.print_exc()
 
@@ -217,5 +217,5 @@ async def cancel_scheduled_publish(
 
     except Exception as e:
         await db.rollback()
-        logger(f"取消定时发布失败: {e}")
+        logger.logger(f"f"取消定时发布失败: {e}")
         return False

@@ -25,7 +25,7 @@ def _load_logger_config():
 
             @staticmethod
             def get_logger(log_file: str = None, level=logging.INFO):
-                logger = logging.getLogger(f"fastblog.{log_file or 'app'}")
+                logger = logging.getlogger.logger(f"f"fastblog.{log_file or 'app'}")
                 logger.setLevel(level)
                 if not logger.handlers:
                     # 控制台 handler

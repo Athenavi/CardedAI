@@ -24,7 +24,7 @@ class CoverImageService:
             self.cover_dir.mkdir(parents=True, exist_ok=True)
             logger.info(f"封面缓存目录已就绪: {self.cover_dir}")
         except Exception as e:
-            logger.error(f"创建封面缓存目录失败: {e}")
+            logger.logger(f"f"创建封面缓存目录失败: {e}")
             raise
 
     def generate_cover_filename(self, media_id: int | str, file_hash: str, extension: str = '.jpg') -> str:
@@ -117,7 +117,7 @@ class CoverImageService:
             return f"/api/v2/media/cover/{cover_filename}"
 
         except Exception as e:
-            logger.error(f"优化和保存封面失败: {e}", exc_info=True)
+            logger.logger(f"f"优化和保存封面失败: {e}", exc_info=True)
             return None
 
     def _optimize_image(
@@ -175,7 +175,7 @@ class CoverImageService:
             return False
 
         except Exception as e:
-            logger.error(f"删除封面图片失败: {e}")
+            logger.logger(f"f"删除封面图片失败: {e}")
             return False
 
     def get_cover_url(self, media_id: int, file_hash: str, extension: str = '.jpg') -> str:

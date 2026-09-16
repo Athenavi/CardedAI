@@ -14,7 +14,7 @@ from src.unified_logger import default_logger as logger
 class CacheMiddleware(BaseHTTPMiddleware):
     """
     HTTP缓存中间件
-    
+
     功能:
     - 自动缓存GET请求的响应
     - 支持自定义TTL
@@ -166,7 +166,7 @@ async def invalidate_article_cache(article_id: int):
 
         logger.info(f"✓ Invalidated cache for article {article_id}")
     except Exception as e:
-        logger.error(f"✗ Cache invalidation failed: {e}")
+        logger.logger(f"f"✗ Cache invalidation failed: {e}")
 
 
 async def invalidate_category_cache(category_id: int):
@@ -176,4 +176,4 @@ async def invalidate_category_cache(category_id: int):
         cache_service.delete_object(f"category:{category_id}")
         logger.info(f"✓ Invalidated cache for category {category_id}")
     except Exception as e:
-        logger.error(f"✗ Cache invalidation failed: {e}")
+        logger.logger(f"f"✗ Cache invalidation failed: {e}")

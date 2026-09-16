@@ -106,7 +106,7 @@ class WorkflowInstance:
 class WorkflowEngine:
     """
     工作流引擎
-    
+
     功能:
     1. 工作流定义管理
     2. 工作流实例执行
@@ -129,7 +129,7 @@ class WorkflowEngine:
     def register_workflow(self, workflow_id: str, definition: Dict[str, Any]):
         """
         注册工作流定义
-        
+
         Args:
             workflow_id: 工作流ID
             definition: 工作流定义 {
@@ -154,11 +154,11 @@ class WorkflowEngine:
     def create_instance(self, workflow_id: str, context: Dict[str, Any] = None) -> str:
         """
         创建工作流实例
-        
+
         Args:
             workflow_id: 工作流ID
             context: 上下文数据
-            
+
         Returns:
             实例ID
         """
@@ -199,10 +199,10 @@ class WorkflowEngine:
     async def execute_instance(self, instance_id: str) -> bool:
         """
         执行工作流实例
-        
+
         Args:
             instance_id: 实例ID
-            
+
         Returns:
             是否执行成功
         """
@@ -251,17 +251,17 @@ class WorkflowEngine:
             instance.status = WorkflowStatus.FAILED
             instance.error = str(e)
             self._record_history(instance_id, 'error', {'exception': str(e)})
-            logger.error(f"Workflow execution failed: {e}")
+            logger.logger(f"f"Workflow execution failed: {e}")
             return False
 
     async def _execute_node(self, instance: WorkflowInstance, node: WorkflowNode) -> bool:
         """
         执行节点
-        
+
         Args:
             instance: 工作流实例
             node: 节点
-            
+
         Returns:
             是否执行成功
         """
@@ -321,11 +321,11 @@ class WorkflowEngine:
     async def _execute_action(self, config: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """
         执行动作节点
-        
+
         Args:
             config: 节点配置 {action_type, action_params}
             context: 上下文
-            
+
         Returns:
             执行结果
         """
@@ -353,11 +353,11 @@ class WorkflowEngine:
     async def _evaluate_condition(self, config: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """
         评估条件节点
-        
+
         Args:
             config: 节点配置 {conditions: [{field, operator, value}]}
             context: 上下文
-            
+
         Returns:
             评估结果
         """
@@ -394,11 +394,11 @@ class WorkflowEngine:
     async def _handle_approval(self, config: Dict[str, Any], context: Dict[str, Any]) -> Dict[str, Any]:
         """
         处理审批节点
-        
+
         Args:
             config: 节点配置 {approver, approval_type}
             context: 上下文
-            
+
         Returns:
             审批结果
         """
@@ -413,11 +413,11 @@ class WorkflowEngine:
     def _get_next_node(self, instance: WorkflowInstance, current_node: WorkflowNode) -> Optional[str]:
         """
         获取下一个节点
-        
+
         Args:
             instance: 工作流实例
             current_node: 当前节点
-            
+
         Returns:
             下一个节点ID
         """
@@ -442,7 +442,7 @@ class WorkflowEngine:
     def _record_history(self, instance_id: str, event: str, data: Dict[str, Any]):
         """
         记录执行历史
-        
+
         Args:
             instance_id: 实例ID
             event: 事件类型
@@ -458,10 +458,10 @@ class WorkflowEngine:
     def get_instance(self, instance_id: str) -> Optional[Dict[str, Any]]:
         """
         获取工作流实例
-        
+
         Args:
             instance_id: 实例ID
-            
+
         Returns:
             实例数据
         """
@@ -473,11 +473,11 @@ class WorkflowEngine:
     def get_execution_history(self, instance_id: str = None, limit: int = 100) -> List[Dict[str, Any]]:
         """
         获取执行历史
-        
+
         Args:
             instance_id: 实例ID（可选）
             limit: 返回数量限制
-            
+
         Returns:
             历史记录列表
         """
@@ -494,10 +494,10 @@ class WorkflowEngine:
     def cancel_instance(self, instance_id: str) -> bool:
         """
         取消工作流实例
-        
+
         Args:
             instance_id: 实例ID
-            
+
         Returns:
             是否取消成功
         """

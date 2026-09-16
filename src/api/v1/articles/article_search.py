@@ -14,7 +14,7 @@ from src.extensions import get_async_db_session as get_async_db
 router = APIRouter(tags=["search"])
 
 
-@router.get("")
+@router.get("/")
 async def search_articles(
         q: str = Query(..., min_length=1, description="搜索关键词"),
         category_id: Optional[int] = Query(None, description="分类ID"),

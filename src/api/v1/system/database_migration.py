@@ -63,8 +63,8 @@ async def preview_url_replace(
         )
 
     except Exception as e:
-        logger.error(f"Error in preview_url_replace: {str(e)}")
-        logger.error(traceback.format_exc())
+        logger.logger(f"Error in preview_url_replace: {str(e)}")
+        logger.logger(f"traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -122,8 +122,8 @@ async def execute_url_replace(
             )
 
     except Exception as e:
-        logger.error(f"Error in execute_url_replace: {str(e)}")
-        logger.error(traceback.format_exc())
+        logger.logger(f"Error in execute_url_replace: {str(e)}")
+        logger.logger(f"traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -164,8 +164,8 @@ async def validate_url_replace(
         )
 
     except Exception as e:
-        logger.error(f"Error in validate_url_replace: {str(e)}")
-        logger.error(traceback.format_exc())
+        logger.logger(f"Error in validate_url_replace: {str(e)}")
+        logger.logger(f"traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

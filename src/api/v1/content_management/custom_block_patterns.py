@@ -50,7 +50,7 @@ async def create_custom_pattern(
             )
     except Exception as e:
         import traceback
-        logger.error("", exc_info=True)
+        logger.logger(f""", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 

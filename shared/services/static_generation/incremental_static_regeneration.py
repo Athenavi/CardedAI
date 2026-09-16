@@ -57,7 +57,7 @@ class ISRPage:
 class IncrementalStaticRegenerator:
     """
     增量静态再生成器
-    
+
     实现Next.js风格的ISR机制：
     1. 首次请求时生成静态页面
     2. 在revalidate时间内返回缓存页面
@@ -118,13 +118,13 @@ class IncrementalStaticRegenerator:
                                    **kwargs) -> Dict[str, Any]:
         """
         获取或生成ISR页面
-        
+
         Args:
             page_path: 页面路径
             generator_func: 页面生成函数（异步）
             revalidate_time: 重新验证时间（秒）
             **kwargs: 传递给生成函数的参数
-            
+
         Returns:
             页面数据和状态
         """
@@ -196,12 +196,12 @@ class IncrementalStaticRegenerator:
                                **kwargs) -> Dict[str, Any]:
         """
         强制重新验证页面
-        
+
         Args:
             page_path: 页面路径
             generator_func: 页面生成函数
             **kwargs: 传递给生成函数的参数
-            
+
         Returns:
             重新验证结果
         """
@@ -223,10 +223,10 @@ class IncrementalStaticRegenerator:
     async def invalidate_page(self, page_path: str) -> Dict[str, Any]:
         """
         使页面缓存失效
-        
+
         Args:
             page_path: 页面路径
-            
+
         Returns:
             操作结果
         """
@@ -255,10 +255,10 @@ class IncrementalStaticRegenerator:
     async def invalidate_by_pattern(self, pattern: str) -> Dict[str, Any]:
         """
         按模式批量使页面失效
-        
+
         Args:
             pattern: 路径模式（支持 * 通配符）
-            
+
         Returns:
             操作结果
         """
@@ -336,7 +336,7 @@ class IncrementalStaticRegenerator:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"Error in revalidation worker: {e}", exc_info=True)
+                logger.logger(f"Error in revalidation worker: {e}", exc_info=True)
 
     async def _queue_revalidation(self, page: ISRPage,
                                   generator_func: Callable,
@@ -365,11 +365,11 @@ class IncrementalStaticRegenerator:
             if result.get('success'):
                 logger.info(f"Revalidation completed: {page.path}")
             else:
-                logger.error(f"Revalidation failed: {page.path} - {result.get('error')}")
+                logger.logger(f"f"Revalidation failed: {page.path} - {result.get('error')}")
                 self.stats['failed_revalidations'] += 1
 
         except Exception as e:
-            logger.error(f"Revalidation error for {page.path}: {e}", exc_info=True)
+            logger.logger(f"f"Revalidation error for {page.path}: {e}", exc_info=True)
             self.stats['failed_revalidations'] += 1
 
         finally:
@@ -422,7 +422,7 @@ class IncrementalStaticRegenerator:
             }
 
         except Exception as e:
-            logger.error(f"Error generating page {page.path}: {e}", exc_info=True)
+            logger.logger(f"Error generating page {page.path}: {e}", exc_info=True)
             return {'success': False, 'error': str(e)}
 
     async def _read_file_async(self, file_path: Path) -> str:

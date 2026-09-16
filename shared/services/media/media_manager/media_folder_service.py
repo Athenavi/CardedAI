@@ -25,14 +25,14 @@ def validate_folder_name(name: str) -> tuple[bool, str]:
     """验证文件夹名称是否合法"""
     if not name or not name.strip():
         return False, "文件夹名称不能为空"
-    
+
     name = name.strip()
     if len(name) > MAX_FOLDER_NAME_LENGTH:
         return False, f"文件夹名称不能超过{MAX_FOLDER_NAME_LENGTH}个字符"
-    
+
     if '..' in name:
         return False, "文件夹名称不能包含 '..'"
-    
+
     if '/' in name or '\\' in name:
         return False, "文件夹名称不能包含路径分隔符 (/ 或 \\)"
 
@@ -42,10 +42,10 @@ def validate_folder_name(name: str) -> tuple[bool, str]:
 
     if not FOLDER_NAME_PATTERN.match(name):
         return False, "文件夹名称只能包含字母、数字、中文、下划线、连字符、空格和点"
-    
+
     if name.startswith('.'):
         return False, "文件夹名称不能以点开头"
-    
+
     return True, ""
 
 
@@ -66,21 +66,21 @@ class MediaFolderService:
             is_valid, error_msg = validate_folder_name(name)
             if not is_valid:
                 return {"success": False, "error": error_msg}
-            
+
             name = name.strip()
             if parent_id:
                 parent_query = select(MediaFolder).where(MediaFolder.id == parent_id, MediaFolder.user == user_id)
                 parent_result = await db.execute(parent_query)
                 if not parent_result.scalar_one_or_none():
                     return {"success": False, "error": "父文件夹不存在或无权访问"}
-            
+
             existing_query = select(MediaFolder).where(
                 MediaFolder.name == name, MediaFolder.user == user_id, MediaFolder.parent_id == parent_id
             )
             existing_result = await db.execute(existing_query)
             if existing_result.scalar_one_or_none():
                 return {"success": False, "error": "该位置已存在同名文件夹"}
-            
+
             folder = MediaFolder(
                 name=name, parent_id=parent_id, user=user_id, description=description,
                 is_public=is_public, sort_order=0, media_count=0,
@@ -92,7 +92,7 @@ class MediaFolderService:
             return {"success": True, "folder": folder.to_dict()}
         except Exception as e:
             await db.rollback()
-            logger.error(f"创建文件夹失败: {e}")
+            logger.logger(f"f"创建文件夹失败: {e}")
             return {"success": False, "error": f"创建文件夹失败: {str(e)}"}
 
     async def get_folder_tree(
@@ -107,19 +107,19 @@ class MediaFolderService:
                                                                                     MediaFolder.name)
             result = await db.execute(query)
             folders = result.scalars().all()
-            
+
             if include_media_count:
                 for folder in folders:
                     count_query = select(func.count(Media.id)).where(Media.folder_id == folder.id)
                     count_result = await db.execute(count_query)
                     folder.media_count = count_result.scalar() or 0
-            
+
             folder_dict = {}
             for folder in folders:
                 folder_data = folder.to_dict()
                 folder_data['children'] = []
                 folder_dict[folder.id] = folder_data
-            
+
             tree = []
             for folder in folders:
                 folder_data = folder_dict[folder.id]
@@ -127,10 +127,10 @@ class MediaFolderService:
                     folder_dict[folder.parent_id]['children'].append(folder_data)
                 else:
                     tree.append(folder_data)
-            
+
             return tree
         except Exception as e:
-            logger.error(f"获取文件夹树失败: {e}", exc_info=True)
+            logger.logger(f"f"获取文件夹树失败: {e}", exc_info=True)
             return []
 
     async def get_folder_list(
@@ -147,7 +147,7 @@ class MediaFolderService:
             result = await db.execute(query)
             return [folder.to_dict() for folder in result.scalars().all()]
         except Exception as e:
-            logger.error(f"获取文件夹列表失败: {e}")
+            logger.logger(f"f"获取文件夹列表失败: {e}")
             return []
 
     async def get_folder_detail(
@@ -170,7 +170,7 @@ class MediaFolderService:
             folder_data['media_count'] = count_result.scalar() or 0
             return folder_data
         except Exception as e:
-            logger.error(f"获取文件夹详情失败: {e}")
+            logger.logger(f"f"获取文件夹详情失败: {e}")
             return None
 
     async def update_folder(
@@ -187,7 +187,7 @@ class MediaFolderService:
             folder = result.scalar_one_or_none()
             if not folder:
                 return {"success": False, "error": "文件夹不存在或无权访问"}
-            
+
             if 'name' in kwargs:
                 is_valid, error_msg = validate_folder_name(kwargs['name'])
                 if not is_valid:
@@ -200,7 +200,7 @@ class MediaFolderService:
                 existing_result = await db.execute(existing_query)
                 if existing_result.scalar_one_or_none():
                     return {"success": False, "error": "该位置已存在同名文件夹"}
-            
+
             allowed_fields = ['name', 'description', 'is_public', 'sort_order']
             for field in allowed_fields:
                 if field in kwargs:
@@ -212,7 +212,7 @@ class MediaFolderService:
             return {"success": True, "folder": folder.to_dict()}
         except Exception as e:
             await db.rollback()
-            logger.error(f"更新文件夹失败: {e}")
+            logger.logger(f"f"更新文件夹失败: {e}")
             return {"success": False, "error": f"更新文件夹失败: {str(e)}"}
 
     async def delete_folder(
@@ -234,11 +234,11 @@ class MediaFolderService:
             children_result = await db.execute(children_query)
             if children_result.scalar() or 0 > 0:
                 return {"success": False, "error": "文件夹包含子文件夹，请先删除子文件夹"}
-            
+
             media_query = select(Media).where(Media.folder_id == folder_id)
             media_result = await db.execute(media_query)
             media_files = media_result.scalars().all()
-            
+
             if media_files:
                 if delete_media:
                     for media in media_files:
@@ -246,13 +246,13 @@ class MediaFolderService:
                 else:
                     stmt = update(Media).where(Media.folder_id == folder_id).values(folder_id=None)
                     await db.execute(stmt)
-            
+
             await db.delete(folder)
             await db.commit()
             return {"success": True, "message": "文件夹删除成功"}
         except Exception as e:
             await db.rollback()
-            logger.error(f"删除文件夹失败: {e}")
+            logger.logger(f"f"删除文件夹失败: {e}")
             return {"success": False, "error": f"删除文件夹失败: {str(e)}"}
 
     async def move_media_to_folder(
@@ -277,7 +277,7 @@ class MediaFolderService:
             return {"success": True, "moved_count": moved_count, "message": f"成功移动 {moved_count} 个文件"}
         except Exception as e:
             await db.rollback()
-            logger.error(f"移动媒体文件失败: {e}")
+            logger.logger(f"f"移动媒体文件失败: {e}")
             return {"success": False, "error": f"移动媒体文件失败: {str(e)}"}
 
     async def copy_media_to_folder(

@@ -15,7 +15,7 @@ from src.unified_logger import default_logger as logger
 class AIAgentRecommendations:
     """
     P11-1: AI Agent 自主决策服务
-    
+
     功能：
     1. 基于文章内容的自动标签推荐
     2. SEO 优化建议主动提示
@@ -35,13 +35,13 @@ class AIAgentRecommendations:
     ) -> Dict[str, Any]:
         """
         P11-1: 基于文章内容自动推荐标签
-        
+
         Args:
             title: 文章标题
             content: 文章内容
             existing_tags: 已有标签列表
             max_tags: 最大推荐数量
-            
+
         Returns:
             推荐的标签列表及置信度
         """
@@ -98,7 +98,7 @@ class AIAgentRecommendations:
             }
 
         except Exception as e:
-            logger.error(f"Tag recommendation failed: {e}")
+            logger.logger(f"f"Tag recommendation failed: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -114,13 +114,13 @@ class AIAgentRecommendations:
     ) -> Dict[str, Any]:
         """
         P11-1: SEO 优化建议主动提示
-        
+
         Args:
             title: 文章标题
             content: 文章内容
             excerpt: 摘要
             slug: URL 路径
-            
+
         Returns:
             SEO 优化建议列表
         """
@@ -251,12 +251,12 @@ class AIAgentRecommendations:
     ) -> List[Dict[str, Any]]:
         """
         P11-1: 相关文章智能推荐
-        
+
         Args:
             article_id: 当前文章 ID
             db_session: 数据库会话
             limit: 推荐数量
-            
+
         Returns:
             相关文章列表
         """
@@ -313,7 +313,7 @@ class AIAgentRecommendations:
             return scored_articles[:limit]
 
         except Exception as e:
-            logger.error(f"Related articles recommendation failed: {e}")
+            logger.logger(f"f"Related articles recommendation failed: {e}")
             return []
 
 

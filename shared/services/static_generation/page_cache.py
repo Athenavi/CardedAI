@@ -76,10 +76,10 @@ class PageCacheService:
         cached_content = self.cache.get(cache_key)
 
         if cached_content:
-            logger(f"[PageCache] HIT: {url} (role: {user_role})")
+            logger.logger(f"f"[PageCache] HIT: {url} (role: {user_role})")
             return cached_content
 
-        logger(f"[PageCache] MISS: {url} (role: {user_role})")
+        logger.logger(f"f"[PageCache] MISS: {url} (role: {user_role})")
         return None
 
     async def set_page(self, url: str, content: str, user_role: str = "anonymous",
@@ -101,7 +101,7 @@ class PageCacheService:
         cache_key = self._generate_cache_key(url, user_role, params)
         self.cache.set(cache_key, content, ttl)
 
-        logger(f"[PageCache] SET: {url} (role: {user_role}, ttl: {ttl}s)")
+        logger.logger(f"f"[PageCache] SET: {url} (role: {user_role}, ttl: {ttl}s)")
 
     async def invalidate_page(self, url: str, user_role: str = "anonymous",
                               params: Optional[Dict[str, Any]] = None) -> None:
@@ -116,7 +116,7 @@ class PageCacheService:
         cache_key = self._generate_cache_key(url, user_role, params)
         self.cache.delete(cache_key)
 
-        logger(f"[PageCache] INVALIDATE: {url} (role: {user_role})")
+        logger.logger(f"f"[PageCache] INVALIDATE: {url} (role: {user_role})")
 
     async def invalidate_pattern(self, pattern: str) -> int:
         """
@@ -130,7 +130,7 @@ class PageCacheService:
         """
         # 注意：这里简化实现，实际应该扫描所有缓存键
         # 对于生产环境，建议使用Redis的KEYS命令或维护索引
-        logger(f"[PageCache] INVALIDATE PATTERN: {pattern}")
+        logger.logger(f"f"[PageCache] INVALIDATE PATTERN: {pattern}")
         return 0
 
     async def clear_all(self) -> None:

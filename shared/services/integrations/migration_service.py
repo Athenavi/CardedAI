@@ -141,7 +141,7 @@ class MigrationService:
         importer = WordPressImportService()
 
         # 解析 WXR 文件
-        logger(f"[Migration] Parsing WXR file: {wxr_file}")
+        logger.logger(f"f"[Migration] Parsing WXR file: {wxr_file}")
         parsed_data = importer.parse_wxr_file(wxr_file)
 
         stats = {
@@ -156,12 +156,12 @@ class MigrationService:
             'errors': 0,
         }
 
-        logger(f"[Migration] Found:")
-        logger(f"  - {stats['total_posts']} posts")
-        logger(f"  - {stats['total_categories']} categories")
-        logger(f"  - {stats['total_tags']} tags")
-        logger(f"  - {stats['total_comments']} comments")
-        logger(f"  - {stats['total_media']} media items")
+        logger.logger(f"f"[Migration] Found:")
+        logger.logger(f"f"  - {stats['total_posts']} posts")
+        logger.logger(f"f"  - {stats['total_categories']} categories")
+        logger.logger(f"f"  - {stats['total_tags']} tags")
+        logger.logger(f"f"  - {stats['total_comments']} comments")
+        logger.logger(f"f"  - {stats['total_media']} media items")
 
         # 导入分类
         for cat_name in parsed_data.get('categories', []):
@@ -181,7 +181,7 @@ class MigrationService:
                     await db_session.flush()
                     stats['imported_categories'] += 1
             except Exception as e:
-                logger(f"[Migration] Error importing category {cat_name}: {e}")
+                logger.logger(f"f"[Migration] Error importing category {cat_name}: {e}")
                 stats['errors'] += 1
 
         # 导入标签
@@ -201,7 +201,7 @@ class MigrationService:
                     await db_session.flush()
                     stats['imported_tags'] += 1
             except Exception as e:
-                logger(f"[Migration] Error importing tag {tag_name}: {e}")
+                logger.logger(f"f"[Migration] Error importing tag {tag_name}: {e}")
                 stats['errors'] += 1
 
         # 导入文章
@@ -255,7 +255,7 @@ class MigrationService:
                 stats['imported_posts'] += 1
 
             except Exception as e:
-                logger(f"[Migration] Error importing post {post.get('title')}: {e}")
+                logger.logger(f"f"[Migration] Error importing post {post.get('title')}: {e}")
                 stats['errors'] += 1
 
         await db_session.commit()
@@ -284,7 +284,7 @@ class MigrationService:
         Returns:
             迁移结果统计
         """
-        logger(f"[Migration] Starting {platform} migration from: {source_dir}")
+        logger.logger(f"f"[Migration] Starting {platform} migration from: {source_dir}")
 
         source_path = Path(source_dir)
         if not source_path.exists():
@@ -295,7 +295,7 @@ class MigrationService:
 
         # 查找所有 Markdown 文件
         md_files = list(source_path.rglob('*.md'))
-        logger(f"[Migration] Found {len(md_files)} markdown files")
+        logger.logger(f"f"[Migration] Found {len(md_files)} markdown files")
 
         imported_count = 0
         errors = []
@@ -455,7 +455,7 @@ class MigrationService:
         Returns:
             迁移结果
         """
-        logger(f"[Migration] Starting Ghost migration from: {json_file}")
+        logger.logger(f"f"[Migration] Starting Ghost migration from: {json_file}")
 
         with open(json_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -475,10 +475,10 @@ class MigrationService:
             'errors': 0,
         }
 
-        logger(f"[Migration] Found:")
-        logger(f"  - {stats['posts']} posts")
-        logger(f"  - {stats['tags']} tags")
-        logger(f"  - {stats['users']} users")
+        logger.logger(f"f"[Migration] Found:")
+        logger.logger(f"f"  - {stats['posts']} posts")
+        logger.logger(f"f"  - {stats['tags']} tags")
+        logger.logger(f"f"  - {stats['users']} users")
 
         # 导入标签
         for tag_data in ghost_data.get('tags', []):
@@ -498,7 +498,7 @@ class MigrationService:
                     await db_session.flush()
                     stats['imported_tags'] += 1
             except Exception as e:
-                logger(f"[Migration] Error importing tag: {e}")
+                logger.logger(f"f"[Migration] Error importing tag: {e}")
                 stats['errors'] += 1
 
         # 导入文章
@@ -543,7 +543,7 @@ class MigrationService:
                 stats['imported_posts'] += 1
 
             except Exception as e:
-                logger(f"[Migration] Error importing post: {e}")
+                logger.logger(f"f"[Migration] Error importing post: {e}")
                 stats['errors'] += 1
 
         await db_session.commit()
@@ -574,7 +574,7 @@ class MigrationService:
         Returns:
             迁移结果
         """
-        logger(f"[Migration] Starting JSON migration from: {json_file}")
+        logger.logger(f"f"[Migration] Starting JSON migration from: {json_file}")
 
         with open(json_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -628,7 +628,7 @@ class MigrationService:
                 imported_count += 1
 
             except Exception as e:
-                logger(f"[Migration] Error importing item: {e}")
+                logger.logger(f"f"[Migration] Error importing item: {e}")
                 errors += 1
 
         await db_session.commit()
@@ -663,7 +663,7 @@ class MigrationService:
         Returns:
             迁移结果
         """
-        logger(f"[Migration] Starting CSV migration from: {csv_file}")
+        logger.logger(f"f"[Migration] Starting CSV migration from: {csv_file}")
 
         imported_count = 0
         errors = []

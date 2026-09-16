@@ -35,7 +35,7 @@ def get_version_from_update_server(request_type: str):
             'data': response.json()
         }
     except Exception as e:
-        logger.error(f"从更新服务器获取版本信息失败: {e}")
+        logger.logger(f"f"从更新服务器获取版本信息失败: {e}")
         return {
             'success': False,
             'error': str(e),

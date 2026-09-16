@@ -20,7 +20,7 @@ from src.utils.database.main import get_async_session
 class BackupManager:
     """
     P8-3: 自动化备份管理器
-    
+
     功能：
     1. 定时数据库备份（每日/每周）
     2. 文件备份（媒体文件、主题、插件）
@@ -52,10 +52,10 @@ class BackupManager:
     async def create_database_backup(self, backup_type: str = 'daily') -> Dict[str, Any]:
         """
         创建数据库备份
-        
+
         Args:
             backup_type: 备份类型 (daily/weekly/monthly)
-            
+
         Returns:
             备份信息
         """
@@ -137,7 +137,7 @@ class BackupManager:
             return backup_info
 
         except Exception as e:
-            logger.error(f"Database backup failed: {e}")
+            logger.logger(f"f"Database backup failed: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -147,7 +147,7 @@ class BackupManager:
     async def create_files_backup(self) -> Dict[str, Any]:
         """
         创建文件备份（媒体文件、主题、插件）
-        
+
         Returns:
             备份信息
         """
@@ -192,7 +192,7 @@ class BackupManager:
             return backup_info
 
         except Exception as e:
-            logger.error(f"Files backup failed: {e}")
+            logger.logger(f"f"Files backup failed: {e}")
             return {
                 "success": False,
                 "error": str(e)
@@ -201,11 +201,11 @@ class BackupManager:
     async def _upload_to_s3(self, file_path: Path, backup_type: str) -> Optional[str]:
         """
         上传备份到 S3
-        
+
         Args:
             file_path: 备份文件路径
             backup_type: 备份类型
-            
+
         Returns:
             S3 URL
         """
@@ -228,13 +228,13 @@ class BackupManager:
             return url
 
         except Exception as e:
-            logger.error(f"S3 upload failed: {e}")
+            logger.logger(f"f"S3 upload failed: {e}")
             return None
 
     async def cleanup_old_backups(self, backup_type: str):
         """
         清理旧备份（根据保留策略）
-        
+
         Args:
             backup_type: 备份类型 (daily/weekly/monthly/files)
         """
@@ -261,15 +261,15 @@ class BackupManager:
                 logger.info(f"Cleanup completed: {deleted_count} old backups deleted")
 
         except Exception as e:
-            logger.error(f"Backup cleanup failed: {e}")
+            logger.logger(f"f"Backup cleanup failed: {e}")
 
     async def restore_database_backup(self, backup_filename: str) -> Dict[str, Any]:
         """
         恢复数据库备份
-        
+
         Args:
             backup_filename: 备份文件名
-            
+
         Returns:
             恢复结果
         """
@@ -334,7 +334,7 @@ class BackupManager:
             }
 
         except Exception as e:
-            logger.error(f"Database restore failed: {e}")
+            logger.logger(f"f"Database restore failed: {e}")
             return {
                 "success": False,
                 "error": str(e)
@@ -343,10 +343,10 @@ class BackupManager:
     def list_backups(self, limit: int = 20) -> List[Dict[str, Any]]:
         """
         列出备份文件
-        
+
         Args:
             limit: 返回数量限制
-            
+
         Returns:
             备份文件列表
         """

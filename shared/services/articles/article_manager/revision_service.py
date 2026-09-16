@@ -26,13 +26,13 @@ def calculate_revision_hash(
 ) -> str:
     """
     计算修订版本的哈希码（基于标题、内容、封面图、标签）
-    
+
     Args:
         title: 标题
         content: 内容
         cover_image: 封面图
         tags_list: 标签列表
-        
+
     Returns:
         SHA256哈希字符串
     """
@@ -56,13 +56,13 @@ async def save_article_revision(
 ) -> Optional[ArticleRevision]:
     """
     保存文章修订版本（优化：减少查询次数 + 去重）
-    
+
     Args:
         db: 数据库会话
         article_id: 文章ID
         author_id: 作者ID
         change_summary: 变更说明
-        
+
     Returns:
         创建的修订对象，如果内容未变化则返回None
     """
@@ -142,7 +142,7 @@ async def save_article_revision(
 
     except Exception as e:
         await db.rollback()
-        logger.error(f"保存修订失败: {e}", exc_info=True)
+        logger.logger(f"f"保存修订失败: {e}", exc_info=True)
         return None
 
 
@@ -154,13 +154,13 @@ async def get_article_revisions(
 ) -> Dict[str, Any]:
     """
     获取文章的修订历史列表
-    
+
     Args:
         db: 数据库会话
         article_id: 文章ID
         page: 页码
         per_page: 每页数量
-        
+
     Returns:
         包含修订列表和分页信息的字典
     """
@@ -200,7 +200,7 @@ async def get_article_revisions(
         }
 
     except Exception as e:
-        logger.error(f"获取修订历史失败: {e}", exc_info=True)
+        logger.logger(f"f"获取修订历史失败: {e}", exc_info=True)
         return {
             "revisions": [],
             "pagination": {
@@ -220,11 +220,11 @@ async def get_revision_detail(
 ) -> Optional[Dict[str, Any]]:
     """
     获取特定修订版本的详细信息
-    
+
     Args:
         db: 数据库会话
         revision_id: 修订ID
-        
+
     Returns:
         修订详情字典
     """
@@ -241,7 +241,7 @@ async def get_revision_detail(
         return revision.to_dict()
 
     except Exception as e:
-        logger.error(f"获取修订详情失败: {e}", exc_info=True)
+        logger.logger(f"f"获取修订详情失败: {e}", exc_info=True)
         return None
 
 
@@ -253,13 +253,13 @@ async def rollback_to_revision(
 ) -> bool:
     """
     回滚到指定修订版本（优化：减少查询次数）
-    
+
     Args:
         db: 数据库会话
         article_id: 文章ID
         revision_id: 目标修订ID
         author_id: 执行回滚的用户ID
-        
+
     Returns:
         是否成功
     """
@@ -331,7 +331,7 @@ async def rollback_to_revision(
 
     except Exception as e:
         await db.rollback()
-        logger.error(f"回滚失败: {e}", exc_info=True)
+        logger.logger(f"f"回滚失败: {e}", exc_info=True)
         return False
 
 
@@ -342,12 +342,12 @@ async def compare_revisions(
 ) -> Optional[Dict[str, Any]]:
     """
     比较两个修订版本的差异
-    
+
     Args:
         db: 数据库会话
         revision1_id: 第一个修订ID
         revision2_id: 第二个修订ID
-        
+
     Returns:
         包含差异信息的字典
     """
@@ -383,7 +383,7 @@ async def compare_revisions(
         }
 
     except Exception as e:
-        logger.error(f"比较修订失败: {e}", exc_info=True)
+        logger.logger(f"f"比较修订失败: {e}", exc_info=True)
         return None
 
 
@@ -394,12 +394,12 @@ async def delete_revision(
 ) -> bool:
     """
     删除指定的修订版本
-    
+
     Args:
         db: 数据库会话
         revision_id: 修订ID
         article_id: 文章ID（用于验证权限）
-        
+
     Returns:
         是否成功删除
     """
@@ -423,5 +423,5 @@ async def delete_revision(
 
     except Exception as e:
         await db.rollback()
-        logger.error(f"删除修订失败: {e}", exc_info=True)
+        logger.logger(f"f"删除修订失败: {e}", exc_info=True)
         return False

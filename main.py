@@ -53,11 +53,11 @@ def run_supervisor_mode():
         supervisor = SupervisedLauncher()
         supervisor.setup_signal_handlers()
         if not supervisor.start_system():
-            logger.error("监督器启动失败")
+            logger.logger(f""监督器启动失败")
             sys.exit(1)
         supervisor.monitor_system()
     except Exception as e:
-        logger.error(f"监督器运行异常: {e}")
+        logger.logger(f"f"监督器运行异常: {e}")
         sys.exit(1)
 
 
@@ -83,12 +83,12 @@ def main():
         # 使用应用实例而不是工厂函数
         from src.app import app as fastapi_app
         if fastapi_app is None:
-            logger.error("FastAPI 应用实例创建失败")
+            logger.logger(f""FastAPI 应用实例创建失败")
             sys.exit(1)
 
         logger.info(f"FastAPI 应用已加载，准备启动服务器...")
         logger.info(f"服务器地址: http://{args.host}:{args.port}")
-        
+
         uvicorn.run(
             fastapi_app,
             host=args.host,
@@ -100,7 +100,7 @@ def main():
     except KeyboardInterrupt:
         logger.info("服务器已关闭")
     except Exception as e:
-        logger.error(f"FastAPI 启动失败: {e}")
+        logger.logger(f"f"FastAPI 启动失败: {e}")
         sys.exit(1)
 
 

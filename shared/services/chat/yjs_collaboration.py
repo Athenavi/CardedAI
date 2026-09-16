@@ -55,7 +55,7 @@ class YjsDocument:
                 try:
                     await client.send_bytes(data)
                 except Exception as e:
-                    logger(f"[Yjs] Broadcast error for client {client_id}: {e}")
+                    logger.logger(f"f"[Yjs] Broadcast error for client {client_id}: {e}")
                     disconnected.append(client_id)
 
         # 清理断开的连接
@@ -74,7 +74,7 @@ class YjsDocument:
                         'state': awareness_state
                     })
                 except Exception as e:
-                    logger(f"[Yjs] Awareness broadcast error for client {client_id}: {e}")
+                    logger.logger(f"f"[Yjs] Awareness broadcast error for client {client_id}: {e}")
                     disconnected.append(client_id)
 
         # 清理断开的连接
@@ -127,7 +127,7 @@ class YjsCollaborationService:
         if document_id not in self.documents:
             doc = YjsDocument(document_id, article_id)
             self.documents[document_id] = doc
-            logger(f"[Yjs] Created new document: {document_id}")
+            logger.logger(f"f"[Yjs] Created new document: {document_id}")
         return self.documents[document_id]
 
     def remove_document(self, document_id: str):
@@ -136,7 +136,7 @@ class YjsCollaborationService:
             doc = self.documents[document_id]
             if len(doc.clients) == 0:
                 del self.documents[document_id]
-                logger(f"[Yjs] Removed document: {document_id}")
+                logger.logger(f"f"[Yjs] Removed document: {document_id}")
 
     def get_active_documents(self) -> list:
         """获取所有活跃的文档"""
@@ -188,13 +188,13 @@ class YjsCollaborationService:
                 db_session.add(revision)
 
                 await db_session.commit()
-                logger(f"[Yjs] Saved document {document_id} (article {article_id}) to database")
+                logger.logger(f"f"[Yjs] Saved document {document_id} (article {article_id}) to database")
 
             doc.last_saved = datetime.now()
             return True
 
         except Exception as e:
-            logger(f"[Yjs] Error saving to database: {e}")
+            logger.logger(f"f"[Yjs] Error saving to database: {e}")
             import traceback
             traceback.print_exc()
             return False

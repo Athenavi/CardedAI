@@ -16,11 +16,11 @@ from shared.models.user import User
 async def load_article_with_author(db: AsyncSession, article_id: int):
     """
     加载文章及其作者信息（由于 author relationship 被注释掉，需要手动加载）
-    
+
     Args:
         db: 数据库会话
         article_id: 文章 ID
-    
+
     Returns:
         tuple: (Article 对象，User 对象或 None)
     """
@@ -43,11 +43,11 @@ async def load_article_with_author(db: AsyncSession, article_id: int):
 async def load_articles_with_authors(db: AsyncSession, query):
     """
     加载文章列表及其作者信息
-    
+
     Args:
         db: 数据库会话
         query: SQLAlchemy 查询对象
-    
+
     Returns:
         list: 包含 (Article, User 或 None) 元组的列表
     """
@@ -69,10 +69,10 @@ async def load_articles_with_authors(db: AsyncSession, query):
 def get_author_info_dict(user):
     """
     将 User 对象转换为作者信息字典
-    
+
     Args:
         user: User 对象或 None
-    
+
     Returns:
         dict: 作者信息字典
     """
@@ -147,7 +147,7 @@ async def get_articles_with_filters(filters: List, db: AsyncSession, page: int, 
         # 在FastAPI中使用logging而不是current_app.logger
 
         from src.unified_logger import default_logger as logger
-        logger.error(f"Database error: {e}")
+        logger.logger(f"f"Database error: {e}")
         raise
 
 
@@ -185,7 +185,7 @@ def set_article_password(aid: int, passwd: str, db: Session):
         db.commit()
         return True
     except Exception as e:
-        logger.error(f"An error occurred: {e}")
+        logger.logger(f"f"An error occurred: {e}")
         db.rollback()
         return False
 
@@ -212,7 +212,7 @@ def get_article_password(aid: int, db: Session):
             return article_content.passwd
         return None
     except Exception as e:
-        logger.error(f"An error occurred: {e}")
+        logger.logger(f"f"An error occurred: {e}")
         return None
 
 
@@ -258,16 +258,16 @@ def get_apw_form(aid: int):
                             请输入新的文章访问密码（至少4位，包含字母和数字）
                         </p>
                         <input type="password" id="new-password" name="new-password"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md"
                                placeholder="输入新密码">
                     </div>
                     <div class="flex justify-center gap-4 px-4 py-3">
-                        <button id="cancel-password" 
+                        <button id="cancel-password"
                                 class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
                                 onclick="document.getElementById('password-modal').remove()">
                             取消
                         </button>
-                        <button id="confirm-password" 
+                        <button id="confirm-password"
                                 hx-post="/api/article/password/''' + str(aid) + '''"
                                 hx-include="#new-password"
                                 hx-target="#password-modal"
@@ -351,7 +351,7 @@ def check_apw_form(aid: int, new_password: str, db: Session):
         </div>
         '''
     except (TypeError, AttributeError) as e:
-        logger.error(e)
+        logger.logger(f"e)
         return '''
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">

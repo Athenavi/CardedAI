@@ -43,7 +43,7 @@ class ArticleCacheService:
             logger.debug(f"文章列表缓存未命中: {cache_key}")
             return None
         except Exception as e:
-            logger.error(f"获取文章列表缓存失败: {e}")
+            logger.logger(f"f"获取文章列表缓存失败: {e}")
             return None
 
     async def set_article_list(
@@ -63,7 +63,7 @@ class ArticleCacheService:
             await redis_service.set(cache_key, data, expire=ttl or self.LIST_TTL)
             logger.debug(f"文章列表已缓存: {cache_key}, TTL={ttl or self.LIST_TTL}s")
         except Exception as e:
-            logger.error(f"设置文章列表缓存失败: {e}")
+            logger.logger(f"f"设置文章列表缓存失败: {e}")
 
     async def get_article_detail(self, article_id: int) -> Optional[Dict[str, Any]]:
         """获取缓存的文章详情"""
@@ -78,7 +78,7 @@ class ArticleCacheService:
             logger.debug(f"文章详情缓存未命中: {article_id}")
             return None
         except Exception as e:
-            logger.error(f"获取文章详情缓存失败: {e}")
+            logger.logger(f"f"获取文章详情缓存失败: {e}")
             return None
 
     async def set_article_detail(self, article_id: int, data: Dict[str, Any], ttl: Optional[int] = None):
@@ -88,7 +88,7 @@ class ArticleCacheService:
             await redis_service.set(cache_key, data, expire=ttl or self.DETAIL_TTL)
             logger.debug(f"文章详情已缓存: {article_id}, TTL={ttl or self.DETAIL_TTL}s")
         except Exception as e:
-            logger.error(f"设置文章详情缓存失败: {e}")
+            logger.logger(f"f"设置文章详情缓存失败: {e}")
 
     async def invalidate_article(self, article_id: int):
         """使文章相关缓存失效"""
@@ -109,7 +109,7 @@ class ArticleCacheService:
 
             logger.info(f"文章 {article_id} 相关缓存已失效")
         except Exception as e:
-            logger.error(f"使文章缓存失效失败: {e}")
+            logger.logger(f"f"使文章缓存失效失败: {e}")
 
     async def invalidate_category_articles(self, category_id: int):
         """使分类下的文章列表缓存失效"""
@@ -120,7 +120,7 @@ class ArticleCacheService:
                 await redis_service.delete(*keys)
                 logger.info(f"分类 {category_id} 文章列表缓存已失效")
         except Exception as e:
-            logger.error(f"使分类文章缓存失效失败: {e}")
+            logger.logger(f"f"使分类文章缓存失效失败: {e}")
 
     async def get_article_count(self, status: str = "published") -> Optional[int]:
         """获取缓存的文章数量"""
@@ -133,7 +133,7 @@ class ArticleCacheService:
 
             return None
         except Exception as e:
-            logger.error(f"获取文章数量缓存失败: {e}")
+            logger.logger(f"f"获取文章数量缓存失败: {e}")
             return None
 
     async def set_article_count(self, count: int, status: str = "published", ttl: Optional[int] = None):
@@ -142,7 +142,7 @@ class ArticleCacheService:
             cache_key = f"{self.ARTICLE_COUNT_PREFIX}:{status}"
             await redis_service.set(cache_key, count, expire=ttl or self.COUNT_TTL)
         except Exception as e:
-            logger.error(f"设置文章数量缓存失败: {e}")
+            logger.logger(f"f"设置文章数量缓存失败: {e}")
 
     def _build_list_key(
             self,
@@ -179,7 +179,7 @@ class ArticleCacheService:
                     break
             return keys
         except Exception as e:
-            logger.error(f"查找键失败: {e}")
+            logger.logger(f"f"查找键失败: {e}")
             return []
 
 

@@ -114,7 +114,7 @@ async def v2_generate_qr(request: Request):
             }
         return result
     except Exception as e:
-        logger.error(f"QR generation failed: {e}")
+        logger.logger(f"f"QR generation failed: {e}")
         return {"success": False, "message": "Failed to generate QR code"}
 
 
@@ -140,7 +140,7 @@ async def v2_check_qr_status(request: Request):
         logger.warning(f"[QR Status] check_qr_login_back returned success=False: {result}")
         return result
     except Exception as e:
-        logger.error(f"QR status check failed: {e}")
+        logger.logger(f"f"QR status check failed: {e}")
         return {"success": False, "message": "Failed to check QR code status"}
 
 
@@ -174,5 +174,5 @@ async def v2_phone_confirm(request: Request, db: AsyncSession = Depends(get_asyn
     try:
         return await phone_scan_back(request, current_user, cache, login_token=login_token)
     except Exception as e:
-        logger.error(f"Phone confirm failed: {e}")
+        logger.logger(f"f"Phone confirm failed: {e}")
         return {"success": False, "message": "确认失败"}

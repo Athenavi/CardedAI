@@ -95,7 +95,7 @@ async def create_source(req: CreateSourceRequest, current_user=Depends(jwt_requi
 
         return ApiResponse(success=True, data={"id": source_id}, message="数据源创建成功")
     except Exception as e:
-        logger.error(f"创建数据源失败: {e}")
+        logger.logger(f"f"创建数据源失败: {e}")
         return ApiResponse(success=False, error=f"创建数据源失败: {str(e)}")
 
 
@@ -143,7 +143,7 @@ async def get_sources(
                 ),
             )
     except Exception as e:
-        logger.error(f"获取数据源列表失败: {e}")
+        logger.logger(f"f"获取数据源列表失败: {e}")
         return ApiResponse(success=False, error=f"获取数据源列表失败: {str(e)}")
 
 
@@ -162,7 +162,7 @@ async def get_source(source_id: int, current_user=Depends(jwt_required)):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"获取数据源详情失败: {e}")
+        logger.logger(f"f"获取数据源详情失败: {e}")
         return ApiResponse(success=False, error=f"获取数据源详情失败: {str(e)}")
 
 
@@ -199,7 +199,7 @@ async def update_source(source_id: int, req: UpdateSourceRequest, current_user=D
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"更新数据源失败: {e}")
+        logger.logger(f"f"更新数据源失败: {e}")
         return ApiResponse(success=False, error=f"更新数据源失败: {str(e)}")
 
 
@@ -221,7 +221,7 @@ async def delete_source(source_id: int, current_user=Depends(jwt_required)):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"删除数据源失败: {e}")
+        logger.logger(f"f"删除数据源失败: {e}")
         return ApiResponse(success=False, error=f"删除数据源失败: {str(e)}")
 
 
@@ -238,7 +238,7 @@ async def trigger_collect(source_id: int, current_user=Depends(jwt_required)):
         result = await collector_engine.run_collection(source_id)
         return ApiResponse(success=True, data=result)
     except Exception as e:
-        logger.error(f"触发采集失败: {e}")
+        logger.logger(f"f"触发采集失败: {e}")
         return ApiResponse(success=False, error=f"触发采集失败: {str(e)}")
 
 
@@ -288,7 +288,7 @@ async def get_items(
                 ),
             )
     except Exception as e:
-        logger.error(f"获取采集条目失败: {e}")
+        logger.logger(f"f"获取采集条目失败: {e}")
         return ApiResponse(success=False, error=f"获取采集条目失败: {str(e)}")
 
 
@@ -347,7 +347,7 @@ async def get_intelligence(
                 ),
             )
     except Exception as e:
-        logger.error(f"获取情报列表失败: {e}")
+        logger.logger(f"f"获取情报列表失败: {e}")
         return ApiResponse(success=False, error=f"获取情报列表失败: {str(e)}")
 
 
@@ -366,7 +366,7 @@ async def get_intelligence_detail(intel_id: int, current_user=Depends(jwt_requir
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"获取情报详情失败: {e}")
+        logger.logger(f"f"获取情报详情失败: {e}")
         return ApiResponse(success=False, error=f"获取情报详情失败: {str(e)}")
 
 
@@ -413,7 +413,7 @@ async def get_briefings(
                 ),
             )
     except Exception as e:
-        logger.error(f"获取简报列表失败: {e}")
+        logger.logger(f"f"获取简报列表失败: {e}")
         return ApiResponse(success=False, error=f"获取简报列表失败: {str(e)}")
 
 
@@ -432,7 +432,7 @@ async def get_briefing_detail(briefing_id: int, current_user=Depends(jwt_require
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"获取简报详情失败: {e}")
+        logger.logger(f"f"获取简报详情失败: {e}")
         return ApiResponse(success=False, error=f"获取简报详情失败: {str(e)}")
 
 
@@ -459,7 +459,7 @@ async def generate_briefing(briefing_type: str = "daily", topic: Optional[str] =
             message="简报生成成功" if result.get("success") else "简报生成失败",
         )
     except Exception as e:
-        logger.error(f"生成简报失败: {e}")
+        logger.logger(f"f"生成简报失败: {e}")
         return ApiResponse(success=False, error=f"生成简报失败: {str(e)}")
 
 
@@ -506,7 +506,7 @@ async def get_alert_rules(
                 ),
             )
     except Exception as e:
-        logger.error(f"获取预警规则失败: {e}")
+        logger.logger(f"f"获取预警规则失败: {e}")
         return ApiResponse(success=False, error=f"获取预警规则失败: {str(e)}")
 
 
@@ -541,7 +541,7 @@ async def create_alert_rule(req: CreateAlertRuleRequest, current_user=Depends(jw
 
         return ApiResponse(success=True, data={"id": rule_id}, message="预警规则创建成功")
     except Exception as e:
-        logger.error(f"创建预警规则失败: {e}")
+        logger.logger(f"f"创建预警规则失败: {e}")
         return ApiResponse(success=False, error=f"创建预警规则失败: {str(e)}")
 
 
@@ -611,7 +611,7 @@ async def trigger_analysis(source_id: int, current_user=Depends(jwt_required)):
         result = await analysis_engine.analyze_source(source_id)
         return ApiResponse(success=True, data=result, message="分析完成")
     except Exception as e:
-        logger.error(f"触发数据源分析失败: {e}")
+        logger.logger(f"f"触发数据源分析失败: {e}")
         return ApiResponse(success=False, error=f"触发分析失败: {str(e)}")
 
 
@@ -624,7 +624,7 @@ async def analyze_all_pending():
         result = await analysis_engine.analyze_pending()
         return ApiResponse(success=True, data=result, message="待处理分析完成")
     except Exception as e:
-        logger.error(f"分析待处理条目失败: {e}")
+        logger.logger(f"f"分析待处理条目失败: {e}")
         return ApiResponse(success=False, error=f"分析失败: {str(e)}")
 
 
@@ -663,5 +663,5 @@ async def get_intel_stats():
             },
         )
     except Exception as e:
-        logger.error(f"获取情报统计失败: {e}")
+        logger.logger(f"f"获取情报统计失败: {e}")
         return ApiResponse(success=False, error=f"获取统计失败: {str(e)}")

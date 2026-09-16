@@ -402,7 +402,7 @@ class SiteAnalyticsService:
             self.events_buffer.clear()
 
         except Exception as e:
-            logger(f"[Analytics] Failed to flush events: {e}")
+            logger.logger(f"f"[Analytics] Failed to flush events: {e}")
 
     def _extract_domain(self, url: str) -> str:
         """从URL提取域名"""
@@ -439,7 +439,7 @@ class SiteAnalyticsService:
                     if line:
                         events.append(json.loads(line))
         except Exception as e:
-            logger(f"[Analytics] Failed to load events: {e}")
+            logger.logger(f"f"[Analytics] Failed to load events: {e}")
 
         return events
 

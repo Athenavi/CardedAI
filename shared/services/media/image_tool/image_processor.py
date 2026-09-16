@@ -44,7 +44,7 @@ from PIL import ImageEnhance
 class ImageProcessor:
     """
     图片处理器
-    
+
     功能:
     1. 图片裁剪
     2. 图片旋转
@@ -61,7 +61,7 @@ class ImageProcessor:
     ) -> Tuple[bytes, str]:
         """
         处理图片（支持多个操作）
-        
+
         Args:
             image_data: 原始图片数据（字节）
             operations: 操作配置 {
@@ -71,7 +71,7 @@ class ImageProcessor:
                 'quality': 85,
                 'format': 'JPEG'
             }
-            
+
         Returns:
             (处理后的图片数据, MIME类型)
         """
@@ -134,17 +134,17 @@ class ImageProcessor:
             return output_buffer.getvalue(), mime_type
 
         except Exception as e:
-            logger.error(f"图片处理失败: {e}")
+            logger.logger(f"f"图片处理失败: {e}")
             raise ValueError(f"图片处理失败: {str(e)}")
 
     def _crop(self, img: Image.Image, crop_params: Dict[str, int]) -> Image.Image:
         """
         裁剪图片
-        
+
         Args:
             img: PIL图片对象
             crop_params: {'x': 0, 'y': 0, 'width': 100, 'height': 100}
-            
+
         Returns:
             裁剪后的图片
         """
@@ -167,11 +167,11 @@ class ImageProcessor:
     def _flip(self, img: Image.Image, flip_params: Dict[str, Any]) -> Image.Image:
         """
         翻转图片
-        
+
         Args:
             img: PIL图片对象
             flip_params: {'horizontal': True, 'vertical': False}
-            
+
         Returns:
             翻转后的图片
         """
@@ -186,11 +186,11 @@ class ImageProcessor:
     def _adjust_brightness(self, img: Image.Image, factor: float) -> Image.Image:
         """
         调整亮度
-        
+
         Args:
             img: PIL图片对象
             factor: 亮度因子 (0.0-2.0, 1.0为原图)
-            
+
         Returns:
             调整后的图片
         """
@@ -200,11 +200,11 @@ class ImageProcessor:
     def _adjust_contrast(self, img: Image.Image, factor: float) -> Image.Image:
         """
         调整对比度
-        
+
         Args:
             img: PIL图片对象
             factor: 对比度因子 (0.0-2.0, 1.0为原图)
-            
+
         Returns:
             调整后的图片
         """
@@ -214,11 +214,11 @@ class ImageProcessor:
     def _apply_filter(self, img: Image.Image, filter_name: str) -> Image.Image:
         """
         应用滤镜
-        
+
         Args:
             img: PIL图片对象
             filter_name: 滤镜名称 (blur, sharpen, smooth, emboss, contour, detail, edge_enhance)
-            
+
         Returns:
             滤镜处理后的图片
         """
@@ -232,11 +232,11 @@ class ImageProcessor:
     def _rotate(self, img: Image.Image, angle: float) -> Image.Image:
         """
         旋转图片
-        
+
         Args:
             img: PIL图片对象
             angle: 旋转角度（度）
-            
+
         Returns:
             旋转后的图片
         """
@@ -246,15 +246,15 @@ class ImageProcessor:
     def _resize(self, img: Image.Image, resize_params: Dict[str, int]) -> Image.Image:
         """
         调整图片大小
-        
+
         Args:
             img: PIL图片对象
             resize_params: {
-                'width': 800, 'height': 600, 
+                'width': 800, 'height': 600,
                 'maintain_aspect': True,
                 'max_width': 1920, 'max_height': 1080  # 新增：最大宽高限制
             }
-            
+
         Returns:
             调整后的图片
         """
@@ -302,11 +302,11 @@ class ImageProcessor:
     def _create_thumbnail(self, img: Image.Image, size: int) -> Image.Image:
         """
         创建缩略图（正方形，居中裁剪）
-        
+
         Args:
             img: PIL图片对象
             size: 缩略图边长
-            
+
         Returns:
             缩略图
         """
@@ -326,10 +326,10 @@ class ImageProcessor:
     def get_image_info(self, image_data: bytes) -> Dict[str, Any]:
         """
         获取图片信息
-        
+
         Args:
             image_data: 图片数据（字节）
-            
+
         Returns:
             图片信息字典
         """
@@ -361,17 +361,17 @@ class ImageProcessor:
             return info
 
         except Exception as e:
-            logger.error(f"获取图片信息失败: {e}")
+            logger.logger(f"f"获取图片信息失败: {e}")
             raise ValueError(f"无法读取图片信息: {str(e)}")
 
     def validate_image(self, image_data: bytes, max_size_mb: float = 10) -> Dict[str, Any]:
         """
         验证图片
-        
+
         Args:
             image_data: 图片数据（字节）
             max_size_mb: 最大文件大小（MB）
-            
+
         Returns:
             验证结果 {'valid': bool, 'errors': []}
         """

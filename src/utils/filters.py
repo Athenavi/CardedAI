@@ -32,7 +32,7 @@ def json_filter(value):
     try:
         return json.loads(value)
     except (ValueError, TypeError) as e:
-        logger.error(f"Error parsing JSON: {e}, Value: {value}")
+        logger.logger(f"Error parsing JSON: {e}, Value: {value}")
         return None
 
 def string_split(value, delimiter=','):
@@ -43,7 +43,7 @@ def string_split(value, delimiter=','):
     try:
         return value.split(delimiter)
     except Exception as e:
-        logger.error(f"Error splitting string: {e}, Value: {value}")
+        logger.logger(f"Error splitting string: {e}, Value: {value}")
         return []
 
 def relative_time_filter(dt):
@@ -111,7 +111,7 @@ def f2list(input_value, delimiter=';'):
             return [tag.strip() for tag in input_value.split(delimiter) if tag.strip()]
         return [str(input_value).strip()]
     except (ValueError, TypeError, AttributeError) as e:
-        logger.error(f"Error converting to list: {e}, Input: {input_value}")
+        logger.logger(f"Error converting to list: {e}, Input: {input_value}")
         return [str(input_value)] if input_value else []
 
 
@@ -237,13 +237,13 @@ def markdown_to_html(markdown_text, theme='github', enable_toc=True, **kwargs):
 
 _THEME_STYLES = {
     'github': '''
-        .markdown-content { 
-            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif; 
-            line-height: 1.6; color: #24292f; background-color: #ffffff; 
-            max-width: 980px; margin: 0 auto; padding: 45px; 
+        .markdown-content {
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif;
+            line-height: 1.6; color: #24292f; background-color: #ffffff;
+            max-width: 980px; margin: 0 auto; padding: 45px;
         }
-        .markdown-content h1,.markdown-content h2,.markdown-content h3,.markdown-content h4,.markdown-content h5,.markdown-content h6 { 
-            margin-top: 24px; margin-bottom: 16px; font-weight: 600; line-height: 1.25; 
+        .markdown-content h1,.markdown-content h2,.markdown-content h3,.markdown-content h4,.markdown-content h5,.markdown-content h6 {
+            margin-top: 24px; margin-bottom: 16px; font-weight: 600; line-height: 1.25;
         }
         .markdown-content h1 { font-size: 2em; border-bottom: 1px solid #d0d7de; padding-bottom: .3em; }
         .markdown-content h2 { font-size: 1.5em; border-bottom: 1px solid #d0d7de; padding-bottom: .3em; }
@@ -259,11 +259,11 @@ _THEME_STYLES = {
         .markdown-content .toc ul { margin: 0; padding-left: 1.5em; list-style-type: none; }
         .markdown-content .toc > ul { padding-left: 0; }
         .markdown-content .toc li { margin: 4px 0; }
-        .markdown-content .toc a, .markdown-content .toc a:link, .markdown-content .toc a:visited, .markdown-content .toc a:hover, .markdown-content .toc a:active { 
-            text-decoration: none !important; color: #0969da; font-weight: 500; 
+        .markdown-content .toc a, .markdown-content .toc a:link, .markdown-content .toc a:visited, .markdown-content .toc a:hover, .markdown-content .toc a:active {
+            text-decoration: none !important; color: #0969da; font-weight: 500;
             border: none !important; outline: none !important;
         }
-        .markdown-content .toc a:hover { 
+        .markdown-content .toc a:hover {
             color: #0550ae !important; background-color: rgba(9, 105, 218, 0.1) !important;
             padding: 2px 4px; border-radius: 3px;
         }
@@ -280,13 +280,13 @@ _THEME_STYLES = {
         .markdown-content .mermaid code { background: transparent; padding: 0; font-size: 14px; }
     ''',
     'dark': '''
-        .markdown-content { 
-            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif; 
-            line-height: 1.6; color: #e6edf3; background-color: #0d1117; 
-            max-width: 980px; margin: 0 auto; padding: 45px; 
+        .markdown-content {
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif;
+            line-height: 1.6; color: #e6edf3; background-color: #0d1117;
+            max-width: 980px; margin: 0 auto; padding: 45px;
         }
-        .markdown-content h1,.markdown-content h2,.markdown-content h3,.markdown-content h4,.markdown-content h5,.markdown-content h6 { 
-            margin-top: 24px; margin-bottom: 16px; font-weight: 600; line-height: 1.25; color: #f0f6fc; 
+        .markdown-content h1,.markdown-content h2,.markdown-content h3,.markdown-content h4,.markdown-content h5,.markdown-content h6 {
+            margin-top: 24px; margin-bottom: 16px; font-weight: 600; line-height: 1.25; color: #f0f6fc;
         }
         .markdown-content h1 { font-size: 2em; border-bottom: 1px solid #21262d; padding-bottom: .3em; }
         .markdown-content h2 { font-size: 1.5em; border-bottom: 1px solid #21262d; padding-bottom: .3em; }
@@ -302,11 +302,11 @@ _THEME_STYLES = {
         .markdown-content .toc ul { margin: 0; padding-left: 1.5em; list-style-type: none; }
         .markdown-content .toc > ul { padding-left: 0; }
         .markdown-content .toc li { margin: 4px 0; }
-        .markdown-content .toc a, .markdown-content .toc a:link, .markdown-content .toc a:visited, .markdown-content .toc a:hover, .markdown-content .toc a:active { 
-            text-decoration: none !important; color: #58a6ff; font-weight: 500; 
+        .markdown-content .toc a, .markdown-content .toc a:link, .markdown-content .toc a:visited, .markdown-content .toc a:hover, .markdown-content .toc a:active {
+            text-decoration: none !important; color: #58a6ff; font-weight: 500;
             border: none !important; outline: none !important;
         }
-        .markdown-content .toc a:hover { 
+        .markdown-content .toc a:hover {
             color: #79c0ff !important; background-color: rgba(88, 166, 255, 0.1) !important;
             padding: 2px 4px; border-radius: 3px;
         }
@@ -323,12 +323,12 @@ _THEME_STYLES = {
         .markdown-content .mermaid code { background: transparent; padding: 0; font-size: 14px; color: #e6edf3; }
     ''',
     'minimal': '''
-        .markdown-content { 
-            font-family: Georgia, 'Times New Roman', serif; line-height: 1.8; color: #333; 
-            max-width: 800px; margin: 0 auto; padding: 40px 20px; 
+        .markdown-content {
+            font-family: Georgia, 'Times New Roman', serif; line-height: 1.8; color: #333;
+            max-width: 800px; margin: 0 auto; padding: 40px 20px;
         }
-        .markdown-content h1,.markdown-content h2,.markdown-content h3,.markdown-content h4,.markdown-content h5,.markdown-content h6 { 
-            color: #000; margin-top: 2em; margin-bottom: 0.5em; 
+        .markdown-content h1,.markdown-content h2,.markdown-content h3,.markdown-content h4,.markdown-content h5,.markdown-content h6 {
+            color: #000; margin-top: 2em; margin-bottom: 0.5em;
         }
         .markdown-content h1 { font-size: 2.2em; }
         .markdown-content h2 { font-size: 1.8em; }
@@ -344,11 +344,11 @@ _THEME_STYLES = {
         .markdown-content .toc ul { margin: 0; padding-left: 1.5em; list-style-type: none; }
         .markdown-content .toc > ul { padding-left: 0; }
         .markdown-content .toc li { margin: 4px 0; }
-        .markdown-content .toc a, .markdown-content .toc a:link, .markdown-content .toc a:visited, .markdown-content .toc a:hover, .markdown-content .toc a:active { 
-            text-decoration: none !important; color: #0066cc; font-weight: 500; 
+        .markdown-content .toc a, .markdown-content .toc a:link, .markdown-content .toc a:visited, .markdown-content .toc a:hover, .markdown-content .toc a:active {
+            text-decoration: none !important; color: #0066cc; font-weight: 500;
             border: none !important; outline: none !important;
         }
-        .markdown-content .toc a:hover { 
+        .markdown-content .toc a:hover {
             color: #004499 !important; background-color: rgba(0, 102, 204, 0.1) !important;
             padding: 2px 4px; border-radius: 3px;
         }
@@ -363,30 +363,30 @@ _THEME_STYLES = {
         .markdown-content .mermaid code { background: transparent; padding: 0; font-size: 14px; }
     ''',
     'academic': '''
-        .markdown-content { 
-            font-family: "Times New Roman", Times, serif; line-height: 1.8; color: #2c3e50; background-color: #ffffff; 
-            max-width: 900px; margin: 0 auto; padding: 60px 40px; 
+        .markdown-content {
+            font-family: "Times New Roman", Times, serif; line-height: 1.8; color: #2c3e50; background-color: #ffffff;
+            max-width: 900px; margin: 0 auto; padding: 60px 40px;
         }
-        .markdown-content h1,.markdown-content h2,.markdown-content h3,.markdown-content h4,.markdown-content h5,.markdown-content h6 { 
-            font-family: "Georgia", serif; font-weight: bold; color: #1a252f; 
-            margin-top: 2.5em; margin-bottom: 1em; 
+        .markdown-content h1,.markdown-content h2,.markdown-content h3,.markdown-content h4,.markdown-content h5,.markdown-content h6 {
+            font-family: "Georgia", serif; font-weight: bold; color: #1a252f;
+            margin-top: 2.5em; margin-bottom: 1em;
         }
         .markdown-content h1 { font-size: 2.4em; text-align: center; border-bottom: 3px double #34495e; padding-bottom: 0.5em; }
         .markdown-content h2 { font-size: 1.8em; border-bottom: 1px solid #bdc3c7; padding-bottom: 0.3em; }
         .markdown-content h3 { font-size: 1.4em; }
         .markdown-content p { margin-bottom: 1.5em; text-align: justify; text-indent: 2em; }
-        .markdown-content blockquote { 
-            border-left: 4px solid #95a5a6; margin: 2em 0; padding: 1em 2em; 
-            background-color: #f8f9fa; font-style: italic; color: #5d6d7e; 
+        .markdown-content blockquote {
+            border-left: 4px solid #95a5a6; margin: 2em 0; padding: 1em 2em;
+            background-color: #f8f9fa; font-style: italic; color: #5d6d7e;
         }
-        .markdown-content code { 
-            background-color: #ecf0f1; padding: 3px 6px; border-radius: 4px; 
-            font-family: "Consolas", "Monaco", monospace; font-size: 0.9em; 
+        .markdown-content code {
+            background-color: #ecf0f1; padding: 3px 6px; border-radius: 4px;
+            font-family: "Consolas", "Monaco", monospace; font-size: 0.9em;
         }
-        .markdown-content pre { 
-            background-color: #f4f6f7; border: 1px solid #d5dbdb; border-radius: 6px; 
-            padding: 20px; overflow-x: auto; margin: 2em 0; 
-            font-family: "Consolas", "Monaco", monospace; line-height: 1.5; 
+        .markdown-content pre {
+            background-color: #f4f6f7; border: 1px solid #d5dbdb; border-radius: 6px;
+            padding: 20px; overflow-x: auto; margin: 2em 0;
+            font-family: "Consolas", "Monaco", monospace; line-height: 1.5;
         }
         .markdown-content table { width: 100%; border-collapse: collapse; margin: 2em 0; font-size: 0.95em; }
         .markdown-content td,.markdown-content th { border: 1px solid #bdc3c7; padding: 12px 15px; text-align: left; }
@@ -396,11 +396,11 @@ _THEME_STYLES = {
         .markdown-content .toc ul { margin: 0; padding-left: 1.5em; list-style-type: none; }
         .markdown-content .toc > ul { padding-left: 0; }
         .markdown-content .toc li { margin: 6px 0; }
-        .markdown-content .toc a, .markdown-content .toc a:link, .markdown-content .toc a:visited, .markdown-content .toc a:hover, .markdown-content .toc a:active { 
-            text-decoration: none !important; color: #2c3e50; font-weight: 600; 
+        .markdown-content .toc a, .markdown-content .toc a:link, .markdown-content .toc a:visited, .markdown-content .toc a:hover, .markdown-content .toc a:active {
+            text-decoration: none !important; color: #2c3e50; font-weight: 600;
             border: none !important; outline: none !important;
         }
-        .markdown-content .toc a:hover { 
+        .markdown-content .toc a:hover {
             color: #34495e !important; background-color: rgba(44, 62, 80, 0.1) !important;
             padding: 2px 4px; border-radius: 3px;
         }
@@ -416,34 +416,34 @@ _THEME_STYLES = {
         .markdown-content .mermaid code { background: transparent; padding: 0; font-size: 14px; }
     ''',
     'elegant': '''
-        .markdown-content { 
-            font-family: "Crimson Text", "Georgia", serif; line-height: 1.8; color: #2c3e50; background-color: #fdfcf8; 
-            max-width: 850px; margin: 0 auto; padding: 60px 50px; 
+        .markdown-content {
+            font-family: "Crimson Text", "Georgia", serif; line-height: 1.8; color: #2c3e50; background-color: #fdfcf8;
+            max-width: 850px; margin: 0 auto; padding: 60px 50px;
         }
-        .markdown-content h1,.markdown-content h2,.markdown-content h3,.markdown-content h4,.markdown-content h5,.markdown-content h6 { 
-            font-family: "Playfair Display", "Georgia", serif; font-weight: 700; color: #1a252f; 
-            margin-top: 3em; margin-bottom: 1em; 
+        .markdown-content h1,.markdown-content h2,.markdown-content h3,.markdown-content h4,.markdown-content h5,.markdown-content h6 {
+            font-family: "Playfair Display", "Georgia", serif; font-weight: 700; color: #1a252f;
+            margin-top: 3em; margin-bottom: 1em;
         }
-        .markdown-content h1 { 
-            font-size: 3.2em; text-align: center; margin-bottom: 0.5em; 
-            border-bottom: 2px solid #d4af37; padding-bottom: 0.3em; 
+        .markdown-content h1 {
+            font-size: 3.2em; text-align: center; margin-bottom: 0.5em;
+            border-bottom: 2px solid #d4af37; padding-bottom: 0.3em;
         }
         .markdown-content h2 { font-size: 2.4em; color: #8b4513; }
         .markdown-content h3 { font-size: 1.8em; color: #a0522d; }
         .markdown-content p { margin-bottom: 1.6em; text-align: justify; font-size: 1.1em; }
-        .markdown-content blockquote { 
-            border-left: 4px solid #d4af37; background-color: #f9f7f1; margin: 2.5em 0; 
-            padding: 1.5em 2.5em; font-style: italic; font-size: 1.05em; color: #5d4e37; 
-            border-radius: 0 8px 8px 0; 
+        .markdown-content blockquote {
+            border-left: 4px solid #d4af37; background-color: #f9f7f1; margin: 2.5em 0;
+            padding: 1.5em 2.5em; font-style: italic; font-size: 1.05em; color: #5d4e37;
+            border-radius: 0 8px 8px 0;
         }
-        .markdown-content code { 
-            background-color: #f4f1eb; border: 1px solid #e8dcc6; padding: 3px 6px; 
-            border-radius: 4px; font-family: "Source Code Pro", monospace; color: #8b4513; 
+        .markdown-content code {
+            background-color: #f4f1eb; border: 1px solid #e8dcc6; padding: 3px 6px;
+            border-radius: 4px; font-family: "Source Code Pro", monospace; color: #8b4513;
         }
-        .markdown-content pre { 
-            background-color: #f9f7f1; border: 1px solid #e8dcc6; border-radius: 8px; 
-            padding: 25px; overflow-x: auto; margin: 2.5em 0; 
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06); 
+        .markdown-content pre {
+            background-color: #f9f7f1; border: 1px solid #e8dcc6; border-radius: 8px;
+            padding: 25px; overflow-x: auto; margin: 2.5em 0;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
         }
         .markdown-content table { width: 100%; border-collapse: collapse; margin: 2.5em 0; font-size: 1em; }
         .markdown-content th { background-color: #8b4513; color: #fdfcf8; padding: 15px; font-weight: bold; border: 1px solid #a0522d; }
@@ -453,12 +453,12 @@ _THEME_STYLES = {
         .markdown-content .toc ul { margin: 0; padding-left: 1.5em; list-style-type: none; }
         .markdown-content .toc > ul { padding-left: 0; }
         .markdown-content .toc li { margin: 6px 0; }
-        .markdown-content .toc a, .markdown-content .toc a:link, .markdown-content .toc a:visited, .markdown-content .toc a:hover, .markdown-content .toc a:active { 
-            text-decoration: none !important; color: #8b4513; font-weight: 600; 
+        .markdown-content .toc a, .markdown-content .toc a:link, .markdown-content .toc a:visited, .markdown-content .toc a:hover, .markdown-content .toc a:active {
+            text-decoration: none !important; color: #8b4513; font-weight: 600;
             font-family: "Playfair Display", "Georgia", serif;
             border: none !important; outline: none !important;
         }
-        .markdown-content .toc a:hover { 
+        .markdown-content .toc a:hover {
             color: #a0522d !important; background-color: rgba(139, 69, 19, 0.1) !important;
             padding: 2px 4px; border-radius: 3px;
         }

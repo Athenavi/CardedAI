@@ -49,7 +49,7 @@ class AutoUpdateChecker:
             }
 
         except Exception as e:
-            logger.error(f"检查 GitHub Releases 失败：{e}")
+            logger.logger(f"f"检查 GitHub Releases 失败：{e}")
             return None
 
     async def check_local_releases(self) -> Optional[str]:
@@ -74,7 +74,7 @@ class AutoUpdateChecker:
             return version
 
         except Exception as e:
-            logger.error(f"检查本地 releases 失败：{e}")
+            logger.logger(f"f"检查本地 releases 失败：{e}")
             return None
 
     @staticmethod
@@ -104,7 +104,7 @@ class AutoUpdateChecker:
             return False
 
         except Exception as e:
-            logger.error(f"版本比较失败：{e}")
+            logger.logger(f"f"版本比较失败：{e}")
             return False
 
     async def check_for_updates(self) -> Dict:
@@ -118,7 +118,7 @@ class AutoUpdateChecker:
             backend_info = version_manager.get_backend_version()
             self.current_version = backend_info.get('version', '0.0.0')
         except Exception as e:
-            logger.error(f"获取当前版本失败：{e}")
+            logger.logger(f"f"获取当前版本失败：{e}")
             self.current_version = "0.0.0"
 
         # 同时检查 GitHub 和本地

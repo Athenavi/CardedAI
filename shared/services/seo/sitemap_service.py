@@ -77,7 +77,7 @@ async def generate_sitemap_xml(
         return pretty_xml.decode('utf-8')
 
     except Exception as e:
-        logger(f"生成sitemap失败: {e}")
+        logger.logger(f"f"生成sitemap失败: {e}")
         import traceback
         traceback.print_exc()
         return ""

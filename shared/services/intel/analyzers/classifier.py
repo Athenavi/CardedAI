@@ -93,7 +93,7 @@ class ContentClassifier:
             logger.warning(f"分类 LLM 响应异常: {result.get('error', 'unknown')}")
 
         except Exception as e:
-            logger.error(f"分类异常: {e}")
+            logger.logger(f"f"分类异常: {e}")
 
         return {
             "category": "其他",

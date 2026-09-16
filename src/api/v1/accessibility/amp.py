@@ -79,7 +79,7 @@ async def get_article_amp_api(
 
         if not validation['valid']:
             # 如果验证失败,记录错误但仍返回(开发阶段)
-            logger(f"AMP Validation Errors: {validation['errors']}")
+            logger.logger(f"f"AMP Validation Errors: {validation['errors']}")
 
         # 返回AMP HTML
         from fastapi.responses import HTMLResponse
@@ -96,8 +96,8 @@ async def get_article_amp_api(
         raise
     except Exception as e:
         import traceback
-        logger(f"Error in get_article_amp_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error in get_article_amp_api: {str(e)}")
+        logger.logger(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -164,8 +164,8 @@ async def validate_article_amp_api(
 
     except Exception as e:
         import traceback
-        logger(f"Error in validate_article_amp_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error in validate_article_amp_api: {str(e)}")
+        logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

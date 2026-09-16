@@ -76,7 +76,7 @@ class AccessibilityService:
                         logger.warning(f"Failed to parse accessibility config for user {user_id}")
 
         except Exception as e:
-            logger.error(f"DB error getting accessibility config for user {user_id}: {e}")
+            logger.logger(f"f"DB error getting accessibility config for user {user_id}: {e}")
 
         return self.DEFAULT_CONFIG.copy()
 
@@ -151,7 +151,7 @@ class AccessibilityService:
                 return {**self.DEFAULT_CONFIG, **current}
 
         except Exception as e:
-            logger.error(f"DB error updating accessibility config for user {user_id}: {e}")
+            logger.logger(f"f"DB error updating accessibility config for user {user_id}: {e}")
             raise
 
     def generate_skip_links(self) -> List[Dict[str, str]]:

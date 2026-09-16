@@ -32,14 +32,14 @@ async def get_user_media_file(
 ):
     """
     获取用户媒体文件（支持流式传输和范围请求）
-    
+
     Args:
         media_id: 媒体文件ID
         request: FastAPI请求对象
         range_header: HTTP Range头，用于断点续传
         current_user_obj: 当前用户对象
         db: 数据库会话
-        
+
     Returns:
         流式响应或FileResponse
     """
@@ -96,7 +96,7 @@ async def get_user_media_file(
             else:
                 etag = f'"{media.hash}"'
         except Exception as e:
-            logger.error(f"生成 ETag 失败: {e}")
+            logger.logger(f"f"生成 ETag 失败: {e}")
             etag = f'"{media.hash}"'
 
         # 检查客户端是否有缓存（If-None-Match）
@@ -160,13 +160,13 @@ async def get_user_media_file(
             )
 
         # 文件不存在
-        logger.error(f"文件不存在 - media_id: {media_id}, hash: {media.hash}")
+        logger.logger(f"f"文件不存在 - media_id: {media_id}, hash: {media.hash}")
         raise HTTPException(status_code=404, detail="文件不存在")
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"获取媒体文件时发生未预期错误 - media_id: {media_id}, error: {str(e)}", exc_info=True)
+        logger.logger(f"f"获取媒体文件时发生未预期错误 - media_id: {media_id}, error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"获取媒体文件失败: {str(e)}")
 
 
@@ -180,10 +180,10 @@ async def get_media_thumbnail(
 ):
     """
     获取媒体文件的缩略图
-    
+
     Args:
         media_id: 媒体文件ID
-        
+
     Returns:
         缩略图文件或404
     """
@@ -240,7 +240,7 @@ async def get_media_thumbnail(
                         break
 
         if not original_path or not original_path.exists():
-            logger.error(f"原始文件不存在 - media_id: {media_id}, hash: {media.hash}")
+            logger.logger(f"f"原始文件不存在 - media_id: {media_id}, hash: {media.hash}")
             raise HTTPException(status_code=404, detail="原始文件不存在")
 
         # 生成缩略图
@@ -278,11 +278,11 @@ async def get_media_thumbnail(
                 logger.warning(f"缩略图生成失败 - media_id: {media_id}")
                 raise HTTPException(status_code=404, detail="该文件类型不支持缩略图")
         except Exception as e:
-            logger.error(f"生成缩略图时出错 - media_id: {media_id}, error: {str(e)}")
+            logger.logger(f"f"生成缩略图时出错 - media_id: {media_id}, error: {str(e)}")
             raise HTTPException(status_code=500, detail=f"生成缩略图失败: {str(e)}")
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"获取缩略图时发生未预期错误 - media_id: {media_id}, error: {str(e)}", exc_info=True)
+        logger.logger(f"f"获取缩略图时发生未预期错误 - media_id: {media_id}, error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"获取缩略图失败: {str(e)}")

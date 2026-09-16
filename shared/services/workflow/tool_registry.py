@@ -148,7 +148,7 @@ class AgentToolRegistry:
             logger.info(f"[ToolRegistry] 工具 {name} 调用成功")
             return result
         except Exception as exc:
-            logger.error(f"[ToolRegistry] 工具 {name} 调用失败: {exc}")
+            logger.logger(f"f"[ToolRegistry] 工具 {name} 调用失败: {exc}")
             raise
 
     async def call_tool_safe(
@@ -239,7 +239,7 @@ class AgentToolRegistry:
                 db.commit()
             return count
         except Exception as exc:
-            logger.error(f"[ToolRegistry] 同步到数据库失败: {exc}")
+            logger.logger(f"f"[ToolRegistry] 同步到数据库失败: {exc}")
             return 0
 
     async def load_from_db(self) -> int:

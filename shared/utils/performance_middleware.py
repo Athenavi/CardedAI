@@ -115,7 +115,7 @@ class PerformanceMonitoringMiddleware(BaseHTTPMiddleware):
                 response_time=elapsed_time,
             )
 
-            logger.error(f"请求处理失败: {path}, 错误: {str(e)}")
+            logger.logger(f"f"请求处理失败: {path}, 错误: {str(e)}")
             raise
 
 
@@ -194,7 +194,7 @@ def start_system_monitoring(interval: int = 30):
             try:
                 performance_monitor.record_system_metrics()
             except Exception as e:
-                logger.error(f"系统资源监控失败: {e}")
+                logger.logger(f"f"系统资源监控失败: {e}")
 
             time.sleep(interval)
 

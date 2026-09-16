@@ -55,7 +55,7 @@ async def setting_profiles_back(user_id: int, user_info, cache_instance, avatar_
             'user_email': user.email,
         }
     except Exception as e:
-        logger(f"Error in setting_profiles_back: {e}")
+        logger.logger(f"Error in setting_profiles_back: {e}")
         return JSONResponse(content={"error": "服务器内部错误"}, status_code=500)
 
 
@@ -186,16 +186,16 @@ async def update_avatar_api(
     """
     try:
         # 调试日志
-        logger(f"[Avatar Upload] === START ===")
-        logger(f"[Avatar Upload] Received request from user: {current_user.id}")
-        logger(f"[Avatar Upload] File name: {file.filename}")
-        logger(f"[Avatar Upload] Content type: {file.content_type}")
-        logger(f"[Avatar Upload] File size attr: {file.size if hasattr(file, 'size') else 'unknown'}")
+        logger.logger(f"f"[Avatar Upload] === START ===")
+        logger.logger(f"f"[Avatar Upload] Received request from user: {current_user.id}")
+        logger.logger(f"f"[Avatar Upload] File name: {file.filename}")
+        logger.logger(f"f"[Avatar Upload] Content type: {file.content_type}")
+        logger.logger(f"f"[Avatar Upload] File size attr: {file.size if hasattr(file, 'size') else 'unknown'}")
 
         # 验证文件类型
         allowed_types = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
         if file.content_type not in allowed_types:
-            logger(f"[Avatar Upload] Invalid content type: {file.content_type}")
+            logger.logger(f"f"[Avatar Upload] Invalid content type: {file.content_type}")
             return JSONResponse(
                 content={"success": False, "error": "不支持的文件类型"},
                 status_code=400
@@ -203,7 +203,7 @@ async def update_avatar_api(
 
         # 验证文件大小 (最大5MB)
         file_content = await file.read()
-        logger(f"[Avatar Upload] Actual file size: {len(file_content)} bytes")
+        logger.logger(f"f"[Avatar Upload] Actual file size: {len(file_content)} bytes")
         if len(file_content) > 5 * 1024 * 1024:
             return JSONResponse(
                 content={"success": False, "error": "文件大小不能超过5MB"},
@@ -223,13 +223,13 @@ async def update_avatar_api(
 
         # 构建头像 URL
         avatar_url = f"/api/v2/static/avatar/{result}.webp"
-        logger(f"[Avatar Upload] Success! Avatar URL: {avatar_url}")
-        logger(f"[Avatar Upload] === END ===")
+        logger.logger(f"f"[Avatar Upload] Success! Avatar URL: {avatar_url}")
+        logger.logger(f"f"[Avatar Upload] === END ===")
         return JSONResponse(content={"success": True, "avatar_url": avatar_url})
     except Exception as e:
         import traceback
-        logger(f"[Avatar Upload] Error: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"f"[Avatar Upload] Error: {str(e)}")
+        logger.logger(traceback.format_exc())
         return JSONResponse(content={"error": f"头像更新失败: {str(e)}"}, status_code=500)
 
 
@@ -258,6 +258,6 @@ async def update_setting_profiles(
         return result
     except Exception as e:
         import traceback
-        logger(f"Error in update_setting_profiles: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error in update_setting_profiles: {str(e)}")
+        logger.logger(traceback.format_exc())
         return JSONResponse(content={"error": str(e)}, status_code=500)

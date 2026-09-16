@@ -19,7 +19,7 @@ class VideoProcessor:
     def __init__(self, ffmpeg_path: Optional[str] = None):
         """
         初始化视频处理器
-        
+
         Args:
             ffmpeg_path: ffmpeg可执行文件路径，如果为None则从PATH中查找
         """
@@ -56,7 +56,7 @@ class VideoProcessor:
     def get_video_info(self, video_path: str) -> Optional[Dict[str, Any]]:
         """
         获取视频信息
-        
+
         Args:
             video_path: 视频文件路径
         Returns:
@@ -64,7 +64,7 @@ class VideoProcessor:
         """
         # 安全校验：确保路径是合法文件路径，不以 - 开头防止 ffprobe 参数注入
         if not video_path or video_path.startswith('-') or ';' in video_path or '|' in video_path:
-            logger.error(f"非法视频路径: {video_path}")
+            logger.logger(f"f"非法视频路径: {video_path}")
             return None
         try:
             cmd = [
@@ -86,7 +86,7 @@ class VideoProcessor:
             )
 
             if result.returncode != 0:
-                logger.error(f"ffprobe 执行失败: {result.stderr}")
+                logger.logger(f"f"ffprobe 执行失败: {result.stderr}")
                 return None
 
             import json
@@ -100,7 +100,7 @@ class VideoProcessor:
                     break
 
             if not video_stream:
-                logger.error("未找到视频流")
+                logger.logger(f""未找到视频流")
                 return None
 
             format_info = info.get('format', {})
@@ -116,7 +116,7 @@ class VideoProcessor:
             }
 
         except Exception as e:
-            logger.error(f"获取视频信息失败: {str(e)}")
+            logger.logger(f"f"获取视频信息失败: {str(e)}")
             return None
 
     def create_thumbnail(
@@ -132,10 +132,10 @@ class VideoProcessor:
         """
         # 安全校验
         if not video_path or video_path.startswith('-') or ';' in video_path or '|' in video_path:
-            logger.error(f"非法视频路径: {video_path}")
+            logger.logger(f"f"非法视频路径: {video_path}")
             return False
         if not thumbnail_path or thumbnail_path.startswith('-') or ';' in thumbnail_path or '|' in thumbnail_path:
-            logger.error(f"非法缩略图路径: {thumbnail_path}")
+            logger.logger(f"f"非法缩略图路径: {thumbnail_path}")
             return False
         try:
             # 确保输出目录存在
@@ -160,7 +160,7 @@ class VideoProcessor:
             )
 
             if result.returncode != 0:
-                logger.error(f"ffmpeg 缩略图提取失败: {result.stderr.decode()}")
+                logger.logger(f"f"ffmpeg 缩略图提取失败: {result.stderr.decode()}")
                 return False
 
             # 验证输出文件
@@ -168,14 +168,14 @@ class VideoProcessor:
                 logger.info(f"成功创建视频缩略图: {thumbnail_path}")
                 return True
             else:
-                logger.error("缩略图文件创建失败")
+                logger.logger(f""缩略图文件创建失败")
                 return False
 
         except subprocess.TimeoutExpired:
-            logger.error("视频缩略图提取超时")
+            logger.logger(f""视频缩略图提取超时")
             return False
         except Exception as e:
-            logger.error(f"创建视频缩略图失败: {str(e)}")
+            logger.logger(f"f"创建视频缩略图失败: {str(e)}")
             return False
 
     def transcode_video(
@@ -247,7 +247,7 @@ class VideoProcessor:
 
             if result.returncode != 0:
                 error_msg = result.stderr.decode()
-                logger.error(f"视频转码失败: {error_msg}")
+                logger.logger(f"f"视频转码失败: {error_msg}")
                 return {
                     'success': False,
                     'error': error_msg
@@ -278,13 +278,13 @@ class VideoProcessor:
                 }
 
         except subprocess.TimeoutExpired:
-            logger.error("视频转码超时")
+            logger.logger(f""视频转码超时")
             return {
                 'success': False,
                 'error': '转码超时'
             }
         except Exception as e:
-            logger.error(f"视频转码失败: {str(e)}")
+            logger.logger(f"f"视频转码失败: {str(e)}")
             return {
                 'success': False,
                 'error': str(e)
@@ -298,13 +298,13 @@ class VideoProcessor:
     ) -> List[Dict[str, Any]]:
         """
         生成多种分辨率的视频版本
-        
+
         Args:
             input_path: 输入视频路径
             output_dir: 输出目录
             resolutions: 分辨率列表，例如 [{'width': 1920, 'height': 1080}, {'width': 1280, 'height': 720}]
                         如果为None，则使用默认分辨率
-            
+
         Returns:
             转码结果列表
         """
@@ -319,7 +319,7 @@ class VideoProcessor:
         # 获取原始视频信息
         video_info = self.get_video_info(input_path)
         if not video_info:
-            logger.error("无法获取视频信息")
+            logger.logger(f""无法获取视频信息")
             return []
 
         original_width = video_info['width']
@@ -366,10 +366,10 @@ class VideoProcessor:
         """
         # 安全校验
         if not video_path or video_path.startswith('-') or ';' in video_path or '|' in video_path:
-            logger.error(f"非法视频路径: {video_path}")
+            logger.logger(f"f"非法视频路径: {video_path}")
             return False
         if not output_path or output_path.startswith('-') or ';' in output_path or '|' in output_path:
-            logger.error(f"非法输出路径: {output_path}")
+            logger.logger(f"f"非法输出路径: {output_path}")
             return False
         try:
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -402,7 +402,7 @@ class VideoProcessor:
             )
 
             if result.returncode != 0:
-                logger.error(f"音频提取失败: {result.stderr.decode()}")
+                logger.logger(f"f"音频提取失败: {result.stderr.decode()}")
                 return False
 
             if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
@@ -412,7 +412,7 @@ class VideoProcessor:
                 return False
 
         except Exception as e:
-            logger.error(f"提取音频失败: {str(e)}")
+            logger.logger(f"f"提取音频失败: {str(e)}")
             return False
 
     def convert_to_gif(
@@ -425,14 +425,14 @@ class VideoProcessor:
     ) -> bool:
         """
         将视频转换为GIF
-        
+
         Args:
             video_path: 视频文件路径
             output_path: 输出GIF路径
             duration: GIF时长（秒），None表示全部
             fps: 帧率
             width: GIF宽度
-            
+
         Returns:
             是否成功
         """
@@ -456,7 +456,7 @@ class VideoProcessor:
             )
 
             if result.returncode != 0:
-                logger.error(f"GIF转换失败: {result.stderr.decode()}")
+                logger.logger(f"f"GIF转换失败: {result.stderr.decode()}")
                 return False
 
             if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
@@ -466,7 +466,7 @@ class VideoProcessor:
                 return False
 
         except Exception as e:
-            logger.error(f"转换GIF失败: {str(e)}")
+            logger.logger(f"f"转换GIF失败: {str(e)}")
             return False
 
 

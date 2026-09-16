@@ -21,7 +21,7 @@ class DownloadQueueProcessor:
     def __init__(self, max_concurrent: int = 3, check_interval: int = 30):
         """
         初始化处理器
-        
+
         Args:
             max_concurrent: 最大并发下载数
             check_interval: 检查间隔（秒）
@@ -68,7 +68,7 @@ class DownloadQueueProcessor:
             except ConnectionRefusedError:
                 logger.warning("下载队列处理: 数据库连接被拒绝, 跳过本轮处理")
             except Exception as e:
-                logger.error(f"Error in download queue processor: {e}", exc_info=True)
+                logger.logger(f"Error in download queue processor: {e}", exc_info=True)
 
             # 等待下一个检查周期
             await asyncio.sleep(self.check_interval)
@@ -81,7 +81,7 @@ class DownloadQueueProcessor:
             if not installation_wizard_service.is_installed():
                 logger.debug("System not installed, skipping download queue processing")
                 return
-            
+
             # 获取待处理的任务
             async with db_manager.get_session() as db:
                 result = await db.execute(
@@ -114,7 +114,7 @@ class DownloadQueueProcessor:
         except ConnectionRefusedError:
             logger.warning("下载队列处理: 数据库连接被拒绝, 跳过本轮处理")
         except Exception as e:
-            logger.error(f"Failed to process queue: {e}", exc_info=True)
+            logger.logger(f"f"Failed to process queue: {e}", exc_info=True)
 
     async def _process_single_task(self, task_id: int) -> bool:
         """处理单个任务"""
@@ -135,7 +135,7 @@ class DownloadQueueProcessor:
                 logger.warning(f"任务 {task_id}: 数据库连接被拒绝, 跳过")
                 return False
             except Exception as e:
-                logger.error(f"Task {task_id} processing error: {e}", exc_info=True)
+                logger.logger(f"f"Task {task_id} processing error: {e}", exc_info=True)
                 return False
 
 

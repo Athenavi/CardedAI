@@ -31,7 +31,7 @@ async def migrate_from_wordpress(
 ):
     """
     从 WordPress WXR (WordPress eXtended RSS) 文件迁移内容
-    
+
     支持导入:
     - 文章和页面
     - 分类和标签
@@ -68,7 +68,7 @@ async def migrate_from_wordpress(
         }
 
     except Exception as e:
-        logger.error(f"WordPress migration failed: {e}", exc_info=True)
+        logger.logger(f"f"WordPress migration failed: {e}", exc_info=True)
         return {
             'success': False,
             'error': 'Migration failed. Please check the server logs for details.',
@@ -87,7 +87,7 @@ async def migrate_from_markdown(
 ):
     """
     从 Jekyll 或 Hexo 的 Markdown 文件迁移
-    
+
     自动解析 YAML Front Matter 并导入文章
     """
     return {
@@ -105,7 +105,7 @@ async def migrate_from_ghost(
 ):
     """
     从 Ghost CMS 导出的 JSON 文件迁移
-    
+
     支持导入文章、标签、用户等
     """
     tmp_path = None
@@ -134,7 +134,7 @@ async def migrate_from_ghost(
         }
 
     except Exception as e:
-        logger.error(f"Ghost migration failed: {e}", exc_info=True)
+        logger.logger(f"f"Ghost migration failed: {e}", exc_info=True)
         return {
             'success': False,
             'error': 'Migration failed. Please check the server logs for details.',
@@ -153,7 +153,7 @@ async def migrate_from_json(
 ):
     """
     从通用 JSON 文件迁移
-    
+
     可以通过 field_mapping 指定字段映射关系
     例如: {"title": "post_title", "content": "post_body"}
     """
@@ -190,7 +190,7 @@ async def migrate_from_json(
         }
 
     except Exception as e:
-        logger.error(f"JSON migration failed: {e}", exc_info=True)
+        logger.logger(f"f"JSON migration failed: {e}", exc_info=True)
         return {
             'success': False,
             'error': 'Migration failed. Please check the server logs for details.',
@@ -210,7 +210,7 @@ async def migrate_from_csv(
 ):
     """
     从 CSV 文件迁移
-    
+
     适用于从电子表格或其他系统导出的数据
     """
     tmp_path = None
@@ -241,7 +241,7 @@ async def migrate_from_csv(
         }
 
     except Exception as e:
-        logger.error(f"CSV migration failed: {e}", exc_info=True)
+        logger.logger(f"f"CSV migration failed: {e}", exc_info=True)
         return {
             'success': False,
             'error': 'Migration failed. Please check the server logs for details.',
@@ -259,9 +259,9 @@ async def generate_redirects(
 ):
     """
     生成 URL 重定向规则
-    
+
     用于在迁移后保持旧链接可访问
-    
+
     示例输入:
     [
         {"old": "/2020/01/old-post", "new": "/articles/new-post"},
@@ -284,7 +284,7 @@ async def generate_redirects(
         }
 
     except Exception as e:
-        logger.error(f"Redirect generation failed: {e}", exc_info=True)
+        logger.logger(f"f"Redirect generation failed: {e}", exc_info=True)
         return {
             'success': False,
             'error': 'Failed to generate redirects. Please check the server logs for details.',

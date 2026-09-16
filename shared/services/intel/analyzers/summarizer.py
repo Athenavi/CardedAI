@@ -67,7 +67,7 @@ class ContentSummarizer:
             logger.warning(f"摘要生成 LLM 响应异常: {result.get('error', 'unknown')}")
 
         except Exception as e:
-            logger.error(f"摘要生成异常: {e}")
+            logger.logger(f"f"摘要生成异常: {e}")
 
         # fallback
         summary = text[:limit]

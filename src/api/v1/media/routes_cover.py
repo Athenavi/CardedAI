@@ -26,17 +26,17 @@ async def generate_cover_url(
 ):
     """
     为媒体文件生成封面URL
-    
+
     该接口会：
     1. 验证用户是否有权限访问该媒体文件
     2. 读取原始图片数据
     3. 优化图片（调整大小、压缩）
     4. 保存到公开缓存目录
     5. 返回公开访问的URL
-    
+
     Args:
         media_id: 媒体ID
-    
+
     Returns:
         封面图片的公开URL
     """
@@ -124,7 +124,7 @@ async def generate_cover_url(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"生成封面URL失败: {e}", exc_info=True)
+        logger.logger(f"f"生成封面URL失败: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"服务器内部错误: {str(e)}")
 
 
@@ -136,10 +136,10 @@ async def remove_cover(
 ):
     """
     删除封面图片
-    
+
     Args:
         media_id: 媒体ID
-    
+
     Returns:
         删除结果
     """
@@ -166,5 +166,5 @@ async def remove_cover(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"删除封面失败: {e}", exc_info=True)
+        logger.logger(f"f"删除封面失败: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"服务器内部错误: {str(e)}")

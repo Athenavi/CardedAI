@@ -209,7 +209,7 @@ class AlertEngine:
                         await handler(event, action if isinstance(action, dict) else {})
                         stats["dispatched"] += 1
                     except Exception as e:
-                        logger.error(f"预警分发失败 ({action_type}): {e}")
+                        logger.logger(f"f"预警分发失败 ({action_type}): {e}")
                         stats["errors"] += 1
                 else:
                     logger.warning(f"未知预警动作类型: {action_type}")
@@ -258,7 +258,7 @@ class AlertEngine:
                 if resp.status_code >= 400:
                     logger.warning(f"Webhook 预警发送失败 ({resp.status_code}): {url}")
         except Exception as e:
-            logger.error(f"Webhook 预警异常: {e}")
+            logger.logger(f"f"Webhook 预警异常: {e}")
             raise
 
     async def _log_alert(self, event: AlertEvent, action_config: Dict = None) -> None:

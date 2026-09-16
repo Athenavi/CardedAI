@@ -31,30 +31,30 @@ async def set_article_password_api(
     try:
         from sqlalchemy import select
         from shared.models.article import Article
-        
+
         # 检查权限
         article_query = select(Article).where(Article.id == article_id)
         article_result = await db.execute(article_query)
         article = article_result.scalar_one_or_none()
-        
+
         if not article:
             return ApiResponse(success=False, error="Article not found")
-        
+
         # 仅管理员或作者可设置密码（不限制必须是隐藏文章）
-        if (not getattr(current_user, 'is_staff', False) and 
+        if (not getattr(current_user, 'is_staff', False) and
             not getattr(current_user, 'is_superuser', False) and
             article.user != current_user.id):
             from fastapi import HTTPException
             raise HTTPException(status_code=403, detail="Permission denied")
-        
+
         result = await password_protection_service.set_article_password(db, article_id, password)
-        
+
         return ApiResponse(
             success=True,
             data=result
         )
     except Exception as e:
-        logger.error(f"Error in set_article_password_api: {str(e)}", exc_info=True)
+        logger.logger(f"Error in set_article_password_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -70,18 +70,18 @@ async def verify_article_password_api(
     """验证文章密码"""
     try:
         result = await password_protection_service.verify_article_password(db, article_id, password)
-        
+
         if result['success']:
             # 生成访问token
             access_token = password_protection_service.generate_access_token(article_id)
             result['access_token'] = access_token
-        
+
         return ApiResponse(
             success=result['success'],
             data=result
         )
     except Exception as e:
-        logger.error(f"Error in verify_article_password_api: {str(e)}", exc_info=True)
+        logger.logger(f"Error in verify_article_password_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 
@@ -98,13 +98,13 @@ async def check_article_access_api(
     try:
         # 从cookie或query参数获取access_token
         access_token = request.query_params.get('access_token') or request.cookies.get(f'article_access_{article_id}')
-        
+
         result = await password_protection_service.check_article_access(db, article_id, access_token)
-        
+
         return ApiResponse(
             success=True,
             data=result
         )
     except Exception as e:
-        logger.error(f"Error in check_article_access_api: {str(e)}", exc_info=True)
+        logger.logger(f"Error in check_article_access_api: {str(e)}", exc_info=True)
         return ApiResponse(success=False, error=str(e))

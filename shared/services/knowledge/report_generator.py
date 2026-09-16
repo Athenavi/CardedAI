@@ -131,7 +131,7 @@ class ReportGenerator:
             )
 
         except Exception as e:
-            logger.error(f"研报生成失败: {e}")
+            logger.logger(f"f"研报生成失败: {e}")
             return ReportResult(success=False, error=str(e))
 
     async def _generate_outline(

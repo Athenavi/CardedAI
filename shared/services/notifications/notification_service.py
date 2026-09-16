@@ -20,7 +20,7 @@ from src.unified_logger import default_logger as logger
 class NotificationService:
     """
     通知服务
-    
+
     支持多种通知渠道：
     - Slack Webhook
     - Discord Webhook
@@ -35,7 +35,7 @@ class NotificationService:
     def configure_slack(self, webhook_url: str):
         """
         配置 Slack Webhook
-        
+
         Args:
             webhook_url: Slack Incoming Webhook URL
         """
@@ -45,7 +45,7 @@ class NotificationService:
     def configure_discord(self, webhook_url: str):
         """
         配置 Discord Webhook
-        
+
         Args:
             webhook_url: Discord Webhook URL
         """
@@ -55,7 +55,7 @@ class NotificationService:
     def configure_email(self, config: Dict[str, Any]):
         """
         配置邮件服务
-        
+
         Args:
             config: 邮件配置 {
                 'smtp_server': 'smtp.example.com',
@@ -78,13 +78,13 @@ class NotificationService:
     ) -> bool:
         """
         发送 Slack 通知
-        
+
         Args:
             message: 消息内容
             title: 标题
             color: 颜色（十六进制）
             fields: 附加字段
-            
+
         Returns:
             是否发送成功
         """
@@ -93,7 +93,7 @@ class NotificationService:
             return False
 
         if not HAS_AIOHTTP:
-            logger.error("aiohttp not installed")
+            logger.logger(f""aiohttp not installed")
             return False
 
         try:
@@ -124,11 +124,11 @@ class NotificationService:
                         logger.info("Slack notification sent successfully")
                         return True
                     else:
-                        logger.error(f"Slack notification failed: {response.status}")
+                        logger.logger(f"f"Slack notification failed: {response.status}")
                         return False
 
         except Exception as e:
-            logger.error(f"Failed to send Slack notification: {e}")
+            logger.logger(f"f"Failed to send Slack notification: {e}")
             return False
 
     async def send_discord_notification(
@@ -140,13 +140,13 @@ class NotificationService:
     ) -> bool:
         """
         发送 Discord 通知
-        
+
         Args:
             message: 消息内容
             title: 标题
             color: 颜色（十进制整数）
             fields: 附加字段
-            
+
         Returns:
             是否发送成功
         """
@@ -155,7 +155,7 @@ class NotificationService:
             return False
 
         if not HAS_AIOHTTP:
-            logger.error("aiohttp not installed")
+            logger.logger(f""aiohttp not installed")
             return False
 
         try:
@@ -186,11 +186,11 @@ class NotificationService:
                         logger.info("Discord notification sent successfully")
                         return True
                     else:
-                        logger.error(f"Discord notification failed: {response.status}")
+                        logger.logger(f"f"Discord notification failed: {response.status}")
                         return False
 
         except Exception as e:
-            logger.error(f"Failed to send Discord notification: {e}")
+            logger.logger(f"f"Failed to send Discord notification: {e}")
             return False
 
     def send_email_notification(
@@ -201,12 +201,12 @@ class NotificationService:
     ) -> bool:
         """
         发送邮件通知
-        
+
         Args:
             subject: 邮件主题
             html_content: HTML内容
             to_emails: 收件人列表（如果为None则使用配置的默认收件人）
-            
+
         Returns:
             是否发送成功
         """
@@ -247,7 +247,7 @@ class NotificationService:
             return True
 
         except Exception as e:
-            logger.error(f"Failed to send email notification: {e}")
+            logger.logger(f"f"Failed to send email notification: {e}")
             return False
 
     async def send_article_published_notification(
@@ -258,7 +258,7 @@ class NotificationService:
     ):
         """
         发送文章发布通知
-        
+
         Args:
             article_title: 文章标题
             article_url: 文章URL
@@ -301,7 +301,7 @@ class NotificationService:
     ):
         """
         发送评论通知
-        
+
         Args:
             article_title: 文章标题
             article_url: 文章URL
@@ -342,7 +342,7 @@ class NotificationService:
     ):
         """
         发送系统告警
-        
+
         Args:
             alert_type: 告警类型
             message: 告警消息

@@ -60,7 +60,7 @@ class SEOTracker:
                     user_agent: str = '', timestamp: datetime = None):
         """
         追踪页面访问
-        
+
         Args:
             article_id: 文章ID
             referrer: 来源URL
@@ -103,10 +103,10 @@ class SEOTracker:
     def _analyze_referrer(self, referrer: str) -> Optional[Dict]:
         """
         分析来源URL，判断是否为搜索引擎流量
-        
+
         Args:
             referrer: 来源URL
-            
+
         Returns:
             {'engine': str, 'keyword': str} 或 None
         """
@@ -136,16 +136,16 @@ class SEOTracker:
                 'keyword': keyword,
             }
         except Exception as e:
-            logger.error(f"Error analyzing referrer: {e}")
+            logger.logger(f"Error analyzing referrer: {e}")
             return None
 
     def get_search_traffic_summary(self, days: int = 30) -> Dict:
         """
         获取搜索引擎流量汇总
-        
+
         Args:
             days: 统计天数
-            
+
         Returns:
             流量汇总数据
         """
@@ -174,11 +174,11 @@ class SEOTracker:
     def get_top_keywords(self, limit: int = 20, days: int = 30) -> List[Dict]:
         """
         获取热门关键词
-        
+
         Args:
             limit: 返回数量
             days: 统计天数
-            
+
         Returns:
             关键词列表 [{keyword, count, articles}]
         """
@@ -212,11 +212,11 @@ class SEOTracker:
     def get_article_seo_performance(self, article_id: int, days: int = 30) -> Dict:
         """
         获取文章 SEO 表现
-        
+
         Args:
             article_id: 文章ID
             days: 统计天数
-            
+
         Returns:
             SEO 表现数据
         """
@@ -257,11 +257,11 @@ class SEOTracker:
     def get_traffic_sources(self, article_id: int = None, days: int = 30) -> Dict:
         """
         获取流量来源分析
-        
+
         Args:
             article_id: 文章ID（可选，不传则统计全站）
             days: 统计天数
-            
+
         Returns:
             流量来源数据
         """

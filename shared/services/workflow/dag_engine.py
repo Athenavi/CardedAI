@@ -301,7 +301,7 @@ class DAGEngine:
                             "status": "failed",
                             "error": str(res),
                         }
-                        logger.error(
+                        logger.logger(f"
                             f"[DAGEngine] 节点 {nid} 执行失败: {res}"
                         )
                         # 持久化失败的 NodeExecution
@@ -348,7 +348,7 @@ class DAGEngine:
         except Exception as exc:
             result.status = "failed"
             result.error_message = str(exc)
-            logger.error(f"[DAGEngine] 工作流 {workflow_id} 执行失败: {exc}")
+            logger.logger(f"f"[DAGEngine] 工作流 {workflow_id} 执行失败: {exc}")
 
         finally:
             # 释放工作流级并发许可
@@ -525,7 +525,7 @@ class DAGEngine:
                 dag_engine.register_executor(node_type, executor)
             logger.info(f"[DAGEngine] 已注册 {len(executors)} 个节点执行器: {list(executors.keys())}")
         except Exception as exc:
-            logger.error(f"[DAGEngine] 注册节点执行器失败: {exc}")
+            logger.logger(f"f"[DAGEngine] 注册节点执行器失败: {exc}")
 
 
 # 全局单例

@@ -157,7 +157,7 @@ class EnhancedCacheStrategy:
             if data is not None:
                 self.set_with_stats(key, data, ttl, tags)
         except Exception as e:
-            logger(f"[CacheWarmup] Failed to warmup {key}: {e}")
+            logger.logger(f"f"[CacheWarmup] Failed to warmup {key}: {e}")
 
     def cached(self, key_template: str, ttl: int = None, tags: List[str] = None):
         """

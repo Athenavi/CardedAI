@@ -25,7 +25,7 @@ from src.setting import settings
 class UnifiedDatabaseManager:
     """
     统一的数据库管理器
-    
+
     确保整个应用中只有一个异步引擎实例和会话工厂，
     避免连接池冲突和会话管理问题。
     """
@@ -114,7 +114,7 @@ class UnifiedDatabaseManager:
     def initialize(self):
         """
         初始化异步引擎和会话工厂
-        
+
         这个方法应该在应用启动时调用一次。
         """
         if self._async_engine is not None:
@@ -204,7 +204,7 @@ class UnifiedDatabaseManager:
             logger.info("Async database engine initialized successfully")
 
         except Exception as e:
-            logger.error(f"Failed to initialize database engine: {e}", exc_info=True)
+            logger.logger(f"f"Failed to initialize database engine: {e}", exc_info=True)
             raise
 
     @property
@@ -225,13 +225,13 @@ class UnifiedDatabaseManager:
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         """
         获取数据库会话的上下文管理器
-        
+
         这是推荐的会话获取方式，确保：
         1. 会话正确关闭
         2. 异常时自动回滚
         3. 成功时自动提交
         4. Windows + asyncpg 兼容性处理
-        
+
         使用示例：
             async with db_manager.get_session() as session:
                 result = await session.execute(query)
@@ -250,12 +250,12 @@ class UnifiedDatabaseManager:
                     "Please ensure you have completed the database configuration step "
                     "before attempting to use the database."
                 )
-                logger.error(error_msg)
+                logger.logger(f"error_msg)
                 raise RuntimeError(error_msg)
-        
+
         session = self.async_session_factory()
         logger.debug(f"Creating new session: {id(session)}")
-        
+
         try:
             yield session
             # 如果没有异常，尝试提交
@@ -290,7 +290,7 @@ class UnifiedDatabaseManager:
                         await session.rollback()
                         logger.debug(f"Session rolled back: {id(session)}")
                     except Exception as rollback_err:
-                        logger.error(f"Error during rollback: {rollback_err}")
+                        logger.logger(f"Error during rollback: {rollback_err}")
                 raise
         except Exception as e:
             # 发生异常时回滚
@@ -310,7 +310,7 @@ class UnifiedDatabaseManager:
                 await session.rollback()
                 logger.debug(f"Session rolled back after exception: {id(session)}")
             except Exception as rollback_err:
-                logger.error(f"Error during rollback: {rollback_err}")
+                logger.logger(f"Error during rollback: {rollback_err}")
             raise
         finally:
             # 确保会话总是被关闭
@@ -325,10 +325,10 @@ class UnifiedDatabaseManager:
     async def get_session_no_auto_commit(self) -> AsyncGenerator[AsyncSession, None]:
         """
         获取数据库会话（不自动提交）- 上下文管理器版本
-        
+
         适用于需要手动控制事务的场景。
         调用者负责 commit/rollback。
-        
+
         使用示例：
             async with db_manager.get_session_no_auto_commit() as session:
                 result = await session.execute(query)
@@ -347,9 +347,9 @@ class UnifiedDatabaseManager:
                     "Please ensure you have completed the database configuration step "
                     "before attempting to use the database."
                 )
-                logger.error(error_msg)
+                logger.logger(f"error_msg)
                 raise RuntimeError(error_msg)
-        
+
         session = self.async_session_factory()
         logger.debug(f"Creating new session (no auto-commit): {id(session)}")
         try:
@@ -372,7 +372,7 @@ class UnifiedDatabaseManager:
                 await session.rollback()
                 logger.debug(f"Session rolled back after exception: {id(session)}")
             except Exception as rollback_err:
-                logger.error(f"Error during rollback: {rollback_err}")
+                logger.logger(f"Error during rollback: {rollback_err}")
             raise
         finally:
             # 确保会话总是被关闭
@@ -390,7 +390,7 @@ class UnifiedDatabaseManager:
                 await self._async_engine.dispose()
                 logger.info("Database engine disposed")
             except Exception as e:
-                logger.error(f"Error disposing database engine: {e}")
+                logger.logger(f"Error disposing database engine: {e}")
             finally:
                 self._async_engine = None
                 self._async_session_factory = None
@@ -404,9 +404,9 @@ db_manager = UnifiedDatabaseManager()
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     FastAPI 依赖注入使用的会话生成器
-    
+
     这是推荐的使用方式，在 FastAPI 路由中使用：
-    
+
     @router.get("/example")
     async def example_endpoint(db: AsyncSession = Depends(get_db_session)):
         result = await db.execute(query)
@@ -419,7 +419,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
 async def get_db_session_manual() -> AsyncGenerator[AsyncSession, None]:
     """
     手动控制事务的会话生成器
-    
+
     适用于需要手动控制 commit/rollback 的场景。
     """
     async with db_manager.get_session_no_auto_commit() as session:

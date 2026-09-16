@@ -174,7 +174,7 @@ class ImageEditor:
                 'size': Path(image_path).stat().st_size,
             }
         except Exception as e:
-            logger(f"获取图片信息失败: {e}")
+            logger.logger(f"f"获取图片信息失败: {e}")
             return None
 
 

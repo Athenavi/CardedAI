@@ -30,21 +30,21 @@ async def export_users(
 ):
     """
     导出用户列表为CSV或Excel文件
-    
+
     Args:
         format: 导出格式(csv/excel)
         limit: 导出数量(1-10000)
-        
+
     Returns:
         文件下载
     """
     try:
         from shared.models.user import User
-        
+
         stmt = select(User).limit(limit)
         result = await db.execute(stmt)
         users_db = result.scalars().all()
-        
+
         users = [{
             'id': user.id,
             'username': user.username,
@@ -75,7 +75,7 @@ async def export_users(
         )
 
     except Exception as e:
-        logger.error(f"导出用户列表失败: {str(e)}")
+        logger.logger(f"f"导出用户列表失败: {str(e)}")
         return ApiResponse(success=False, error=f"导出失败: {str(e)}")
 
 
@@ -89,24 +89,24 @@ async def export_articles(
 ):
     """
     导出文章列表为CSV或Excel文件
-    
+
     Args:
         format: 导出格式(csv/excel)
         status: 文章状态过滤(published/draft/archived)
         limit: 导出数量(1-10000)
-        
+
     Returns:
         文件下载
     """
     try:
         from shared.models.article import Article
-        
+
         stmt = select(Article).limit(limit)
         if status:
             stmt = stmt.where(Article.status == status)
         result = await db.execute(stmt)
         articles_db = result.scalars().all()
-        
+
         articles = [{
             'id': article.id,
             'title': article.title,
@@ -137,7 +137,7 @@ async def export_articles(
         )
 
     except Exception as e:
-        logger.error(f"导出文章列表失败: {str(e)}")
+        logger.logger(f"f"导出文章列表失败: {str(e)}")
         return ApiResponse(success=False, error=f"导出失败: {str(e)}")
 
 
@@ -151,24 +151,24 @@ async def export_comments(
 ):
     """
     导出评论列表为CSV或Excel文件
-    
+
     Args:
         format: 导出格式(csv/excel)
         article_id: 文章ID过滤
         limit: 导出数量(1-10000)
-        
+
     Returns:
         文件下载
     """
     try:
         from shared.models.article import Article as ArticleModel
-        
+
         stmt = select(ArticleModel).limit(limit)
         if article_id:
             stmt = stmt.where(ArticleModel.id == article_id)
         result = await db.execute(stmt)
         comments_db = result.scalars().all()
-        
+
         comments = [{
             'id': comment.id,
             'article_id': getattr(comment, 'article_id', ''),
@@ -196,7 +196,7 @@ async def export_comments(
         )
 
     except Exception as e:
-        logger.error(f"导出评论列表失败: {str(e)}")
+        logger.logger(f"f"导出评论列表失败: {str(e)}")
         return ApiResponse(success=False, error=f"导出失败: {str(e)}")
 
 
@@ -211,20 +211,20 @@ async def export_analytics(
 ):
     """
     导出分析数据报表
-    
+
     Args:
         format: 导出格式(csv/excel)
         report_type: 报表类型(visits/users/articles)
         start_date: 开始日期
         end_date: 结束日期
-        
+
     Returns:
         文件下载
     """
     try:
         from datetime import datetime
         from shared.models.article import Article
-        
+
         stmt = select(Article).limit(1000)
         if start_date and hasattr(Article, 'created_at'):
             stmt = stmt.where(Article.created_at >= datetime.strptime(start_date, '%Y-%m-%d'))
@@ -232,7 +232,7 @@ async def export_analytics(
             stmt = stmt.where(Article.created_at <= datetime.strptime(end_date, '%Y-%m-%d'))
         result = await db.execute(stmt)
         data_rows = result.scalars().all()
-        
+
         analytics_data = [{
             'id': row.id,
             'title': getattr(row, 'title', ''),
@@ -267,7 +267,7 @@ async def export_analytics(
         )
 
     except Exception as e:
-        logger.error(f"导出分析数据失败: {str(e)}")
+        logger.logger(f"f"导出分析数据失败: {str(e)}")
         return ApiResponse(success=False, error=f"导出失败: {str(e)}")
 
 
@@ -277,7 +277,7 @@ async def get_export_templates(
 ):
     """
     获取可用的导出模板和字段
-    
+
     Returns:
         模板列表
     """
@@ -305,13 +305,13 @@ async def export_custom_data(
 ):
     """
     自定义数据导出
-    
+
     Args:
         data_type: 数据类型(users/articles/comments/analytics)
         format: 导出格式(csv/excel)
         fields: 导出字段列表
         filters: 过滤条件
-        
+
     Returns:
         文件下载
     """
@@ -351,5 +351,5 @@ async def export_custom_data(
         )
 
     except Exception as e:
-        logger.error(f"自定义导出失败: {str(e)}")
+        logger.logger(f"f"自定义导出失败: {str(e)}")
         return ApiResponse(success=False, error=f"导出失败: {str(e)}")

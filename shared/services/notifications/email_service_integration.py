@@ -270,11 +270,11 @@ class EmailServiceIntegration:
             elif config.provider == 'smtp':
                 return self._send_via_smtp(config, to_email, subject, html_content, text_content, sender_name)
             else:
-                logger.error(f"Unsupported email provider: {config.provider}")
+                logger.logger(f"f"Unsupported email provider: {config.provider}")
                 return False
 
         except Exception as e:
-            logger.error(f"Failed to send email via {config.provider}: {e}")
+            logger.logger(f"f"Failed to send email via {config.provider}: {e}")
             return False
 
     async def send_batch_emails(
@@ -356,7 +356,7 @@ class EmailServiceIntegration:
     ) -> bool:
         """通过 SendGrid API 发送邮件"""
         if not HAS_HTTPX:
-            logger.error("httpx is required for SendGrid integration")
+            logger.logger(f""httpx is required for SendGrid integration")
             return False
 
         url = "https://api.sendgrid.com/v3/mail/send"
@@ -385,7 +385,7 @@ class EmailServiceIntegration:
                 logger.info(f"SendGrid: Email sent to {to_email}")
                 return True
             else:
-                logger.error(f"SendGrid: Failed to send email: {response.status_code} {response.text}")
+                logger.logger(f"f"SendGrid: Failed to send email: {response.status_code} {response.text}")
                 return False
 
     async def _send_via_mailgun(
@@ -399,7 +399,7 @@ class EmailServiceIntegration:
     ) -> bool:
         """通过 Mailgun API 发送邮件"""
         if not HAS_HTTPX:
-            logger.error("httpx is required for Mailgun integration")
+            logger.logger(f""httpx is required for Mailgun integration")
             return False
 
         # Mailgun domain is typically extracted from from_email or configured separately
@@ -411,7 +411,7 @@ class EmailServiceIntegration:
             domain, api_key = api_key.split(':', 1)
 
         if not domain:
-            logger.error("Mailgun: Domain not configured. Use 'domain:api_key' format for api_key field.")
+            logger.logger(f""Mailgun: Domain not configured. Use 'domain:api_key' format for api_key field.")
             return False
 
         url = f"https://api.mailgun.net/v3/{domain}/messages"
@@ -435,7 +435,7 @@ class EmailServiceIntegration:
                 logger.info(f"Mailgun: Email sent to {to_email}")
                 return True
             else:
-                logger.error(f"Mailgun: Failed to send email: {response.status_code} {response.text}")
+                logger.logger(f"f"Mailgun: Failed to send email: {response.status_code} {response.text}")
                 return False
 
     def _send_via_smtp(
@@ -449,7 +449,7 @@ class EmailServiceIntegration:
     ) -> bool:
         """通过 SMTP 发送邮件"""
         if not config.smtp_host:
-            logger.error("SMTP: Host not configured")
+            logger.logger(f""SMTP: Host not configured")
             return False
 
         try:
@@ -481,7 +481,7 @@ class EmailServiceIntegration:
             return True
 
         except Exception as e:
-            logger.error(f"SMTP: Failed to send email: {e}")
+            logger.logger(f"f"SMTP: Failed to send email: {e}")
             return False
 
 

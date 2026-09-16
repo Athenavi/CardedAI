@@ -37,7 +37,7 @@ class RedirectManager:
                 with open(self.redirects_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
             except Exception as e:
-                logger(f"加载重定向规则失败: {e}")
+                logger.logger(f"f"加载重定向规则失败: {e}")
 
         return []
 
@@ -47,7 +47,7 @@ class RedirectManager:
             with open(self.redirects_file, 'w', encoding='utf-8') as f:
                 json.dump(self.redirects, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            logger(f"保存重定向规则失败: {e}")
+            logger.logger(f"f"保存重定向规则失败: {e}")
 
     def add_redirect(
         self,

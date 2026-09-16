@@ -92,7 +92,7 @@ class SentimentAnalyzer:
             logger.warning(f"情感分析 LLM 响应异常: {result.get('error', 'unknown')}")
 
         except Exception as e:
-            logger.error(f"情感分析异常: {e}")
+            logger.logger(f"f"情感分析异常: {e}")
 
         return {
             "sentiment": self.fallback_sentiment,

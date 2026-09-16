@@ -5,7 +5,7 @@
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, Body
+from fastapi import APIRouter, Depends, Query, Body, logger
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -156,8 +156,8 @@ async def create_article_revision(
 
     except Exception as e:
         import traceback
-        logger(f"Error creating revision: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error creating revision: {str(e)}")
+        logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -337,8 +337,8 @@ async def sync_article_revisions(
 
     except Exception as e:
         import traceback
-        logger(f"Error syncing revisions: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error syncing revisions: {str(e)}")
+        logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

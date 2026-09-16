@@ -81,7 +81,7 @@ async def get_audio_metadata(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"获取音频元数据失败: {e}", exc_info=True)
+        logger.logger(f"f"获取音频元数据失败: {e}", exc_info=True)
         return {"success": False, "error": str(e)}
 
 
@@ -112,7 +112,7 @@ def extract_cover_from_audio(media: Media) -> Optional[bytes]:
                 aws_secret_key = getattr(settings, 'S3_SECRET_KEY', None) or getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)
 
                 if not aws_access_key or not aws_secret_key:
-                    logger.error("S3 凭据未配置")
+                    logger.logger(f""S3 凭据未配置")
                     return None
 
                 s3_client = boto3.client(
@@ -130,7 +130,7 @@ def extract_cover_from_audio(media: Media) -> Optional[bytes]:
                     os.unlink(tmp_file.name)
                     return result
             except Exception as e:
-                logger.error(f"S3文件下载失败: {e}")
+                logger.logger(f"f"S3文件下载失败: {e}")
                 return None
 
         # 本地文件直接提取
@@ -142,10 +142,10 @@ def extract_cover_from_audio(media: Media) -> Optional[bytes]:
             return None
 
     except ImportError:
-        logger.error("mutagen库未安装")
+        logger.logger(f""mutagen库未安装")
         return None
     except Exception as e:
-        logger.error(f"提取封面失败: {e}")
+        logger.logger(f"f"提取封面失败: {e}")
         return None
 
 
@@ -165,7 +165,7 @@ def extract_lyrics_from_audio(media: Media) -> list:
         return []
 
     except Exception as e:
-        logger.error(f"提取歌词失败: {e}")
+        logger.logger(f"f"提取歌词失败: {e}")
         return []
 
 
@@ -233,10 +233,10 @@ def extract_lyrics_from_id3(media: Media) -> list:
         return lyrics_list
 
     except ImportError:
-        logger.error("mutagen库未安装")
+        logger.logger(f""mutagen库未安装")
         return []
     except Exception as e:
-        logger.error(f"从ID3提取歌词失败: {e}")
+        logger.logger(f"f"从ID3提取歌词失败: {e}")
         import traceback
         logger.debug(traceback.format_exc())
         return []
@@ -276,7 +276,7 @@ def parse_lrc_text(text: str) -> list:
         return lyrics
 
     except Exception as e:
-        logger.error(f"解析LRC文本失败: {e}")
+        logger.logger(f"f"解析LRC文本失败: {e}")
         return []
 
 
@@ -311,7 +311,7 @@ def find_lrc_file(media: Media) -> Optional[Path]:
         return None
 
     except Exception as e:
-        logger.error(f"查找歌词文件失败: {e}")
+        logger.logger(f"f"查找歌词文件失败: {e}")
         return None
 
 
@@ -350,7 +350,7 @@ def parse_lrc_file(lrc_path: Path) -> list:
         return lyrics
 
     except Exception as e:
-        logger.error(f"解析LRC文件失败: {lrc_path}, 错误: {e}")
+        logger.logger(f"f"解析LRC文件失败: {lrc_path}, 错误: {e}")
         return []
 
 

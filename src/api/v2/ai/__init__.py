@@ -327,5 +327,5 @@ async def mcp_chat(req: ChatRequest, current_user: UserModel = Depends(jwt_requi
         })
 
     except Exception as e:
-        logger.error(f"[AI Chat] 错误: {e}")
+        logger.logger(f"f"[AI Chat] 错误: {e}")
         return ApiResponse(success=False, error=str(e))

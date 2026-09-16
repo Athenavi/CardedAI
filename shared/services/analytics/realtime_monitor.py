@@ -38,7 +38,7 @@ class RealTimeMonitorService:
     def record_user_activity(self, user_id: int):
         """
         记录用户活动
-        
+
         Args:
             user_id: 用户ID
         """
@@ -48,7 +48,7 @@ class RealTimeMonitorService:
     def record_page_view(self, endpoint: str, article_id: int = None):
         """
         记录页面访问
-        
+
         Args:
             endpoint: 访问的端点
             article_id: 文章ID(可选)
@@ -65,7 +65,7 @@ class RealTimeMonitorService:
     def get_online_users_count(self) -> int:
         """
         获取在线用户数
-        
+
         Returns:
             在线用户数量
         """
@@ -86,10 +86,10 @@ class RealTimeMonitorService:
     def get_online_users_list(self, limit: int = 50) -> List[Dict]:
         """
         获取在线用户列表
-        
+
         Args:
             limit: 返回数量
-            
+
         Returns:
             在线用户列表
         """
@@ -113,7 +113,7 @@ class RealTimeMonitorService:
     def get_today_visits(self) -> int:
         """
         获取今日访问量
-        
+
         Returns:
             今日访问次数
         """
@@ -130,10 +130,10 @@ class RealTimeMonitorService:
     def get_realtime_visits(self, window_minutes: int = 5) -> int:
         """
         获取实时访问量(最近N分钟)
-        
+
         Args:
             window_minutes: 时间窗口(分钟)
-            
+
         Returns:
             访问量
         """
@@ -151,11 +151,11 @@ class RealTimeMonitorService:
                               window_minutes: int = 60) -> List[Dict]:
         """
         获取热门访问端点
-        
+
         Args:
             limit: 返回数量
             window_minutes: 时间窗口(分钟)
-            
+
         Returns:
             热门端点列表
         """
@@ -186,7 +186,7 @@ class RealTimeMonitorService:
     def get_system_metrics(self) -> Dict:
         """
         获取系统指标(CPU、内存、磁盘等)
-        
+
         Returns:
             系统指标字典
         """
@@ -247,7 +247,7 @@ class RealTimeMonitorService:
             return metrics
 
         except Exception as e:
-            logger.error(f"Failed to get system metrics: {str(e)}")
+            logger.logger(f"f"Failed to get system metrics: {str(e)}")
             return {
                 'error': str(e),
                 'timestamp': now.isoformat(),
@@ -256,10 +256,10 @@ class RealTimeMonitorService:
     def get_trending_articles(self, limit: int = 10) -> List[Dict]:
         """
         获取实时热门文章
-        
+
         Args:
             limit: 返回数量
-            
+
         Returns:
             热门文章列表
         """
@@ -276,7 +276,7 @@ class RealTimeMonitorService:
         # from shared.models.article import Article
         # from sqlalchemy import select, desc
         # from datetime import datetime, timedelta
-        # 
+        #
         # seven_days_ago = datetime.now() - timedelta(days=7)
         # stmt = (
         #     select(Article)
@@ -287,7 +287,7 @@ class RealTimeMonitorService:
         # )
         # result = await db.execute(stmt)
         # articles = result.scalars().all()
-        # 
+        #
         # trending = [{
         #     'id': article.id,
         #     'title': article.title,
@@ -310,7 +310,7 @@ class RealTimeMonitorService:
     def get_health_status(self) -> Dict:
         """
         获取系统健康状态
-        
+
         Returns:
             健康状态字典
         """
@@ -361,7 +361,7 @@ class RealTimeMonitorService:
     def get_dashboard_data(self) -> Dict:
         """
         获取仪表板完整数据
-        
+
         Returns:
             仪表板数据
         """

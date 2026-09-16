@@ -25,7 +25,7 @@ DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 class BatchUploadService:
     """
     批量上传服务
-    
+
     功能:
     1. 多文件同时上传
     2. 上传进度追踪
@@ -91,7 +91,7 @@ class BatchUploadService:
                     failed_count += 1
                     error_msg = f"文件 {file_obj.filename} 上传失败: {str(e)}"
                     errors.append({'filename': file_obj.filename, 'error': str(e)})
-                    logger.error(error_msg, exc_info=True)
+                    logger.logger(f"error_msg, exc_info=True)
                     return None
 
         tasks = [upload_single_file(file_obj, idx) for idx, file_obj in enumerate(files)]
@@ -130,7 +130,7 @@ class BatchUploadService:
                 })
             except Exception as e:
                 errors.append({'media_id': media_id, 'error': str(e)})
-                logger.error(f"处理媒体 {media_id} 失败: {e}", exc_info=True)
+                logger.logger(f"f"处理媒体 {media_id} 失败: {e}", exc_info=True)
 
         return {
             'total': len(media_ids), 'successful': len(results),
@@ -146,7 +146,7 @@ class BatchUploadService:
         """处理单个媒体文件"""
         from src.utils.storage.s3_storage import s3_storage
         import json
-        
+
         result = {}
 
         # 生成缩略图
@@ -164,7 +164,7 @@ class BatchUploadService:
                 logger.info(f"生成缩略图成功: {media.original_filename}")
             except Exception as e:
                 result['thumbnail_error'] = str(e)
-                logger.error(f"生成缩略图失败: {e}")
+                logger.logger(f"f"生成缩略图失败: {e}")
 
         # 提取元数据
         if 'metadata' in operations:
@@ -182,7 +182,7 @@ class BatchUploadService:
                 logger.info(f"提取元数据成功: {media.original_filename}")
             except Exception as e:
                 result['metadata_error'] = str(e)
-                logger.error(f"提取元数据失败: {e}")
+                logger.logger(f"f"提取元数据失败: {e}")
 
         # 优化图片
         if 'optimize' in operations and media.file_type == 'image':
@@ -203,7 +203,7 @@ class BatchUploadService:
                     logger.info(f"优化图片成功: {media.original_filename}")
             except Exception as e:
                 result['optimize_error'] = str(e)
-                logger.error(f"优化图片失败: {e}")
+                logger.logger(f"f"优化图片失败: {e}")
 
         return result
 

@@ -95,8 +95,8 @@ async def get_internal_link_suggestions_api(
         )
     except Exception as e:
         import traceback
-        logger(f"Error in get_internal_link_suggestions_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error in get_internal_link_suggestions_api: {str(e)}")
+        logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -142,8 +142,8 @@ async def detect_orphan_articles_api(
         )
     except Exception as e:
         import traceback
-        logger(f"Error in detect_orphan_articles_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error in detect_orphan_articles_api: {str(e)}")
+        logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -186,8 +186,8 @@ async def internal_link_analysis_api(
         )
     except Exception as e:
         import traceback
-        logger(f"Error in internal_link_analysis_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error in internal_link_analysis_api: {str(e)}")
+        logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

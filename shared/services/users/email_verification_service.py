@@ -47,11 +47,11 @@ class EmailVerificationService:
     def _generate_verification_email(self, email: str, code: str) -> str:
         """
         生成验证邮件HTML内容
-            
+
         Args:
             email: 收件人邮箱
             code: 验证码
-                
+
         Returns:
             HTML邮件内容
         """
@@ -106,12 +106,12 @@ class EmailVerificationService:
     def _send_email(self, to_email: str, subject: str, html_content: str) -> bool:
         """
         发送邮件
-            
+
         Args:
             to_email: 收件人邮箱
             subject: 邮件主题
             html_content: HTML邮件内容
-                
+
         Returns:
             是否发送成功
         """
@@ -150,16 +150,16 @@ class EmailVerificationService:
             return True
 
         except Exception as e:
-            logger.error(f"Failed to send email to {to_email}: {str(e)}")
+            logger.logger(f"f"Failed to send email to {to_email}: {str(e)}")
             return False
-    
+
     def send_verification_code(self, email: str) -> dict:
         """
         发送邮箱验证码
-            
+
         Args:
             email: 邮箱地址
-                
+
         Returns:
             包含成功状态和消息的字典
         """
@@ -167,7 +167,7 @@ class EmailVerificationService:
         if email in self._verification_codes:
             last_sent = self._verification_codes[email]['sent_at']
             elapsed = (datetime.now() - last_sent).total_seconds()
-    
+
             if elapsed < self.RESEND_INTERVAL_SECONDS:
                 remaining = int(self.RESEND_INTERVAL_SECONDS - elapsed)
                 return {
@@ -190,7 +190,7 @@ class EmailVerificationService:
             logger.warning(f"Email sending failed for {email}, using fallback mode")
             # 降级模式:仅记录日志(开发环境)
             logger.info(f"[FALLBACK] Verification code for {email}: {code}")
-    
+
         # 存储验证码
         self._verification_codes[email] = {
             'code': code,
@@ -208,11 +208,11 @@ class EmailVerificationService:
     def verify_code(self, email: str, code: str) -> dict:
         """
         验证邮箱验证码
-        
+
         Args:
             email: 邮箱地址
             code: 验证码
-            
+
         Returns:
             包含验证结果的字典
         """
@@ -273,10 +273,10 @@ class EmailVerificationService:
     def is_verified(self, email: str) -> bool:
         """
         检查邮箱是否已验证
-        
+
         Args:
             email: 邮箱地址
-            
+
         Returns:
             是否已验证
         """
@@ -288,7 +288,7 @@ class EmailVerificationService:
     def cleanup_expired_codes(self) -> int:
         """
         清理过期的验证码
-        
+
         Returns:
             清理的数量
         """
@@ -310,7 +310,7 @@ class EmailVerificationService:
                        from_email: str, from_name: str = 'FastBlog', use_tls: bool = True):
         """
         配置SMTP服务器
-        
+
         Args:
             host: SMTP服务器地址
             port: SMTP端口

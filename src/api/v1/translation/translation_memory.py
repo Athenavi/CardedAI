@@ -59,8 +59,8 @@ async def add_translation_api(
             return ApiResponse(success=False, error='添加失败')
     except Exception as e:
         import traceback
-        logger(f"Error in add_translation_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error in add_translation_api: {str(e)}")
+        logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -105,8 +105,8 @@ async def get_translation_suggestions_api(
         )
     except Exception as e:
         import traceback
-        logger(f"Error in get_translation_suggestions_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error in get_translation_suggestions_api: {str(e)}")
+        logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -130,8 +130,8 @@ async def translation_stats_api(
         )
     except Exception as e:
         import traceback
-        logger(f"Error in translation_stats_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error in translation_stats_api: {str(e)}")
+        logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -158,8 +158,8 @@ async def export_translation_memory_api(
         )
     except Exception as e:
         import traceback
-        logger(f"Error in export_translation_memory_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error in export_translation_memory_api: {str(e)}")
+        logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -199,8 +199,8 @@ async def import_translation_memory_api(
             return ApiResponse(success=False, error='导入失败')
     except Exception as e:
         import traceback
-        logger(f"Error in import_translation_memory_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error in import_translation_memory_api: {str(e)}")
+        logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -232,8 +232,8 @@ async def clear_translation_memory_api(
         )
     except Exception as e:
         import traceback
-        logger(f"Error in clear_translation_memory_api: {str(e)}")
-        logger(traceback.format_exc())
+        logger.logger(f"Error in clear_translation_memory_api: {str(e)}")
+        logger.logger(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

@@ -130,5 +130,5 @@ async def generate_cover_from_external_url(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"生成封面失败: {e}", exc_info=True)
+        logger.logger(f"f"生成封面失败: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"生成封面失败: {str(e)}")

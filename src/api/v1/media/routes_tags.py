@@ -83,9 +83,9 @@ async def remove_exif(
 
     except Exception as e:
         logger = _logger
-        logger.error(f"移除EXIF失败: {e}")
+        logger.logger(f"f"移除EXIF失败: {e}")
         import traceback
-        logger.error("", exc_info=True)
+        logger.logger(f""", exc_info=True)
         return ApiResponse(success=False, error=f"移除EXIF失败: {str(e)}")
 
 
