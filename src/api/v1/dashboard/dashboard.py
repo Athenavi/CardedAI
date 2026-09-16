@@ -681,6 +681,48 @@ async def get_users(
         return ApiResponse(success=False, error=f"获取用户列表失败: {str(e)}")
 
 
+@router.post("/user-management/users/{user_id}/{action}")
+async def toggle_user_active(
+    user_id: int,
+    action: str,
+    current_user: UserModel = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_async_db)
+):
+    """
+    启用/禁用用户（管理员专用，对应前端的封禁/解封操作）
+
+    action: ban（禁用） | unban（启用）
+    """
+    try:
+        if not getattr(current_user, 'is_superuser', False):
+            raise HTTPException(status_code=403, detail="权限不足")
+
+        if action not in ("ban", "unban"):
+            return ApiResponse(success=False, error="不支持的操作，仅支持 ban / unban")
+
+        if user_id == current_user.id:
+            return ApiResponse(success=False, error="不能对自己执行该操作")
+
+        result = await db.execute(select(UserModel).where(UserModel.id == user_id))
+        user = result.scalars().first()
+        if not user:
+            return ApiResponse(success=False, error="用户不存在")
+
+        user.is_active = (action == "unban")
+        await db.commit()
+
+        logger.info(f"[UserMgmt] {action} user_id={user_id} by={current_user.id}")
+        return ApiResponse(success=True, data={
+            "id": user.id,
+            "username": user.username,
+            "is_active": user.is_active,
+        })
+    except HTTPException:
+        raise
+    except Exception as e:
+        return ApiResponse(success=False, error=f"操作失败: {str(e)}")
+
+
 @router.get("/system-settings")
 async def get_system_settings(
         request: Request,

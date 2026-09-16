@@ -107,6 +107,29 @@ class AnalyticsService:
         return series
 
     @staticmethod
+    def _classify_referrer(referrer) -> str:
+        """把 referrer 归类为可直接展示的来源渠道"""
+        text = str(referrer or "").lower()
+        if not text:
+            return "直接访问"
+        for keyword, label in (
+                ("google.", "Google"),
+                ("bing.", "Bing"),
+                ("baidu.", "百度"),
+                ("duckduckgo.", "DuckDuckGo"),
+                ("yandex.", "Yandex"),
+                ("github.", "GitHub"),
+                ("twitter.", "Twitter / X"),
+                ("x.com", "Twitter / X"),
+                ("weibo.", "微博"),
+                ("zhihu.", "知乎"),
+                ("wechat", "微信"),
+        ):
+            if keyword in text:
+                return label
+        return "其它站点"
+
+    @staticmethod
     def _classify_device(device_info) -> str:
         text = str(device_info or "").lower()
         if any(keyword in text for keyword in ("ipad", "tablet", "pad")):
@@ -217,6 +240,20 @@ class AnalyticsService:
         tags = await self._tag_counts()
         pv_buckets, uv_buckets = await self._pageview_trend(days)
 
+        # 平均停留时长：来自访问明细的 duration_ms（暂无明细时为 0）
+        avg_duration = 0
+        try:
+            from shared.models.page_view import PageView
+            result = await self.db.execute(
+                select(func.avg(PageView.duration_ms)).where(
+                    PageView.created_at >= cutoff, PageView.duration_ms.isnot(None)
+                )
+            )
+            value = result.scalar()
+            avg_duration = round(float(value) / 1000, 1) if value else 0
+        except Exception:
+            avg_duration = 0
+
         return {
             # 内容
             "total_articles": total_articles,
@@ -240,7 +277,7 @@ class AnalyticsService:
             # 访问明细（Phase 2 采集上线前恒为 0，代表「暂无明细」）
             "total_pv": sum(pv_buckets.values()) if pv_buckets else 0,
             "unique_visitors": sum(uv_buckets.values()) if uv_buckets else 0,
-            "avg_duration": 0,
+            "avg_duration": avg_duration,
             "bounce_rate": 0,
             "has_traffic_detail": bool(pv_buckets),
             "period_days": days,
@@ -449,14 +486,28 @@ class AnalyticsService:
         """
         cutoff = datetime.now() - timedelta(days=days)
         buckets: Counter = Counter()
+
+        # 优先使用访问明细的 User-Agent（Phase 2 采集），无明细时回退登录会话 device_info
         try:
+            from shared.models.page_view import PageView
             result = await self.db.execute(
-                select(UserSession.device_info).where(UserSession.created_at >= cutoff)
+                select(PageView.user_agent).where(PageView.created_at >= cutoff)
             )
-            for (device_info,) in result.all():
-                buckets[self._classify_device(device_info)] += 1
-        except Exception as exc:
-            logger.warning(f"[Analytics] device stats failed: {exc}")
+            for (user_agent,) in result.all():
+                buckets[self._classify_device(user_agent)] += 1
+        except Exception:
+            buckets = Counter()
+
+        if not buckets:
+            try:
+                result = await self.db.execute(
+                    select(UserSession.device_info).where(UserSession.created_at >= cutoff)
+                )
+                for (device_info,) in result.all():
+                    buckets[self._classify_device(device_info)] += 1
+            except Exception as exc:
+                logger.warning(f"[Analytics] device stats failed: {exc}")
+
         return [{"name": name, "value": value} for name, value in buckets.most_common()]
 
     async def get_traffic_sources(self, days: int = 30) -> List[Dict]:
@@ -468,14 +519,28 @@ class AnalyticsService:
         """
         cutoff = datetime.now() - timedelta(days=days)
         buckets: Counter = Counter()
+
+        # 优先按访问明细的 referrer 归类（Phase 2 采集）
         try:
+            from shared.models.page_view import PageView
             result = await self.db.execute(
-                select(UserSession.location).where(UserSession.created_at >= cutoff)
+                select(PageView.referrer).where(PageView.created_at >= cutoff)
             )
-            for (location,) in result.all():
-                buckets[str(location).strip() if location else "未知"] += 1
-        except Exception as exc:
-            logger.warning(f"[Analytics] traffic sources failed: {exc}")
+            for (referrer,) in result.all():
+                buckets[self._classify_referrer(referrer)] += 1
+        except Exception:
+            buckets = Counter()
+
+        if not buckets:
+            try:
+                result = await self.db.execute(
+                    select(UserSession.location).where(UserSession.created_at >= cutoff)
+                )
+                for (location,) in result.all():
+                    buckets[str(location).strip() if location else "未知"] += 1
+            except Exception as exc:
+                logger.warning(f"[Analytics] traffic sources failed: {exc}")
+
         return [{"name": name, "value": value} for name, value in buckets.most_common(10)]
 
     # ══════════════════════════════════════════════════

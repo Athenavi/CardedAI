@@ -1808,6 +1808,57 @@ models:
       - is_custom_pattern
       - to_pattern_dict
     defs_target: block_pattern_defs.py
+  PageView:
+    description: 访问明细（页面浏览事件），用于真实 PV/UV、来源与停留时长统计
+    status: active
+    frontend_page: /admin/analytics
+    properties:
+      id:
+        type: bigint
+        description: 主键ID
+      path:
+        type: string
+        maxLength: 512
+        description: 访问路径
+        index: true
+      article_id:
+        type: bigint
+        description: 关联文章ID（非文章页为空）
+        nullable: true
+        index: true
+      user_id:
+        type: bigint
+        description: 已登录用户ID（匿名访问为空）
+        nullable: true
+        index: true
+      visitor_hash:
+        type: string
+        maxLength: 64
+        description: 访客指纹（IP+UA 的哈希，用于 UV 去重，不存原始 IP）
+        index: true
+      referrer:
+        type: string
+        maxLength: 512
+        description: 来源页面（用于流量来源归类）
+        nullable: true
+      user_agent:
+        type: string
+        maxLength: 512
+        description: User-Agent（用于设备分类）
+        nullable: true
+      country:
+        type: string
+        maxLength: 64
+        description: 国家/地区（可选，需 IP 库支持）
+        nullable: true
+      duration_ms:
+        type: integer
+        description: 停留时长（毫秒，离站时补报）
+        nullable: true
+      created_at:
+        type: datetime
+        description: 记录时间
+        index: true
   OAuthAccount:
     description: OAuth 第三方登录账号关联模型
     status: active

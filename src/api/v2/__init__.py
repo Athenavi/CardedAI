@@ -130,6 +130,13 @@ ROUTE_REGISTRY_V2 = [
     ("src.api.v1.users.user_security_management", "/api/v2/users/security", ["user-security-management"], False),
     # ==================== 社交（V2 聚合路由器）====================
 
+    # ==================== 访问明细采集（Phase 2，匿名可上报）====================
+    ("src.api.v1.analytics.pageview_collect", "/api/v2/analytics", ["analytics-collect"], False),
+    # ==================== 版本信息（V1 转发路由）====================
+    ("src.api.v1.system.version", "/api/v2/system/version", ["system-version"], False),
+    # ==================== 前端性能指标上报（Web Vitals）====================
+    ("src.api.v1.system.performance_vitals", "/api/v2/performance", ["performance"], False),
+
     # ==================== 示例和工具端点（集中管理）====================
     ("src.api.v2.examples_tools", "/api/v2/examples", ["examples-tools"], False),
 
