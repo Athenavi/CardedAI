@@ -336,28 +336,12 @@ export default function LoginPage() {
           {/* Gradient Background */}
           <div className="absolute inset-0 bg-primary"/>
 
-          {/* Animated Orbs */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl animate-pulse"
-                 style={{animationDuration: '4s'}}/>
-            <div className="absolute bottom-20 right-10 w-60 h-60 bg-primary/20 rounded-full blur-3xl animate-pulse"
-                 style={{animationDuration: '6s'}}/>
-            <div className="absolute top-1/3 left-1/3 w-40 h-40 bg-primary/20 rounded-full blur-3xl animate-pulse"
-                 style={{animationDuration: '5s'}}/>
-          </div>
-
-          {/* Grid Pattern */}
-          <div className="absolute inset-0 opacity-10" style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-            backgroundSize: '40px 40px'
-          }}/>
-
           {/* Content */}
           <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 w-full">
             {/* Logo & Brand */}
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md border border-white/25">
                   <BookOpen className="w-5 h-5 text-white"/>
                 </div>
                 <span className="text-xl font-bold text-white">Carded AI</span>
@@ -367,7 +351,7 @@ export default function LoginPage() {
             {/* Main Content */}
             <div className="space-y-8">
               <div>
-                <h2 className="text-3xl xl:text-4xl font-bold text-white leading-tight mb-4">
+                <h2 className="editorial-title mb-4 text-3xl leading-tight text-white xl:text-4xl">
                   {t('login.branding.tagline').split('\n').map((line, i) => (
                     <React.Fragment key={i}>{i > 0 && <br/>}{line}</React.Fragment>
                   ))}
@@ -383,7 +367,7 @@ export default function LoginPage() {
                   const Icon = feat.icon;
                   return (
                       <div key={i}
-                           className="group p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300">
+                           className="group rounded-md border border-white/15 p-4 transition-colors hover:border-white/30">
                         <Icon className="w-6 h-6 text-blue-200 mb-3 group-hover:scale-110 transition-transform"/>
                         <h3 className="text-sm font-semibold text-white mb-1">{t(feat.titleKey)}</h3>
                         <p className="text-xs text-blue-100/70 leading-relaxed">{t(feat.descKey)}</p>
@@ -419,7 +403,7 @@ export default function LoginPage() {
             {/* Mobile Logo */}
             <div className="lg:hidden flex items-center gap-3 mb-8">
               <div
-                className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-blue-200/50 dark:shadow-blue-900/30">
+                className="w-10 h-10 bg-primary rounded-md flex items-center justify-center shadow-lg shadow-blue-200/50 dark:shadow-blue-900/30">
                 <BookOpen className="w-5 h-5 text-white"/>
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">Carded AI</span>
@@ -472,7 +456,7 @@ export default function LoginPage() {
                             value={field.value}
                             onChange={e => field.onChange(e.target.value.replace(/\D/g, '').slice(0, backup ? 8 : 6))}
                             placeholder={backup ? t('login.twoFactorPlaceholder') : '000000'}
-                            className="w-full text-center text-3xl tracking-[0.5em] px-6 py-5 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 dark:text-white font-mono transition-all"
+                            className="w-full text-center text-3xl tracking-[0.5em] px-6 py-5 bg-card border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 dark:text-white font-mono transition-all"
                           />
                           {twoFAForm.formState.errors.code && (
                             <p className="text-xs text-red-500 dark:text-red-400 text-center mt-2">
@@ -518,13 +502,13 @@ export default function LoginPage() {
             ) : (
                 <>
                   {/* Mode Switch */}
-                  <div className="flex p-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg mb-6">
+                  <div className="flex p-1.5 bg-muted rounded-lg mb-6">
                     <button
                         onClick={() => {
                           setMode('password');
                           setErr('');
                         }}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-semibold transition-all duration-200 ${
                             mode === 'password'
                                 ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white'
                               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
@@ -538,7 +522,7 @@ export default function LoginPage() {
                           setErr('');
                           if (!qrImg) generateQR();
                         }}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-semibold transition-all duration-200 ${
                             mode === 'qrcode'
                                 ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white'
                               : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
@@ -569,7 +553,7 @@ export default function LoginPage() {
                                 onBlur={() => setFocusedField(null)}
                                 placeholder={t('login.usernameOrEmailPlaceholder')}
                                 autoFocus
-                                className={`w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-800 border-2 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all ${
+                                className={`w-full pl-12 pr-4 py-4 bg-card border-2 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all ${
                                   loginForm.formState.errors.username
                                     ? 'border-red-400 dark:border-red-500'
                                     : 'border-gray-200 dark:border-gray-700'
@@ -606,7 +590,7 @@ export default function LoginPage() {
                                 onFocus={() => setFocusedField('password')}
                                 onBlur={() => setFocusedField(null)}
                                 placeholder={t('login.passwordPlaceholder')}
-                                className={`w-full pl-12 pr-12 py-4 bg-white dark:bg-gray-800 border-2 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all ${
+                                className={`w-full pl-12 pr-12 py-4 bg-card border-2 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all ${
                                   loginForm.formState.errors.password
                                     ? 'border-red-400 dark:border-red-500'
                                     : 'border-gray-200 dark:border-gray-700'
@@ -656,7 +640,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={busy}
-                            className="w-full py-4 bg-primary text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25 hover:shadow-sm hover:shadow-blue-500/30 active:scale-[0.98] flex items-center justify-center gap-2"
+                            className="w-full py-4 bg-primary text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-sm hover:shadow-blue-500/30 active:scale-[0.98] flex items-center justify-center gap-2"
                         >
                           {busy ? (
                               <>
@@ -717,7 +701,7 @@ export default function LoginPage() {
                   {mode === 'qrcode' && (
                       <div className="space-y-6">
                         <div
-                          className="bg-white dark:bg-gray-800 rounded-lg p-8 border border-gray-100 dark:border-gray-700 shadow-sm">
+                          className="bg-card rounded-lg p-8 border border-gray-100 dark:border-gray-700 shadow-sm">
                           <div className="text-center space-y-5">
                             {/* QR Display */}
                             <div className="flex justify-center">
@@ -792,7 +776,7 @@ export default function LoginPage() {
                             {(qrStatus === 'expired' || qrStatus === 'idle') && (
                                 <button
                                     onClick={generateQR}
-                                    className="px-6 py-3 bg-primary text-white text-sm font-semibold rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
+                                    className="px-6 py-3 bg-primary text-white text-sm font-semibold rounded-md transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
                                 >
                                   {qrStatus === 'expired' ? t('login.qrRegenerate') : t('login.qrGenerate')}
                                 </button>
@@ -802,7 +786,7 @@ export default function LoginPage() {
 
                         {/* Instructions */}
                         <div
-                          className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-5 border border-gray-100 dark:border-gray-800">
+                          className="bg-muted/50 rounded-lg p-5 border border-gray-100 dark:border-gray-800">
                           <h3
                             className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{t('login.scanSteps')}</h3>
                           <ol className="space-y-2.5">

@@ -84,7 +84,8 @@ const FolderTree: React.FC<{
         <button onClick={onCreate} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-400 hover:text-blue-600"><Plus className="w-4 h-4"/></button>
       </div>
       {loading ? (
-        <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-8 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse"/>)}</div>
+        <div className="space-y-2">{[1, 2, 3].map(i => <div key={i}
+                                                            className="h-8 bg-muted rounded-lg animate-pulse"/>)}</div>
       ) : (
         <div className="space-y-0.5">
           <div onClick={() => onSelect(null)}
@@ -250,7 +251,7 @@ const MediaGrid: React.FC<{files: MediaFile[]; loading: boolean; viewMode: 'grid
     const Icon = getIcon(f.mime_type || '');
     return (
         <div key={f.id}
-             className={`relative group aspect-square rounded-xl overflow-hidden border ${selected.includes(f.id) ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-200 dark:border-gray-700'} bg-gray-50 dark:bg-gray-800`}>
+             className={`relative group aspect-square rounded-md overflow-hidden border ${selected.includes(f.id) ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-200 dark:border-gray-700'} bg-muted`}>
           <input type="checkbox" checked={selected.includes(f.id)} onChange={() => onSelect(f.id)} className="absolute top-2 left-2 z-10 h-4 w-4 text-blue-600 rounded"/>
           {isImage && f.url ? (
               <img src={getFullMediaUrl(f.url)} alt={f.original_filename} className="w-full h-full object-cover cursor-pointer" onClick={() => onPreview(f)} loading="lazy" decoding="async"/>
@@ -322,7 +323,7 @@ const MediaGrid: React.FC<{files: MediaFile[]; loading: boolean; viewMode: 'grid
     const cleanKey = key.replace('\u0000', '');
     return (
         <div key={`header-${key}`}
-             className="flex items-center gap-2 px-3 py-2.5 bg-gray-100 dark:bg-gray-800/80 rounded-xl mb-3 select-none">
+             className="flex items-center gap-2 px-3 py-2.5 bg-muted/80 rounded-md mb-3 select-none">
           {/* 展开/折叠 */}
           <button onClick={() => toggleGroup(key)}
                   className="p-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors">
@@ -371,7 +372,7 @@ const MediaGrid: React.FC<{files: MediaFile[]; loading: boolean; viewMode: 'grid
               <div key={key} className="mb-4">
                 {renderGroupHeader(key, key.replace('\u0000', ''), items)}
                 {!groupCollapsed.has(key) && (
-                    <div className="bg-white dark:bg-gray-900 rounded-xl border overflow-hidden">
+                  <div className="bg-card rounded-md border overflow-hidden">
                       <table className="w-full">
                         <tbody className="divide-y">
                         {items.map(f => renderListItem(f))}
@@ -561,7 +562,7 @@ const AudioPlayer: React.FC<{
           {/* 最小化按钮 (桌面左上角) */}
           <button
               onClick={onMinimize}
-              className="absolute top-4 left-4 z-20 w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 backdrop-blur flex items-center justify-center transition-colors hidden lg:flex"
+              className="absolute top-4 left-4 z-20 w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 flex items-center justify-center transition-colors hidden lg:flex"
               aria-label="最小化播放"
               title="最小化 (Esc)"
           >
@@ -579,7 +580,6 @@ const AudioPlayer: React.FC<{
                 transition={{duration: 1}}
             >
               <motion.div
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] aspect-square rounded-full blur-3xl"
                   style={{background: 'radial-gradient(circle, rgba(147,51,234,0.5), rgba(236,72,153,0.2), transparent)'}}
                   animate={isPlaying ? {
                     scale: [1, 1.1, 1],
@@ -684,7 +684,7 @@ const AudioPlayer: React.FC<{
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
                 </svg>
               </motion.button>
-              <div className="w-14 h-14 rounded-xl overflow-hidden shadow-lg shrink-0">
+              <div className="w-14 h-14 rounded-md overflow-hidden shadow-lg shrink-0">
                 {coverImage ? (
                     <img src={coverImage} alt="cover" className="w-full h-full object-cover" />
                 ) : (
@@ -743,7 +743,7 @@ const AudioPlayer: React.FC<{
                                 {/* 背景进度条 */}
                                 {isActive && (
                                     <motion.div
-                                      className="absolute inset-0 rounded-xl bg-primary/5 pointer-events-none"
+                                      className="absolute inset-0 rounded-md bg-primary/5 pointer-events-none"
                                         animate={{width: `${karaokeProgress * 100}%`}}
                                         transition={{duration: 0.08, ease: 'linear'}}
                                     />
@@ -829,7 +829,7 @@ const AudioPlayer: React.FC<{
         </div>
 
         {/* ====== Bottom Controls Bar (Apple Music style) ====== */}
-        <div className="flex-shrink-0 bg-black/90 backdrop-blur-2xl border-t border-white/10"
+        <div className="flex-shrink-0 bg-black/90 border-t border-white/10"
              style={{paddingBottom: 'env(safe-area-inset-bottom, 0px)'}}>
           {/* --- Progress Bar (touch-friendly, thin visual + large tap target) --- */}
           <div className="px-4 pt-3 pb-1">
@@ -986,7 +986,7 @@ const AudioPlayer: React.FC<{
                 </motion.button>
                 {showVolumeSlider && (
                   <div
-                    className="absolute bottom-full right-0 mb-2 p-3 bg-neutral-900/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-sm">
+                    className="absolute bottom-full right-0 mb-2 p-3 bg-neutral-900/95 rounded-md border border-white/10 shadow-sm">
                       <input
                           type="range"
                           min="0"
@@ -1081,13 +1081,13 @@ const MiniPlayer: React.FC<{
             initial={{x: -100, opacity: 0}}
             animate={{x: 0, opacity: 1}}
             exit={{x: -100, opacity: 0}}
-            className="hidden sm:flex fixed bottom-4 left-4 z-[60] bg-black/90 backdrop-blur-2xl rounded-lg border border-white/10 shadow-sm overflow-hidden"
+            className="hidden sm:flex fixed bottom-4 left-4 z-[60] bg-black/90 rounded-lg border border-white/10 shadow-sm overflow-hidden"
             style={{paddingBottom: 'env(safe-area-inset-bottom, 0px)'}}
         >
           <div className="flex items-center gap-3 p-3 min-w-[260px] max-w-[320px]">
             {/* 封面 */}
             <motion.div
-                className="w-12 h-12 rounded-xl overflow-hidden shrink-0 cursor-pointer"
+              className="w-12 h-12 rounded-md overflow-hidden shrink-0 cursor-pointer"
                 whileTap={{scale: 0.9}}
                 onClick={onRestore}
                 animate={isPlaying ? {rotate: 360} : {rotate: 0}}
@@ -1158,7 +1158,7 @@ const MiniPlayer: React.FC<{
             )}
 
             {/* 底部半透明条显示歌名 */}
-            <div className="absolute inset-x-0 bottom-0 h-5 bg-black/50 backdrop-blur flex items-center justify-center px-1">
+            <div className="absolute inset-x-0 bottom-0 h-5 bg-black/50 flex items-center justify-center px-1">
               <p className="text-[9px] text-white font-medium truncate leading-none">{media.original_filename}</p>
             </div>
           </motion.div>
@@ -1171,20 +1171,20 @@ const MiniPlayer: React.FC<{
               <motion.div
                   initial={{y: 100, opacity: 0}}
                   animate={{y: 0, opacity: 1}}
-                  className="bg-neutral-900/95 backdrop-blur-2xl rounded-lg w-64 p-4 border border-white/10 shadow-sm"
+                  className="bg-neutral-900/95 rounded-lg w-64 p-4 border border-white/10 shadow-sm"
                   onClick={e => e.stopPropagation()}
               >
                 <p className="text-white font-semibold text-center mb-4 truncate">{media.original_filename}</p>
                 <div className="space-y-2">
                   <button onClick={() => { setShowMenu(false); onRestore(); }}
-                          className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 rounded-xl text-white text-sm font-medium transition-colors flex items-center gap-3">
+                          className="w-full py-3 px-4 bg-white/10 hover:bg-white/20 rounded-md text-white text-sm font-medium transition-colors flex items-center gap-3">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
                     </svg>
                     展开播放器
                   </button>
                   <button onClick={() => { setShowMenu(false); onClose(); }}
-                          className="w-full py-3 px-4 bg-red-500/20 hover:bg-red-500/30 rounded-xl text-red-400 text-sm font-medium transition-colors flex items-center gap-3">
+                          className="w-full py-3 px-4 bg-red-500/20 hover:bg-red-500/30 rounded-md text-red-400 text-sm font-medium transition-colors flex items-center gap-3">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -1365,7 +1365,7 @@ const AudioLayer: React.FC<{ media: MediaFile; onClose: () => void }> = ({media,
                   <button
                       onClick={(e) => { e.stopPropagation(); setShowDesktopLyrics(v => !v); }}
                       onPointerDown={(e) => e.stopPropagation()}
-                      className="fixed bottom-24 right-4 z-[66] w-9 h-9 rounded-full bg-black/60 backdrop-blur border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
+                      className="fixed bottom-24 right-4 z-[66] w-9 h-9 rounded-full bg-black/60 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
                       aria-label="桌面歌词"
                       title="桌面歌词"
                   >
@@ -1410,10 +1410,10 @@ const PreviewModal: React.FC<{media: MediaFile|null; onClose: ()=>void}> = ({med
 
   return (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={onClose}>
     <div
-      className="w-[90vw] max-w-7xl max-h-[95vh] bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-sm flex flex-col"
+      className="w-[90vw] max-w-7xl max-h-[95vh] bg-card rounded-lg overflow-hidden shadow-sm flex flex-col"
         onClick={e => e.stopPropagation()}>
       {media.mime_type === 'application/pdf' && fullUrl ? (
-          <div className="flex-1 bg-gray-100 dark:bg-gray-800 min-h-[80vh]">
+        <div className="flex-1 bg-muted min-h-[80vh]">
             <embed src={fullUrl} type="application/pdf" className="w-full h-full" style={{minHeight: '80vh', maxHeight: '85vh'}}/>
           </div>
       ) : media.mime_type?.startsWith('video/') && fullUrl ? (
@@ -1438,12 +1438,17 @@ const PreviewModal: React.FC<{media: MediaFile|null; onClose: ()=>void}> = ({med
 
 const DeleteConfirm: React.FC<{item: MediaFile; onCancel: ()=>void; onConfirm: ()=>void}> = ({item, onCancel, onConfirm}) => (
   <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onCancel}>
-    <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-sm w-full shadow-sm"
+    <div className="bg-card rounded-lg p-6 max-w-sm w-full shadow-sm"
          onClick={e => e.stopPropagation()}>
       <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">确认删除</h3>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">确定要删除 <span
         className="font-medium">{item.original_filename}</span> 吗？</p>
-      <div className="flex justify-end gap-3"><button onClick={onCancel} className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium">取消</button><button onClick={onConfirm} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">删除</button></div>
+      <div className="flex justify-end gap-3">
+        <button onClick={onCancel} className="px-4 py-2 bg-muted rounded-lg text-sm font-medium">取消</button>
+        <button onClick={onConfirm}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">删除
+        </button>
+      </div>
     </div>
   </div>
 );
@@ -1456,7 +1461,7 @@ const MoveDialog: React.FC<{open: boolean; onClose: ()=>void; folders: FolderNod
     </button>
   );
   return (<div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-    <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-md w-full shadow-sm"
+    <div className="bg-card rounded-lg p-6 max-w-md w-full shadow-sm"
          onClick={e => e.stopPropagation()}>
       <h3 className="text-lg font-bold mb-2">移动文件</h3>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">将选中的 {mediaCount} 个文件移动到：</p>
@@ -1466,7 +1471,9 @@ const MoveDialog: React.FC<{open: boolean; onClose: ()=>void; folders: FolderNod
         </button>
         {folders.map(n=>renderNode(n))}
       </div>
-      <div className="flex justify-end"><button onClick={onClose} className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium">取消</button></div>
+      <div className="flex justify-end">
+        <button onClick={onClose} className="px-4 py-2 bg-muted rounded-lg text-sm font-medium">取消</button>
+      </div>
     </div>
   </div>);
 };
@@ -1475,11 +1482,27 @@ const CreateFolderDialog: React.FC<{open: boolean; onClose: ()=>void; onCreate: 
   const [name, setName] = useState('');
   if(!open) return null;
   return (<div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-    <div className="bg-white dark:bg-gray-900 rounded-lg p-6 max-w-sm w-full shadow-sm"
+    <div className="bg-card rounded-lg p-6 max-w-sm w-full shadow-sm"
          onClick={e => e.stopPropagation()}>
       <h3 className="text-lg font-bold mb-4">新建文件夹</h3>
-      <input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="文件夹名称" className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white mb-4" autoFocus onKeyDown={e=>{if(e.key==='Enter' && name.trim()) {onCreate(name.trim()); setName('');}}}/>
-      <div className="flex justify-end gap-3"><button onClick={onClose} className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium">取消</button><button onClick={()=>{if(name.trim()){onCreate(name.trim()); setName('');}}} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">创建</button></div>
+      <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="文件夹名称"
+             className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-md bg-muted focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white mb-4"
+             autoFocus onKeyDown={e => {
+        if (e.key === 'Enter' && name.trim()) {
+          onCreate(name.trim());
+          setName('');
+        }
+      }}/>
+      <div className="flex justify-end gap-3">
+        <button onClick={onClose} className="px-4 py-2 bg-muted rounded-lg text-sm font-medium">取消</button>
+        <button onClick={() => {
+          if (name.trim()) {
+            onCreate(name.trim());
+            setName('');
+          }
+        }} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">创建
+        </button>
+      </div>
     </div>
   </div>);
 };
@@ -1711,9 +1734,13 @@ const MediaPage: React.FC = () => {
             <UploadArea onUpload={uploadFiles} uploading={uploading} progress={uploadProgress} status={uploadStatus} collapsed={uploadCollapsed} onToggle={()=>setUploadCollapsed(!uploadCollapsed)}/>
 
             <div className="flex flex-wrap items-center gap-3 mb-2">
-              <input type="text" value={search} onChange={e=>{setSearch(e.target.value);setPage(1)}} placeholder="搜索文件..." className="flex-1 min-w-[200px] px-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"/>
+              <input type="text" value={search} onChange={e => {
+                setSearch(e.target.value);
+                setPage(1)
+              }} placeholder="搜索文件..."
+                     className="flex-1 min-w-[200px] px-4 py-2.5 bg-card border border-gray-200 dark:border-gray-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"/>
               <button onClick={() => setShowFilters(v => !v)}
-                      className={`px-3 py-2.5 rounded-xl text-sm flex items-center gap-1.5 transition-colors ${showFilters || selectedTagIds.length || selectedCategoryId ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
+                      className={`px-3 py-2.5 rounded-md text-sm flex items-center gap-1.5 transition-colors ${showFilters || selectedTagIds.length || selectedCategoryId ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800' : 'bg-card border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
                 <Filter className="w-4 h-4"/>
                 {selectedTagIds.length || selectedCategoryId ? <span className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold bg-blue-500 text-white rounded-full">{(selectedTagIds.length) + (selectedCategoryId ? 1 : 0)}</span> : '筛选'}
               </button>
@@ -1751,7 +1778,7 @@ const MediaPage: React.FC = () => {
                     animate={{height: 'auto', opacity: 1}}
                     className="overflow-hidden mb-4"
                 >
-                  <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-4">
+                  <div className="bg-card border border-gray-200 dark:border-gray-700 rounded-md p-4 space-y-4">
                     {/* 类型筛选 */}
                     <div>
                       <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-2">文件类型</label>
@@ -1768,7 +1795,7 @@ const MediaPage: React.FC = () => {
                                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                                         filterType === t.key
                                             ? 'bg-blue-600 text-white'
-                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                          : 'bg-muted text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                                     }`}
                             >{t.label}</button>
                         ))}
@@ -1798,7 +1825,7 @@ const MediaPage: React.FC = () => {
                                         className={`px-2.5 py-1 rounded-lg text-xs transition-colors ${
                                             selectedTagIds.includes(tag.id)
                                               ? 'bg-primary text-white'
-                                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                              : 'bg-muted text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                                         }`}
                                 >{tag.name}</button>
                             ))}
@@ -1825,7 +1852,7 @@ const MediaPage: React.FC = () => {
                                         className={`px-2.5 py-1 rounded-lg text-xs transition-colors ${
                                             selectedCategoryId === cat.id
                                                 ? 'bg-emerald-600 text-white'
-                                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                              : 'bg-muted text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                                         }`}
                                 >{cat.name}</button>
                             ))}
@@ -1978,7 +2005,7 @@ const TagEditor: React.FC<{
 
   return (
       <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 w-full max-w-md"
+        <div className="bg-card rounded-lg shadow-sm p-6 w-full max-w-md"
              onClick={e => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">编辑标签</h3>
@@ -1987,7 +2014,7 @@ const TagEditor: React.FC<{
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">最多 5 个标签</p>
 
           {/* 已选标签 */}
-          <div className="flex flex-wrap gap-2 mb-3 min-h-[32px] p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex flex-wrap gap-2 mb-3 min-h-[32px] p-2 bg-muted rounded-lg">
             {tags.map(tag => (
                 <span key={tag}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-primary dark:bg-primary/30 text-primary dark:text-primary text-xs font-medium">
@@ -2004,11 +2031,12 @@ const TagEditor: React.FC<{
                    onChange={e => setInputVal(e.target.value)}
                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(inputVal); } }}
                    placeholder="输入标签名称..."
-                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:text-white"
+                   className="w-full px-3 py-2 bg-card border border-gray-200 dark:border-gray-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:text-white"
                    disabled={tags.length >= 5}
             />
             {suggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden z-10">
+              <div
+                className="absolute top-full left-0 right-0 mt-1 bg-card border border-gray-200 dark:border-gray-700 rounded-md shadow-lg overflow-hidden z-10">
                   {suggestions.map(s => (
                       <button key={s.id} onClick={() => addTag(s.name)}
                               className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 flex items-center gap-2">
@@ -2027,7 +2055,7 @@ const TagEditor: React.FC<{
                 <div className="flex flex-wrap gap-1.5">
                   {allTags.filter(t => !tags.includes(t.name)).slice(0, 10).map(t => (
                       <button key={t.id} onClick={() => addTag(t.name)}
-                              className="px-2 py-1 rounded-lg text-xs bg-gray-100 dark:bg-gray-800 hover:bg-primary dark:hover:bg-primary/30 text-gray-600 dark:text-gray-400 hover:text-primary transition-colors">
+                              className="px-2 py-1 rounded-lg text-xs bg-muted hover:bg-primary dark:hover:bg-primary/30 text-gray-600 dark:text-gray-400 hover:text-primary transition-colors">
                         {t.name}
                       </button>
                   ))}
@@ -2036,7 +2064,7 @@ const TagEditor: React.FC<{
           )}
 
           <button onClick={handleSave} disabled={saving}
-                  className="w-full py-2.5 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary disabled:opacity-50 transition-colors">
+                  className="w-full py-2.5 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary disabled:opacity-50 transition-colors">
             {saving ? '保存中...' : '保存标签'}
           </button>
         </div>
@@ -2067,7 +2095,7 @@ const BatchTagDialog: React.FC<{
 
   return (
       <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 w-full max-w-sm"
+        <div className="bg-card rounded-lg shadow-sm p-6 w-full max-w-sm"
              onClick={e => e.stopPropagation()}>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">批量添加标签</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">将为 {mediaCount} 个文件添加标签</p>
@@ -2076,17 +2104,17 @@ const BatchTagDialog: React.FC<{
                  onChange={e => setInputVal(e.target.value)}
                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleSave(); } }}
                  placeholder="输入标签名称..."
-                 className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white mb-3"
+                 className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary dark:bg-gray-800 dark:text-white mb-3"
                  autoFocus
           />
 
           <div className="flex gap-2">
             <button onClick={onClose}
-                    className="flex-1 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    className="flex-1 py-2 rounded-md border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
               取消
             </button>
             <button onClick={handleSave} disabled={saving || !inputVal.trim()}
-                    className="flex-1 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:bg-primary disabled:opacity-50 transition-colors">
+                    className="flex-1 py-2 rounded-md bg-primary text-white text-sm font-medium hover:bg-primary disabled:opacity-50 transition-colors">
               {saving ? '添加中...' : '添加标签'}
             </button>
           </div>
@@ -2125,7 +2153,7 @@ const CategoryEditor: React.FC<{
 
   return (
       <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 w-full max-w-md"
+        <div className="bg-card rounded-lg shadow-sm p-6 w-full max-w-md"
              onClick={e => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">设置分类</h3>
@@ -2141,7 +2169,7 @@ const CategoryEditor: React.FC<{
                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                             selected === cat.name
                                 ? 'bg-emerald-600 text-white'
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                              : 'bg-muted text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
                 >{cat.name}</button>
             ))}
@@ -2149,7 +2177,7 @@ const CategoryEditor: React.FC<{
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                         selected === null && !customVal
                             ? 'bg-gray-600 text-white'
-                            : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200'
+                          : 'bg-muted text-gray-600 dark:text-gray-400 hover:bg-gray-200'
                     }`}>
               无
             </button>
@@ -2161,12 +2189,12 @@ const CategoryEditor: React.FC<{
             <input type="text" value={customVal}
                    onChange={e => { setCustomVal(e.target.value); setSelected(null); }}
                    placeholder="输入新分类名称..."
-                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white"
+                   className="w-full px-3 py-2 bg-card border border-gray-200 dark:border-gray-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white"
             />
           </div>
 
           <button onClick={handleSave} disabled={saving}
-                  className="w-full py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors">
+                  className="w-full py-2.5 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors">
             {saving ? '保存中...' : '保存分类'}
           </button>
         </div>
@@ -2197,7 +2225,7 @@ const BatchCategoryDialog: React.FC<{
 
   return (
       <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm p-6 w-full max-w-sm"
+        <div className="bg-card rounded-lg shadow-sm p-6 w-full max-w-sm"
              onClick={e => e.stopPropagation()}>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">批量设置分类</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">将为 {mediaCount} 个文件设置分类</p>
@@ -2209,7 +2237,7 @@ const BatchCategoryDialog: React.FC<{
                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                             selected === cat.name
                                 ? 'bg-emerald-600 text-white'
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                              : 'bg-muted text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
                 >{cat.name}</button>
             ))}
@@ -2217,11 +2245,11 @@ const BatchCategoryDialog: React.FC<{
 
           <div className="flex gap-2">
             <button onClick={onClose}
-                    className="flex-1 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    className="flex-1 py-2 rounded-md border border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
               取消
             </button>
             <button onClick={handleSave} disabled={saving || !selected}
-                    className="flex-1 py-2 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors">
+                    className="flex-1 py-2 rounded-md bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors">
               {saving ? '设置中...' : '设置分类'}
             </button>
           </div>
@@ -2283,7 +2311,7 @@ const _ImageCropDialog: React.FC<{
 
   return (
       <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm w-full max-w-4xl max-h-[90vh] flex flex-col"
+        <div className="bg-card rounded-lg shadow-sm w-full max-w-4xl max-h-[90vh] flex flex-col"
              onClick={e => e.stopPropagation()}>
           <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">图像裁剪与优化</h3>
@@ -2320,9 +2348,9 @@ const _ImageCropDialog: React.FC<{
             </div>
           </div>
           <div className="px-6 py-4 border-t dark:border-gray-700 flex gap-2">
-            <button onClick={onClose} className="flex-1 py-2 rounded-xl border text-sm">取消</button>
+            <button onClick={onClose} className="flex-1 py-2 rounded-md border text-sm">取消</button>
             <button onClick={handleOptimize} disabled={processing}
-                    className="flex-1 py-2 rounded-xl bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50">
+                    className="flex-1 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-50">
               {processing ? '优化中...' : '生成 WebP'}
             </button>
           </div>

@@ -230,14 +230,14 @@ function Settings() {
                 {/* ═══ Sidebar Navigation ═══ */}
                 <div className="lg:w-64 shrink-0">
                     <nav
-                      className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden p-1.5">
+                      className="bg-card rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden p-1.5">
                         {TABS.map((t, i) => {
                             const Icon = t.icon;
                             return (
                                 <button
                                     key={t.id}
                                     onClick={() => setTab(i)}
-                                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all duration-200 ${
+                                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-md text-left transition-all duration-200 ${
                                         tab === i
                                           ? 'bg-secondary text-blue-700 dark:text-blue-300 shadow-sm'
                                             : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-750'
@@ -262,7 +262,7 @@ function Settings() {
                         <div className="border-t border-gray-100 dark:border-gray-700 mt-1.5 pt-1.5">
                             <button
                                 onClick={handleLogout}
-                                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                                className="w-full flex items-center gap-3 px-4 py-3.5 rounded-md text-left text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
                             >
                                 <div
                                     className="w-9 h-9 rounded-lg bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
@@ -281,7 +281,7 @@ function Settings() {
                         <div className="space-y-6">
                             {/* Avatar Section */}
                             <div
-                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                              className="bg-card rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
                               <div className="h-20 bg-primary"/>
                                 <div className="px-6 pb-6">
                                     <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-10">
@@ -316,7 +316,7 @@ function Settings() {
                                         <div className="sm:ml-auto pb-1">
                                             <button
                                                 onClick={() => avRef.current?.click()}
-                                                className="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
+                                                className="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
                                             >
                                                 <Camera className="w-4 h-4"/> 更换头像
                                             </button>
@@ -328,19 +328,19 @@ function Settings() {
 
                             {/* Username */}
                             <div
-                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-card rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <label
                                     className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">用户名</label>
                                 <div className="flex gap-3">
                                     <input
                                         value={un}
                                         onChange={e => setUn(e.target.value)}
-                                        className="flex-1 px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white transition-all"
+                                        className="flex-1 px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white transition-all"
                                     />
                                     <button
                                         onClick={() => save('username', un)}
                                         disabled={busy}
-                                        className="px-5 py-3 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center gap-2 shrink-0"
+                                        className="px-5 py-3 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center gap-2 shrink-0"
                                     >
                                         {savedField === 'username' ? <><Check className="w-4 h-4"/> 已保存</> : busy ?
                                             <Loader className="w-4 h-4 animate-spin"/> : '保存'}
@@ -350,7 +350,7 @@ function Settings() {
 
                             {/* Bio */}
                             <div
-                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-card rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <label
                                     className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">个人简介</label>
                                 <textarea
@@ -358,14 +358,14 @@ function Settings() {
                                     onChange={e => setBio(e.target.value)}
                                     rows={3}
                                     placeholder="介绍一下你自己..."
-                                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white resize-none transition-all placeholder-gray-400"
+                                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white resize-none transition-all placeholder-gray-400"
                                 />
                                 <div className="flex items-center justify-between mt-3">
                                     <span className="text-xs text-gray-400">{bio.length}/200 字符</span>
                                     <button
                                         onClick={() => save('bio', bio)}
                                         disabled={busy}
-                                        className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center gap-2"
+                                        className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 transition-all flex items-center gap-2"
                                     >
                                         {savedField === 'bio' ? <><Check className="w-4 h-4"/> 已保存</> : '保存'}
                                     </button>
@@ -374,7 +374,7 @@ function Settings() {
 
                             {/* Language & Privacy */}
                             <div
-                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-card rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <div className="grid sm:grid-cols-2 gap-6">
                                     <div>
                                         <label
@@ -387,7 +387,7 @@ function Settings() {
                                                 setLoc(e.target.value);
                                                 save('locale', e.target.value);
                                             }}
-                                            className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:border-blue-500 dark:text-white transition-all"
+                                            className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:border-blue-500 dark:text-white transition-all"
                                         >
                                             <option value="zh_CN">🇨🇳 简体中文</option>
                                             <option value="en_US">🇺🇸 English</option>
@@ -399,7 +399,7 @@ function Settings() {
                                             <Eye className="w-4 h-4"/> 隐私设置
                                         </label>
                                         <label
-                                            className="flex items-center gap-3 cursor-pointer p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
+                                          className="flex items-center gap-3 cursor-pointer p-3 rounded-md bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 transition-colors">
                                             <div className="relative">
                                                 <input type="checkbox" checked={priv} onChange={e => {
                                                     setPriv(e.target.checked);
@@ -425,10 +425,10 @@ function Settings() {
                           <OAuthBindings/>
                             {/* Password Change */}
                             <div
-                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-card rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div
-                                        className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
+                                      className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-md flex items-center justify-center">
                                         <Lock className="w-5 h-5 text-amber-600 dark:text-amber-400"/>
                                     </div>
                                     <div>
@@ -445,7 +445,7 @@ function Settings() {
                                             value={pw.cur}
                                             onChange={e => setPw(p => ({...p, cur: e.target.value}))}
                                             placeholder="当前密码"
-                                            className="w-full px-4 py-3.5 pr-12 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white transition-all"
+                                            className="w-full px-4 py-3.5 pr-12 border-2 border-gray-200 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white transition-all"
                                         />
                                         <button type="button" onClick={() => setShowPw(s => ({...s, cur: !s.cur}))}
                                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -459,7 +459,7 @@ function Settings() {
                                             value={pw.new}
                                             onChange={e => setPw(p => ({...p, new: e.target.value}))}
                                             placeholder="新密码"
-                                            className="w-full px-4 py-3.5 pr-12 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white transition-all"
+                                            className="w-full px-4 py-3.5 pr-12 border-2 border-gray-200 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white transition-all"
                                         />
                                         <button type="button" onClick={() => setShowPw(s => ({...s, new: !s.new}))}
                                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -485,7 +485,7 @@ function Settings() {
                                             value={pw.con}
                                             onChange={e => setPw(p => ({...p, con: e.target.value}))}
                                             placeholder="确认新密码"
-                                            className="w-full px-4 py-3.5 pr-12 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white transition-all"
+                                            className="w-full px-4 py-3.5 pr-12 border-2 border-gray-200 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white transition-all"
                                         />
                                         {pw.con && (
                                             <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -498,7 +498,7 @@ function Settings() {
                                     <button
                                         onClick={changePw}
                                         disabled={busy || !pw.cur || !pw.new || pw.new !== pw.con}
-                                        className="px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                                        className="px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
                                     >
                                         {busy ? <Loader className="w-4 h-4 animate-spin"/> :
                                             <Lock className="w-4 h-4"/>}
@@ -509,11 +509,11 @@ function Settings() {
 
                             {/* 2FA */}
                             <div
-                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-card rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <div className="flex items-start justify-between mb-6">
                                     <div className="flex items-center gap-3">
                                         <div
-                                            className={`w-10 h-10 rounded-xl flex items-center justify-center ${fa ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                                          className={`w-10 h-10 rounded-md flex items-center justify-center ${fa ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
                                             <Fingerprint
                                               className={`w-5 h-5 ${fa ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}/>
                                         </div>
@@ -529,12 +529,12 @@ function Settings() {
                                     </div>
                                     {fa ? (
                                         <button onClick={disable2FA}
-                                                className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 text-sm font-medium rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+                                                className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 text-sm font-medium rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
                                             禁用
                                         </button>
                                     ) : (
                                         <button onClick={setup2FA} disabled={busy}
-                                                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-all">
+                                                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 transition-all">
                                             启用
                                         </button>
                                     )}
@@ -564,10 +564,10 @@ function Settings() {
                                                 value={vc}
                                                 onChange={e => setVc(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                                 placeholder="000000"
-                                                className="flex-1 text-center text-xl tracking-[0.4em] px-3 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white font-mono transition-all"
+                                                className="flex-1 text-center text-xl tracking-[0.4em] px-3 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:text-white font-mono transition-all"
                                             />
                                             <button onClick={enable2FA}
-                                                    className="px-5 py-3 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 shrink-0">验证
+                                                    className="px-5 py-3 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 shrink-0">验证
                                             </button>
                                         </div>
                                     </div>
@@ -585,7 +585,7 @@ function Settings() {
                                         <div className="grid grid-cols-2 gap-2">
                                             {codes.map(c => (
                                                 <code key={c}
-                                                      className="px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg text-xs font-mono text-gray-700 dark:text-gray-300 text-center">{c}</code>
+                                                      className="px-3 py-1.5 bg-card rounded-lg text-xs font-mono text-gray-700 dark:text-gray-300 text-center">{c}</code>
                                             ))}
                                         </div>
                                     </div>
@@ -598,10 +598,10 @@ function Settings() {
                     {tab === 2 && (
                         <div className="space-y-6">
                             <div
-                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-card rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <div className="flex items-center gap-3 mb-6">
                                     <div
-                                      className="w-10 h-10 bg-primary dark:bg-primary/30 rounded-xl flex items-center justify-center">
+                                      className="w-10 h-10 bg-primary dark:bg-primary/30 rounded-md flex items-center justify-center">
                                       <Palette className="w-5 h-5 text-primary dark:text-primary"/>
                                     </div>
                                     <div>
@@ -643,7 +643,7 @@ function Settings() {
                                                 className={`relative p-5 rounded-lg border-2 transition-all duration-200 ${
                                                     isActive
                                                       ? `${t.activeBorder} bg-secondary`
-                                                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800'
+                                                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-card'
                                                 }`}
                                             >
                                                 {isActive && (
@@ -670,11 +670,11 @@ function Settings() {
                     {tab === 3 && (
                         <div className="space-y-6">
                             <div
-                              className="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+                              className="bg-card rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm p-6">
                                 <div className="flex items-center justify-between mb-6">
                                     <div className="flex items-center gap-3">
                                         <div
-                                            className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+                                          className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-md flex items-center justify-center">
                                             <Monitor className="w-5 h-5 text-blue-600 dark:text-blue-400"/>
                                         </div>
                                         <div>
@@ -685,14 +685,14 @@ function Settings() {
                                     </div>
                                     <div className="flex gap-2">
                                         <button onClick={loadS}
-                                                className="p-2 text-gray-400 hover:text-blue-500 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                                className="p-2 text-gray-400 hover:text-blue-500 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                                                 title="刷新">
                                             <RefreshCw className="w-4 h-4"/>
                                         </button>
                                         {sessions.length > 1 && (
                                             <button
                                                 onClick={revokeAllOther}
-                                                className="px-3 py-2 text-xs font-medium text-red-500 bg-red-50 dark:bg-red-900/20 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                                                className="px-3 py-2 text-xs font-medium text-red-500 bg-red-50 dark:bg-red-900/20 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
                                             >
                                                 注销其他设备
                                             </button>
@@ -713,14 +713,14 @@ function Settings() {
                                             return (
                                                 <div
                                                     key={sessionId || i}
-                                                    className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
+                                                    className={`flex items-center gap-4 p-4 rounded-md border transition-all ${
                                                         isCurrent
                                                             ? 'border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/10'
                                                             : 'border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'
                                                     }`}
                                                 >
                                                     <div
-                                                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                                                      className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 ${
                                                           isCurrent ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                                                         }`}>
                                                         {getDeviceIcon(s)}
@@ -741,7 +741,7 @@ function Settings() {
                                                     {!isCurrent && (
                                                         <button
                                                             onClick={() => revokeSession(sessionId)}
-                                                            className="p-2 text-gray-400 hover:text-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                                            className="p-2 text-gray-400 hover:text-red-500 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                                             title="注销"
                                                         >
                                                             <Trash2 className="w-4 h-4"/>

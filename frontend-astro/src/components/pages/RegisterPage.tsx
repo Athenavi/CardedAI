@@ -173,31 +173,12 @@ export default function RegisterPage() {
           <div className="hidden lg:flex lg:w-1/2 xl:w-[45%] relative overflow-hidden">
             <div className="absolute inset-0 bg-primary"/>
 
-              {/* Animated Orbs */}
-              <div className="absolute inset-0 overflow-hidden">
-                  <div
-                    className="absolute -top-20 -right-20 w-80 h-80 bg-primary/20 rounded-full blur-3xl animate-pulse"
-                      style={{animationDuration: '5s'}}/>
-                  <div
-                    className="absolute bottom-10 left-10 w-60 h-60 bg-primary/20 rounded-full blur-3xl animate-pulse"
-                      style={{animationDuration: '7s'}}/>
-                  <div
-                    className="absolute top-1/2 right-1/3 w-40 h-40 bg-primary/20 rounded-full blur-3xl animate-pulse"
-                      style={{animationDuration: '4s'}}/>
-              </div>
-
-              {/* Grid Pattern */}
-              <div className="absolute inset-0 opacity-10" style={{
-                  backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-                  backgroundSize: '40px 40px'
-              }}/>
-
               <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 w-full">
                   {/* Logo */}
                   <div>
                       <div className="flex items-center gap-3 mb-2">
                           <div
-                              className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            className="flex h-10 w-10 items-center justify-center rounded-md border border-white/25">
                               <BookOpen className="w-5 h-5 text-white"/>
                           </div>
                           <span className="text-xl font-bold text-white">Carded AI</span>
@@ -207,9 +188,9 @@ export default function RegisterPage() {
                   {/* Main Content */}
                   <div className="space-y-8">
             <div>
-              <h2 className="text-3xl xl:text-4xl font-bold text-white leading-tight mb-4"
+              <h2 className="editorial-title mb-4 text-3xl leading-tight text-white xl:text-4xl"
                   dangerouslySetInnerHTML={{__html: t('register.branding.tagline').replace(/\n/g, '<br/>')}}/>
-              <p className="text-primary/80 text-lg leading-relaxed max-w-md">
+              <p className="max-w-md text-lg leading-relaxed text-white/75">
                   {t('register.branding.description')}
                 </p>
             </div>
@@ -218,23 +199,23 @@ export default function RegisterPage() {
                       <div className="grid grid-cols-2 gap-4">
                           {benefits.map((b, i) => (
                               <div key={i}
-                                   className="group p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all duration-300">
+                                   className="group rounded-md border border-white/15 p-4 transition-colors hover:border-white/30">
                                   <span className="text-2xl block mb-2">{b.icon}</span>
                                 <h3 className="text-sm font-semibold text-white mb-1">{t(b.titleKey)}</h3>
-                                <p className="text-xs text-primary/70 leading-relaxed">{t(b.descKey)}</p>
+                                <p className="text-xs leading-relaxed text-white/70">{t(b.descKey)}</p>
                               </div>
                           ))}
                       </div>
                   </div>
 
                   {/* Testimonial */}
-                <div className="p-5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/10">
+                <div className="rounded-md border border-white/15 p-5">
                       <p className="text-white/90 text-sm italic mb-3">
                         "{t('register.branding.testimonial.quote')}"
                       </p>
                       <div className="flex items-center gap-3">
                           <div
-                            className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-xs font-bold text-white">
+                            className="flex h-8 w-8 items-center justify-center rounded-sm border border-white/25 text-xs font-semibold text-white">
                             {t('register.branding.testimonial.author').charAt(0)}
                           </div>
                           <div>
@@ -253,7 +234,7 @@ export default function RegisterPage() {
                   {/* Mobile Logo */}
                   <div className="lg:hidden flex items-center gap-3 mb-8">
                       <div
-                        className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg">
+                        className="w-10 h-10 bg-primary rounded-md flex items-center justify-center shadow-lg">
                           <BookOpen className="w-5 h-5 text-white"/>
             </div>
                       <span className="text-xl font-bold text-gray-900 dark:text-white">Carded AI</span>
@@ -304,7 +285,7 @@ export default function RegisterPage() {
                   )}
 
                   <div
-                    className="bg-white dark:bg-gray-800 rounded-lg p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+                    className="bg-card rounded-lg p-6 sm:p-8 shadow-sm border border-gray-100 dark:border-gray-700">
                       {/* Step 0: Basic Info */}
                       {step === 0 && (
                         <FormProvider {...form}>
