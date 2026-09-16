@@ -1,9 +1,9 @@
 ---
-// 注册页 — 统一到 Layout（含导航/页脚/主题同步）
-import Layout from '@/layouts/Layout.astro';
+// 注册页 — 使用认证页独立壳层（不含全站导航 / 页脚 / Cookie 提示）
+import AuthLayout from '@/layouts/AuthLayout.astro';
 import RegisterPage from '@/components/pages/RegisterPage';
 ---
 
-<Layout title="注册 - Carded AI" description="创建 Carded AI 账号">
+<AuthLayout title="注册 - Carded AI" description="创建 Carded AI 账号">
     <RegisterPage client:load/>
-</Layout>
+</AuthLayout>

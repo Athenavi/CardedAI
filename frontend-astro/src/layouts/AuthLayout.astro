@@ -1,0 +1,90 @@
+---
+// 认证页独立壳层 —— 刻意不引入全站 Layout：
+// 没有顶部导航、页脚与 Cookie 提示，只保留一条极简品牌条，页面完全沉浸。
+import '@/styles/globals.css';
+import '@/styles/rtl.css';
+import AuthTopBar from '@/components/auth/AuthTopBar';
+
+export interface Props {
+    title?: string;
+    description?: string;
+}
+
+const {title = 'Carded AI', description = 'A modern blog platform'} = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN" dir="ltr" suppressHydrationWarning>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+    <meta name="description" content={description}/>
+    <meta name="robots" content="noindex"/>
+    <title>{title}</title>
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"/>
+
+    <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)"/>
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)"/>
+
+    <slot name="head"/>
+
+    <!-- 主题同步：首屏前应用 dark 类，避免闪白 -->
+    <script is:inline>
+        (function () {
+            var root = document.documentElement;
+            try {
+                var stored = localStorage.getItem('fastblog-theme');
+                if (stored === 'dark') {
+                    root.classList.add('dark');
+                } else if (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    root.classList.add('dark');
+                }
+            } catch (e) { /* ignore */
+            }
+            try {
+                var locale = localStorage.getItem('fastblog-locale');
+                if (locale) {
+                    root.lang = locale;
+                    root.dir = 'ltr';
+                }
+            } catch (e) { /* ignore */
+            }
+        })();
+    </script>
+
+    <style is:global>
+        /* 下划线式输入：浏览器自动填充会强制浅黄底与内阴影，这里还原为纸色 */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        select:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 1000px var(--color-background) inset;
+            -webkit-text-fill-color: var(--color-foreground);
+            caret-color: var(--color-foreground);
+            transition: background-color 9999s ease-out 0s;
+        }
+
+        /* 认证页不需要横向滚动条 */
+        body {
+            overflow-x: hidden;
+        }
+
+        /* 让下划线式输入在 Firefox 下也不出现额外的聚焦描边 */
+        input:focus-visible {
+            outline: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-background text-foreground antialiased">
+<AuthTopBar client:load/>
+<main id="main-content">
+    <slot/>
+</main>
+</body>
+</html>

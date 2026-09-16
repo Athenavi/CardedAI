@@ -132,10 +132,10 @@
     "verifyingStatus": "Verifying login status...",
     "passwordLogin": "Password Login",
     "qrLogin": "QR Login",
-    "scanQRCode": "Use FastBlog App to scan QR code",
+    "scanQRCode": "Use Carded AI App to scan QR code",
     "generatingQR": "Generating QR code...",
     "scanSteps": "Scan Steps",
-    "scanStep1": "Open the FastBlog mobile app",
+    "scanStep1": "Open the Carded AI mobile app",
     "scanStep2": "Go to \"My\" -> \"Scan\"",
     "scanStep3": "Scan the QR code above",
     "scanStep4": "Confirm login on your phone",
@@ -163,7 +163,7 @@
     "verificationFailed": "Verification failed",
     "branding": {
       "tagline": "Create, Share, Connect the World",
-      "description": "FastBlog is a next-generation smart blogging platform that empowers every creator to express ideas, share knowledge, and connect with readers worldwide.",
+      "description": "Carded AI is a next-generation smart blogging platform that empowers every creator to express ideas, share knowledge, and connect with readers worldwide.",
       "activeCreators": "Active Creators",
       "qualityArticles": "Quality Articles",
       "countries": "Countries"
@@ -212,10 +212,10 @@
     "emailCheckFailed": "Email check failed",
     "checkPassword": "Please check your password",
     "usernameMinChars": "Username must be at least 3 characters",
-    "usernameAvailable": "✓ Username available",
-    "usernameUnavailable": "✗ Username unavailable or already taken",
-    "emailAvailable": "✓ Email available",
-    "emailUnavailable": "✗ Invalid email format or already registered",
+    "usernameAvailable": "Username available",
+    "usernameUnavailable": "Username unavailable or already taken",
+    "emailAvailable": "Email available",
+    "emailUnavailable": "Invalid email format or already registered",
     "passwordStrengthLabel": "Password strength:",
     "passwordStrength": {
       "weak": "Weak",
@@ -244,7 +244,7 @@
     "footerAgreement": "By registering, you agree to our Terms of Service and Privacy Policy",
     "branding": {
       "tagline": "Start Your Creative Journey",
-      "description": "Join 50,000+ creators and tell your story with FastBlog. Let your ideas reach every corner of the world.",
+      "description": "Join 50,000+ creators and tell your story with Carded AI. Let your ideas reach every corner of the world.",
       "benefits": {
         "aiAssisted": "AI-Assisted Creation",
         "aiAssistedDesc": "Smart writing assistant, boost your creativity",
@@ -256,16 +256,16 @@
         "contentMonetizationDesc": "Multiple revenue models to make creation valuable"
       },
       "testimonial": {
-        "quote": "FastBlog has completely transformed my creative process. AI-assisted writing has tripled my efficiency, and the platform's distribution capabilities have brought my articles to a much wider audience.",
+        "quote": "Carded AI has completely transformed my creative process. AI-assisted writing has tripled my efficiency, and the platform's distribution capabilities have brought my articles to a much wider audience.",
         "author": "Li Ming",
         "role": "Full-stack Developer · Tech Blogger"
       }
     },
-    "step0Title": "🚀 Create Account",
+    "step0Title": "Create Account",
     "step0Subtitle": "Fill in basic info to get started",
-    "step1Title": "🔐 Set Password",
+    "step1Title": "Set Password",
     "step1Subtitle": "Create a secure password",
-    "step2Title": "🎉 Almost Done",
+    "step2Title": "Almost Done",
     "step2Subtitle": "Confirm info and complete registration"
   },
   "validation": {

@@ -132,10 +132,10 @@
     "verifyingStatus": "正在验证登录状态...",
     "passwordLogin": "密码登录",
     "qrLogin": "扫码登录",
-    "scanQRCode": "使用 FastBlog App 扫描二维码",
+    "scanQRCode": "使用 Carded AI App 扫描二维码",
     "generatingQR": "正在生成二维码...",
     "scanSteps": "扫码步骤",
-    "scanStep1": "打开 FastBlog 手机应用",
+    "scanStep1": "打开 Carded AI 手机应用",
     "scanStep2": "进入\"我的\" → \"扫一扫\"",
     "scanStep3": "扫描上方二维码",
     "scanStep4": "在手机上确认登录",
@@ -163,7 +163,7 @@
     "verificationFailed": "验证失败",
     "branding": {
       "tagline": "创作、分享、连接世界",
-      "description": "FastBlog 是新一代智能博客平台，让每位创作者都能轻松表达思想、分享知识、与全球读者建立连接。",
+      "description": "Carded AI 是新一代智能博客平台，让每位创作者都能轻松表达思想、分享知识、与全球读者建立连接。",
       "activeCreators": "活跃创作者",
       "qualityArticles": "优质文章",
       "countries": "国家地区"
@@ -212,10 +212,10 @@
     "emailCheckFailed": "邮箱检查失败",
     "checkPassword": "请检查密码填写",
     "usernameMinChars": "用户名至少3个字符",
-    "usernameAvailable": "✓ 用户名可用",
-    "usernameUnavailable": "✗ 用户名不可用或已被占用",
-    "emailAvailable": "✓ 邮箱可用",
-    "emailUnavailable": "✗ 邮箱格式不正确或已被注册",
+    "usernameAvailable": "用户名可用",
+    "usernameUnavailable": "用户名不可用或已被占用",
+    "emailAvailable": "邮箱可用",
+    "emailUnavailable": "邮箱格式不正确或已被注册",
     "passwordStrengthLabel": "密码强度:",
     "passwordStrength": {
       "weak": "弱",
@@ -244,7 +244,7 @@
     "footerAgreement": "注册即表示同意我们的服务条款和隐私政策",
     "branding": {
       "tagline": "开始你的创作旅程",
-      "description": "加入 50,000+ 创作者的行列，用 FastBlog 讲述你的故事，让思想触达世界的每个角落。",
+      "description": "加入 50,000+ 创作者的行列，用 Carded AI 讲述你的故事，让思想触达世界的每个角落。",
       "benefits": {
         "aiAssisted": "AI 辅助创作",
         "aiAssistedDesc": "智能写作助手，提升创作效率",
@@ -256,16 +256,16 @@
         "contentMonetizationDesc": "多种收益模式，让创作更有价值"
       },
       "testimonial": {
-        "quote": "FastBlog 彻底改变了我的创作方式。AI 辅助写作让我效率提升了 3 倍，平台的分发能力让我的文章被更多人看到。",
+        "quote": "Carded AI 彻底改变了我的创作方式。AI 辅助写作让我效率提升了 3 倍，平台的分发能力让我的文章被更多人看到。",
         "author": "李明",
         "role": "全栈开发者 · 技术博主"
       }
     },
-    "step0Title": "🚀 创建账户",
+    "step0Title": "创建账户",
     "step0Subtitle": "填写基本信息开始注册",
-    "step1Title": "🔐 设置密码",
+    "step1Title": "设置密码",
     "step1Subtitle": "创建一个安全的密码",
-    "step2Title": "🎉 即将完成",
+    "step2Title": "即将完成",
     "step2Subtitle": "确认信息并完成注册"
   },
   "validation": {

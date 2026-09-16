@@ -7,6 +7,7 @@ import {apiClient} from '@/lib/api/base-client';
 import {getCookie, setCookie} from '@/lib/auth-utils';
 import {type LoginFormData, loginSchema, type TwoFactorFormData, twoFactorSchema} from '@/lib/schemas';
 import {useTranslation} from '@/lib/i18n';
+import {cn} from '@/lib/utils';
 import {
   AlertCircle,
   ArrowLeft,
@@ -20,17 +21,21 @@ import {
   Lock,
   QrCode,
   Shield,
-  Smartphone,
   Sparkles,
   User,
   Zap
 } from 'lucide-react';
+import AuthShell from '@/components/auth/AuthShell';
+import AuthField from '@/components/auth/AuthField';
+import {Button} from '@/components/ui/button';
+import {Checkbox} from '@/components/ui/checkbox';
 
 export default function LoginPage() {
   const {t} = useTranslation();
-  const [mode, setMode] = useState<'password'|'qrcode'>('password');
-  const [pv, setPv] = useState(false); const [err, setErr] = useState(''); const [busy, setBusy] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [mode, setMode] = useState<'password' | 'qrcode'>('password');
+  const [pv, setPv] = useState(false);
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
   // 第三方登录（GitHub / Google）：启用状态由后台配置决定
   const [oauthProviders, setOauthProviders] = useState<Array<{
     key: string;
@@ -78,8 +83,8 @@ export default function LoginPage() {
   const features = [
     {icon: Sparkles, titleKey: 'login.features.aiWriting', descKey: 'login.features.aiWritingDesc'},
     {icon: Zap, titleKey: 'login.features.fastPublish', descKey: 'login.features.fastPublishDesc'},
-    {icon: BookOpen, titleKey: 'login.features.immersiveReading', descKey: 'login.features.immersiveReadingDesc'},
     {icon: Shield, titleKey: 'login.features.secure', descKey: 'login.features.secureDesc'},
+    {icon: BookOpen, titleKey: 'login.features.immersiveReading', descKey: 'login.features.immersiveReadingDesc'},
   ];
 
   // react-hook-form — 登录表单
@@ -95,13 +100,13 @@ export default function LoginPage() {
   });
 
   // 2FA
-  const [fa, setFa] = useState<{tempToken:string;userId:number}|null>(null);
+  const [fa, setFa] = useState<{ tempToken: string; userId: number } | null>(null);
   const [backup, setBackup] = useState(false);
 
   // QR code
   const [qrImg, setQrImg] = useState('');
   const [, setQrToken] = useState('');
-  const [qrStatus, setQrStatus] = useState<'idle'|'loading'|'ready'|'pending'|'success'|'expired'>('idle');
+  const [qrStatus, setQrStatus] = useState<'idle' | 'loading' | 'ready' | 'pending' | 'success' | 'expired'>('idle');
   const pollRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const cancelRef = useRef(false);
   const [countdown, setCountdown] = useState(0);
@@ -147,7 +152,7 @@ export default function LoginPage() {
     })();
   }, []);
 
-  const next = () => new URLSearchParams(window.location.search).get('next')||'/profile';
+  const next = () => new URLSearchParams(window.location.search).get('next') || '/profile';
 
   // Cleanup polling + countdown
   useEffect(() => {
@@ -197,7 +202,11 @@ export default function LoginPage() {
 
   // ═══ QR Login Generator (uses V2 backend) ═══
   const generateQR = async () => {
-    setErr(''); setQrStatus('loading'); setQrImg(''); setQrToken(''); cancelRef.current = false;
+    setErr('');
+    setQrStatus('loading');
+    setQrImg('');
+    setQrToken('');
+    cancelRef.current = false;
     try {
       const r = await apiClient.get('/auth/qr/generate');
       if (!r.success || !r.data) {
@@ -214,7 +223,11 @@ export default function LoginPage() {
         try {
           const mod = await import('qrcode');
           const loginUrl = `${window.location.origin}/api/v2/mobile-login?login_token=${token}`;
-          const dataUrl = await mod.toDataURL(loginUrl, {width:280,margin:2,color:{dark:'#1e40af',light:'#ffffff'}});
+          const dataUrl = await mod.toDataURL(loginUrl, {
+            width: 280,
+            margin: 2,
+            color: {dark: '#1e40af', light: '#ffffff'}
+          });
           setQrImg(dataUrl);
         } catch {
           setErr(t('login.qrGenerateFailed'));
@@ -286,7 +299,11 @@ export default function LoginPage() {
         return;
       }
       const d = r.data as any;
-      if (d.requires_2fa && d.temp_token) { setFa({tempToken:d.temp_token, userId:d.user_id}); setBusy(false); return; }
+      if (d.requires_2fa && d.temp_token) {
+        setFa({tempToken: d.temp_token, userId: d.user_id});
+        setBusy(false);
+        return;
+      }
       if (d.access_token) setCookie('access_token', d.access_token, 3600);
       if (d.refresh_token) setCookie('refresh_token', d.refresh_token, 604800);
       window.location.href = next();
@@ -299,11 +316,13 @@ export default function LoginPage() {
   // ═══ 2FA ═══
   const on2FASubmit = async (data: TwoFactorFormData) => {
     if (!fa) return;
-    setBusy(true); setErr('');
+    setBusy(true);
+    setErr('');
     try {
       const r = await apiClient.post('/security/2fa/verify-login', {user_id: fa.userId, token: data.code});
       if (r.success && r.data) {
-        const d = r.data as any; if (d.access_token) setCookie('access_token', d.access_token, 3600);
+        const d = r.data as any;
+        if (d.access_token) setCookie('access_token', d.access_token, 3600);
         if (d.refresh_token) setCookie('refresh_token', d.refresh_token, 604800);
         window.location.href = next();
       } else setErr(r.error || t('login.verificationFailed'));
@@ -315,511 +334,374 @@ export default function LoginPage() {
   };
 
   if (checking) return (
-      <div
-        className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 rounded-full animate-spin"/>
-            <div
-                className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-blue-600 rounded-full animate-spin"/>
-          </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">{t('login.verifyingStatus')}</p>
-        </div>
-      </div>
-  );
-
-  return (
-      <div
-        className="min-h-screen flex bg-background">
-        {/* ═══ Left Panel - Branding ═══ */}
-        <div className="hidden lg:flex lg:w-1/2 xl:w-[45%] relative overflow-hidden">
-          {/* Gradient Background */}
-          <div className="absolute inset-0 bg-primary"/>
-
-          {/* Content */}
-          <div className="relative z-10 flex flex-col justify-between p-12 xl:p-16 w-full">
-            {/* Logo & Brand */}
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-md border border-white/25">
-                  <BookOpen className="w-5 h-5 text-white"/>
-                </div>
-                <span className="text-xl font-bold text-white">Carded AI</span>
-              </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="space-y-8">
-              <div>
-                <h2 className="editorial-title mb-4 text-3xl leading-tight text-white xl:text-4xl">
-                  {t('login.branding.tagline').split('\n').map((line, i) => (
-                    <React.Fragment key={i}>{i > 0 && <br/>}{line}</React.Fragment>
-                  ))}
-                </h2>
-                <p className="text-blue-100/80 text-lg leading-relaxed max-w-md">
-                  {t('login.branding.description')}
-                </p>
-              </div>
-
-              {/* Features */}
-              <div className="grid grid-cols-2 gap-4">
-                {features.map((feat, i) => {
-                  const Icon = feat.icon;
-                  return (
-                      <div key={i}
-                           className="group rounded-md border border-white/15 p-4 transition-colors hover:border-white/30">
-                        <Icon className="w-6 h-6 text-blue-200 mb-3 group-hover:scale-110 transition-transform"/>
-                        <h3 className="text-sm font-semibold text-white mb-1">{t(feat.titleKey)}</h3>
-                        <p className="text-xs text-blue-100/70 leading-relaxed">{t(feat.descKey)}</p>
-                      </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Bottom Stats */}
-            <div className="flex items-center gap-8">
-              <div>
-                <div className="text-2xl font-bold text-white">50K+</div>
-                <div className="text-sm text-blue-100/70">{t('login.branding.activeCreators')}</div>
-              </div>
-              <div className="w-px h-10 bg-white/20"/>
-              <div>
-                <div className="text-2xl font-bold text-white">1M+</div>
-                <div className="text-sm text-blue-100/70">{t('login.branding.qualityArticles')}</div>
-              </div>
-              <div className="w-px h-10 bg-white/20"/>
-              <div>
-                <div className="text-2xl font-bold text-white">100+</div>
-                <div className="text-sm text-blue-100/70">{t('login.branding.countries')}</div>
-              </div>
-          </div>
-          </div>
-        </div>
-
-        {/* ═══ Right Panel - Login Form ═══ */}
-        <div className="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-12">
-          <div className="w-full max-w-md">
-            {/* Mobile Logo */}
-            <div className="lg:hidden flex items-center gap-3 mb-8">
-              <div
-                className="w-10 h-10 bg-primary rounded-md flex items-center justify-center shadow-lg shadow-blue-200/50 dark:shadow-blue-900/30">
-                <BookOpen className="w-5 h-5 text-white"/>
-              </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">Carded AI</span>
-            </div>
-
-            {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                {fa ? `🔐 ${t('login.twoFactorTitle')}` : mode === 'qrcode' ? `📱 ${t('login.qrLogin')}` : `👋 ${t('login.title')}`}
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400">
-                {fa ? t('login.twoFactorSubtitle') : mode === 'qrcode' ? t('login.scanQRCode') : t('login.subtitle')}
-              </p>
-            </div>
-
-            {/* Error Message */}
-            {err && (
-                <div
-                  className="mb-6 flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200/60 dark:border-red-800/40 rounded-lg text-sm">
-                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"/>
-                  <span className="text-red-600 dark:text-red-400">{err}</span>
-                </div>
-            )}
-
-            {/* 2FA Form */}
-            {fa ? (
-              <FormProvider {...twoFAForm}>
-                <div className="space-y-6">
-                  <div
-                    className="text-center p-6 bg-secondary rounded-lg border border-primary dark:border-primary/30">
-                    <div
-                      className="w-16 h-16 mx-auto mb-4 bg-primary rounded-lg flex items-center justify-center shadow-lg">
-                      <Smartphone className="w-8 h-8 text-white"/>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {backup ? t('login.twoFactorBackupHint') : t('login.twoFactorCodeHint')}
-                    </p>
-                  </div>
-
-                  <form onSubmit={twoFAForm.handleSubmit(on2FASubmit)} className="space-y-4">
-                    <Controller
-                      name="code"
-                      control={twoFAForm.control}
-                      render={({field}) => (
-                        <div className="relative">
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            autoFocus
-                            value={field.value}
-                            onChange={e => field.onChange(e.target.value.replace(/\D/g, '').slice(0, backup ? 8 : 6))}
-                            placeholder={backup ? t('login.twoFactorPlaceholder') : '000000'}
-                            className="w-full text-center text-3xl tracking-[0.5em] px-6 py-5 bg-card border-2 border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 dark:text-white font-mono transition-all"
-                          />
-                          {twoFAForm.formState.errors.code && (
-                            <p className="text-xs text-red-500 dark:text-red-400 text-center mt-2">
-                              {twoFAForm.formState.errors.code.message}
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    />
-
-                    <button
-                        type="submit"
-                        disabled={busy}
-                        className="w-full py-4 bg-primary text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary hover:shadow-sm hover:shadow-primary active:scale-[0.98]"
-                    >
-                      {busy ? (
-                          <span className="flex items-center justify-center gap-2">
-                      <Loader className="w-5 h-5 animate-spin"/> {t('login.twoFactorVerifying')}
-                    </span>
-                      ) : t('login.verifyButton')}
-                    </button>
-
-                    <div className="flex items-center justify-between pt-2">
-                      <button type="button" onClick={() => {
-                        setBackup(!backup);
-                        twoFAForm.reset({code: ''});
-                      }}
-                              className="text-sm text-primary hover:text-primary dark:text-primary font-medium">
-                        {backup ? t('login.twoFactorUseCode') : t('login.twoFactorUseBackup')}
-                      </button>
-                      <button type="button" onClick={() => {
-                        setFa(null);
-                        twoFAForm.reset({code: ''});
-                        setErr('');
-                      }}
-                              className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                        <ArrowLeft className="w-4 h-4"/> {t('login.backToLogin')}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </FormProvider>
-            ) : (
-                <>
-                  {/* Mode Switch */}
-                  <div className="flex p-1.5 bg-muted rounded-lg mb-6">
-                    <button
-                        onClick={() => {
-                          setMode('password');
-                          setErr('');
-                        }}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-semibold transition-all duration-200 ${
-                            mode === 'password'
-                                ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white'
-                              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                        }`}
-                    >
-                      <Lock className="w-4 h-4"/> {t('login.passwordLogin')}
-                    </button>
-                    <button
-                        onClick={() => {
-                          setMode('qrcode');
-                          setErr('');
-                          if (!qrImg) generateQR();
-                        }}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-md text-sm font-semibold transition-all duration-200 ${
-                            mode === 'qrcode'
-                                ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white'
-                              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                        }`}
-                    >
-                      <QrCode className="w-4 h-4"/> {t('login.qrLogin')}
-                    </button>
-                  </div>
-
-                  {/* Password Form */}
-                  {mode === 'password' && (
-                    <FormProvider {...loginForm}>
-                      <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-5">
-                        {/* Username Field */}
-                        <div className="space-y-2">
-                          <label
-                            className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('login.usernameOrEmail')}</label>
-                          <div
-                              className={`relative group transition-all duration-200 ${focusedField === 'username' ? 'scale-[1.01]' : ''}`}>
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                              <User
-                                  className={`w-5 h-5 transition-colors ${focusedField === 'username' ? 'text-blue-500' : 'text-gray-400'}`}/>
-                            </div>
-                            <input
-                                type="text"
-                                {...loginForm.register('username')}
-                                onFocus={() => setFocusedField('username')}
-                                onBlur={() => setFocusedField(null)}
-                                placeholder={t('login.usernameOrEmailPlaceholder')}
-                                autoFocus
-                                className={`w-full pl-12 pr-4 py-4 bg-card border-2 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all ${
-                                  loginForm.formState.errors.username
-                                    ? 'border-red-400 dark:border-red-500'
-                                    : 'border-gray-200 dark:border-gray-700'
-                                }`}
-                            />
-                          </div>
-                          {loginForm.formState.errors.username && (
-                            <p className="text-xs text-red-500 dark:text-red-400 flex items-center gap-1 pl-1">
-                              <AlertCircle className="w-3 h-3 flex-shrink-0"/>
-                              {loginForm.formState.errors.username.message}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Password Field */}
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <label
-                              className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('login.password')}</label>
-                            <a href="/forgot-password"
-                               className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium">
-                              {t('login.forgotPassword')}
-                            </a>
-                          </div>
-                          <div
-                              className={`relative group transition-all duration-200 ${focusedField === 'password' ? 'scale-[1.01]' : ''}`}>
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                              <Lock
-                                  className={`w-5 h-5 transition-colors ${focusedField === 'password' ? 'text-blue-500' : 'text-gray-400'}`}/>
-                            </div>
-                            <input
-                                type={pv ? 'text' : 'password'}
-                                {...loginForm.register('password')}
-                                onFocus={() => setFocusedField('password')}
-                                onBlur={() => setFocusedField(null)}
-                                placeholder={t('login.passwordPlaceholder')}
-                                className={`w-full pl-12 pr-12 py-4 bg-card border-2 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all ${
-                                  loginForm.formState.errors.password
-                                    ? 'border-red-400 dark:border-red-500'
-                                    : 'border-gray-200 dark:border-gray-700'
-                                }`}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setPv(!pv)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                            >
-                              {pv ? <EyeOff className="w-5 h-5"/> : <Eye className="w-5 h-5"/>}
-                            </button>
-                          </div>
-                          {loginForm.formState.errors.password && (
-                            <p className="text-xs text-red-500 dark:text-red-400 flex items-center gap-1 pl-1">
-                              <AlertCircle className="w-3 h-3 flex-shrink-0"/>
-                              {loginForm.formState.errors.password.message}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Remember Me */}
-                        <label className="flex items-center gap-3 cursor-pointer group">
-                          <div className="relative">
-                            <input
-                                type="checkbox"
-                                {...loginForm.register('remember')}
-                                className="peer sr-only"
-                            />
-                            <div
-                                className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded-lg peer-checked:border-blue-500 peer-checked:bg-blue-500 transition-all flex items-center justify-center">
-                              {loginForm.watch('remember') && (
-                                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24"
-                                       stroke="currentColor" strokeWidth={3}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
-                                  </svg>
-                              )}
-                            </div>
-                          </div>
-                          <span
-                              className="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors">
-                      {t('login.rememberMeStatus')}
-                    </span>
-                        </label>
-
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            disabled={busy}
-                            className="w-full py-4 bg-primary text-white font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-sm hover:shadow-blue-500/30 active:scale-[0.98] flex items-center justify-center gap-2"
-                        >
-                          {busy ? (
-                              <>
-                                <Loader className="w-5 h-5 animate-spin"/>
-                                <span>{t('login.loggingIn')}</span>
-                              </>
-                          ) : (
-                              <>
-                                <span>{t('login.loginButton')}</span>
-                                <ChevronRight className="w-5 h-5"/>
-                              </>
-                          )}
-                        </button>
-
-                        {/* Divider */}
-                        <div className="relative flex items-center py-2">
-                          <div className="flex-1 border-t border-gray-200 dark:border-gray-700"/>
-                          <span
-                            className="px-4 text-xs text-gray-400 dark:text-gray-500 font-medium">{t('login.orOtherMethods')}</span>
-                          <div className="flex-1 border-t border-gray-200 dark:border-gray-700"/>
-                        </div>
-
-                        {/* Social Login */}
-                        <div className="grid grid-cols-2 gap-3">
-                          <button
-                              type="button"
-                              onClick={() => startOauthLogin('github')}
-                              disabled={busy || !oauthReady('github')}
-                              title={oauthReady('github') ? '使用 GitHub 账号登录' : '管理员尚未启用 GitHub 登录'}
-                              className="flex items-center justify-center gap-2 py-3.5 bg-card border border-border rounded-md text-sm font-medium text-foreground hover:bg-accent transition-colors active:translate-y-[0.5px] disabled:opacity-50 disabled:pointer-events-none"
-                          >
-                            <GitBranch className="w-5 h-5"/> GitHub
-                          </button>
-                          <button
-                              type="button"
-                              onClick={() => startOauthLogin('google')}
-                              disabled={busy || !oauthReady('google')}
-                              title={oauthReady('google') ? '使用 Google 账号登录' : '管理员尚未启用 Google 登录'}
-                              className="flex items-center justify-center gap-2 py-3.5 bg-card border border-border rounded-md text-sm font-medium text-foreground hover:bg-accent transition-colors active:translate-y-[0.5px] disabled:opacity-50 disabled:pointer-events-none"
-                          >
-                            <Globe className="w-5 h-5"/> Google
-                          </button>
-                        </div>
-
-                        {/* Register Link */}
-                        <p className="text-center text-sm text-gray-500 dark:text-gray-400 pt-2">
-                          {t('login.noAccount')}{' '}
-                          <a href="/register"
-                             className="text-blue-600 hover:text-blue-700 dark:text-blue-400 font-semibold hover:underline">
-                            {t('login.registerNow')}
-                          </a>
-                        </p>
-                      </form>
-                    </FormProvider>
-                  )}
-
-                  {/* QR Code Panel */}
-                  {mode === 'qrcode' && (
-                      <div className="space-y-6">
-                        <div
-                          className="bg-card rounded-lg p-8 border border-gray-100 dark:border-gray-700 shadow-sm">
-                          <div className="text-center space-y-5">
-                            {/* QR Display */}
-                            <div className="flex justify-center">
-                              {qrStatus === 'loading' ? (
-                                  <div
-                                    className="w-[220px] h-[220px] bg-gray-50 dark:bg-gray-900 rounded-lg animate-pulse flex items-center justify-center">
-                                    <div className="flex flex-col items-center gap-3">
-                                      <Loader className="w-8 h-8 animate-spin text-blue-500"/>
-                                      <span className="text-sm text-gray-400">{t('login.qrGenerating')}</span>
-                                    </div>
-                                  </div>
-                              ) : qrImg ? (
-                                <div className="relative p-4 bg-card rounded-lg border border-border shadow-sm">
-                                    <img src={qrImg} alt="Login QR Code" className="w-[200px] h-[200px]"/>
-                                    {qrStatus === 'success' && (
-                                        <div
-                                          className="absolute inset-0 bg-green-500/90 rounded-lg flex items-center justify-center">
-                                          <svg className="w-16 h-16 text-white" fill="none" viewBox="0 0 24 24"
-                                               stroke="currentColor" strokeWidth={2.5}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
-                                          </svg>
-                                        </div>
-                                    )}
-                                    {qrStatus === 'expired' && (
-                                      <div
-                                        className="absolute inset-0 bg-orange-500/85 rounded-lg flex flex-col items-center justify-center gap-2">
-                                        <svg className="w-14 h-14 text-white" fill="none" viewBox="0 0 24 24"
-                                             stroke="currentColor" strokeWidth={2}>
-                                          <circle cx="12" cy="12" r="10"/>
-                                          <polyline points="12 6 12 12 16 14"/>
-                                        </svg>
-                                        <span
-                                          className="text-white text-sm font-medium">{t('login.qrExpiredAutoRefresh')}</span>
-                                      </div>
-                                    )}
-                                  </div>
-                              ) : (
-                                  <div
-                                    className="w-[220px] h-[220px] bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
-                                      onClick={generateQR}>
-                                    <QrCode className="w-10 h-10 text-gray-300 dark:text-gray-600"/>
-                                    <span className="text-sm text-gray-400">{t('login.qrClickToGenerate')}</span>
-                                  </div>
-                              )}
-                            </div>
-
-                            {/* Status Text */}
-                            <div className="space-y-2">
-                              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {qrStatus === 'loading' ? t('login.generatingQR') :
-                                    qrStatus === 'ready' || qrStatus === 'pending' ? (
-                                        <span className="flex flex-col items-center gap-1">
-                                          <span className="flex items-center justify-center gap-2">
-                                            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"/>
-                                            {t('login.qrWaitingScan')}
-                                          </span>
-                                          {countdown > 0 && (
-                                            <span
-                                              className={`text-xs ${countdown <= 30 ? 'text-orange-500 font-semibold' : 'text-gray-400 dark:text-gray-500'}`}>
-                                              {t('login.qrExpiresIn', {seconds: countdown})}
-                                            </span>
-                                          )}
-                                        </span>
-                                      ) :
-                                      qrStatus === 'success' ? `✅ ${t('login.qrScanSuccess')}` :
-                                        qrStatus === 'expired' ? t('login.qrExpiredAutoRefresh') :
-                                          t('login.scanQRCode')}
-                              </p>
-                            </div>
-
-                            {/* Action Buttons */}
-                            {(qrStatus === 'expired' || qrStatus === 'idle') && (
-                                <button
-                                    onClick={generateQR}
-                                    className="px-6 py-3 bg-primary text-white text-sm font-semibold rounded-md transition-all shadow-md hover:shadow-lg active:scale-[0.98]"
-                                >
-                                  {qrStatus === 'expired' ? t('login.qrRegenerate') : t('login.qrGenerate')}
-                                </button>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Instructions */}
-                        <div
-                          className="bg-muted/50 rounded-lg p-5 border border-gray-100 dark:border-gray-800">
-                          <h3
-                            className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">{t('login.scanSteps')}</h3>
-                          <ol className="space-y-2.5">
-                            {[t('login.scanStep1'), t('login.scanStep2'), t('login.scanStep3'), t('login.scanStep4')].map((step, i) => (
-                                <li key={i}
-                                    className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                          <span
-                              className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
-                            {i + 1}
-                          </span>
-                                  {step}
-                                </li>
-                            ))}
-                          </ol>
-                        </div>
-                      </div>
-                  )}
-                </>
-            )}
-
-            {/* Footer */}
-            <div className="mt-8 text-center">
-              <p className="text-xs text-gray-400 dark:text-gray-500">
-                {t('login.agreeToTerms')}{' '}
-                <a href="/terms"
-                   className="text-gray-500 dark:text-gray-400 hover:underline">{t('login.termsOfService')}</a>
-                {' '}{t('common.and') || '和'}{' '}
-                <a href="/privacy"
-                   className="text-gray-500 dark:text-gray-400 hover:underline">{t('login.privacyPolicy')}</a>
-              </p>
-            </div>
-          </div>
+    <div className="flex min-h-[calc(100dvh-3.5rem)] items-center justify-center">
+      <div className="flex items-center gap-3 text-xs tracking-[0.18em] text-muted-foreground">
+        <Loader className="h-4 w-4 animate-spin"/>
+        {t('login.verifyingStatus')}
       </div>
     </div>
+  );
+
+  const heading = fa
+    ? t('login.twoFactorTitle')
+    : mode === 'qrcode'
+      ? t('login.qrLogin')
+      : t('login.title');
+
+  const subheading = fa
+    ? t('login.twoFactorSubtitle')
+    : mode === 'qrcode'
+      ? t('login.scanQRCode')
+      : t('login.subtitle');
+
+  const modeTabs = [
+    {value: 'password' as const, icon: Lock, label: t('login.passwordLogin')},
+    {value: 'qrcode' as const, icon: QrCode, label: t('login.qrLogin')},
+  ];
+
+  const scanSteps = [t('login.scanStep1'), t('login.scanStep2'), t('login.scanStep3'), t('login.scanStep4')];
+
+  return (
+    <AuthShell
+      tagline={t('login.branding.tagline')}
+      title={heading}
+      subtitle={subheading}
+      footnote={
+        <div className="space-y-3">
+          <p>
+            {t('login.noAccount')}{' '}
+            <a href="/register"
+               className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground">
+              {t('login.registerNow')}
+            </a>
+          </p>
+          <p className="text-xs text-muted-foreground/75">
+            {t('login.agreeToTerms')}{' '}
+            <a href="/terms" className="underline decoration-border underline-offset-4 hover:decoration-foreground">
+              {t('login.termsOfService')}
+            </a>{' '}
+            {t('common.and') || '和'}{' '}
+            <a href="/privacy" className="underline decoration-border underline-offset-4 hover:decoration-foreground">
+              {t('login.privacyPolicy')}
+            </a>
+          </p>
+        </div>
+      }
+      note={
+        <div className="space-y-5">
+          <dl className="flex flex-wrap gap-x-10 gap-y-4">
+            {[
+              {value: '50K+', label: t('login.branding.activeCreators')},
+              {value: '1M+', label: t('login.branding.qualityArticles')},
+              {value: '100+', label: t('login.branding.countries')},
+            ].map(({value, label}) => (
+              <div key={label}>
+                <dd className="font-mono text-lg tabular-nums text-foreground">{value}</dd>
+                <dt className="mt-0.5 text-[10px] tracking-[0.14em] text-muted-foreground">{label}</dt>
+              </div>
+            ))}
+          </dl>
+          <p className="text-xs leading-relaxed text-muted-foreground/80">
+            {features.map(f => t(f.titleKey)).join(' · ')}
+          </p>
+        </div>
+      }
+    >
+      {/* Error */}
+      {err && (
+        <div
+          className="mb-8 flex items-start gap-3 border-l-2 border-destructive bg-destructive/[0.04] py-3 pl-4 pr-3 text-sm text-destructive">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0"/>
+          <span>{err}</span>
+        </div>
+      )}
+
+      {/* ═══ 2FA ═══ */}
+      {fa ? (
+        <FormProvider {...twoFAForm}>
+          <div className="space-y-8">
+            <p
+              className="border-l-2 border-primary/50 bg-muted/40 py-3 pl-4 pr-3 text-sm leading-relaxed text-muted-foreground">
+              {backup ? t('login.twoFactorBackupHint') : t('login.twoFactorCodeHint')}
+            </p>
+
+            <form onSubmit={twoFAForm.handleSubmit(on2FASubmit)} className="space-y-8">
+              <Controller
+                name="code"
+                control={twoFAForm.control}
+                render={({field}) => (
+                  <div>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoFocus
+                      aria-label={backup ? t('login.twoFactorPlaceholder') : t('login.twoFactorTitle')}
+                      value={field.value}
+                      onChange={e => field.onChange(e.target.value.replace(/\D/g, '').slice(0, backup ? 8 : 6))}
+                      placeholder={backup ? t('login.twoFactorPlaceholder') : '000000'}
+                      className={cn(
+                        'h-16 w-full border-0 border-b bg-transparent pb-2 text-center font-mono text-3xl tabular-nums tracking-[0.35em] text-foreground transition-colors',
+                        'placeholder:text-muted-foreground/40 focus:outline-none',
+                        twoFAForm.formState.errors.code ? 'border-destructive' : 'border-input focus:border-primary',
+                      )}
+                    />
+                    {twoFAForm.formState.errors.code && (
+                      <p className="mt-2 text-xs text-destructive">{twoFAForm.formState.errors.code.message}</p>
+                    )}
+                  </div>
+                )}
+              />
+
+              <Button type="submit" disabled={busy} className="h-12 w-full rounded-sm text-[15px]">
+                {busy ? (
+                  <span className="flex items-center gap-2">
+                    <Loader className="h-4 w-4 animate-spin"/> {t('login.twoFactorVerifying')}
+                  </span>
+                ) : t('login.verifyButton')}
+              </Button>
+
+              <div className="flex items-center justify-between text-sm">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBackup(!backup);
+                    twoFAForm.reset({code: ''});
+                  }}
+                  className="text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+                >
+                  {backup ? t('login.twoFactorUseCode') : t('login.twoFactorUseBackup')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFa(null);
+                    twoFAForm.reset({code: ''});
+                    setErr('');
+                  }}
+                  className="flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5"/> {t('login.backToLogin')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </FormProvider>
+      ) : (
+        <>
+          {/* Mode switch */}
+          <div className="mb-9 flex border-b border-border">
+            {modeTabs.map(({value, icon: Icon, label}) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={mode === value}
+                onClick={() => {
+                  setMode(value);
+                  setErr('');
+                  if (value === 'qrcode' && !qrImg) generateQR();
+                }}
+                className={cn(
+                  '-mb-px mr-8 flex items-center gap-2 border-b-2 py-3 text-sm transition-colors',
+                  mode === value
+                    ? 'border-primary font-medium text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
+                )}
+              >
+                <Icon className="h-4 w-4"/> {label}
+              </button>
+            ))}
+          </div>
+
+          {/* ═══ 密码登录 ═══ */}
+          {mode === 'password' && (
+            <FormProvider {...loginForm}>
+              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-7">
+                <AuthField
+                  label={t('login.usernameOrEmail')}
+                  icon={User}
+                  autoFocus
+                  placeholder={t('login.usernameOrEmailPlaceholder')}
+                  error={loginForm.formState.errors.username?.message}
+                  {...loginForm.register('username')}
+                />
+
+                <AuthField
+                  label={t('login.password')}
+                  icon={Lock}
+                  type={pv ? 'text' : 'password'}
+                  placeholder={t('login.passwordPlaceholder')}
+                  error={loginForm.formState.errors.password?.message}
+                  hint={
+                    <a href="/forgot-password"
+                       className="text-xs text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground">
+                      {t('login.forgotPassword')}
+                    </a>
+                  }
+                  action={
+                    <button
+                      type="button"
+                      onClick={() => setPv(!pv)}
+                      aria-label={t('login.password')}
+                      className="flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {pv ? <EyeOff className="h-4 w-4"/> : <Eye className="h-4 w-4"/>}
+                    </button>
+                  }
+                  {...loginForm.register('password')}
+                />
+
+                {/* Remember me */}
+                <Controller
+                  name="remember"
+                  control={loginForm.control}
+                  render={({field}) => (
+                    <label
+                      className="flex w-fit cursor-pointer items-center gap-2.5 text-sm text-muted-foreground select-none">
+                      <Checkbox
+                        checked={Boolean(field.value)}
+                        onCheckedChange={(checked) => field.onChange(checked === true)}
+                      />
+                      <span>{t('login.rememberMeStatus')}</span>
+                    </label>
+                  )}
+                />
+
+                <Button type="submit" disabled={busy} className="h-12 w-full gap-2 rounded-sm text-[15px]">
+                  {busy ? (
+                    <>
+                      <Loader className="h-4 w-4 animate-spin"/>
+                      <span>{t('login.loggingIn')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{t('login.loginButton')}</span>
+                      <ChevronRight className="h-4 w-4"/>
+                    </>
+                  )}
+                </Button>
+
+                {/* Divider */}
+                <div className="relative">
+                  <div className="h-px w-full bg-border"/>
+                  <span
+                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-4 text-xs text-muted-foreground">
+                    {t('login.orOtherMethods')}
+                  </span>
+                </div>
+
+                {/* Social login */}
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => startOauthLogin('github')}
+                    disabled={busy || !oauthReady('github')}
+                    title={oauthReady('github') ? '使用 GitHub 账号登录' : '管理员尚未启用 GitHub 登录'}
+                    className="h-12 gap-2 rounded-sm border-border font-normal"
+                  >
+                    <GitBranch className="h-4 w-4"/> GitHub
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => startOauthLogin('google')}
+                    disabled={busy || !oauthReady('google')}
+                    title={oauthReady('google') ? '使用 Google 账号登录' : '管理员尚未启用 Google 登录'}
+                    className="h-12 gap-2 rounded-sm border-border font-normal"
+                  >
+                    <Globe className="h-4 w-4"/> Google
+                  </Button>
+                </div>
+              </form>
+            </FormProvider>
+          )}
+
+          {/* ═══ 扫码登录 ═══ */}
+          {mode === 'qrcode' && (
+            <div className="space-y-10">
+              <div className="flex flex-col items-center gap-7">
+                {/* QR —— 无外框，二维码直接落在纸底上 */}
+                {qrStatus === 'loading' ? (
+                  <div className="flex h-[190px] w-[190px] items-center justify-center">
+                    <Loader className="h-5 w-5 animate-spin text-muted-foreground"/>
+                  </div>
+                ) : qrImg ? (
+                  <div className="relative">
+                    <img src={qrImg} alt={t('login.qrLogin')} className="h-[190px] w-[190px]"/>
+                    {qrStatus === 'success' && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-primary/95">
+                        <svg className="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                             strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+                        </svg>
+                      </div>
+                    )}
+                    {qrStatus === 'expired' && (
+                      <div
+                        className="absolute inset-0 flex items-center justify-center bg-background/95 px-4 text-center">
+                        <p className="text-xs text-muted-foreground">{t('login.qrExpiredAutoRefresh')}</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={generateQR}
+                    aria-label={t('login.qrClickToGenerate')}
+                    className="flex h-[190px] w-[190px] items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <QrCode className="h-7 w-7"/>
+                  </button>
+                )}
+
+                {/* Status */}
+                <div className="w-full max-w-[19rem] text-center">
+                  <p className="text-sm text-foreground">
+                    {qrStatus === 'loading' ? t('login.generatingQR')
+                      : qrStatus === 'ready' || qrStatus === 'pending' ? t('login.qrWaitingScan')
+                        : qrStatus === 'success' ? t('login.qrScanSuccess')
+                          : qrStatus === 'expired' ? t('login.qrExpired')
+                            : t('login.qrClickToGenerate')}
+                  </p>
+                  {countdown > 0 && (qrStatus === 'ready' || qrStatus === 'pending') && (
+                    <p className={cn(
+                      'mt-1.5 font-mono text-xs tabular-nums',
+                      countdown <= 30 ? 'text-destructive' : 'text-muted-foreground',
+                    )}>
+                      {t('login.qrExpiresIn', {seconds: countdown})}
+                    </p>
+                  )}
+                  {(qrStatus === 'expired' || qrStatus === 'idle') && (
+                    <button
+                      type="button"
+                      onClick={generateQR}
+                      className="mt-3 text-sm text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+                    >
+                      {qrStatus === 'expired' ? t('login.qrRegenerate') : t('login.qrGenerate')}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Steps —— 等宽序号 + 发丝线，无卡片 */}
+              <div>
+                <p className="mb-3 text-[11px] tracking-[0.2em] text-muted-foreground">{t('login.scanSteps')}</p>
+                <ol className="border-t border-border">
+                  {scanSteps.map((step, i) => (
+                    <li key={i}
+                        className="flex items-baseline gap-4 border-b border-border py-2.5 text-sm text-muted-foreground">
+                      <span className="font-mono text-[11px] tabular-nums text-muted-foreground/60">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </AuthShell>
   );
 }

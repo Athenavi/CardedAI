@@ -1,9 +1,9 @@
 ---
-// 登录页 — 统一到 Layout（含导航/页脚/主题同步）
-import Layout from '@/layouts/Layout.astro';
+// 登录页 — 使用认证页独立壳层（不含全站导航 / 页脚 / Cookie 提示）
+import AuthLayout from '@/layouts/AuthLayout.astro';
 import LoginPage from '@/components/pages/LoginPage';
 ---
 
-<Layout title="登录 - Carded AI" description="登录 Carded AI 账号">
+<AuthLayout title="登录 - Carded AI" description="登录 Carded AI 账号">
     <LoginPage client:load/>
-</Layout>
+</AuthLayout>
