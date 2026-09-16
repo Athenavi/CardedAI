@@ -37,7 +37,7 @@ async def migration_status_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in migration_status_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -75,7 +75,7 @@ async def apply_migrations_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in apply_migrations_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -119,7 +119,7 @@ async def create_migration_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in create_migration_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -155,7 +155,7 @@ async def rollback_migration_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in rollback_migration_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

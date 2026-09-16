@@ -44,7 +44,7 @@ async def translate_text(
             )
     except Exception as e:
         import traceback
-        logger.error(exc_info=True)
+        traceback.print_exc()
         return ApiResponse(success=False, error=str(e))
 
 
@@ -79,8 +79,6 @@ async def batch_translate_texts(
             data=result
         )
     except Exception as e:
-        import traceback
-        logger.error(exc_info=True)
         return ApiResponse(success=False, error=str(e))
 
 

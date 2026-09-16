@@ -229,7 +229,7 @@ async def update_avatar_api(
     except Exception as e:
         import traceback
         logger.error(f"[Avatar Upload] Error: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return JSONResponse(content={"error": f"头像更新失败: {str(e)}"}, status_code=500)
 
 
@@ -259,5 +259,5 @@ async def update_setting_profiles(
     except Exception as e:
         import traceback
         logger.error(f"Error in update_setting_profiles: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return JSONResponse(content={"error": str(e)}, status_code=500)

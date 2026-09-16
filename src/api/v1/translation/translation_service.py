@@ -76,7 +76,7 @@ async def translate_text_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in translate_text_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -126,7 +126,7 @@ async def detect_language_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in detect_language_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -156,7 +156,7 @@ async def get_providers_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in get_providers_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -207,7 +207,7 @@ async def configure_translation_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in configure_translation_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

@@ -180,7 +180,7 @@ async def add_whitelist_ip_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in add_whitelist_ip_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

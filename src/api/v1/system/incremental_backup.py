@@ -229,7 +229,7 @@ async def get_backup_chain(
     except Exception as e:
         import traceback
         logger.error(f"Error getting backup chain: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -260,5 +260,5 @@ async def cleanup_old_backups(
     except Exception as e:
         import traceback
         logger.error(f"Error cleaning up old backups: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))

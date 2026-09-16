@@ -88,7 +88,7 @@ async def search_articles(
     except Exception as e:
         import traceback
         logger.error(f"Error in search_articles: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -212,7 +212,7 @@ async def rebuild_search_index(
     except Exception as e:
         import traceback
         logger.error(f"Error in rebuild_search_index: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -329,5 +329,5 @@ async def sync_article_to_index(
     except Exception as e:
         import traceback
         logger.error(f"Error in sync_article_to_index: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))

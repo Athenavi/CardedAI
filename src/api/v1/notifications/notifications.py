@@ -28,7 +28,7 @@ async def read_notification_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in read_notification_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 
@@ -45,7 +45,7 @@ async def fetch_message_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in fetch_message_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 
@@ -62,7 +62,7 @@ async def mark_all_as_read_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in mark_all_as_read_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 
@@ -92,7 +92,7 @@ async def clean_notification_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in clean_notification_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 
@@ -116,7 +116,7 @@ async def mark_notification_as_read_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in mark_notification_as_read_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 
@@ -139,7 +139,7 @@ async def delete_notification_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in delete_notification_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 
@@ -172,5 +172,5 @@ async def get_notifications_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in get_notifications_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)

@@ -157,7 +157,7 @@ async def create_article_revision(
     except Exception as e:
         import traceback
         logger.error(f"Error creating revision: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -338,7 +338,7 @@ async def sync_article_revisions(
     except Exception as e:
         import traceback
         logger.error(f"Error syncing revisions: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

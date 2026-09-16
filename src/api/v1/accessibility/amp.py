@@ -97,7 +97,7 @@ async def get_article_amp_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in get_article_amp_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -165,7 +165,7 @@ async def validate_article_amp_api(
     except Exception as e:
         import traceback
         logger.error(f"Error in validate_article_amp_api: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

@@ -302,7 +302,7 @@ async def get_blog_management_articles(
     except Exception as e:
         import traceback
         logger.error(f"Error in get_blog_management_articles: {str(e)}")
-        logger.logger(traceback.format_exc())
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 

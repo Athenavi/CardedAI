@@ -16,6 +16,7 @@ from shared.models.user import User
 from src.api.v1.core.responses import ApiResponse
 from src.utils.database.main import get_async_session
 from src.unified_logger import default_logger as logger
+from src.utils.menu_builder import get_default_menu
 
 router = APIRouter(tags=["home"])
 
@@ -357,49 +358,16 @@ async def get_home_stats(db: AsyncSession = Depends(get_async_session)):
 
 @router.get("/menus")
 async def get_home_menus(request: Request = None):
-    """
-    获取首页菜单配置
-    从数据库获取所有已激活的菜单及其菜单项
-    """
-    try:
-        from src.extensions import get_async_db_session
-        from src.utils.menu_builder import get_all_menus_with_items_async
-
-        # 获取数据库会话
-        async for db in get_async_db_session():
-            try:
-                menus_dict = await get_all_menus_with_items_async(db)
-
-                # 将字典转为列表格式，方便前端使用
-                menus_list = []
-                for menu_id, menu_data in menus_dict.items():
-                    menus_list.append({
-                        "id": menu_data['id'],
-                        "name": menu_data['name'],
-                        "slug": menu_data['slug'],
-                        "description": menu_data.get('description', ''),
-                        "items": menu_data.get('items', [])
-                    })
-
-                return ApiResponse(success=True, data={"menus": menus_list})
-            finally:
-                await db.close()
-    except Exception as e:
-        import traceback
-        print(f"Error in get_home_menus: {str(e)}")
-        print(traceback.format_exc())
-        # 出错时返回默认菜单
-        from src.utils.menu_builder import get_default_menu
-        default_items = get_default_menu()
-        return ApiResponse(success=True, data={
-            "menus": [{
-                "id": 0,
-                "name": "默认菜单",
-                "slug": "default",
-                "description": "系统默认菜单",
-                "items": default_items
-            }]
-        })
+    default_items = get_default_menu()
+    return ApiResponse(success=True, data={
+        "menus": [{
+            "id": 0,
+            "name": "默认菜单",
+            "slug": "default",
+            "description": "系统默认菜单",
+            "items": default_items
+        }]
+    })
 
 
 @router.get("/search")

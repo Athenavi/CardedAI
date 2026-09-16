@@ -22,7 +22,7 @@ def auth_by_uid(article_id: int, user_id: int, db: Session) -> bool:
         article = article_result.scalar_one_or_none()
         return article is not None
     except SQLAlchemyError as e:
-        logger.error(f"An error occurred: {e}")
+        print(f"An error occurred: {e}")
         return False
 
 
@@ -40,7 +40,7 @@ def check_user_conflict(zone: str, value: str, db: Session) -> bool:
             return False
         return user is not None
     except SQLAlchemyError as e:
-        logger.error(f"Error getting user list: {e}")
+        print(f"Error getting user list: {e}")
         return False
 
 
@@ -59,7 +59,7 @@ async def check_user_conflict_async(zone: str, value: str, db: AsyncSession) -> 
             return False
         return user is not None
     except SQLAlchemyError as e:
-        logger.error(f"Error checking user conflict: {e}")
+        print(f"Error checking user conflict: {e}")
         return False
 
 
@@ -104,14 +104,14 @@ async def save_uploaded_avatar(file: UploadFile, user_id: int, db):
 
         return avatar_uuid  # 返回不含扩展名的UUID，扩展名将通过get_avatar函数动态确定
     except SQLAlchemyError as e:
-        logger.error(f"Database error saving avatar: {e} by user {user_id}")
+        print(f"Database error saving avatar: {e} by user {user_id}")
         if isinstance(db, AsyncSession):
             await db.rollback()
         else:
             db.rollback()
         raise
     except Exception as e:
-        logger.error(f"Error saving avatar file: {e} by user {user_id}")
+        print(f"Error saving avatar file: {e} by user {user_id}")
         raise
 
 
@@ -131,7 +131,7 @@ async def db_save_bio(user_id: int, bio: str, db):
                 user.bio = bio
                 db.commit()
     except SQLAlchemyError as e:
-        logger.error(f"Error saving bio: {e} by user {user_id} bio: {bio}")
+        print(f"Error saving bio: {e} by user {user_id} bio: {bio}")
         if isinstance(db, AsyncSession):
             await db.rollback()
         else:
@@ -156,7 +156,7 @@ async def change_username(user_id: int, new_username: str, db):
                 user.username = new_username
                 db.commit()
     except SQLAlchemyError as e:
-        logger.error(f"Error changing username: {e} by user {user_id} new username: {new_username}")
+        print(f"Error changing username: {e} by user {user_id} new username: {new_username}")
         if isinstance(db, AsyncSession):
             await db.rollback()
         else:
@@ -184,7 +184,7 @@ async def bind_email(user_id: int, param: str, db) -> bool:
                 db.commit()
                 return True
     except SQLAlchemyError as e:
-        logger.error(f"Error binding email: {e} by user {user_id} email: {param}")
+        print(f"Error binding email: {e} by user {user_id} email: {param}")
         if isinstance(db, AsyncSession):
             await db.rollback()
         else:
@@ -301,6 +301,6 @@ async def get_avatar(domain: str, user_identifier, identifier_type: str = 'id', 
             if not avatar_url:
                 avatar_url = f"{domain}static/avatar/{user.profile_picture}.webp"
     except SQLAlchemyError as e:
-        logger.error(f"Error fetching avatar: {e}")
+        print(f"Error fetching avatar: {e}")
 
     return avatar_url
