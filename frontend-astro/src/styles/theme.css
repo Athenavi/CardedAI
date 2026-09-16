@@ -1,0 +1,262 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Editorial Minimal — 设计令牌（Design Tokens）
+   ───────────────────────────────────────────────────────────────────
+   落地方式说明（Tailwind v4 是 CSS-first 配置，tailwind.config.mjs 不作为令牌来源）：
+   1. 覆盖 Tailwind 内置色阶（white/black/gray/neutral/zinc/blue/indigo/violet/purple）
+      → 全站既有 bg-gray-*、text-gray-*、bg-blue-* 等数千处原子类一次性收敛到
+        "纸 + 墨 + 墨蓝" 的编辑风色板，无需逐页改类名。
+   2. 语义令牌（shadcn 命名：background/foreground/primary/muted/border/ring…）
+      → 用 :root / .dark 存值，再经 @theme inline 映射为 Tailwind 工具类，
+        使 components/ui/* 的 bg-primary、bg-background、ring-ring 等真正生效。
+   3. 语义状态色（red/green/emerald/amber/yellow/orange）保持 Tailwind 默认值，
+      避免与"告警/成功"等状态语义混淆。
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 静态令牌：字体 / 圆角 / 阴影 / 纸墨色阶 ── */
+@theme {
+  /* 字体：正文无衬线（可读性），标题衬线（编辑风标志），等宽用于元信息 */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+  --font-serif: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'SimSun', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-display: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', Georgia, 'Times New Roman', serif;
+
+  /* 圆角：编辑风偏方正，收紧圆角 */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 12px;
+
+  /* 阴影：以细线替代投影，仅保留极浅层次 */
+  --shadow-sm: 0 1px 1px rgb(28 25 23 / 0.04);
+  --shadow-md: 0 2px 6px rgb(28 25 23 / 0.06);
+  --shadow-lg: 0 8px 24px rgb(28 25 23 / 0.08);
+  --shadow-xl: 0 16px 40px rgb(28 25 23 / 0.10);
+
+  /* 纸白 / 墨黑 */
+  --color-white: #fffdf8;
+  --color-black: #12100e;
+
+  /* 暖灰（纸面与墨色）：覆盖 gray / neutral / zinc */
+  --color-gray-50: #faf8f5;
+  --color-gray-100: #f4f1ec;
+  --color-gray-200: #e8e4dd;
+  --color-gray-300: #d8d3c9;
+  --color-gray-400: #a8a29a;
+  --color-gray-500: #7c766d;
+  --color-gray-600: #5c564e;
+  --color-gray-700: #423d36;
+  --color-gray-800: #2b2721;
+  --color-gray-900: #1b1815;
+  --color-gray-950: #100e0c;
+
+  --color-neutral-50: #faf8f5;
+  --color-neutral-100: #f4f1ec;
+  --color-neutral-200: #e8e4dd;
+  --color-neutral-300: #d8d3c9;
+  --color-neutral-400: #a8a29a;
+  --color-neutral-500: #7c766d;
+  --color-neutral-600: #5c564e;
+  --color-neutral-700: #423d36;
+  --color-neutral-800: #2b2721;
+  --color-neutral-900: #1b1815;
+  --color-neutral-950: #100e0c;
+
+  --color-zinc-50: #faf8f5;
+  --color-zinc-100: #f4f1ec;
+  --color-zinc-200: #e8e4dd;
+  --color-zinc-300: #d8d3c9;
+  --color-zinc-400: #a8a29a;
+  --color-zinc-500: #7c766d;
+  --color-zinc-600: #5c564e;
+  --color-zinc-700: #423d36;
+  --color-zinc-800: #2b2721;
+  --color-zinc-900: #1b1815;
+  --color-zinc-950: #100e0c;
+
+  /* 墨蓝（唯一强调色）：覆盖 blue */
+  --color-blue-50: #f2f5fa;
+  --color-blue-100: #e3eaf4;
+  --color-blue-200: #c7d6ea;
+  --color-blue-300: #9db6d8;
+  --color-blue-400: #7d9cc9;
+  --color-blue-500: #5a80b4;
+  --color-blue-600: #2b4f86;
+  --color-blue-700: #24406d;
+  --color-blue-800: #1d3355;
+  --color-blue-900: #16263f;
+  --color-blue-950: #0e1826;
+
+  /* 灰紫（低饱和装饰色）：覆盖 indigo / violet / purple */
+  --color-indigo-50: #f5f4f7;
+  --color-indigo-100: #ebe9ef;
+  --color-indigo-200: #d9d5e0;
+  --color-indigo-300: #bdb7c9;
+  --color-indigo-400: #9c95ac;
+  --color-indigo-500: #7d758f;
+  --color-indigo-600: #615a73;
+  --color-indigo-700: #4d4759;
+  --color-indigo-800: #3a3547;
+  --color-indigo-900: #262233;
+  --color-indigo-950: #17141f;
+
+  --color-violet-50: #f5f4f7;
+  --color-violet-100: #ebe9ef;
+  --color-violet-200: #d9d5e0;
+  --color-violet-300: #bdb7c9;
+  --color-violet-400: #9c95ac;
+  --color-violet-500: #7d758f;
+  --color-violet-600: #615a73;
+  --color-violet-700: #4d4759;
+  --color-violet-800: #3a3547;
+  --color-violet-900: #262233;
+  --color-violet-950: #17141f;
+
+  --color-purple-50: #f5f4f7;
+  --color-purple-100: #ebe9ef;
+  --color-purple-200: #d9d5e0;
+  --color-purple-300: #bdb7c9;
+  --color-purple-400: #9c95ac;
+  --color-purple-500: #7d758f;
+  --color-purple-600: #615a73;
+  --color-purple-700: #4d4759;
+  --color-purple-800: #3a3547;
+  --color-purple-900: #262233;
+  --color-purple-950: #17141f;
+}
+
+/* ── 语义令牌取值：亮色（纸） ── */
+:root {
+  --background: #faf8f5;
+  --foreground: #1b1815;
+  --card: #fffdf8;
+  --card-foreground: #1b1815;
+  --popover: #fffdf8;
+  --popover-foreground: #1b1815;
+  --primary: #2b4f86;
+  --primary-foreground: #fffdf8;
+  --secondary: #f4f1ec;
+  --secondary-foreground: #1b1815;
+  --muted: #f4f1ec;
+  --muted-foreground: #7c766d;
+  --accent: #e8e4dd;
+  --accent-foreground: #1b1815;
+  --destructive: #a3312a;
+  --destructive-foreground: #fffdf8;
+  --border: #e8e4dd;
+  --input: #d8d3c9;
+  --ring: #2b4f86;
+}
+
+/* ── 语义令牌取值：暗色（夜纸） ── */
+.dark {
+  --background: #100e0c;
+  --foreground: #f0ece6;
+  --card: #1b1815;
+  --card-foreground: #f0ece6;
+  --popover: #1b1815;
+  --popover-foreground: #f0ece6;
+  --primary: #8fb0dc;
+  --primary-foreground: #100e0c;
+  --secondary: #262220;
+  --secondary-foreground: #f0ece6;
+  --muted: #232120;
+  --muted-foreground: #a8a29a;
+  --accent: #2b2721;
+  --accent-foreground: #f0ece6;
+  --destructive: #d1665c;
+  --destructive-foreground: #100e0c;
+  --border: #2b2721;
+  --input: #38332d;
+  --ring: #8fb0dc;
+}
+
+/* ── 语义令牌 → Tailwind 工具类（inline：直接引用上面的 var，便于 .dark 切换） ── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/* ── 基础排版：标题走衬线，正文保持无衬线 ── */
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  h1 {
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+}
+
+/* ── 编辑风工具类（供页面复用） ── */
+@layer components {
+  /* 小标签/栏目名：等宽、字距放开、大写观感 */
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  /* 细线分隔（编辑风以 hairline 替代阴影块） */
+  .rule {
+    border-top: 1px solid var(--border);
+  }
+
+  /* 大标题：衬线 + 紧字距 */
+  .editorial-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  /* 正文导读：稍大字号、放宽行高 */
+  .editorial-lede {
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    color: var(--muted-foreground);
+    text-wrap: pretty;
+  }
+
+  /* 下划线式链接（编辑风常用） */
+  .link-editorial {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, var(--primary) 35%, transparent);
+    transition: text-decoration-color 150ms ease, color 150ms ease;
+  }
+
+  .link-editorial:hover {
+    text-decoration-color: var(--primary);
+  }
+}

@@ -1,12 +1,11 @@
 ---
-// 分类列表页
+// 分类索引页
 import Layout from '@/layouts/Layout.astro';
 import CategoriesPage from '@/components/pages/CategoriesPage';
 ---
 
-<Layout title="分类 - FastBlog">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">内容分类</h1>
+<Layout title="分类 - Carded AI" description="按主题浏览全部内容">
+    <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
     <CategoriesPage client:load />
   </div>
 </Layout>

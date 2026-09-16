@@ -1,27 +1,99 @@
 ---
-// 关于页
+// 关于页 — Editorial minimal
 import Layout from '@/layouts/Layout.astro';
+
+const principles = [
+    {
+        index: '01',
+        title: '快速',
+        body: '基于 Astro 的静态优先架构与 FastAPI 后端，首屏以内容为中心，几乎瞬时呈现。',
+    },
+    {
+        index: '02',
+        title: '现代',
+        body: '支持 Markdown、富文本编辑、AI 写作辅助，以及可扩展的插件与自动化工作流。',
+    },
+    {
+        index: '03',
+        title: '开放',
+        body: '开源、可定制，提供分类与标签体系、全文检索、RSS / Atom 订阅与站点地图。',
+    },
+];
+
+const stack = [
+    {name: 'Astro', role: '静态站点与岛屿架构'},
+    {name: 'React', role: '交互组件'},
+    {name: 'Tailwind CSS', role: '设计系统与样式令牌'},
+    {name: 'FastAPI', role: '异步 API 后端'},
+    {name: 'SQLAlchemy', role: '数据访问层'},
+    {name: 'Redis', role: '缓存与队列'},
+];
+
+const entries = [
+    {label: '文章', href: '/articles', desc: '全部内容'},
+    {label: '分类', href: '/categories', desc: '按主题浏览'},
+    {label: '标签', href: '/tags', desc: '按关键词索引'},
+    {label: 'RSS', href: '/api/v2/cms/feed?format=rss', desc: '订阅更新'},
+];
 ---
 
-<Layout title="关于 - FastBlog">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-    <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-8">关于 FastBlog</h1>
-    <div class="prose dark:prose-invert max-w-none">
-      <p class="text-lg text-gray-600 dark:text-gray-400">FastBlog 是一个现代化的博客平台，致力于为创作者和读者提供最佳的内容分享体验。</p>
-      <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">快速</h3>
-          <p class="text-gray-600 dark:text-gray-400">基于 Astro 构建，极致性能，瞬间加载</p>
-        </div>
-        <div class="p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">现代</h3>
-          <p class="text-gray-600 dark:text-gray-400">支持 Markdown、富文本编辑、AI 写作辅助</p>
-        </div>
-        <div class="p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">开放</h3>
-          <p class="text-gray-600 dark:text-gray-400">开源、可定制、丰富的插件系统</p>
-        </div>
-      </div>
-    </div>
+<Layout title="关于 - Carded AI" description="关于 Carded AI —— 一个现代化的内容创作与分享平台">
+    <div class="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-20 lg:px-8">
+        <header class="border-b border-border pb-10">
+            <p class="kicker">About</p>
+            <h1 class="editorial-title mt-3 text-4xl text-foreground sm:text-5xl">关于 Carded AI</h1>
+            <p class="editorial-lede mt-5">
+                Carded AI 是一个现代化的内容创作与分享平台，致力于为创作者和读者提供最佳的内容体验：
+                写作专注、阅读清爽、检索快速。
+            </p>
+        </header>
+
+        <!-- 三条原则 -->
+        <section class="grid gap-px border-b border-border bg-border sm:grid-cols-3" aria-label="平台特性">
+            {principles.map((item) => (
+                <article class="bg-background px-0 py-8 sm:px-6">
+                    <p class="font-mono text-xs tracking-widest text-muted-foreground">{item.index}</p>
+                    <h2 class="editorial-title mt-3 text-xl text-foreground">{item.title}</h2>
+                    <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+                </article>
+            ))}
+        </section>
+
+        <!-- 技术栈 -->
+        <section class="border-b border-border py-10" aria-label="技术栈">
+            <h2 class="kicker">Stack</h2>
+            <dl class="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+                {stack.map((item) => (
+                    <div class="flex items-baseline justify-between gap-4 border-b border-border/60 pb-3">
+                        <dt class="editorial-title text-base text-foreground">{item.name}</dt>
+                        <dd class="text-right text-xs text-muted-foreground">{item.role}</dd>
+                    </div>
+                ))}
+            </dl>
+        </section>
+
+        <!-- 入口 -->
+        <section class="py-10" aria-label="快速入口">
+            <h2 class="kicker">Explore</h2>
+            <div class="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {entries.map((item) => (
+                    <a
+                        href={item.href}
+                        class="group border border-border bg-card px-4 py-5 transition-colors hover:border-foreground/30"
+                    >
+            <span class="editorial-title block text-base text-foreground transition-colors group-hover:text-primary">
+              {item.label}
+            </span>
+                        <span class="mt-1 block text-xs text-muted-foreground">{item.desc}</span>
+                    </a>
+                ))}
+            </div>
+        </section>
+
+        <footer class="border-t border-border pt-6">
+            <p class="font-mono text-xs text-muted-foreground">
+                © {new Date().getFullYear()} Carded AI · Built with FastAPI &amp; Astro
+            </p>
+        </footer>
   </div>
 </Layout>

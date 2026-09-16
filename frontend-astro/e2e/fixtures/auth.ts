@@ -19,7 +19,7 @@ async function loginViaAPI(page: Page, baseURL: string, creds = ADMIN_CREDENTIAL
 
   // 通过 API 登录获取 token
   const resp = await page.evaluate(async ({url, username, password}) => {
-    const r = await fetch(`${url}/api/v1/auth/login`, {
+    const r = await fetch(`${url}/api/v2/auth/login`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({username, password}),
@@ -28,9 +28,17 @@ async function loginViaAPI(page: Page, baseURL: string, creds = ADMIN_CREDENTIAL
   }, {url: baseURL || '', username: creds.username, password: creds.password});
 
   if (resp?.data?.access_token) {
-    await page.evaluate((token) => {
-      localStorage.setItem('access_token', token);
-    }, resp.data.access_token);
+    const {access_token, refresh_token} = resp.data as { access_token: string; refresh_token?: string };
+    // 应用是从 cookie 读取 token（src/lib/api/base-client.ts 的 getCookie('access_token')），
+    // 因此这里必须写 cookie，仅写 localStorage 不会被请求带上。
+    await page.evaluate(({access, refresh}) => {
+      localStorage.setItem('access_token', access);
+      const secure = location.protocol === 'https:' ? '; Secure' : '';
+      document.cookie = `access_token=${encodeURIComponent(access)}; path=/; max-age=3600; SameSite=Lax${secure}`;
+      if (refresh) {
+        document.cookie = `refresh_token=${encodeURIComponent(refresh)}; path=/; max-age=604800; SameSite=Lax${secure}`;
+      }
+    }, {access: access_token, refresh: refresh_token});
   }
 }
 

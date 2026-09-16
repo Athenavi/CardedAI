@@ -243,4 +243,13 @@ export class CategoryService {
             categories
         });
     }
+
+  /**
+   * 分类索引页数据（公开 API /home/categories）
+   * 后端返回纯数组，且仅支持 limit 参数（默认 8），因此这里显式放大 limit，
+   * 搜索 / 排序 / 分页在前端完成。
+   */
+  static async getCategoryIndex(limit = 200): Promise<ApiResponse<Category[]>> {
+    return apiClient.get('/home/categories', {limit});
+  }
 }

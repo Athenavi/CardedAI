@@ -1,12 +1,11 @@
 ---
-// 文章列表页
+// 文章列表页 — 编辑风（旧 ArticleList 保留在 components/pages/ 以便对照回滚）
 import Layout from '@/layouts/Layout.astro';
-import ArticleList from '@/components/pages/ArticleList';
+import ArticleIndexPage from '@/components/pages/ArticleIndexPage';
 ---
 
-<Layout title="文章列表 - FastBlog" description="浏览所有文章">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">文章列表</h1>
-    <ArticleList client:load />
+<Layout title="文章 - Carded AI" description="浏览全部已发布文章">
+    <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <ArticleIndexPage client:load/>
   </div>
 </Layout>

@@ -1,5 +1,5 @@
 /**
- * 移动端底部导航栏 - React 岛屿
+ * 移动端底部导航栏 - React 岛屿（Editorial minimal）
  * 适配 Astro：使用 <a> 替代 next/link, window.location 替代 usePathname
  */
 
@@ -25,23 +25,31 @@ const MobileBottomNav = () => {
     const navItems = [
         {name: '首页', href: '/', icon: Home},
         {name: '探索', href: '/articles', icon: Compass},
-        {name: '消息', href: '/messages', icon: MessageSquare},
+      {name: '标签', href: '/tags', icon: MessageSquare},
         {name: '创建', href: '/admin/editor', icon: PlusSquare},
         {name: '我的', href: '/profile', icon: User},
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 md:hidden">
-            <div className="flex items-center justify-around h-16">
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 md:hidden"
+        style={{paddingBottom: 'env(safe-area-inset-bottom, 0px)'}}
+      >
+        <div className="flex h-16 items-center justify-around">
                 {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href;
                     return (
-                        <a key={item.href} href={item.href}
-                            className={`flex flex-col items-center justify-center px-3 py-2 text-xs transition-colors ${
-                                isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                            }`}>
-                            <Icon className="w-6 h-6 mb-1"/>
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        className={`flex flex-1 flex-col items-center justify-center gap-1 py-2 text-[11px] tracking-wide transition-colors ${
+                          isActive
+                            ? 'text-primary'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        <Icon className="h-5 w-5"/>
                             <span>{item.name}</span>
                         </a>
                     );

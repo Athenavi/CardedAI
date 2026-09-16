@@ -1,0 +1,36 @@
+---
+// 标签详情页（静态输出 → 构建时枚举标签生成路径）
+import Layout from '@/layouts/Layout.astro';
+import TagDetailPage from '@/components/pages/TagDetailPage';
+
+export async function getStaticPaths() {
+    // 构建时向后端拉取标签；后端不可用时返回空数组（构建不失败，仅不生成标签页）
+    const base = process.env.API_BASE_URL || 'http://127.0.0.1:9421';
+    try {
+        const res = await fetch(`${base}/api/v2/tags?per_page=200`, {signal: AbortSignal.timeout(5000)});
+        if (!res.ok) return [];
+        const json = await res.json();
+        const tags: Array<{ name: string }> = json?.data?.tags ?? [];
+        return tags.map((tag) => ({params: {tag: tag.name}}));
+    } catch {
+        return [];
+    }
+}
+
+const rawTag = Astro.params.tag ?? '';
+let tagName = rawTag;
+try {
+    tagName = decodeURIComponent(rawTag);
+} catch {
+    tagName = rawTag;
+}
+---
+
+<Layout
+    title={`#${tagName} - 标签 - Carded AI`}
+    description={`标签 ${tagName} 下的全部文章`}
+>
+    <div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+        <TagDetailPage client:load tagName={tagName}/>
+    </div>
+</Layout>

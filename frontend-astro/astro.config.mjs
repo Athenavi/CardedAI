@@ -166,33 +166,10 @@ export default defineConfig({
       // chunk 大小警告阈值
       chunkSizeWarningLimit: 500,
       // 代码分割优化
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('/react/') || id.includes('/react-dom/')) return 'vendor-react';
-              if (id.includes('/@tanstack/react-query/')) return 'vendor-query';
-              if (id.includes('/framer-motion/')) return 'vendor-motion';
-              if (id.includes('/lucide-react/')) return 'vendor-icons';
-              if (id.includes('/@radix-ui/')) return 'vendor-radix';
-              if (id.includes('/@tiptap/') || id.includes('/lowlight/') || id.includes('/highlight.js/') || id.includes('/yjs/') || id.includes('/y-websocket/') || id.includes('/y-prosemirror/')) return 'vendor-editor';
-              // 新增：图表库独立分包
-              if (id.includes('/chart.js/') || id.includes('/react-chartjs-2/')) return 'vendor-chart';
-              // 新增：lodash独立分包
-              if (id.includes('/lodash-es/')) return 'vendor-lodash';
-              // 新增：recharts独立分包
-              if (id.includes('/recharts/')) return 'vendor-recharts';
-              // 新增：dnd-kit独立分包
-              if (id.includes('/@dnd-kit/')) return 'vendor-dnd';
-              // 新增：表单库独立分包
-              if (id.includes('/react-hook-form/') || id.includes('/@hookform/')) return 'vendor-form';
-              // 新增：UI工具库
-              if (id.includes('/class-variance-authority/') || id.includes('/tailwind-merge/') || id.includes('/clsx/')) return 'vendor-ui-utils';
-            }
-            return 'vendor';
-          },
-        },
-      },
+        // 注意：不要自定义 manualChunks 把 React 生态库拆成多个 vendor chunk。
+        // React 19 以 CJS 形式发布，经 Rollup interop 后跨 chunk 引用 default 导出会取到
+        // undefined（典型报错 "Cannot read properties of undefined (reading 'createContext')"），
+        // 导致整站 React 岛屿水合失败。交给 Rollup 自动分包即可正确排序。
       // 启用 CSS 代码分割
       cssCodeSplit: true,
       // 压缩选项
@@ -224,35 +201,6 @@ export default defineConfig({
         '@testing-library/dom',
         '@testing-library/jest-dom',
       ],
-    },
-    // Tree shaking: 标记纯模块
-    build: {
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('/react/') || id.includes('/react-dom/')) return 'vendor-react';
-              if (id.includes('/@tanstack/react-query/')) return 'vendor-query';
-              if (id.includes('/framer-motion/')) return 'vendor-motion';
-              if (id.includes('/lucide-react/')) return 'vendor-icons';
-              if (id.includes('/@radix-ui/')) return 'vendor-radix';
-              if (id.includes('/@tiptap/') || id.includes('/lowlight/') || id.includes('/highlight.js/') || id.includes('/yjs/') || id.includes('/y-websocket/') || id.includes('/y-prosemirror/')) return 'vendor-editor';
-              if (id.includes('/chart.js/') || id.includes('/react-chartjs-2/')) return 'vendor-chart';
-              if (id.includes('/lodash-es/')) return 'vendor-lodash';
-              if (id.includes('/recharts/')) return 'vendor-recharts';
-              if (id.includes('/@dnd-kit/')) return 'vendor-dnd';
-              if (id.includes('/react-hook-form/') || id.includes('/@hookform/')) return 'vendor-form';
-              if (id.includes('/class-variance-authority/') || id.includes('/tailwind-merge/') || id.includes('/clsx/')) return 'vendor-ui-utils';
-            }
-            return 'vendor';
-          },
-          // Tree shaking 优化
-          treeshake: {
-            moduleSideEffects: false,
-            annotations: true,
-          },
-        },
-      },
     },
   },
 

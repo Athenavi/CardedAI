@@ -1,11 +1,9 @@
 ---
-// 首页 — Astro 静态外壳
+// 首页 — 编辑风报头版（旧 ModernHomePage 保留在 components/home/ 以便对照回滚）
 import Layout from '@/layouts/Layout.astro';
-import ModernHomePage from '@/components/home/ModernHomePage';
+import HomePage from '@/components/pages/HomePage';
 ---
 
-<Layout title="FastBlog - 首页" description="发现精彩内容，连接智慧世界">
-  <div class="min-h-screen">
-    <ModernHomePage client:load />
-  </div>
+<Layout title="Carded AI - 首页" description="写作、阅读与检索，都收在一处">
+    <HomePage client:load/>
 </Layout>

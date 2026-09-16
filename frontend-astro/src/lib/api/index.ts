@@ -2,7 +2,9 @@
 
 export {apiClient} from "@/lib/api/base-client";
 export {ArticleService} from './article-service';
-export type {Article, Category, ApiResponse, Pagination} from './base-types';
+export {TagService} from './tag-service';
+export type {TagListResult, TagArticlesResult} from './tag-service';
+export type {Article, Category, ApiResponse, Pagination, TagSummary} from './base-types';
 
 export interface MediaFile {
     filename: string;

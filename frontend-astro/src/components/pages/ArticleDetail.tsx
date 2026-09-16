@@ -465,29 +465,30 @@ const ArticleDetail: React.FC<Props> = ({slug: propSlug}) => {
                                   {tags.slice(0, 3).map(tag => (
                                       <a
                                           key={tag}
-                                          href={`/search?q=${encodeURIComponent(tag)}`}
-                                          className="badge badge-blue"
+                                          href={`/tags/${encodeURIComponent(tag)}`}
+                                          className="inline-flex items-center gap-1 rounded-sm border border-border px-2 py-0.5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
                                       >
-                                          <Hash className="w-3 h-3 mr-0.5"/>
+                                        <Hash className="w-3 h-3"/>
                                           {tag}
                                       </a>
                                   ))}
                               </div>
                           )}
 
-                          <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-gray-900 dark:text-white leading-tight tracking-tight mb-5">
+                        <h1
+                          className="editorial-title text-3xl sm:text-4xl lg:text-[2.75rem] text-foreground leading-tight mb-5">
                               {article.title}
                           </h1>
 
                           {article.excerpt && (
-                              <p className="text-lg text-gray-500 dark:text-gray-400 leading-relaxed mb-6">
+                            <p className="editorial-lede mb-6">
                                   {article.excerpt}
                               </p>
                           )}
 
                           {/* Author & Meta Bar */}
                           <div
-                              className="flex flex-wrap items-center gap-4 py-4 border-y border-gray-100 dark:border-gray-800">
+                            className="flex flex-wrap items-center gap-4 py-4 border-y border-border">
                               {/* Author */}
                               {article.author && (
                                   <div className="flex items-center gap-2.5">
@@ -546,14 +547,14 @@ const ArticleDetail: React.FC<Props> = ({slug: propSlug}) => {
                       <div className="border-t border-gray-100 dark:border-gray-800 pt-8 mb-12">
                           {/* Tags */}
                           {tags.length > 0 && (
-                              <div className="flex items-center gap-2 mb-6">
-                                  <Tag className="w-4 h-4 text-gray-400"/>
+                            <div className="flex items-start gap-2 mb-6">
+                              <Tag className="w-4 h-4 mt-1.5 text-muted-foreground"/>
                                   <div className="flex flex-wrap gap-2">
                                       {tags.map(tag => (
                                           <a
                                               key={tag}
-                                              href={`/search?q=${encodeURIComponent(tag)}`}
-                                              className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                              href={`/tags/${encodeURIComponent(tag)}`}
+                                              className="inline-flex items-center rounded-sm border border-border px-2.5 py-1 font-mono text-xs text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
                                           >
                                               {tag}
                                           </a>

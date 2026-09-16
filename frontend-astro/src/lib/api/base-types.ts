@@ -109,6 +109,13 @@ export interface Stats {
     total_role_permissions: number;
 }
 
+// 标签类型（GET /api/v2/tags 返回项）
+export interface TagSummary {
+  name: string;
+  slug: string;
+  count: number;
+}
+
 // 二维码登录相关类型
 export interface QrCodeResponse {
     qr_code: string;

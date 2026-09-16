@@ -6,7 +6,7 @@ import re
 from datetime import datetime
 from typing import Optional
 
-import logger
+from src.unified_logger import default_logger as logger
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy import func, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -123,7 +123,12 @@ async def _get_article_detail(
 
     # 7. 获取作者和 SEO 数据
     author_info = await _get_article_author(db, article.user)
-    seo_data_dict = article.seo_data.to_dict() if article.seo_data else {}
+    # SEO 字段直接来自 Article 列（模型没有 seo_data 关系）
+    seo_data_dict = {key: getattr(article, key, None) for key in (
+        "seo_title", "seo_description", "seo_keywords", "og_title", "og_description", "og_image",
+        "og_type", "twitter_title", "twitter_description", "twitter_image", "twitter_card",
+        "canonical_url", "robots_meta",
+    )}
 
     # 8. 获取多语言版本
     i18n_query = select(ArticleContent).where(ArticleContent.article == article.id)
@@ -460,7 +465,7 @@ async def get_article_by_slug_api(
         db: AsyncSession = Depends(get_async_session)
 ):
     try:
-        article_query = select(Article).options(selectinload(Article.seo_data)).where(Article.slug == slug)
+        article_query = select(Article).where(Article.slug == slug)
         result = await db.execute(article_query)
         article = result.scalar_one_or_none()
         if not article:
@@ -488,7 +493,7 @@ async def get_article_by_id_html_api(
         db: AsyncSession = Depends(get_async_session)
 ):
     try:
-        article_query = select(Article).options(selectinload(Article.seo_data)).where(Article.id == article_id)
+        article_query = select(Article).where(Article.id == article_id)
         result = await db.execute(article_query)
         article = result.scalar_one_or_none()
         if not article:
