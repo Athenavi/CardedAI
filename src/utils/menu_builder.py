@@ -10,89 +10,6 @@ from sqlalchemy.orm import Session
 from shared.models import Menus, SystemSettings
 
 
-# from src.models.system import Menus, MenuItems, SystemSettings
-
-
-def get_menu_tree_by_slug(db: Session, menu_slug: str) -> List[Dict]:
-    """
-    根据菜单slug获取菜单树结构
-
-    Args:
-        db: 数据库会话
-        menu_slug: 菜单标识符
-
-    Returns:
-        包含菜单项树结构的列表
-    """
-    try:
-        # 首先获取菜单ID
-        from sqlalchemy import select
-        menu_query = select(Menus).where(Menus.slug == menu_slug, Menus.is_active == True)
-        menu_result = db.execute(menu_query)
-        menu = menu_result.scalar_one_or_none()
-        if not menu:
-            # 如果找不到指定的菜单，返回默认菜单
-            return get_default_menu()
-
-        # 获取该菜单下的所有菜单项，按order_index排序
-        from sqlalchemy import select
-        menu_items = []
-
-        # 构建菜单树
-        menu_tree = []
-        item_dict = {}
-
-        # 首先创建所有菜单项的字典映射
-        for item in menu_items:
-            item_dict[item.id] = {
-                'id': item.id,
-                'title': item.title,
-                'url': item.url,
-                'target': item.target,
-                'children': [],
-                'parent_id': item.parent_id
-            }
-
-        # 构建树结构
-        for item_id, item_data in item_dict.items():
-            parent_id = item_data['parent_id']
-            if parent_id is None:
-                # 没有父级，这是根节点
-                menu_tree.append(item_data)
-            else:
-                # 有父级，将其添加到父级的children中
-                if parent_id in item_dict:
-                    item_dict[parent_id]['children'].append(item_data)
-
-        # 按照order_index对根菜单进行排序，对每个节点的子菜单也进行排序
-        menu_tree.sort(key=lambda x: get_original_menu_item(menu_items, x['id']).order_index)
-        sort_children_recursive(menu_tree, menu_items)
-
-        return menu_tree
-    except Exception as e:
-        # 如果数据库查询失败，返回默认菜单
-        logger.info(f"获取菜单失败: {e}")
-        return get_default_menu()
-
-
-def sort_children_recursive(menu_tree: List[Dict], all_menu_items: List[MenuItems]):
-    """递归地对菜单树的所有层级进行排序"""
-    for item in menu_tree:
-        # 对当前项目的子项进行排序
-        if item['children']:
-            item['children'].sort(key=lambda x: get_original_menu_item(all_menu_items, x['id']).order_index)
-            # 递归处理子项
-            sort_children_recursive(item['children'], all_menu_items)
-
-
-def get_original_menu_item(all_menu_items: List[MenuItems], item_id: int) -> MenuItems:
-    """从原始菜单项列表中获取特定ID的菜单项"""
-    for item in all_menu_items:
-        if item.id == item_id:
-            return item
-    return None
-
-
 def get_default_menu() -> List[Dict]:
     """
     返回默认菜单结构
@@ -224,20 +141,7 @@ def get_menu_tree_by_system_config(db: Session) -> List[Dict]:
     Returns:
         包含菜单项树结构的列表
     """
-    try:
-        # 从系统设置中获取菜单slug配置
-        from sqlalchemy import select
-        menu_setting_query = select(SystemSettings).where(SystemSettings.setting_key == 'menu_slug')
-        menu_setting_result = db.execute(menu_setting_query)
-        menu_setting = menu_setting_result.scalar_one_or_none()
-        menu_slug = menu_setting.setting_value if menu_setting else 'default'
-
-        # 获取菜单树
-        return get_menu_tree_by_slug(db, menu_slug)
-    except Exception as e:
-        # 如果数据库查询失败，返回默认菜单
-        logger.info(f"获取系统配置菜单失败: {e}")
-        return get_default_menu()
+    return get_default_menu()
 
 
 async def get_all_menus_with_items_async(db: AsyncSession) -> Dict:

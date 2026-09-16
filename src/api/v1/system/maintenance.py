@@ -1,6 +1,7 @@
 """
 维护模式管理API
 """
+import traceback
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, Body
@@ -50,8 +51,8 @@ async def get_maintenance_status_api(
             data=status
         )
     except Exception as e:
-        logger.error(f"Error in get_maintenance_status_api: {str(e)}")
-        logger.error(traceback.format_exc())
+        print(f"Error in get_maintenance_status_api: {str(e)}")
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -84,8 +85,8 @@ async def enable_maintenance_api(
             }
         )
     except Exception as e:
-        logger.error(f"Error in enable_maintenance_api: {str(e)}")
-        logger.error(traceback.format_exc())
+        print(f"Error in enable_maintenance_api: {str(e)}")
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -113,8 +114,8 @@ async def disable_maintenance_api(
             }
         )
     except Exception as e:
-        logger.error(f"Error in disable_maintenance_api: {str(e)}")
-        logger.error(traceback.format_exc())
+        print(f"Error in disable_maintenance_api: {str(e)}")
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -148,8 +149,8 @@ async def schedule_maintenance_api(
             }
         )
     except Exception as e:
-        logger.error(f"Error in schedule_maintenance_api: {str(e)}")
-        logger.error(traceback.format_exc())
+        print(f"Error in schedule_maintenance_api: {str(e)}")
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -179,7 +180,7 @@ async def add_whitelist_ip_api(
         )
     except Exception as e:
         import traceback
-        logger.error(f"Error in add_whitelist_ip_api: {str(e)}")
+        print(f"Error in add_whitelist_ip_api: {str(e)}")
         print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -209,8 +210,8 @@ async def remove_whitelist_ip_api(
             }
         )
     except Exception as e:
-        logger.error(f"Error in remove_whitelist_ip_api: {str(e)}")
-        logger.error(traceback.format_exc())
+        print(f"Error in remove_whitelist_ip_api: {str(e)}")
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
 
@@ -239,6 +240,6 @@ async def update_message_api(
             }
         )
     except Exception as e:
-        logger.error(f"Error in update_message_api: {str(e)}")
-        logger.error(traceback.format_exc())
+        print(f"Error in update_message_api: {str(e)}")
+        print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))

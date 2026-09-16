@@ -91,7 +91,7 @@ class BatchUploadService:
                     failed_count += 1
                     error_msg = f"文件 {file_obj.filename} 上传失败: {str(e)}"
                     errors.append({'filename': file_obj.filename, 'error': str(e)})
-                    logger.error(f"error_msg, exc_info=True)
+                    logger.error(error_msg)
                     return None
 
         tasks = [upload_single_file(file_obj, idx) for idx, file_obj in enumerate(files)]

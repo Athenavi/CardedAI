@@ -2,6 +2,7 @@
 数据库 URL 替换 API
 用于网站迁移时批量替换数据库中的URL
 """
+import traceback
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession

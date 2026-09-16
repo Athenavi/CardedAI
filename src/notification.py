@@ -19,7 +19,7 @@ async def create_notification(
 ) -> Notification:
     """
     创建通知
-    
+
     Args:
         recipient_id: 接收者ID
         title: 通知标题
@@ -27,7 +27,7 @@ async def create_notification(
         notification_type: 通知类型 ('info', 'warning', 'error', 'success')
         related_id: 相关对象ID
         data: 额外数据
-    
+
     Returns:
         Notification: 创建的通知对象
     """
@@ -69,7 +69,7 @@ async def create_notification(
         pass
     except Exception as e:
         # 在serverless环境中，WebSocket可能不可用，记录警告但不抛出错误
-        logger.warning(f"无法发送实时通知: {str(e)}")
+        print(f"无法发送实时通知: {str(e)}")
 
     return notification
 
@@ -77,12 +77,12 @@ async def create_notification(
 async def get_user_notifications(user_id: int, unread_only: bool = False, limit: int = 20):
     """
     获取用户通知
-    
+
     Args:
         user_id: 用户ID
         unread_only: 是否只获取未读通知
         limit: 限制数量
-    
+
     Returns:
         list: 通知列表
     """
@@ -104,11 +104,11 @@ async def get_user_notifications(user_id: int, unread_only: bool = False, limit:
 async def mark_notification_as_read(notification_id: int, user_id: int) -> bool:
     """
     标记通知为已读
-    
+
     Args:
         notification_id: 通知ID
         user_id: 用户ID
-    
+
     Returns:
         bool: 是否成功
     """
@@ -132,10 +132,10 @@ async def mark_notification_as_read(notification_id: int, user_id: int) -> bool:
 async def mark_all_notifications_as_read(user_id: int) -> int:
     """
     标记所有通知为已读
-    
+
     Args:
         user_id: 用户ID
-    
+
     Returns:
         int: 更新的通知数量
     """
@@ -156,11 +156,11 @@ async def mark_all_notifications_as_read(user_id: int) -> int:
 async def delete_notification(notification_id: int, user_id: int) -> bool:
     """
     删除通知
-    
+
     Args:
         notification_id: 通知ID
         user_id: 用户ID
-    
+
     Returns:
         bool: 是否成功
     """
@@ -183,10 +183,10 @@ async def delete_notification(notification_id: int, user_id: int) -> bool:
 async def get_unread_count(user_id: int) -> int:
     """
     获取未读通知数量
-    
+
     Args:
         user_id: 用户ID
-    
+
     Returns:
         int: 未读通知数量
     """

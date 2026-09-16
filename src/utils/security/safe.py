@@ -2,6 +2,8 @@
 安全工具模块
 包含输入验证、SQL注入防护、XSS防护等功能
 """
+from urllib.request import Request
+
 from src.unified_logger import default_logger as logger
 import os
 import re
@@ -12,7 +14,7 @@ from urllib.parse import urlparse
 def validate_input(input_string, allowed_pattern=None):
     """
     验证输入字符串的安全性
-    
+
     :param input_string: 待验证的输入字符串
     :param allowed_pattern: 允许的正则模式
     :return: 验证结果和清理后的字符串
@@ -57,7 +59,7 @@ def load_sensitive_words(file_path):
 def validate_xss(input_string):
     """
     验证输入字符串是否包含XSS尝试
-    
+
     :param input_string: 待验证的输入字符串
     :return: 验证结果
     """
@@ -87,7 +89,7 @@ def validate_xss(input_string):
 def sanitize_sql_identifier(identifier):
     """
     清理SQL标识符（如表名、列名），防止SQL注入
-    
+
     :param identifier: SQL标识符
     :return: 清理后的标识符
     """
@@ -104,7 +106,7 @@ def sanitize_sql_identifier(identifier):
 def escape_html(text):
     """
     转义HTML特殊字符，防止XSS
-    
+
     :param text: 待转义的文本
     :return: 转义后的文本
     """
@@ -122,7 +124,7 @@ def escape_html(text):
 def validate_url(url_string, allowed_schemes=None):
     """
     验证URL的安全性
-    
+
     :param url_string: URL字符串
     :param allowed_schemes: 允许的协议列表
     :return: 验证结果和标准化URL
@@ -194,7 +196,7 @@ def validate_password_strength(password):
 def sanitize_filename(filename):
     """
     清理文件名，防止路径遍历攻击
-    
+
     :param filename: 原始文件名
     :return: 清理后的文件名
     """
@@ -278,7 +280,7 @@ def validate_boolean(value):
 def sql_injection_protection(*param_names):
     """
     SQL注入防护依赖函数，验证指定参数的安全性
-    
+
     :param param_names: 需要验证的参数名称列表
     :return: 验证后的参数字典
     """

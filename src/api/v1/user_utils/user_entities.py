@@ -230,7 +230,7 @@ async def update_password(user_id: int, new_password: str, confirm_password: str
                     db.commit()
                 return True
             except Exception as e:
-                logger(e)
+                print(e)
                 if isinstance(db, AsyncSession):
                     await db.rollback()
                 else:

@@ -87,7 +87,7 @@ async def search_articles(
         raise
     except Exception as e:
         import traceback
-        logger.error(f"Error in search_articles: {str(e)}")
+        print(f"Error in search_articles: {str(e)}")
         print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -122,7 +122,7 @@ async def get_search_suggestions(
         )
 
     except Exception as e:
-        logger.error(f"Error in get_search_suggestions: {str(e)}")
+        print(f"Error in get_search_suggestions: {str(e)}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -211,7 +211,7 @@ async def rebuild_search_index(
 
     except Exception as e:
         import traceback
-        logger.error(f"Error in rebuild_search_index: {str(e)}")
+        print(f"Error in rebuild_search_index: {str(e)}")
         print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
@@ -242,7 +242,7 @@ async def get_search_stats(
         )
 
     except Exception as e:
-        logger.error(f"Error in get_search_stats: {str(e)}")
+        print(f"Error in get_search_stats: {str(e)}")
         return ApiResponse(success=False, error=str(e))
 
 
@@ -328,6 +328,6 @@ async def sync_article_to_index(
 
     except Exception as e:
         import traceback
-        logger.error(f"Error in sync_article_to_index: {str(e)}")
+        print(f"Error in sync_article_to_index: {str(e)}")
         print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))

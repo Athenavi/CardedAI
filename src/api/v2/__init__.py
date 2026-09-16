@@ -68,12 +68,6 @@ ROUTE_REGISTRY_V2 = [
     ("src.api.v2.content_management", "/api/v2/cms", ["cms-v2"], True),
     # V1 content_management 各子模块已废弃，功能已迁移到 V2 聚合路由器
 
-    # ==================== 块模式库（独立顶级路由）====================
-    # 前端直接调用 /api/v2/block-patterns/list
-    ("src.api.v1.content_management.block_patterns", "/api/v2/block-patterns", ["block-patterns"], False),
-
-    # [已删除] 电商功能模块（Product, Cart, Order 等模型已移除）
-
     # ==================== 媒体管理 ====================
     ("src.api.v1.media", "/api/v2/media", ["media"], False),
     ("src.api.v1.media.cover_upload", "/api/v2/media", ["cover-upload"], False),

@@ -58,7 +58,7 @@ async def analyze_seo(
         )
     except Exception as e:
         import traceback
-        logger.error(f"Error in analyze_seo: {str(e)}")
+        print(f"Error in analyze_seo: {str(e)}")
         print(traceback.format_exc())
         return ApiResponse(success=False, error=str(e))
 
