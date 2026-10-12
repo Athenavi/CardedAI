@@ -180,7 +180,6 @@ class BaseSkill(ABC):
         Returns:
             执行结果
         """
-        pass
 
     async def validate(self, context: SkillContext) -> bool:
         """

@@ -1,7 +1,5 @@
 """简化的性能监控（个人站长轻量版）"""
 import time
-from collections import defaultdict
-from typing import Any, Optional
 
 
 class PerformanceMonitor:

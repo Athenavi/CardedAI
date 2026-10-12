@@ -10,6 +10,7 @@ import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Any, Optional
+from src.unified_logger import default_logger as logger
 
 
 class IncrementalBackupService:

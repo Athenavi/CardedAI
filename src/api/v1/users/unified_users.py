@@ -10,11 +10,10 @@
 import os
 # 导入用户关系和屏蔽服务
 from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, Depends, Query, Request, HTTPException, UploadFile, File
 from fastapi.responses import JSONResponse
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.user import User
@@ -528,7 +527,7 @@ async def update_avatar_api(
     """更新用户头像API"""
     try:
         # 调试日志
-        logger.debug(f"[Avatar Upload] === START ===")
+        logger.debug("[Avatar Upload] === START ===")
         logger.debug(f"[Avatar Upload] Received request from user: {current_user.id}")
         logger.debug(f"[Avatar Upload] File name: {file.filename}")
         logger.debug(f"[Avatar Upload] Content type: {file.content_type}")

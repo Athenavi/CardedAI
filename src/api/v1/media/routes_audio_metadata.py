@@ -112,7 +112,7 @@ def extract_cover_from_audio(media: Media) -> Optional[bytes]:
                 aws_secret_key = getattr(settings, 'S3_SECRET_KEY', None) or getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)
 
                 if not aws_access_key or not aws_secret_key:
-                    logger.error(f"S3 凭据未配置")
+                    logger.error("S3 凭据未配置")
                     return None
 
                 s3_client = boto3.client(
@@ -142,7 +142,7 @@ def extract_cover_from_audio(media: Media) -> Optional[bytes]:
             return None
 
     except ImportError:
-        logger.error(f"mutagen库未安装")
+        logger.error("mutagen库未安装")
         return None
     except Exception as e:
         logger.error(f"提取封面失败: {e}")
@@ -173,7 +173,7 @@ def extract_lyrics_from_id3(media: Media) -> list:
     """从音频文件的ID3标签中提取USLT帧（同步歌词）"""
     try:
         from mutagen import File as MutagenFile
-        from mutagen.id3 import ID3, USLT
+        from mutagen.id3 import USLT
         from mutagen.mp3 import MP3
 
         # 获取文件路径
@@ -233,7 +233,7 @@ def extract_lyrics_from_id3(media: Media) -> list:
         return lyrics_list
 
     except ImportError:
-        logger.error(f"mutagen库未安装")
+        logger.error("mutagen库未安装")
         return []
     except Exception as e:
         logger.error(f"从ID3提取歌词失败: {e}")

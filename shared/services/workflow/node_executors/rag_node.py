@@ -5,7 +5,7 @@ RAG 检索节点执行器
 支持纯检索模式和 RAG 问答模式。
 """
 
-from typing import Any, Dict
+from typing import Dict
 
 from src.unified_logger import default_logger as logger
 from shared.services.workflow.node_executors.base import BaseNodeExecutor

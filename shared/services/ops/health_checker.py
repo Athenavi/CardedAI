@@ -3,14 +3,13 @@ P8-2: 健康检查与自愈服务
 提供系统监控、告警和自动恢复功能
 """
 import asyncio
-import json
 import psutil
 import time
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from typing import Dict, Any, List
+from datetime import datetime
 
 try:
     import aiohttp
@@ -18,7 +17,6 @@ except ImportError:
     aiohttp = None
 
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.unified_logger import default_logger as logger
 from src.utils.database.main import get_async_session
@@ -62,7 +60,7 @@ class HealthChecker:
             async for db in get_async_session():
                 # 测试数据库连接
                 start_time = time.time()
-                result = await db.execute(text("SELECT 1"))
+                await db.execute(text("SELECT 1"))
                 response_time = (time.time() - start_time) * 1000  # ms
 
                 # 获取连接池信息（如果使用 SQLAlchemy pool）
@@ -316,7 +314,7 @@ class HealthChecker:
         # 3. 发送告警通知运维团队
         await self._send_alert(
             "self_healing_triggered",
-            f"自愈机制已触发，请检查系统状态",
+            "自愈机制已触发，请检查系统状态",
             "warning"
         )
 

@@ -6,7 +6,7 @@ API 采集器
 
 import asyncio
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 try:
     import httpx
@@ -51,7 +51,7 @@ class APICollector(BaseCollector):
             List[CollectedItemData]
         """
         if httpx is None:
-            logger.error(f"httpx 未安装，无法采集 API")
+            logger.error("httpx 未安装，无法采集 API")
             return []
 
         method = source_config.get("method", "GET").upper()

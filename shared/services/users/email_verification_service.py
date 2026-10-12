@@ -8,10 +8,9 @@
 import random
 import string
 import smtplib
-from datetime import datetime, timedelta
+from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from typing import Optional, Dict
 
 from src.unified_logger import default_logger as logger
 

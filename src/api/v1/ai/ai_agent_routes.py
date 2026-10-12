@@ -7,7 +7,6 @@ from typing import Optional, List
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.services.ai.ai_agent_recommendations import ai_agent_service
 from src.auth.auth_deps import jwt_required_dependency as jwt_required

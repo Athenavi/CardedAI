@@ -356,7 +356,7 @@ class EmailServiceIntegration:
     ) -> bool:
         """通过 SendGrid API 发送邮件"""
         if not HAS_HTTPX:
-            logger.error(f"httpx is required for SendGrid integration")
+            logger.error("httpx is required for SendGrid integration")
             return False
 
         url = "https://api.sendgrid.com/v3/mail/send"
@@ -399,7 +399,7 @@ class EmailServiceIntegration:
     ) -> bool:
         """通过 Mailgun API 发送邮件"""
         if not HAS_HTTPX:
-            logger.error(f"httpx is required for Mailgun integration")
+            logger.error("httpx is required for Mailgun integration")
             return False
 
         # Mailgun domain is typically extracted from from_email or configured separately
@@ -411,7 +411,7 @@ class EmailServiceIntegration:
             domain, api_key = api_key.split(':', 1)
 
         if not domain:
-            logger.error(f"Mailgun: Domain not configured. Use 'domain:api_key' format for api_key field.")
+            logger.error("Mailgun: Domain not configured. Use 'domain:api_key' format for api_key field.")
             return False
 
         url = f"https://api.mailgun.net/v3/{domain}/messages"
@@ -449,7 +449,7 @@ class EmailServiceIntegration:
     ) -> bool:
         """通过 SMTP 发送邮件"""
         if not config.smtp_host:
-            logger.error(f"SMTP: Host not configured")
+            logger.error("SMTP: Host not configured")
             return False
 
         try:

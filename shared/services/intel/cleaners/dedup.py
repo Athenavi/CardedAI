@@ -8,7 +8,7 @@ import hashlib
 import logging
 import re
 from collections import defaultdict
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional
 
 from shared.services.intel.cleaners.base import BaseCleaner
 

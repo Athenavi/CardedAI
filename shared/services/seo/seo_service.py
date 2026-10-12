@@ -657,7 +657,7 @@ class SEOService:
 
         # 4. 内容长度检查
         content = article.get('content', '')
-        content_length = len(content)
+        len(content)
         word_count = len(content.split()) if content else 0
         if word_count < 300:
             checks.append({'item': '内容长度', 'status': 'warning', 'message': f'内容过短 ({word_count}字)'})

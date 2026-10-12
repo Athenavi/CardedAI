@@ -5,7 +5,6 @@
 """
 
 import re
-import string
 from typing import Dict, List, Any, Optional
 
 from sqlalchemy import text, inspect
@@ -18,7 +17,7 @@ def _validate_identifier(name: str, max_len: int = 128) -> str:
     只允许字母、数字、下划线、连字符，且长度有限制。
     """
     if not name or len(name) > max_len:
-        raise ValueError(f"Invalid identifier: length out of range")
+        raise ValueError("Invalid identifier: length out of range")
     # PostgreSQL 标识符只允许字母、数字、下划线；拒绝其他所有字符
     if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', name):
         raise ValueError(f"Invalid identifier '{name}': only alphanumeric and underscore allowed")

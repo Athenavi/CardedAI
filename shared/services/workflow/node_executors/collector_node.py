@@ -5,7 +5,7 @@
 复用情报引擎的 CollectorEngine。
 """
 
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from src.unified_logger import default_logger as logger
 from shared.services.workflow.node_executors.base import BaseNodeExecutor

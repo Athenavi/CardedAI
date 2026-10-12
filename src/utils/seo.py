@@ -1,8 +1,7 @@
-t"""
+"""
 SEO优化工具模块
 包含sitemap生成、meta标签优化等功能
 """
-import re
 from datetime import datetime
 
 from fastapi import Request
@@ -103,7 +102,7 @@ def generate_seo_friendly_url(title, model_type='article', id_value=None):
     """
     slug = slugify(title)
     if model_type == 'article':
-        return f"/p/{slug}" if slug else f"/{id_value}.html" if id_value else f"/article.html"
+        return f"/p/{slug}" if slug else f"/{id_value}.html" if id_value else "/article.html"
     elif model_type == 'category':
         return f"/category/{slug}" if slug else f"/category/{id_value}" if id_value else "/category"
     elif model_type == 'tag':
@@ -126,8 +125,8 @@ def get_feed_discovery_tags(base_url: str = None) -> dict:
         base_url = "http://localhost:8000"
 
     return {
-        'rss_link': f'{base_url}/api/v2/feed/rss',
-        'atom_link': f'{base_url}/api/v2/feed/atom',
-        'rss_xml': f'<link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="{base_url}/api/v2/feed/rss" />',
-        'atom_xml': f'<link rel="alternate" type="application/atom+xml" title="Atom 1.0" href="{base_url}/api/v2/feed/atom" />'
+        'rss_link': f'{base_url}/api/v2/cms/rss',
+        'atom_link': f'{base_url}/api/v2/cms/atom',
+        'rss_xml': f'<link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="{base_url}/api/v2/cms/rss" />',
+        'atom_xml': f'<link rel="alternate" type="application/atom+xml" title="Atom 1.0" href="{base_url}/api/v2/cms/atom" />'
     }

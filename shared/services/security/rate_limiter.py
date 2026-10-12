@@ -1,7 +1,6 @@
 """简化的频率限制器（个人站长轻量版）"""
 import time
 from collections import defaultdict
-from typing import Optional
 
 
 class RateLimiter:

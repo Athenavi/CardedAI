@@ -8,7 +8,7 @@
 import random
 import string
 from datetime import datetime, timedelta
-from typing import Optional, Dict
+from typing import Optional
 
 from src.unified_logger import default_logger as logger
 
@@ -115,7 +115,7 @@ class SMSVerificationService:
         """
         logger.info(f"[SMS MOCK] Phone: {phone}, Code: {code}")
         logger.error(f"\n{'=' * 60}")
-        logger.error(f"📱 短信验证码 (MOCK模式)")
+        logger.error("📱 短信验证码 (MOCK模式)")
         logger.error(f"手机号: {phone}")
         logger.error(f"验证码: {code}")
         logger.error(f"有效期: {self.EXPIRE_MINUTES} 分钟")
@@ -283,7 +283,7 @@ class SMSVerificationService:
                 logger.info(f"SMS sent successfully via Twilio to {phone}, SID: {message.sid}")
                 return True
             else:
-                logger.error(f"Twilio SMS failed: No message SID returned")
+                logger.error("Twilio SMS failed: No message SID returned")
                 return False
 
         except ImportError:
@@ -312,7 +312,7 @@ class SMSVerificationService:
         import os
         env = os.environ.get('ENVIRONMENT', 'development').lower()
         if provider == 'mock' and env == 'production':
-            logger.error(f"生产环境禁止使用 SMS mock 模式，请配置真实的 SMS 服务商")
+            logger.error("生产环境禁止使用 SMS mock 模式，请配置真实的 SMS 服务商")
             return False
 
         if provider == 'aliyun':
@@ -323,7 +323,7 @@ class SMSVerificationService:
             return self._send_sms_twilio(phone, code)
         else:
             if env == 'production':
-                logger.error(f"生产环境未配置 SMS 服务商，无法发送短信")
+                logger.error("生产环境未配置 SMS 服务商，无法发送短信")
                 return False
             # 非生产环境使用模拟模式
             return self._send_sms_mock(phone, code)

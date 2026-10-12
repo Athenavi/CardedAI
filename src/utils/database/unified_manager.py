@@ -250,7 +250,7 @@ class UnifiedDatabaseManager:
                     "Please ensure you have completed the database configuration step "
                     "before attempting to use the database."
                 )
-                logger.error(f"error_msg")
+                logger.error("error_msg")
                 raise RuntimeError(error_msg)
 
         session = self.async_session_factory()
@@ -347,7 +347,7 @@ class UnifiedDatabaseManager:
                     "Please ensure you have completed the database configuration step "
                     "before attempting to use the database."
                 )
-                logger.error(f"error_msg")
+                logger.error("error_msg")
                 raise RuntimeError(error_msg)
 
         session = self.async_session_factory()

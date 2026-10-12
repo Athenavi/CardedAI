@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 from PIL import Image
+from src.unified_logger import default_logger as logger
 
 # 默认配置常量
 DEFAULT_IMAGE_CONFIG = {

@@ -4,7 +4,6 @@ import html
 
 from fastapi.responses import HTMLResponse
 
-from src.unified_logger import default_logger as logger
 
 
 def error(status_code, message):

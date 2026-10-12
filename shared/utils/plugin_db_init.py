@@ -143,7 +143,7 @@ class PluginDatabaseInitializer:
                 fail_count += 1
 
         logger("\n" + "=" * 60)
-        logger.error(f"[PluginDBInit] Initialization complete:")
+        logger.error("[PluginDBInit] Initialization complete:")
         logger.error(f"  Total: {len(plugins)}")
         logger.error(f"  Success: {success_count}")
         logger.error(f"  Failed: {fail_count}")
@@ -174,7 +174,7 @@ class PluginDatabaseInitializer:
 
             # 删除现有数据库
             if plugin_db.delete_plugin_db(plugin_slug):
-                logger.error(f"[PluginDBInit] Deleted existing database")
+                logger.error("[PluginDBInit] Deleted existing database")
 
             # 重新初始化
             return self.initialize_plugin_db(plugin_slug)

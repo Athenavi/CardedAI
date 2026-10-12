@@ -7,10 +7,10 @@
 3. 发布队列管理
 4. 发布历史记录
 """
-from typing import List, Dict, Optional
+from typing import List, Dict
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update
+from sqlalchemy import select
 
 
 class ScheduledPublishService:
@@ -172,7 +172,7 @@ class ScheduledPublishService:
         from shared.models.article import Article
         from shared.models.user import User
 
-        now = datetime.now()
+        datetime.now()
 
         # 查询所有已设置定时发布的文章
         stmt = (

@@ -79,7 +79,7 @@ def extract_audio_cover(audio_path: str) -> Optional[bytes]:
         elif hasattr(audio_file, 'tags') and audio_file.tags:
             # OGG 通常使用 METADATA_BLOCK_PICTURE
             # 这里简化处理，实际可能需要更复杂的解析
-            logger.debug(f"OGG 格式暂不支持封面提取")
+            logger.debug("OGG 格式暂不支持封面提取")
 
         if cover_data:
             logger.info(f"成功从音频文件提取封面: {audio_path}")
@@ -89,7 +89,7 @@ def extract_audio_cover(audio_path: str) -> Optional[bytes]:
             return None
 
     except ImportError:
-        logger.error(f"mutagen 库未安装，请运行: pip install mutagen")
+        logger.error("mutagen 库未安装，请运行: pip install mutagen")
         return None
     except Exception as e:
         logger.error(f"提取音频封面失败: {audio_path}, 错误: {e}")

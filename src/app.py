@@ -4,7 +4,6 @@ FastBlog 应用入口
 import importlib
 import os
 import time as _time
-import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import asynccontextmanager
 from datetime import datetime

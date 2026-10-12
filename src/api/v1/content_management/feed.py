@@ -26,16 +26,20 @@ async def get_feed_items(
     """从文章列表生成 Feed 条目"""
     items = []
 
+    # 批量预取作者信息，避免逐条查询（N+1）
+    user_ids = {a.user for a in articles if getattr(a, 'user', None)}
+    users_map: dict = {}
+    if user_ids:
+        user_result = await db.execute(select(User).where(User.id.in_(user_ids)))
+        users_map = {u.id: u for u in user_result.scalars().all()}
+
     for article in articles:
-        # 获取作者信息
+        # 获取作者信息（来自上面的批量预取）
         author_name = None
         if article.user:
-            user_result = await db.execute(
-                select(User).where(User.id == article.user)
-            )
-            user = user_result.scalar_one_or_none()
-            if user:
-                author_name = user.username
+            author = users_map.get(article.user)
+            if author:
+                author_name = author.username
 
         # 获取分类
         categories = []

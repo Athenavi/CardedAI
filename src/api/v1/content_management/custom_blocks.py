@@ -5,12 +5,13 @@
 
 from typing import Dict, Any, List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from shared.services.content_management.block_editor_service import block_editor_service
 from shared.services.content_management.custom_block_framework import create_plugin_manager
 from shared.services.content_management.example_custom_blocks import ExampleBlocksPlugin
+from src.auth.auth_deps import admin_required
 
 router = APIRouter(tags=["Custom Blocks"])
 
@@ -88,7 +89,7 @@ async def list_active_plugins():
 
 
 @router.post("/plugins/{plugin_name}/activate", response_model=PluginActionResponse)
-async def activate_plugin(plugin_name: str):
+async def activate_plugin(plugin_name: str, current_user=Depends(admin_required)):
     """
     激活插件
     
@@ -116,7 +117,7 @@ async def activate_plugin(plugin_name: str):
 
 
 @router.post("/plugins/{plugin_name}/deactivate", response_model=PluginActionResponse)
-async def deactivate_plugin(plugin_name: str):
+async def deactivate_plugin(plugin_name: str, current_user=Depends(admin_required)):
     """
     停用插件
     
@@ -238,7 +239,7 @@ async def get_statistics():
 
 
 @router.post("/discover", response_model=PluginActionResponse)
-async def discover_plugins():
+async def discover_plugins(current_user=Depends(admin_required)):
     """
     自动发现并加载插件
     

@@ -112,8 +112,7 @@ class SiteHealthService:
         
         # 数据库连接测试
         try:
-            import asyncio
-            from src.utils.database.main import get_async_session, get_async_session_context
+            from src.utils.database.main import get_async_session_context
             
             async def test_connection():
                 async with get_async_session_context() as session:

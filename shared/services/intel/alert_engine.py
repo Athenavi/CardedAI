@@ -9,7 +9,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import select, and_
+from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 

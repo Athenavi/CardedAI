@@ -100,7 +100,7 @@ class VideoProcessor:
                     break
 
             if not video_stream:
-                logger.error(f"未找到视频流")
+                logger.error("未找到视频流")
                 return None
 
             format_info = info.get('format', {})
@@ -168,11 +168,11 @@ class VideoProcessor:
                 logger.info(f"成功创建视频缩略图: {thumbnail_path}")
                 return True
             else:
-                logger.error(f"缩略图文件创建失败")
+                logger.error("缩略图文件创建失败")
                 return False
 
         except subprocess.TimeoutExpired:
-            logger.error(f"视频缩略图提取超时")
+            logger.error("视频缩略图提取超时")
             return False
         except Exception as e:
             logger.error(f"创建视频缩略图失败: {str(e)}")
@@ -278,7 +278,7 @@ class VideoProcessor:
                 }
 
         except subprocess.TimeoutExpired:
-            logger.error(f"视频转码超时")
+            logger.error("视频转码超时")
             return {
                 'success': False,
                 'error': '转码超时'
@@ -319,7 +319,7 @@ class VideoProcessor:
         # 获取原始视频信息
         video_info = self.get_video_info(input_path)
         if not video_info:
-            logger.error(f"无法获取视频信息")
+            logger.error("无法获取视频信息")
             return []
 
         original_width = video_info['width']

@@ -72,7 +72,7 @@ class FileProcessor:
                 logger.debug(f"[DEBUG] Magic 检测到 MIME 类型: {mime_type} (文件: {filename})")
                 return mime_type
             else:
-                logger.warning(f"[WARN] Magic 库不可用，使用扩展名推断")
+                logger.warning("[WARN] Magic 库不可用，使用扩展名推断")
                 raise Exception("Magic library not available")
         except Exception as e:
             logger.warning(f"[WARN] Magic 库失败，使用扩展名推断: {e}")

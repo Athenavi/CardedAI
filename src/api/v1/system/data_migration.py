@@ -8,8 +8,7 @@ import time
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, UploadFile, File, Depends, Form, Query
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, UploadFile, File, Depends, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.user import User

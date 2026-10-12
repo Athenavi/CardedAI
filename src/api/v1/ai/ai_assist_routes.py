@@ -4,7 +4,6 @@ AI 辅助功能 API 路由
 """
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from typing import Optional
 
 from shared.services.ai.workflow_service import ai_workflow_service
 from src.auth.auth_deps import jwt_required_dependency as jwt_required

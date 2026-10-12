@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 from enum import Enum
 from typing import Dict, Any, Optional, List
+from src.unified_logger import default_logger as logger
 
 
 class AuditActionType(str, Enum):

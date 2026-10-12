@@ -10,7 +10,7 @@ AI 写作助手服务
 6. 段落重组
 """
 import re
-from typing import List, Dict, Optional
+from typing import List, Dict
 
 
 class AIWritingAssistantService:
@@ -140,7 +140,7 @@ class AIWritingAssistantService:
         if target_style not in self.style_templates:
             return text
 
-        style_config = self.style_templates[target_style]
+        self.style_templates[target_style]
         result = text
 
         # 应用风格转换规则

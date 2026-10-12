@@ -14,7 +14,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.article import Article
 from shared.models.article_content import ArticleContent
-from src.unified_logger import default_logger as logger
 
 
 async def get_article_by_id(db: AsyncSession, article_id: int) -> Optional[Article]:
@@ -497,4 +496,3 @@ def _trigger_article_event(event_name: str, data: dict):
         event_name: 事件名称
         data: 事件数据
     """
-    pass

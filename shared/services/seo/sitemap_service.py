@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.article import Article
 from shared.models.category import Category
+from src.unified_logger import default_logger as logger
 
 
 async def generate_sitemap_xml(

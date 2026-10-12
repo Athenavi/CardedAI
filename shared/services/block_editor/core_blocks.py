@@ -250,7 +250,7 @@ def render_embed_block(block: Block) -> str:
     """渲染嵌入块"""
     attrs = block.attributes
     url = attrs.get("url", "")
-    provider = attrs.get("provider", "")
+    attrs.get("provider", "")
     width = attrs.get("width", 560)
     height = attrs.get("height", 315)
 
@@ -389,8 +389,8 @@ def render_social_share(block: Block) -> str:
     """渲染社交分享"""
     attrs = block.attributes
     platforms = attrs.get("platforms", ["wechat", "weibo", "twitter"])
-    title = attrs.get("title", "")
-    url = attrs.get("url", "")
+    attrs.get("title", "")
+    attrs.get("url", "")
 
     icons = {
         "wechat": "微信",

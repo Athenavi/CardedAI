@@ -10,7 +10,7 @@
 """
 
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List
 from dataclasses import dataclass, field
 
 from src.unified_logger import default_logger as logger

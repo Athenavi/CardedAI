@@ -4,9 +4,8 @@
 调用 LLM 对文本进行情感倾向分析。
 """
 
-import json
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from shared.services.ai.llm_client import llm_client
 

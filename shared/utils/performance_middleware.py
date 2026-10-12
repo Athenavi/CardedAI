@@ -160,7 +160,7 @@ def monitor_db_query(table_name: str = None):
 
                 return result
 
-            except Exception as e:
+            except Exception:
                 elapsed_time = time.perf_counter() - start_time
                 table = table_name or func.__name__.replace('get_', '').replace('list_', '')
 

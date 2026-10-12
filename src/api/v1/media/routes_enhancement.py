@@ -39,8 +39,10 @@ async def optimize_media_file(
         return ApiResponse(success=False, error="文件不存在或无权访问")
 
     try:
-        from PIL import Image
+        import asyncio
         import io
+
+        from PIL import Image
 
         # 获取文件路径
         file_path = Path(media.file_path)
@@ -51,31 +53,35 @@ async def optimize_media_file(
         if not media.mime_type or not media.mime_type.startswith('image/'):
             return ApiResponse(success=False, error="只能优化图片文件")
 
-        # 打开图片
-        img = Image.open(file_path)
+        mime_type = media.mime_type
 
-        # 调整大小
-        original_size = img.size
-        if img.width > max_width or img.height > max_height:
-            img.thumbnail((max_width, max_height), Image.LANCZOS)
+        def _optimize_image() -> tuple:
+            """同步的图片缩放与编码，放到线程池执行以避免阻塞事件循环"""
+            img = Image.open(file_path)
 
-        # 保存优化后的图片
-        output = io.BytesIO()
-        save_kwargs = {'quality': quality, 'optimize': True}
+            # 调整大小
+            original_size = img.size
+            if img.width > max_width or img.height > max_height:
+                img.thumbnail((max_width, max_height), Image.LANCZOS)
 
-        if media.mime_type == 'image/jpeg':
-            img.save(output, format='JPEG', **save_kwargs)
-        elif media.mime_type == 'image/png':
-            img.save(output, format='PNG', optimize=True)
-        else:
-            img.save(output, format=img.format, **save_kwargs)
+            # 保存优化后的图片
+            output = io.BytesIO()
+            save_kwargs = {'quality': quality, 'optimize': True}
 
-        # 写回文件
-        with open(file_path, 'wb') as f:
-            f.write(output.getvalue())
+            if mime_type == 'image/jpeg':
+                img.save(output, format='JPEG', **save_kwargs)
+            elif mime_type == 'image/png':
+                img.save(output, format='PNG', optimize=True)
+            else:
+                img.save(output, format=img.format, **save_kwargs)
 
-        # 更新文件大小
-        new_size = file_path.stat().st_size
+            # 写回文件
+            with open(file_path, 'wb') as f:
+                f.write(output.getvalue())
+
+            return original_size, file_path.stat().st_size
+
+        original_size, new_size = await asyncio.to_thread(_optimize_image)
         file_hash_obj = await db.execute(
             select(FileHash).where(FileHash.hash == media.hash)
         )
@@ -119,30 +125,31 @@ async def convert_to_webp_endpoint(
         return ApiResponse(success=False, error="只能转换图片文件")
 
     try:
-        from PIL import Image
+        import asyncio
         import io
+
+        from PIL import Image
 
         # 获取文件路径
         original_path = Path(media.file_path)
         if not original_path.exists():
             return ApiResponse(success=False, error="文件不存在")
 
-        # 打开图片
-        img = Image.open(original_path)
-
         # 生成WebP文件路径
         webp_path = original_path.with_suffix('.webp')
 
-        # 转换为WebP
-        output = io.BytesIO()
-        img.save(output, format='WEBP', quality=quality, method=6)
+        def _convert_to_webp() -> tuple:
+            """同步的 WebP 编码，放到线程池执行以避免阻塞事件循环"""
+            img = Image.open(original_path)
+            # 转换为WebP
+            output = io.BytesIO()
+            img.save(output, format='WEBP', quality=quality, method=6)
+            # 保存WebP文件
+            with open(webp_path, 'wb') as f:
+                f.write(output.getvalue())
+            return webp_path.stat().st_size, original_path.stat().st_size
 
-        # 保存WebP文件
-        with open(webp_path, 'wb') as f:
-            f.write(output.getvalue())
-
-        webp_size = webp_path.stat().st_size
-        original_size = original_path.stat().st_size
+        webp_size, original_size = await asyncio.to_thread(_convert_to_webp)
 
         logger.info(f"WebP转换完成: {media.original_filename}, 原始: {_format_file_size(original_size)}, WebP: {_format_file_size(webp_size)}")
 

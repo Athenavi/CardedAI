@@ -249,7 +249,7 @@ class BackupManager:
                 # 清理过期备份
                 self.cleanup_old_backups()
             else:
-                logger.error(f"自动备份失败")
+                logger.error("自动备份失败")
 
         except Exception as e:
             logger.error(f"自动备份任务执行失败: {e}", exc_info=True)
@@ -502,7 +502,6 @@ class BackupManager:
         """上传到AWS S3"""
         try:
             import boto3
-            from botocore.exceptions import ClientError
 
             s3_client = boto3.client(
                 's3',
@@ -529,7 +528,7 @@ class BackupManager:
             return True
 
         except ImportError:
-            logger.error(f"boto3库未安装，请运行: pip install boto3")
+            logger.error("boto3库未安装，请运行: pip install boto3")
             return False
         except Exception as e:
             logger.error(f"S3上传失败: {e}")
@@ -563,7 +562,7 @@ class BackupManager:
             return True
 
         except ImportError:
-            logger.error(f"oss2库未安装，请运行: pip install oss2")
+            logger.error("oss2库未安装，请运行: pip install oss2")
             return False
         except Exception as e:
             logger.error(f"OSS上传失败: {e}")
@@ -633,7 +632,7 @@ class BackupManager:
 
             # 验证元数据
             with open(info_file, 'r', encoding='utf-8') as f:
-                metadata = json.load(f)
+                json.load(f)
 
             # 检查文件大小
             actual_size = self._get_directory_size(backup_path)

@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from shared.services.install.install_manager.installation_wizard import installation_wizard_service
 from shared.services.install.install_manager.migration_service import migration_service
 from src.api.v1.core.responses import ApiResponse
+from src.unified_logger import default_logger as logger
 
 router = APIRouter()
 
@@ -346,7 +347,6 @@ async def create_admin_user_api(
             )
 
         # 直接调用内部异步函数
-        from shared.services.install.install_manager.installation_wizard import installation_wizard_service as wizard
 
         # 验证输入
         if not request.username or not request.email or not request.password:
@@ -671,7 +671,7 @@ async def stream_migration_logs():
 
         except Exception as e:
             # 仅记录 traceback 到日志，不返回给客户端
-            logger.error(f"[SSE ERROR] 迁移流出错", exc_info=True)
+            logger.error("[SSE ERROR] 迁移流出错", exc_info=True)
             error_msg = {
                 'type': 'error',
                 'message': '迁移执行失败，请稍后重试'

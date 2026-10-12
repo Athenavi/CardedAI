@@ -60,14 +60,13 @@ async def upload_cover(
             return JSONResponse({'code': 400, 'msg': validation_result}, status_code=400)
 
         # 计算文件哈希
-        file_hash = processor.calculate_hash(file_data)
+        processor.calculate_hash(file_data)
 
         # 处理文件并在数据库中创建记录
         try:
             result = await process_single_file(processor, file_data, file.filename, db)
         except Exception as e:
             await db.rollback()
-            import traceback
             logger.error(exc_info=True)
             return JSONResponse({'code': 500, 'msg': '文件处理失败', 'error': str(e)}, status_code=500)
 
@@ -88,6 +87,5 @@ async def upload_cover(
             return JSONResponse({'code': 500, 'msg': '文件处理失败', 'error': result['error']}, status_code=500)
 
     except Exception as e:
-        import traceback
         logger.error(exc_info=True)
         return JSONResponse({'code': 500, 'msg': '上传失败', 'error': str(e)}, status_code=500)

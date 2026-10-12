@@ -7,7 +7,7 @@ from typing import List, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
-from shared.models import Menus, SystemSettings
+from shared.models import Menus
 
 
 def get_default_menu() -> List[Dict]:
@@ -223,6 +223,5 @@ async def get_all_menus_with_items_async(db: AsyncSession) -> Dict:
     except Exception as e:
         # 如果数据库查询失败，返回空字典
         logger.info(f"获取所有菜单失败: {e}")
-        import traceback
         logger.error(exc_info=True)  # 打印完整的堆栈跟踪
         return {}

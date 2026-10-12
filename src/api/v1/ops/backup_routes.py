@@ -2,7 +2,6 @@
 P8-3: 备份管理 API
 提供备份创建、恢复、列表查询等功能
 """
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -117,7 +116,6 @@ async def delete_backup(
     Returns:
         删除结果
     """
-    from pathlib import Path
 
     backup_path = backup_manager.backup_dir / backup_filename
 

@@ -104,7 +104,6 @@ async def __get_recent_articles(
     """
     try:
         from sqlalchemy import select
-        from sqlalchemy.orm import selectinload
         from sqlalchemy import desc
 
         # 查询最近的文章（按创建时间排序），使用预加载来避免N+1问题
@@ -324,7 +323,6 @@ async def get_my_articles(
     """
     try:
         from sqlalchemy import select, func, or_
-        from sqlalchemy.orm import selectinload
 
         # 构建基础查询，预加载关联的作者信息
         query = select(Article).join(User, Article.user == User.id).where(
@@ -774,7 +772,7 @@ async def update_system_settings(
     更新系统设置
     """
     try:
-        data = await request.json()
+        await request.json()
         # 在实际实现中，需要验证和保存设置到数据库
         # 这里只是示例，实际应用中应将设置保存到系统配置表中
 
@@ -846,7 +844,7 @@ async def delete_blog_management_article(
     删除博客管理文章
     """
     try:
-        from sqlalchemy import select, delete
+        from sqlalchemy import select
         from shared.models.article_content import ArticleContent
         from shared.models.article_revision import ArticleRevision
 

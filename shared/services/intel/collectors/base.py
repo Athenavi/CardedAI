@@ -4,11 +4,9 @@
 定义所有采集器的统一接口，采用抽象基类模式（复用插件系统的设计模式）。
 """
 
-import json
 import hashlib
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)

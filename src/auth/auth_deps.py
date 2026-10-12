@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.user import User as UserModel
 from src.setting import settings
+from src.unified_logger import default_logger as logger
 from src.utils.database.main import get_async_session
 
 # token_blacklist 改为惰性导入：避免模块加载时触发 Redis .ping() 导致启动缓慢
@@ -112,15 +113,8 @@ async def _authenticate_user(
     内部核心：根据请求中的 token 验证身份，返回用户或 None。
     `required=True` 时无有效 token 会抛 401；`required=False` 时返回 None。
     """
-    import logging
-    _dep_logger = logging.getLogger('auth_deps')
-    
     token = await _get_token_from_request(request)
-    _dep_logger.warning('[AUTH_DEBUG] path=%s, token_exists=%s, auth_header=%s, cookie_access_token=%s, cookies_keys=%s',
-                        request.url.path, bool(token),
-                        bool(request.headers.get("Authorization")),
-                        bool(request.cookies.get("access_token")),
-                        list(request.cookies.keys()))
+
     if not token:
         if required:
             raise HTTPException(
@@ -136,8 +130,8 @@ async def _authenticate_user(
     try:
         payload = jwt.decode(token, jwt_secret, algorithms=[jwt_algorithm])
     except InvalidTokenError as e:
-        _dep_logger.warning('[AUTH_DEBUG_DECODE] DECODE FAILED for path=%s, error=%s, token_type=%s, token_preview=%s',
-                            request.url.path, str(e), type(e).__name__, (token or '')[:30])
+        logger.debug('[Auth] token 解码失败 path=%s error=%s type=%s',
+                     request.url.path, str(e), type(e).__name__)
         if required:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

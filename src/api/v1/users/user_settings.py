@@ -186,7 +186,7 @@ async def update_avatar_api(
     """
     try:
         # 调试日志
-        logger.error(f"[Avatar Upload] === START ===")
+        logger.error("[Avatar Upload] === START ===")
         logger.error(f"[Avatar Upload] Received request from user: {current_user.id}")
         logger.error(f"[Avatar Upload] File name: {file.filename}")
         logger.error(f"[Avatar Upload] Content type: {file.content_type}")
@@ -224,7 +224,7 @@ async def update_avatar_api(
         # 构建头像 URL
         avatar_url = f"/api/v2/static/avatar/{result}.webp"
         logger.error(f"[Avatar Upload] Success! Avatar URL: {avatar_url}")
-        logger.error(f"[Avatar Upload] === END ===")
+        logger.error("[Avatar Upload] === END ===")
         return JSONResponse(content={"success": True, "avatar_url": avatar_url})
     except Exception as e:
         import traceback

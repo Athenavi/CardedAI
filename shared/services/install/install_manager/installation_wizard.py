@@ -32,7 +32,7 @@ class InstallationWizardService:
         self.config_file = self.config_dir / ".env"
         self.ensure_directories()
 
-        logger.info(f"\n[InstallationWizard] 初始化:")
+        logger.info("\n[InstallationWizard] 初始化:")
         logger.info(f"  .env 文件路径: {self.config_file.absolute()}")
         logger.info(f"  项目根目录: {self.config_file.parent.absolute()}")
         logger.info(f"  文件是否存在: {self.config_file.exists()}")
@@ -242,7 +242,7 @@ class InstallationWizardService:
             }
 
             # 调试输出
-            logger.debug(f"\n[DEBUG] 保存数据库配置到 .env:")
+            logger.debug("\n[DEBUG] 保存数据库配置到 .env:")
             for key, value in env_updates.items():
                 if key == 'DB_PASSWORD':
                     logger.info(f"  {key}: {'***' if value else '(empty)'}")
@@ -314,7 +314,7 @@ class InstallationWizardService:
             env_content.update(updates)
 
             # 调试输出：显示即将写入的配置
-            logger.debug(f"\n[DEBUG] 即将写入 .env 文件的配置:")
+            logger.debug("\n[DEBUG] 即将写入 .env 文件的配置:")
             for key, value in env_content.items():
                 if 'PASSWORD' in key or 'SECRET' in key:
                     logger.info(f"  {key}: {'***' if value else '(empty)'}")
@@ -323,7 +323,7 @@ class InstallationWizardService:
 
             # 确保父目录存在
             self.config_file.parent.mkdir(parents=True, exist_ok=True)
-            logger.debug(f"[DEBUG] 父目录已确保存在")
+            logger.debug("[DEBUG] 父目录已确保存在")
 
             # 写入文件，保持标准格式
             with open(self.config_file, 'w', encoding='utf-8') as f:
@@ -354,13 +354,13 @@ class InstallationWizardService:
                 # 读取并显示文件内容以供调试
                 with open(self.config_file, 'r', encoding='utf-8') as f:
                     content = f.read()
-                    logger.debug(f"\n[DEBUG] 文件完整内容:")
+                    logger.debug("\n[DEBUG] 文件完整内容:")
                     logger.info("=" * 60)
                     logger.info(content)
                     logger.info("=" * 60)
             else:
-                logger.error(f"\n[ERROR] ✗ .env 文件写入后仍然不存在！")
-                logger.error(f"[ERROR] 请检查以下可能的问题:")
+                logger.error("\n[ERROR] ✗ .env 文件写入后仍然不存在！")
+                logger.error("[ERROR] 请检查以下可能的问题:")
                 logger.info(f"  1. 父目录是否存在: {self.config_file.parent.exists()}")
                 logger.info(f"  2. 父目录是否可写: {os.access(str(self.config_file.parent), os.W_OK)}")
                 logger.info(f"  3. 当前工作目录: {Path.cwd().absolute()}")
@@ -399,7 +399,6 @@ class InstallationWizardService:
 
             import asyncio
             from sqlalchemy import select
-            from src.utils.database.main import get_async_session
             from shared.models import Category, Article, ArticleContent
             from datetime import datetime
 
@@ -515,7 +514,7 @@ class InstallationWizardService:
 
             # 运行异步函数（处理可能在异步上下文中调用的情况）
             try:
-                loop = asyncio.get_running_loop()
+                asyncio.get_running_loop()
                 # 如果已经有运行的事件循环，使用线程池在新的事件循环中执行
                 import concurrent.futures
                 import threading
@@ -662,7 +661,6 @@ class InstallationWizardService:
             # 实际创建用户到数据库
             import asyncio
             from sqlalchemy import select
-            from src.utils.database.main import get_async_session
             from shared.models import User
 
             # 确保数据库管理器已初始化
@@ -734,7 +732,6 @@ class InstallationWizardService:
                         raise
 
             # 运行异步函数（处理可能在异步上下文中调用的情况）
-            import sys
 
             try:
                 loop = asyncio.get_running_loop()

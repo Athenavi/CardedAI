@@ -8,7 +8,6 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import select, desc
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.page_builder import PageBuilder
 from src.auth.auth_deps import jwt_required_dependency as jwt_required

@@ -225,7 +225,7 @@ async def stream_and_cache_s3(
                 response.headers[key] = value
 
             return response
-    except Exception as e:
+    except Exception:
         if temp_path.exists():
             temp_path.unlink()
         raise HTTPException(status_code=500, detail="文件获取失败")

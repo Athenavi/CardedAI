@@ -2,12 +2,12 @@
 多语言 API
 提供翻译管理、语言检测、自动翻译等功能
 """
-from typing import Optional, Dict, Any, List
-from fastapi import APIRouter, Depends, HTTPException, Query, Body, Header
+from typing import Optional, Dict, List
+from fastapi import APIRouter, Depends, Query, Body, Header
 
 from shared.services.translation.translation import translation_service
 from src.api.v1.core.responses import ApiResponse
-from src.auth.auth_deps import jwt_required_dependency as jwt_required, get_current_user
+from src.auth.auth_deps import jwt_required_dependency as jwt_required
 
 router = APIRouter(tags=["i18n"])
 

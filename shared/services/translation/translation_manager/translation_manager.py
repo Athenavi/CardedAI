@@ -7,6 +7,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Any, Optional
+from src.unified_logger import default_logger as logger
 
 # 支持的语言配置
 SUPPORTED_LANGUAGES = [

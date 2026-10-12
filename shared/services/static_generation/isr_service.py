@@ -5,6 +5,7 @@
 import httpx
 
 from src.setting import app_config
+from src.unified_logger import default_logger as logger
 
 
 class ISRService:

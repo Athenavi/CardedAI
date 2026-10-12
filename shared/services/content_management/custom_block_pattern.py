@@ -10,6 +10,7 @@
 import json
 from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
+from src.unified_logger import default_logger as logger
 
 
 class CustomBlockPatternService:
@@ -272,7 +273,7 @@ class CustomBlockPatternService:
         try:
             from src.utils.database.unified_manager import db_manager
             from shared.models.block_pattern import BlockPattern as ORMBlockPattern
-            from sqlalchemy import select, delete
+            from sqlalchemy import select
 
             async with db_manager.get_async_session() as session:
                 result = await session.execute(

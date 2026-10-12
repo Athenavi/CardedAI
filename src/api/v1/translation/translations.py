@@ -3,9 +3,10 @@
 """
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from shared.services.translation.translation import translation_service
+from src.auth.auth_deps import admin_required
 
 router = APIRouter(tags=["translations"])
 
@@ -46,7 +47,8 @@ async def get_translation(
 async def set_translation(
         locale: str,
         key: str,
-        value: str
+        value: str,
+        current_user=Depends(admin_required)
 ):
     """
     设置翻译

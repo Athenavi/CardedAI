@@ -9,6 +9,7 @@ from datetime import datetime
 from typing import Dict, Optional
 
 from fastapi import WebSocket
+from src.unified_logger import default_logger as logger
 
 
 class YjsDocument:

@@ -2,6 +2,7 @@
 内部链接建议API
 分析文章内容,推荐相关内部链接
 """
+import traceback
 from typing import Dict, Any
 
 from fastapi import APIRouter, Depends, Request, Body

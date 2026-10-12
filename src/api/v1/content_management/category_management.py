@@ -174,7 +174,7 @@ async def get_categories_with_stats_api(
             .group_by(Category.id)
             .order_by(Category.sort_order.asc(), Category.name.asc())
         )
-        category_stats = await db.execute(category_stats_query)
+        await db.execute(category_stats_query)
 
         # 获取总数
         total_categories_query = await db.execute(select(func.count()).select_from(Category))

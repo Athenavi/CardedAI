@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional, Tuple
 
 from PIL import Image, ImageFilter, ImageEnhance, ImageOps
+from src.unified_logger import default_logger as logger
 
 # 滤镜映射（类级别常量）
 FILTERS = {

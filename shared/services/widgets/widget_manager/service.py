@@ -131,7 +131,7 @@ class WidgetService:
         """更新小部件配置"""
         try:
             from src.utils.database.unified_manager import db_manager
-            from sqlalchemy import select, update
+            from sqlalchemy import select
 
             async with db_manager.get_session() as db:
                 result = await db.execute(
@@ -175,7 +175,7 @@ class WidgetService:
         """移除小部件"""
         try:
             from src.utils.database.unified_manager import db_manager
-            from sqlalchemy import select, delete
+            from sqlalchemy import select
 
             async with db_manager.get_session() as db:
                 result = await db.execute(
@@ -426,7 +426,6 @@ class WidgetService:
         try:
             from shared.models.article import Article
             from shared.models.user import User
-            from sqlalchemy import desc
 
             # 评论功能已移除，返回空列表
             comments = []

@@ -13,11 +13,11 @@ import asyncio
 import json
 import logging
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional
 
 from sqlalchemy import select, and_
 
-from shared.services.intel.collectors.base import BaseCollector, CollectedItemData
+from shared.services.intel.collectors.base import BaseCollector
 
 logger = logging.getLogger(__name__)
 

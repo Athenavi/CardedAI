@@ -10,7 +10,6 @@ from pydantic import BaseModel
 from shared.services.system.maintenance_mode import maintenance_service
 from src.api.v1.core.responses import ApiResponse
 from src.auth.auth_deps import jwt_required_dependency as jwt_required
-from src.unified_logger import default_logger as logger
 
 router = APIRouter()
 

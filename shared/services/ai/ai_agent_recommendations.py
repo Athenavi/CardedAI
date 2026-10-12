@@ -2,8 +2,7 @@
 AI Agent 智能推荐服务
 提供自动标签推荐、SEO 优化建议、相关文章推荐等功能
 """
-import asyncio
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from datetime import datetime
 
 from sqlalchemy import select

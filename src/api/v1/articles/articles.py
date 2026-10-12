@@ -10,7 +10,6 @@ from src.unified_logger import default_logger as logger
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from sqlalchemy import func, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from shared.models.article import Article
 from shared.models.article_content import ArticleContent

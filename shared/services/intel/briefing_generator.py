@@ -7,7 +7,7 @@
 import json
 import logging
 from datetime import date, datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from sqlalchemy import select, and_, desc
 

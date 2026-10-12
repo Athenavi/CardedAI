@@ -3,7 +3,7 @@
 
 提供ISR管理的REST API接口
 """
-from fastapi import APIRouter, Depends, Query, HTTPException, Body
+from fastapi import APIRouter, Depends, Query, Body
 from sqlalchemy import String
 from sqlalchemy.ext.asyncio import AsyncSession
 

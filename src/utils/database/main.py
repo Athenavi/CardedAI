@@ -321,7 +321,7 @@ def test_connection() -> bool:
     try:
         # 尝试获取当前事件循环
         try:
-            loop = asyncio.get_running_loop()
+            asyncio.get_running_loop()
             # 如果已经有运行的事件循环，使用线程池执行
             import concurrent.futures
             with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -348,7 +348,7 @@ async def init_database_async(create_if_missing=True, check_consistency=True):
         db_manager.initialize()
 
     if not await test_connection_async():
-        logger.error(f"数据库连接失败")
+        logger.error("数据库连接失败")
         return False
 
     logger.info("数据库连接成功")
@@ -365,7 +365,7 @@ def init_database(create_if_missing=True, check_consistency=True):
     try:
         # 尝试获取当前事件循环
         try:
-            loop = asyncio.get_running_loop()
+            asyncio.get_running_loop()
             # 如果已经有运行的事件循环，使用线程池执行
             import concurrent.futures
             with concurrent.futures.ThreadPoolExecutor() as executor:

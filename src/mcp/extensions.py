@@ -9,10 +9,8 @@ MCP Server 扩展模块
 - 工作流工具: trigger_workflow, list_workflows, get_workflow_execution
 """
 
-import json
 import logging
-from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Dict, List
 
 logger = logging.getLogger(__name__)
 

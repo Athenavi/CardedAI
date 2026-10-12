@@ -302,7 +302,6 @@ class DatabaseBackup:
 
         except Exception as e:
             logger.info(f"数据库结构备份错误: {str(e)}")
-            import traceback
             logger.error(exc_info=True)
             return None
 
@@ -469,7 +468,6 @@ class DatabaseBackup:
 
         except Exception as e:
             logger.info(f"数据库数据备份错误: {str(e)}")
-            import traceback
             logger.error(exc_info=True)
             return None
 

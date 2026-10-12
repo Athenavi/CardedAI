@@ -153,7 +153,7 @@ async def invalidate_article_cache(article_id: int):
     """文章更新时清除相关缓存"""
     try:
         # 清除文章详情页缓存
-        cache_service.invalidate_pattern(f"/p/")
+        cache_service.invalidate_pattern("/p/")
 
         # 清除首页缓存
         cache_service.invalidate_pattern("/")

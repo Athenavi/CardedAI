@@ -4,6 +4,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Optional
+from src.unified_logger import default_logger as logger
 
 # ============ Collection Task Queue ============
 

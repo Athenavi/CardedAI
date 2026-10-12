@@ -9,6 +9,7 @@ from functools import wraps
 from typing import Any, Dict, List, Optional, Callable
 
 from shared.services.core.multi_level_cache import MultiLevelCache, multi_level_cache
+from src.unified_logger import default_logger as logger
 
 
 

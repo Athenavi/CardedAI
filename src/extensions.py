@@ -486,7 +486,7 @@ def _get_sync_session_factory():
             db_url = db_manager.database_url if hasattr(db_manager, 'database_url') else None
 
         if not db_url:
-            logger.error(f"No database URL available for sync session factory")
+            logger.error("No database URL available for sync session factory")
             return None
 
         # 将异步驱动转换为同步驱动

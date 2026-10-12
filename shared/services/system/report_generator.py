@@ -10,7 +10,6 @@ from typing import Dict, List, Optional
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.unified_logger import default_logger as logger
 
 
 class ReportGenerator:
@@ -69,7 +68,7 @@ class ReportGenerator:
                 Like.like_type == 'article'
             )
         )
-        total_likes = total_likes_result.scalar() or 0
+        total_likes_result.scalar() or 0
 
         # 总评论数
         total_comments_result = await self.db.execute(
@@ -77,7 +76,7 @@ class ReportGenerator:
                 Comment.created_at >= cutoff
             )
         )
-        total_comments = total_comments_result.scalar() or 0
+        total_comments_result.scalar() or 0
 
         # 平均每篇文章浏览量
         avg_views = round(total_views / total_articles, 2) if total_articles > 0 else 0

@@ -7,6 +7,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List, Optional
+from src.unified_logger import default_logger as logger
 
 # 默认配置
 MEMORY_FILE_PATH = Path(__file__).parent.parent.parent / "plugins_data" / "translation_memory.json"

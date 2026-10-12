@@ -444,7 +444,7 @@ class PageCacheService:
         import glob
 
         html_files = glob.glob(os.path.join(self.cache_dir, "*.html"))
-        meta_files = glob.glob(os.path.join(self.cache_dir, "*.meta.json"))
+        glob.glob(os.path.join(self.cache_dir, "*.meta.json"))
 
         total_size = sum(os.path.getsize(f) for f in html_files)
 

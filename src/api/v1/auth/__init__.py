@@ -7,6 +7,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+import jwt
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -26,6 +27,21 @@ from src.setting import settings
 from src.unified_logger import default_logger as logger
 
 router = APIRouter(tags=["auth"])
+
+
+# ---------- token 黑名单：惰性导入 + 单例缓存 ----------
+# 避免模块加载时触发 Redis .ping() 导致启动缓慢
+_tb_instance = None
+
+
+def get_token_blacklist():
+    """获取 token 黑名单管理器单例（首次调用时才导入并建立连接）"""
+    global _tb_instance
+    if _tb_instance is None:
+        from src.utils.token_blacklist import get_token_blacklist as _get_tb
+        _tb_instance = _get_tb()
+    return _tb_instance
+
 
 # 第三方登录（OAuth 2.0）：端点落在 /api/v2/auth/oauth/*
 from src.api.v1.auth import oauth as oauth_routes  # noqa: E402
@@ -369,14 +385,19 @@ async def login_api(
         response.set_cookie(
             key="access_token",
             value=access_token,
+            # 前端（auth-utils.ts / base-client.ts）通过 JS 读取该 cookie 才能携带
+            # Authorization 头并刷新令牌，因此这里不能设为 HttpOnly（否则前端登录态失效）。
+            # HttpOnly 化需要前端改为纯 cookie 认证流程，属独立的后续改造。
             httponly=False,
-            secure=False,
+            # 仅当“配置允许 JWT_COOKIE_SECURE + 实际走 https”时才加 Secure，避免本地 http 调试时 cookie 失效
+            secure=bool(getattr(settings, "JWT_COOKIE_SECURE", False)) and request.url.scheme == "https",
             samesite="lax",
+            path="/",
             max_age=3600,
         )
         return response
-    except Exception as e:
-        logger.exception(f"Login failed for user")
+    except Exception:
+        logger.exception("Login failed for user")
 
 
 @router.post("/register", summary="用户注册")
@@ -686,8 +707,14 @@ async def logout_api(
         except Exception:
             pass
 
-        return ApiResponse(success=True, message="登出成功")
-    except Exception as e:
+        # 服务端同时清除认证 cookie（前端也会清理，双保险）
+        response = JSONResponse(
+            content=ApiResponse(success=True, message="登出成功").model_dump(mode='json')
+        )
+        for cookie_name in ("access_token", "refresh_token"):
+            response.delete_cookie(key=cookie_name, path="/", samesite="lax")
+        return response
+    except Exception:
         return ApiResponse(success=False, error="登出失败，请稍后重试")
 
 

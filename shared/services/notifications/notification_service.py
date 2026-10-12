@@ -2,7 +2,6 @@
 第三方通知服务集成
 支持 Slack、Discord、Email 等通知渠道
 """
-import json
 
 from typing import Dict, Any, Optional, List
 from datetime import datetime
@@ -93,7 +92,7 @@ class NotificationService:
             return False
 
         if not HAS_AIOHTTP:
-            logger.error(f"aiohttp not installed")
+            logger.error("aiohttp not installed")
             return False
 
         try:
@@ -155,7 +154,7 @@ class NotificationService:
             return False
 
         if not HAS_AIOHTTP:
-            logger.error(f"aiohttp not installed")
+            logger.error("aiohttp not installed")
             return False
 
         try:

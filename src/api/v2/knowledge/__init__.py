@@ -43,7 +43,7 @@ async def create_knowledge_base(
                 embedding_model=embedding_model,
                 chunk_size=chunk_size,
                 chunk_overlap=chunk_overlap,
-                vector_collection=f"kb_{{placeholder}}",
+                vector_collection="kb_{placeholder}",
                 document_count=0,
                 chunk_count=0,
                 created_at=datetime.utcnow(),

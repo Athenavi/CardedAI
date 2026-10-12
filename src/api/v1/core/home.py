@@ -73,7 +73,6 @@ async def send_subscription_confirmation_email(email: str):
 
     except Exception as e:
         logger.error(f"发送订阅确认邮件失败: {e}")
-        import traceback
         logger.error(exc_info=True)
 
 
@@ -161,9 +160,9 @@ async def get_home_config(db: AsyncSession = Depends(get_async_session)):
 
         config = {
             "hero": {
-                "title": config_dict.get('home_hero_title', f"用文字连接每一个想法"),
+                "title": config_dict.get('home_hero_title', "用文字连接每一个想法"),
                 "subtitle": config_dict.get('home_hero_subtitle',
-                                            f"FastBlog 是一个现代化的内容创作平台，为创作者提供极致的写作体验，让灵感自由流动。"),
+                                            "FastBlog 是一个现代化的内容创作平台，为创作者提供极致的写作体验，让灵感自由流动。"),
                 "backgroundImage": config_dict.get('home_hero_background_image', ""),
                 "ctaText": config_dict.get('home_hero_cta_text', "开始阅读"),
                 "ctaLink": config_dict.get('home_hero_cta_link', "/articles"),

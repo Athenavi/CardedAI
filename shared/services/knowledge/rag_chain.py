@@ -120,7 +120,7 @@ class RAGChain:
                 content = chunk.get("metadata", {}).get("content", "")
                 if not content:
                     content = str(chunk.get("metadata", {}))
-                source_info = chunk.get("metadata", {}).get("document_title", f"来源{i + 1}")
+                chunk.get("metadata", {}).get("document_title", f"来源{i + 1}")
                 context_parts.append(f"[来源{i + 1}] (相关度: {chunk.get('score', 0):.2f}) {content}")
 
             context = "\n\n".join(context_parts)
@@ -283,7 +283,7 @@ class RAGChain:
             embeddings = await self.embedding_service.embed(texts)
 
             if not embeddings:
-                logger.error(f"Embedding 生成失败，跳过导入")
+                logger.error("Embedding 生成失败，跳过导入")
                 return []
 
             # 构建元数据

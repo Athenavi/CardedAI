@@ -83,19 +83,18 @@
     GET /api/v1/migrations/guide/{platform} - 获取迁移指南
 """
 
-import asyncio
 import csv
 import json
-import os
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from shared.models import Article, Category, Tag, User
+from shared.models import Article, Category, Tag
 from shared.services.integrations.wordpress_import import WordPressImportService
+from src.unified_logger import default_logger as logger
 
 
 class MigrationService:
@@ -156,7 +155,7 @@ class MigrationService:
             'errors': 0,
         }
 
-        logger.error(f"[Migration] Found:")
+        logger.error("[Migration] Found:")
         logger.error(f"  - {stats['total_posts']} posts")
         logger.error(f"  - {stats['total_categories']} categories")
         logger.error(f"  - {stats['total_tags']} tags")
@@ -175,7 +174,7 @@ class MigrationService:
                     category = Category(
                         name=cat_name,
                         slug=self._generate_slug(cat_name),
-                        description=f'Imported from WordPress'
+                        description='Imported from WordPress'
                     )
                     db_session.add(category)
                     await db_session.flush()
@@ -475,7 +474,7 @@ class MigrationService:
             'errors': 0,
         }
 
-        logger.error(f"[Migration] Found:")
+        logger.error("[Migration] Found:")
         logger.error(f"  - {stats['posts']} posts")
         logger.error(f"  - {stats['tags']} tags")
         logger.error(f"  - {stats['users']} users")

@@ -5,7 +5,7 @@
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from shared.services.ai.llm_client import llm_client
 

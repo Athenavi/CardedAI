@@ -7,7 +7,7 @@
 import json
 import logging
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from sqlalchemy import select
 
@@ -90,7 +90,7 @@ class AnalysisEngine:
         summary = summary_result.get("summary", "")
         category = classify_result.get("category", "其他")
         tags = classify_result.get("tags", [])
-        confidence = sentiment_result.get("confidence", 0.0)
+        sentiment_result.get("confidence", 0.0)
         importance = classify_result.get("confidence", 0.0)
 
         # 3. 创建 Intelligence 记录

@@ -1,12 +1,11 @@
 """
 用户管理 API（统一使用 auth_deps 提供的认证依赖）
 """
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from typing import Optional
 
 from fastapi import Depends, HTTPException, Request, status
 from jwt.exceptions import InvalidTokenError
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # SQLAlchemy 模型与服务（保持不变）

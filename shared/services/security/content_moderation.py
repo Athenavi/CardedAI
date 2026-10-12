@@ -1,5 +1,4 @@
 """简化的内容审核服务（个人站长轻量版）"""
-from typing import Optional
 
 
 class ContentModerationService:

@@ -99,18 +99,18 @@ class TestGetFeedDiscoveryTags:
 
     def test_custom_base_url(self):
         tags = get_feed_discovery_tags("https://blog.example.com")
-        assert tags["rss_link"] == "https://blog.example.com/api/v1/feed/rss"
-        assert tags["atom_link"] == "https://blog.example.com/api/v1/feed/atom"
+        assert tags["rss_link"] == "https://blog.example.com/api/v2/cms/rss"
+        assert tags["atom_link"] == "https://blog.example.com/api/v2/cms/atom"
 
     def test_rss_xml_contains_link(self):
         tags = get_feed_discovery_tags("https://example.com")
         assert "rss+xml" in tags["rss_xml"]
-        assert "https://example.com/api/v1/feed/rss" in tags["rss_xml"]
+        assert "https://example.com/api/v2/cms/rss" in tags["rss_xml"]
 
     def test_atom_xml_contains_link(self):
         tags = get_feed_discovery_tags("https://example.com")
         assert "atom+xml" in tags["atom_xml"]
-        assert "https://example.com/api/v1/feed/atom" in tags["atom_xml"]
+        assert "https://example.com/api/v2/cms/atom" in tags["atom_xml"]
 
     def test_none_base_url_uses_default(self):
         tags = get_feed_discovery_tags(None)

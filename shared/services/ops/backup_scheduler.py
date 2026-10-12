@@ -2,8 +2,6 @@
 P8-3: 定时备份任务调度器
 使用 APScheduler 实现自动化备份调度
 """
-import asyncio
-from datetime import datetime
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -50,7 +48,7 @@ class BackupScheduler:
         if db_result['success'] and files_result['success']:
             logger.info("Weekly full backup completed")
         else:
-            logger.error(f"Weekly backup partially failed")
+            logger.error("Weekly backup partially failed")
 
     async def monthly_backup_job(self):
         """每月备份任务"""

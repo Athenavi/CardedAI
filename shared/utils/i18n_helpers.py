@@ -3,6 +3,7 @@
 提供便捷的翻译函数,类似WordPress的 __(), _e(), _x() 等
 """
 from shared.services.translation.translation_manager.i18n_service import i18n_service
+from src.unified_logger import default_logger as logger
 
 
 def __(text: str, domain: str = 'default', language: str = None) -> str:

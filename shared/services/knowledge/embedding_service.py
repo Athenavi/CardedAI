@@ -16,7 +16,6 @@ Embedding 服务
 - OpenAI 默认: text-embedding-3-small
 """
 
-import asyncio
 import os
 import re
 from abc import ABC, abstractmethod
@@ -109,7 +108,7 @@ class OpenAIEmbeddingBackend(EmbeddingBackend):
 
     async def embed(self, texts: List[str]) -> List[List[float]]:
         if not self._api_key:
-            logger.error(f"OPENAI_API_KEY 未设置")
+            logger.error("OPENAI_API_KEY 未设置")
             return []
 
         try:

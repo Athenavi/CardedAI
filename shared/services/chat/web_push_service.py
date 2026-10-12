@@ -4,7 +4,6 @@ Web Push 推送通知服务
 """
 
 import json
-import os
 from datetime import datetime
 from typing import Dict, List
 
@@ -310,7 +309,7 @@ class WebPushService:
             original_count = len(self._subscriptions[user_id])
 
             # 清理超过30天的旧订阅(简化逻辑)
-            cutoff = datetime.now()
+            datetime.now()
             self._subscriptions[user_id] = [
                 sub for sub in self._subscriptions[user_id]
                 # 实际应该检查created_at

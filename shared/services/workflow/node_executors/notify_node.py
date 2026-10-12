@@ -5,7 +5,7 @@
 复用 notification_service 的邮件发送能力。
 """
 
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from src.unified_logger import default_logger as logger
 from shared.services.workflow.node_executors.base import BaseNodeExecutor

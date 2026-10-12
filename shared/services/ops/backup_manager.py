@@ -5,16 +5,13 @@ P8-3: 自动化备份服务
 import os
 import gzip
 import shutil
-import asyncio
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 
 import boto3
-from sqlalchemy import text
 
 from src.unified_logger import default_logger as logger
-from src.utils.database.main import get_async_session
 
 
 class BackupManager:

@@ -45,6 +45,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 from .block_editor_service import BlockType, BlockEditorService
+from src.unified_logger import default_logger as logger
 
 
 @dataclass
@@ -105,11 +106,9 @@ class CustomBlockPlugin:
 
     def on_activate(self):
         """插件激活时调用（可选）"""
-        pass
 
     def on_deactivate(self):
         """插件停用时调用（可选）"""
-        pass
 
     def get_render_method(self, block_name: str) -> Optional[Any]:
         """

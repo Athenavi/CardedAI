@@ -409,7 +409,7 @@ class RedirectService:
                 lines.append(f'Redirect {redirect_type} {source} {target}')
             elif match_type == 'regex':
                 # Apache mod_rewrite规则
-                lines.append(f'RewriteEngine On')
+                lines.append('RewriteEngine On')
                 lines.append(f'RewriteRule ^{source}$ {target} [R={redirect_type},L]')
 
             lines.append('')

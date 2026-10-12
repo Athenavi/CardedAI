@@ -3,6 +3,7 @@
 支持一键将文章同步到知乎、掘金、Medium 等平台
 """
 from typing import Dict, Any
+from src.unified_logger import default_logger as logger
 
 
 class ThirdPartyPublisher:

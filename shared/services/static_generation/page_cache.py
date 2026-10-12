@@ -10,6 +10,7 @@ import hashlib
 from typing import Optional, Dict, Any, Callable, Awaitable
 
 from shared.services.core.multi_level_cache import MultiLevelCache, multi_level_cache
+from src.unified_logger import default_logger as logger
 
 
 class PageCacheService:

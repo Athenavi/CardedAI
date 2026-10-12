@@ -7,6 +7,7 @@ import asyncio
 import hashlib
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Union
+from src.unified_logger import default_logger as logger
 
 try:
     from shared.services.cache_service import CacheService

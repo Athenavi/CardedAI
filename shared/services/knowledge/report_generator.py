@@ -11,7 +11,6 @@ AI 研报生成器
 5. 格式化输出 Markdown
 """
 
-import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field

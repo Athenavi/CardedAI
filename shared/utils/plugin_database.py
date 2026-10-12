@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any
+from src.unified_logger import default_logger as logger
 
 
 class PluginDatabaseManager:

@@ -29,9 +29,11 @@ async def remove_exif(
 ):
     """移除图片的EXIF元数据"""
     try:
+        import asyncio
+        import io
+
         from PIL import Image
         from pathlib import Path
-        import io
 
         # 查询媒体文件
         query = select(Media).where(Media.id == media_id)
@@ -50,27 +52,32 @@ async def remove_exif(
         if not file_path.exists():
             return ApiResponse(success=False, error="文件不存在")
 
-        # 打开图片
-        img = Image.open(file_path)
+        mime_type = media.mime_type
 
-        # 提取图片数据(不包含EXIF)
-        data = list(img.getdata())
-        image_without_exif = Image.new(img.mode, img.size)
-        image_without_exif.putdata(data)
+        def _strip_exif() -> None:
+            """同步的 EXIF 去除与重编码，放到线程池执行以避免阻塞事件循环"""
+            img = Image.open(file_path)
 
-        # 保存不含EXIF的图片
-        output = io.BytesIO()
+            # 提取图片数据(不包含EXIF)
+            data = list(img.getdata())
+            image_without_exif = Image.new(img.mode, img.size)
+            image_without_exif.putdata(data)
 
-        if media.mime_type == 'image/jpeg':
-            image_without_exif.save(output, format='JPEG', quality=95)
-        elif media.mime_type == 'image/png':
-            image_without_exif.save(output, format='PNG')
-        else:
-            image_without_exif.save(output, format=img.format)
+            # 保存不含EXIF的图片
+            output = io.BytesIO()
 
-        # 写回文件
-        with open(file_path, 'wb') as f:
-            f.write(output.getvalue())
+            if mime_type == 'image/jpeg':
+                image_without_exif.save(output, format='JPEG', quality=95)
+            elif mime_type == 'image/png':
+                image_without_exif.save(output, format='PNG')
+            else:
+                image_without_exif.save(output, format=img.format)
+
+            # 写回文件
+            with open(file_path, 'wb') as f:
+                f.write(output.getvalue())
+
+        await asyncio.to_thread(_strip_exif)
 
         logger = _logger
         logger.info(f"EXIF已移除: {media.original_filename}")
@@ -84,7 +91,6 @@ async def remove_exif(
     except Exception as e:
         logger = _logger
         logger.error(f"移除EXIF失败: {e}")
-        import traceback
         logger.error(exc_info=True)
         return ApiResponse(success=False, error=f"移除EXIF失败: {str(e)}")
 

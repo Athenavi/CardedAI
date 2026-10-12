@@ -57,17 +57,17 @@ def main():
 
     # 选择配置并启动
     from src.setting import get_config_by_env
-    config = get_config_by_env(args.env)
+    get_config_by_env(args.env)
 
     try:
         import uvicorn
         # 使用应用实例而不是工厂函数
         from src.app import app as fastapi_app
         if fastapi_app is None:
-            logger.error(f"FastAPI 应用实例创建失败")
+            logger.error("FastAPI 应用实例创建失败")
             sys.exit(1)
 
-        logger.info(f"FastAPI 应用已加载，准备启动服务器...")
+        logger.info("FastAPI 应用已加载，准备启动服务器...")
         logger.info(f"服务器地址: http://{args.host}:{args.port}")
 
         uvicorn.run(

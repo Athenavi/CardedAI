@@ -7,8 +7,8 @@
 - 每周简报：每周一 8:00 生成
 """
 
+import asyncio
 import logging
-from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 

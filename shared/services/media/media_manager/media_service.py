@@ -10,6 +10,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from PIL import Image, ExifTags
 
 from shared.models import Media
+from src.unified_logger import default_logger as logger
 
 # 默认缩略图尺寸配置
 DEFAULT_THUMBNAIL_SIZES = [

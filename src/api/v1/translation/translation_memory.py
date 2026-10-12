@@ -11,6 +11,7 @@ from src.api.v1.core.responses import ApiResponse
 from shared.models.user import User
 from shared.services.translation.translation_manager.translation_memory import translation_memory_service
 from src.auth.auth_deps import admin_required as admin_required_api
+from src.unified_logger import default_logger as logger
 
 router = APIRouter()
 

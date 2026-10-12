@@ -2,8 +2,8 @@
 移动端同步 API 路由
 为 Mobile App 提供离线写作、媒体同步及通知推送支持
 """
-from fastapi import APIRouter, Depends, Query, HTTPException
-from typing import List, Optional
+from fastapi import APIRouter, Depends, Query
+from typing import Optional
 
 from shared.models.article import Article
 from shared.models.media import Media

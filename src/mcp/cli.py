@@ -98,7 +98,6 @@ async def main():
 
     _log(f"MCP Server 已初始化: {mcp_server.get_server_info()}")
 
-    initialized = False
 
     while True:
         request = await _read_message()
@@ -115,14 +114,13 @@ async def main():
                 response = await _handle_initialize(request)
 
             elif method == "initialized":
-                initialized = True
                 response = {"jsonrpc": "2.0", "id": request.get("id"), "result": {}}
 
             elif method == "ping":
                 response = await _handle_ping(request)
 
             elif method == "notifications/initialized":
-                initialized = True
+                pass
                 # 通知类消息不需要响应
                 continue
 

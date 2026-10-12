@@ -215,7 +215,7 @@ async def chunked_upload_init(
                 }
             }, status_code=400)
 
-        logger.info(f"参数验证通过，开始初始化上传任务...")
+        logger.info("参数验证通过，开始初始化上传任务...")
         processor = ChunkedUploadProcessor(current_user_obj.id)
         result = await processor.init_upload(filename, total_size, total_chunks, file_hash, existing_upload_id, db)
 

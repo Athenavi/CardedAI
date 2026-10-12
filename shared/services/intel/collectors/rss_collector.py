@@ -7,7 +7,7 @@ RSS/Atom 采集器
 import importlib
 import logging
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from shared.services.intel.collectors.base import BaseCollector, CollectedItemData
 
@@ -52,12 +52,12 @@ class RSSCollector(BaseCollector):
         """
         fp = _get_feedparser()
         if fp is None:
-            logger.error(f"feedparser 未安装，无法采集 RSS 源（请执行: pip install feedparser）")
+            logger.error("feedparser 未安装，无法采集 RSS 源（请执行: pip install feedparser）")
             return []
 
         hx = _get_httpx()
         if hx is None:
-            logger.error(f"httpx 未安装，无法发起 HTTP 请求（请执行: pip install httpx）")
+            logger.error("httpx 未安装，无法发起 HTTP 请求（请执行: pip install httpx）")
             return []
 
         etag = source_config.get("etag")

@@ -9,15 +9,14 @@
 5. 搜索历史
 6. 热门搜索统计
 """
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 
-from sqlalchemy import select, func, or_, and_, desc
+from sqlalchemy import select, func, or_, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.article import Article
 from shared.models.article_content import ArticleContent
-from shared.models.category import Category
 from shared.models.search_history import SearchHistory
 
 

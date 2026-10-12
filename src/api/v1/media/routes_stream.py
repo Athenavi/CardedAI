@@ -217,7 +217,7 @@ async def get_media_file_by_id(
 
             # 如果文件实际上存在于标准路径但没有被检测到（可能是权限问题）
             if file_path.exists():
-                logger.warning(f"  [WARN] 文件存在但之前的检查失败，重试...")
+                logger.warning("  [WARN] 文件存在但之前的检查失败，重试...")
                 return await handle_local_file(file_path, file_hash.mime_type, file_hash.filename, range_header,
                                                headers)
 
@@ -225,5 +225,5 @@ async def get_media_file_by_id(
                                 detail=f"不支持的存储类型: '{file_hash.storage_path}'，文件也不存在于标准路径")
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="服务器内部错误")

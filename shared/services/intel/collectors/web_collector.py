@@ -53,7 +53,7 @@ class WebCollector(BaseCollector):
             List[CollectedItemData]
         """
         if httpx is None:
-            logger.error(f"httpx 未安装，无法采集网页")
+            logger.error("httpx 未安装，无法采集网页")
             return []
 
         timeout = source_config.get("timeout", 30)

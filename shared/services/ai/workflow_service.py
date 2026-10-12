@@ -4,10 +4,9 @@ AI 智能工作流引擎服务
 """
 import json
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models.ai_workflow import AIWorkflow
 from src.utils.database.main import get_async_session
