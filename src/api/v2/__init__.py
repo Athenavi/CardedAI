@@ -136,6 +136,8 @@ ROUTE_REGISTRY_V2 = [
     ("src.api.v1.system.version", "/api/v2/system/version", ["system-version"], False),
     # ==================== 前端性能指标上报（Web Vitals）====================
     ("src.api.v1.system.performance_vitals", "/api/v2/performance", ["performance"], False),
+    # ==================== 全局性能统计（Phase 6）====================
+    ("src.api.v2.performance", "/api/v2/performance", ["performance-stats"], False),
 
     # ==================== 示例和工具端点（集中管理）====================
     ("src.api.v2.examples_tools", "/api/v2/examples", ["examples-tools"], False),
