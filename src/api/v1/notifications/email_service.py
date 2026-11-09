@@ -224,6 +224,10 @@ async def send_email(
         发送结果
     """
     try:
+        has_permission = getattr(current_user, 'is_superuser', False) or getattr(current_user, 'is_staff', False)
+        if not has_permission:
+            return ApiResponse(success=False, error="Insufficient permissions")
+
         config = await email_service_integration.get_config(db, provider, site_id)
 
         if not config:
@@ -278,6 +282,10 @@ async def send_batch_emails(
         发送结果统计
     """
     try:
+        has_permission = getattr(current_user, 'is_superuser', False) or getattr(current_user, 'is_staff', False)
+        if not has_permission:
+            return ApiResponse(success=False, error="Insufficient permissions")
+
         config = await email_service_integration.get_config(db, provider, site_id)
 
         if not config:

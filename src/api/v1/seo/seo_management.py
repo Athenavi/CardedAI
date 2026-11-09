@@ -6,10 +6,11 @@
 
 from typing import Optional, List
 
-from fastapi import APIRouter, Query, Body
+from fastapi import APIRouter, Query, Body, Depends
 
 from shared.services.seo.seo_analyzer import seo_analyzer
 from src.api.v1.core.responses import ApiResponse
+from src.auth.auth_deps import jwt_required_dependency as jwt_required
 
 router = APIRouter()
 
@@ -25,6 +26,7 @@ async def analyze_seo(
         h3_headings: Optional[List[str]] = Body(None, description="H3标题列表"),
         images: Optional[List[dict]] = Body(None, description="图片列表 [{src, alt}]"),
         internal_links: int = Body(0, description="内部链接数量"),
+    current_user=Depends(jwt_required),
 ):
     """分析SEO"""
     headings = {}
@@ -55,6 +57,7 @@ async def analyze_seo(
 async def quick_check(
         title: str = Query(..., description="页面标题"),
         description: str = Query(..., description="页面描述"),
+    current_user=Depends(jwt_required),
 ):
     """快速检查"""
     title_analysis = seo_analyzer._analyze_title(title)

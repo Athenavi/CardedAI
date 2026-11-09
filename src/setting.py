@@ -177,7 +177,6 @@ class BaseConfig:
         'text/plain',  # .txt
         'text/markdown',  # .md
         'text/csv',  # .csv
-        'text/html',  # .html
         # 压缩格式
         'application/zip',
         'application/x-zip-compressed',  # ZIP 文件的另一种 MIME 类型

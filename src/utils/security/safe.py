@@ -2,13 +2,19 @@
 安全工具模块
 包含输入验证、SQL注入防护、XSS防护等功能
 """
-from urllib.request import Request
-
-from src.unified_logger import default_logger as logger
+import asyncio
+import ipaddress
 import os
 import re
 import socket
 from urllib.parse import urlparse
+from urllib.request import Request
+
+from src.unified_logger import default_logger as logger
+
+# 允许访问内网/回环地址的开关（默认关闭）。
+# 仅用于确有自建内网服务（如本地 Ollama）的私有部署；公网部署必须保持关闭。
+_PRIVATE_OUTBOUND_ENV = "OUTBOUND_ALLOW_PRIVATE"
 
 
 def validate_input(input_string, allowed_pattern=None):
@@ -173,6 +179,67 @@ def validate_url(url_string, allowed_schemes=None):
         return True, url_string
     except Exception:
         return False, None
+
+
+def is_private_or_reserved_ip(ip: ipaddress._BaseAddress) -> bool:
+    """判断 IP 是否属于内网/回环/保留/组播/未指定地址"""
+    return bool(
+        ip.is_private or ip.is_loopback or ip.is_link_local
+        or ip.is_reserved or ip.is_multicast or ip.is_unspecified
+    )
+
+
+def assert_safe_outbound_url(url_string: str, allowed_schemes=None) -> str:
+    """出站请求（SSRF）防护：同步版本。
+
+    与 validate_url 不同，这里对所有解析结果做完整分类判断，
+    并支持 IPv6、十进制/八进制 IP 等变形。不允许内网地址时将直接抛
+    ValueError，调用方无需再判断布尔返回值。
+
+    :param url_string: 待校验的 URL
+    :param allowed_schemes: 允许的协议，默认仅 http/https
+    :return: 规范化后的 URL
+    :raises ValueError: URL 非法或指向内网地址
+    """
+    if not url_string or not isinstance(url_string, str):
+        raise ValueError("URL 不能为空")
+
+    url_string = url_string.strip()
+    if allowed_schemes is None:
+        allowed_schemes = ("http", "https")
+
+    parsed = urlparse(url_string)
+    if parsed.scheme.lower() not in allowed_schemes:
+        raise ValueError(f"仅支持 {', '.join(allowed_schemes)} 协议")
+    if not parsed.hostname:
+        raise ValueError("无效的 URL 主机")
+
+    if os.environ.get(_PRIVATE_OUTBOUND_ENV, "").strip().lower() in ("1", "true", "yes"):
+        return url_string
+
+    host = parsed.hostname
+    try:
+        infos = socket.getaddrinfo(host, parsed.port or None, proto=socket.IPPROTO_TCP)
+    except socket.gaierror:
+        raise ValueError(f"无法解析主机: {host}")
+
+    if not infos:
+        raise ValueError(f"无法解析主机: {host}")
+
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0])
+        if is_private_or_reserved_ip(ip):
+            raise ValueError(f"不允许访问内网地址: {host}")
+
+    return url_string
+
+
+async def assert_safe_outbound_url_async(url_string: str, allowed_schemes=None) -> str:
+    """出站请求（SSRF）防护：异步版本，避免阻塞事件循环。"""
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(
+        None, assert_safe_outbound_url, url_string, allowed_schemes
+    )
 
 
 def validate_password_strength(password):

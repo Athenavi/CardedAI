@@ -2,14 +2,13 @@
 数据备份服务
 提供数据库和文件的自动备份、恢复和管理功能
 """
-import os
-import json
+import asyncio
 import gzip
+import json
+import os
 import shutil
-
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
-
 
 from src.unified_logger import default_logger as logger
 
@@ -99,7 +98,10 @@ class BackupService:
                 db_config['database']
             ]
 
-            result = subprocess.run(
+            # 子进程可能运行数分钟，必须放到线程池，否则会阻塞事件循环，
+            # 导致整个服务在备份期间无响应。
+            result = await asyncio.to_thread(
+                subprocess.run,
                 cmd,
                 env=env,
                 capture_output=True,
@@ -189,7 +191,8 @@ class BackupService:
 
             cmd = ['tar', '-czf', backup_path] + files_to_backup
 
-            result = subprocess.run(
+            result = await asyncio.to_thread(
+                subprocess.run,
                 cmd,
                 capture_output=True,
                 text=True,
@@ -334,7 +337,9 @@ class BackupService:
                 db_config['database']
             ]
 
-            subprocess.run(drop_cmd, env=env, check=True, capture_output=True)
+            await asyncio.to_thread(
+                subprocess.run, drop_cmd, env=env, check=True, capture_output=True
+            )
 
             # 创建新数据库
             create_cmd = [
@@ -345,7 +350,9 @@ class BackupService:
                 db_config['database']
             ]
 
-            subprocess.run(create_cmd, env=env, check=True, capture_output=True)
+            await asyncio.to_thread(
+                subprocess.run, create_cmd, env=env, check=True, capture_output=True
+            )
 
             # 恢复数据库
             restore_cmd = [
@@ -359,7 +366,8 @@ class BackupService:
                 backup_path
             ]
 
-            result = subprocess.run(
+            result = await asyncio.to_thread(
+                subprocess.run,
                 restore_cmd,
                 env=env,
                 capture_output=True,
@@ -408,7 +416,8 @@ class BackupService:
             # 解压并恢复文件
             cmd = ['tar', '-xzf', backup_path, '-C', '/']
 
-            result = subprocess.run(
+            result = await asyncio.to_thread(
+                subprocess.run,
                 cmd,
                 capture_output=True,
                 text=True,

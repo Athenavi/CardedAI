@@ -27,6 +27,7 @@ pyjwt==2.13.0
 fastapi-users[sqlalchemy]
 argon2-cffi==25.1.0
 bcrypt>=4.0.0
+python-magic==0.4.27
 pyotp==2.9.0
 qrcode[pil]
 

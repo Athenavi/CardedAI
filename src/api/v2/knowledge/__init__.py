@@ -500,6 +500,7 @@ async def generate_report(
     template: str = Form("default"),
     max_sections: int = Form(6),
     detail_level: str = Form("standard"),
+    current_user=Depends(jwt_required),
 ):
     """
     基于知识库内容生成 AI 研报
@@ -553,6 +554,7 @@ async def get_reports(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
     status: str = Query(None),
+    current_user=Depends(jwt_required),
 ):
     """获取已生成的报告列表"""
     try:
@@ -585,7 +587,10 @@ async def get_reports(
 
 
 @router.get("/reports/{report_id}", summary="获取研报详情")
-async def get_report_detail(report_id: int):
+async def get_report_detail(
+    report_id: int,
+    current_user=Depends(jwt_required),
+):
     """获取指定研报详情"""
     try:
         from shared.models.knowledge.generated_report import GeneratedReport
@@ -607,6 +612,7 @@ async def get_report_detail(report_id: int):
 async def get_report_templates(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
+    current_user=Depends(jwt_required),
 ):
     """获取报告模板列表"""
     try:
@@ -640,6 +646,7 @@ async def create_report_template(
     description: str = Form(""),
     template_content: str = Form(""),
     sections: str = Form("[]"),
+    current_user=Depends(jwt_required),
 ):
     """创建新的报告模板"""
     try:
@@ -668,7 +675,7 @@ async def create_report_template(
 # ==================== 统计概览 ====================
 
 @router.get("/stats", summary="知识引擎统计概览")
-async def get_knowledge_stats():
+async def get_knowledge_stats(current_user=Depends(jwt_required)):
     """获取知识引擎的统计数据（用于仪表盘集成）"""
     try:
         from shared.models.knowledge.knowledge_base import \

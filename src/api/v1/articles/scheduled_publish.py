@@ -8,6 +8,8 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.services.articles.scheduled_publish import create_scheduled_publish_service
+from src.auth.auth_deps import admin_required as admin_required_api
+from src.auth.auth_deps import jwt_required_dependency as jwt_required
 from src.utils.database.main import get_async_session
 
 router = APIRouter(tags=["scheduled-publish"])
@@ -22,15 +24,16 @@ class ScheduleArticleRequest(BaseModel):
 @router.post("/schedule")
 async def schedule_article(
         request: ScheduleArticleRequest,
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(admin_required_api)
 ):
     """
     设置文章定时发布
-    
+
     Args:
         request: 定时发布请求
         db: 数据库会话
-        
+
     Returns:
         调度结果
     """
@@ -59,15 +62,16 @@ async def schedule_article(
 @router.post("/cancel/{article_id}")
 async def cancel_scheduled_publish(
         article_id: int,
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(admin_required_api)
 ):
     """
     取消文章定时发布
-    
+
     Args:
         article_id: 文章ID
         db: 数据库会话
-        
+
     Returns:
         取消结果
     """
@@ -87,14 +91,15 @@ async def cancel_scheduled_publish(
 
 @router.post("/publish-due")
 async def publish_due_articles(
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(admin_required_api)
 ):
     """
     发布所有到期的定时文章
-    
+
     Args:
         db: 数据库会话
-        
+
     Returns:
         发布结果统计
     """
@@ -111,16 +116,17 @@ async def publish_due_articles(
 async def get_scheduled_articles(
         limit: int = Query(50, ge=1, le=200, description="返回数量"),
         offset: int = Query(0, ge=0, description="偏移量"),
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
 ):
     """
     获取待发布的文章列表
-    
+
     Args:
         limit: 返回数量限制
         offset: 偏移量
         db: 数据库会话
-        
+
     Returns:
         待发布文章列表
     """
@@ -140,15 +146,16 @@ async def get_scheduled_articles(
 @router.get("/upcoming")
 async def get_upcoming_publishes(
         hours: int = Query(24, ge=1, le=168, description="小时数"),
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
 ):
     """
     获取即将发布的文章
-    
+
     Args:
         hours: 未来多少小时内
         db: 数据库会话
-        
+
     Returns:
         即将发布的文章列表
     """

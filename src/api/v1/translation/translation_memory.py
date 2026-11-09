@@ -7,10 +7,11 @@ from typing import Dict, Any
 
 from fastapi import APIRouter, Depends, Request, Body
 
-from src.api.v1.core.responses import ApiResponse
 from shared.models.user import User
 from shared.services.translation.translation_manager.translation_memory import translation_memory_service
+from src.api.v1.core.responses import ApiResponse
 from src.auth.auth_deps import admin_required as admin_required_api
+from src.auth.auth_deps import jwt_required_dependency as jwt_required
 from src.unified_logger import default_logger as logger
 
 router = APIRouter()
@@ -71,7 +72,8 @@ async def add_translation_api(
              response_description="返回相似翻译列表")
 async def get_translation_suggestions_api(
         request: Request,
-        data: Dict[str, Any] = Body(...)
+    data: Dict[str, Any] = Body(...),
+    current_user: User = Depends(jwt_required)
 ):
     """
     获取翻译建议API

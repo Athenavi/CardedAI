@@ -14,8 +14,8 @@ V2 MCP Server API 路由
 - GET  /api/v2/mcp/prompts  - 列出所有提示词
 """
 
-import json
 import asyncio
+import json
 import logging
 import uuid
 from typing import Any, Dict, Optional
@@ -23,17 +23,37 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
-from src.auth import jwt_required_dependency as jwt_required
+
 from shared.models.user import User as UserModel
+from src.auth import jwt_required_dependency as jwt_required
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["mcp"])
 
-# SSE 连接注册表：session_id -> asyncio.Queue
+# SSE 连接注册表：session_id -> {"queue": asyncio.Queue, "user_id": int}
 # 每建立一个 SSE 连接，就在此注册一个队列；
-# POST /message 将响应推入队列，SSE 事件循环从队列取出并推送给客户端。
-_active_sse_queues: Dict[str, asyncio.Queue] = {}
+# POST /message 按 session_id（或同一用户）定向投递响应，避免跨会话泄露。
+_active_sse_queues: Dict[str, Dict[str, Any]] = {}
+
+
+def _push_to_user_queues(user_id: int, payload: Any, session_id: Optional[str] = None) -> int:
+    """把结果投递给指定会话；未指定会话时只投递给该用户自己的会话。
+
+    返回实际投递的队列数量。
+    """
+    delivered = 0
+    for sid, entry in list(_active_sse_queues.items()):
+        if entry.get("user_id") != user_id:
+            continue
+        if session_id and sid != session_id:
+            continue
+        try:
+            entry["queue"].put_nowait(payload)
+            delivered += 1
+        except Exception:
+            pass
+    return delivered
 
 
 # ==================== Pydantic 模型 ====================
@@ -44,6 +64,8 @@ class MCPRequest(BaseModel):
     method: str
     params: Optional[Dict[str, Any]] = None
     id: Optional[Any] = None
+    # SSE 模式下用于把响应定向推回发起请求的会话
+    session_id: Optional[str] = None
 
 
 class MCPBatchRequest(BaseModel):
@@ -86,7 +108,7 @@ async def mcp_jsonrpc(
             "params": request.params or {},
             "id": request.id,
         }
-        result = await mcp_server.handle_request(rpc_request)
+        result = await mcp_server.handle_request(rpc_request, caller_id=current_user.id)
         return JSONResponse(content=result)
     except Exception as e:
         logger.error(f"MCP JSON-RPC error: {e}")
@@ -120,7 +142,7 @@ async def mcp_batch_jsonrpc(
                 "params": req.params or {},
                 "id": req.id,
             }
-            return await mcp_server.handle_request(rpc_request)
+            return await mcp_server.handle_request(rpc_request, caller_id=current_user.id)
 
         results = await asyncio.gather(
             *[process_one(req) for req in batch.requests],
@@ -153,9 +175,12 @@ async def mcp_batch_jsonrpc(
 # ==================== SSE 传输端点 ====================
 
 @router.get("/sse", summary="MCP SSE 长连接端点")
-async def mcp_sse(request: Request):
+async def mcp_sse(
+    request: Request,
+    current_user: UserModel = Depends(jwt_required),
+):
     """
-    Server-Sent Events (SSE) 端点
+    Server-Sent Events (SSE) 端点（需要登录）
 
     建立 SSE 长连接后，客户端可通过 POST /api/v2/mcp/message 发送请求，
     服务端通过此 SSE 流推送响应。
@@ -163,13 +188,13 @@ async def mcp_sse(request: Request):
     MCP SSE 协议:
     1. 客户端连接 GET /api/v2/mcp/sse，获得 session_id
     2. 服务端发送 event: endpoint -> 告知消息注入 URL
-    3. 客户端 POST JSON-RPC 到 /api/v2/mcp/message（可携带 session_id）
+    3. 客户端 POST JSON-RPC 到 /api/v2/mcp/message（需携带 session_id）
     4. 服务端处理请求后，通过 SSE event: message 推送结果
     """
     mcp_server = _get_mcp_server()
     session_id = uuid.uuid4().hex[:12]
     queue: asyncio.Queue = asyncio.Queue()
-    _active_sse_queues[session_id] = queue
+    _active_sse_queues[session_id] = {"queue": queue, "user_id": current_user.id}
 
     async def event_generator():
         try:
@@ -213,13 +238,16 @@ async def mcp_sse(request: Request):
 
 
 @router.post("/message", summary="SSE 消息注入端点")
-async def mcp_sse_message(request: MCPRequest):
+async def mcp_sse_message(
+    request: MCPRequest,
+    current_user: UserModel = Depends(jwt_required),
+):
     """
-    SSE 模式的消息注入端点
+    SSE 模式的消息注入端点（需要登录）
 
     客户端通过此端点发送 JSON-RPC 请求。
-    - 如果有活跃的 SSE 连接，响应通过 SSE 流推送
-    - 如果没有 SSE 连接，直接返回 JSON（向后兼容）
+    - 响应只会推送回**本次请求指定**的 session_id，或（未指定时）属于同一用户的会话
+    - 如果没有可用的 SSE 连接，直接返回 JSON（向后兼容）
     """
     try:
         mcp_server = _get_mcp_server()
@@ -229,22 +257,20 @@ async def mcp_sse_message(request: MCPRequest):
             "params": request.params or {},
             "id": request.id,
         }
-        result = await mcp_server.handle_request(rpc_request)
+        result = await mcp_server.handle_request(rpc_request, caller_id=current_user.id)
 
-        # 尝试将结果推送到 SSE 队列（优先推送，兼容无 SSE 场景）
-        if _active_sse_queues:
-            for session_id, queue in list(_active_sse_queues.items()):
-                try:
-                    await queue.put(result)
-                except Exception:
-                    pass
+        # 仅向本用户（可进一步限定 session_id）的 SSE 连接定向投递
+        delivered = _push_to_user_queues(
+            current_user.id, result, session_id=request.session_id
+        )
+        if delivered:
             # SSE 模式下，消息端点返回 202 Accepted（告知客户端等待 SSE 推送）
             return JSONResponse(
-                content={"status": "accepted", "session_count": len(_active_sse_queues)},
+                content={"status": "accepted", "session_count": delivered},
                 status_code=202,
             )
 
-        # 无 SSE 连接时：同步返回（向后兼容）
+        # 无可用 SSE 连接时：同步返回（向后兼容）
         return JSONResponse(content=result)
     except Exception as e:
         logger.error(f"MCP message error: {e}")
@@ -261,7 +287,7 @@ async def mcp_sse_message(request: MCPRequest):
 # ==================== 信息端点 ====================
 
 @router.get("/info", summary="获取 MCP 服务器信息")
-async def mcp_info():
+async def mcp_info(current_user: UserModel = Depends(jwt_required)):
     """获取 MCP 服务器基本信息（名称、版本、资源/工具/提示词数量）"""
     try:
         mcp_server = _get_mcp_server()
@@ -274,7 +300,7 @@ async def mcp_info():
 
 
 @router.get("/resources", summary="列出 MCP 资源")
-async def mcp_resources():
+async def mcp_resources(current_user: UserModel = Depends(jwt_required)):
     """列出所有已注册的 MCP 资源"""
     try:
         mcp_server = _get_mcp_server()
@@ -293,7 +319,7 @@ async def mcp_resources():
 
 
 @router.get("/tools", summary="列出 MCP 工具")
-async def mcp_tools():
+async def mcp_tools(current_user: UserModel = Depends(jwt_required)):
     """列出所有已注册的 MCP 工具"""
     try:
         mcp_server = _get_mcp_server()
@@ -312,7 +338,7 @@ async def mcp_tools():
 
 
 @router.get("/prompts", summary="列出 MCP 提示词")
-async def mcp_prompts():
+async def mcp_prompts(current_user: UserModel = Depends(jwt_required)):
     """列出所有已注册的 MCP 提示词模板"""
     try:
         mcp_server = _get_mcp_server()

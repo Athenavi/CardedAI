@@ -2,7 +2,6 @@
 媒体上传（普通上传、分块上传）
 """
 import hashlib
-
 from datetime import datetime
 from typing import Optional
 
@@ -48,7 +47,6 @@ async def upload_media_file(
             'text/plain',  # .txt
             'text/markdown',  # .md
             'text/csv',  # .csv
-            'text/html',  # .html
             # 压缩文件格式
             'application/zip',
             'application/x-rar-compressed',
@@ -59,7 +57,6 @@ async def upload_media_file(
             # 其他常见格式
             'application/json',
             'application/xml',
-            'application/octet-stream',  # 通用二进制文件
         ])
 
         form = await request.form()
@@ -71,6 +68,16 @@ async def upload_media_file(
         for file in files:
             if hasattr(file, 'filename') and hasattr(file, 'read'):
                 try:
+                    # 预检大小：UPLOAD_LIMIT 默认 500MB，直接 read() 会把整个文件
+                    # 读进内存，多文件并发时极易打爆进程。超限直接拒绝。
+                    declared_size = getattr(file, 'size', None)
+                    if declared_size is not None and declared_size > upload_limit:
+                        results.append({
+                            'success': False,
+                            'error': f"文件大小超过限制: {upload_limit // 1024 // 1024}MB",
+                        })
+                        continue
+
                     file_data = await file.read()
                     result = await _process_single_file(
                         current_user_obj.id, file_data, file.filename,
@@ -131,7 +138,6 @@ async def _process_single_file(user_id, file_data, filename, allowed_size, allow
         'text/plain',  # .txt
         'text/markdown',  # .md
         'text/csv',  # .csv
-        'text/html',  # .html
         # 压缩文件格式
         'application/zip',
         'application/x-rar-compressed',
@@ -142,7 +148,6 @@ async def _process_single_file(user_id, file_data, filename, allowed_size, allow
         # 其他常见格式
         'application/json',
         'application/xml',
-        'application/octet-stream',  # 通用二进制文件
     }
 
     # 调试日志

@@ -10,6 +10,8 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 from shared.services.intel.collectors.base import BaseCollector, CollectedItemData
+from src.utils.security.safe import assert_safe_outbound_url
+from src.utils.security.safe_fetch import safe_request
 
 logger = logging.getLogger(__name__)
 
@@ -72,8 +74,11 @@ class RSSCollector(BaseCollector):
             headers["If-Modified-Since"] = last_modified
 
         try:
-            async with hx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
-                resp = await client.get(url, headers=headers)
+            # SSRF 防护：起始 URL 与每一跳重定向都必须是公网地址
+            assert_safe_outbound_url(url)
+
+            async with hx.AsyncClient(timeout=timeout, follow_redirects=False) as client:
+                resp = await safe_request(client, "GET", url, headers=headers)
 
                 # 304 Not Modified — 无新内容
                 if resp.status_code == 304:

@@ -17,10 +17,12 @@
 
 import os
 import re
-from typing import Dict, List, Optional
 from dataclasses import dataclass, field
+from typing import Dict, List, Optional
 
 from src.unified_logger import default_logger as logger
+from src.utils.security.safe import assert_safe_outbound_url
+from src.utils.security.safe_fetch import safe_request
 
 
 @dataclass
@@ -284,15 +286,18 @@ class DocumentParser:
             raise ImportError("请安装 httpx: pip install httpx")
 
         try:
+            # SSRF 防护：起始 URL 与每一跳重定向都必须是公网地址
+            assert_safe_outbound_url(url)
+
             async with httpx.AsyncClient(
                 timeout=30.0,
-                follow_redirects=True,
+                follow_redirects=False,
                 headers={
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                     "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 },
             ) as client:
-                response = await client.get(url)
+                response = await safe_request(client, "GET", url)
                 response.raise_for_status()
                 html_content = response.text
 

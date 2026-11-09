@@ -78,6 +78,20 @@ if !errorlevel! neq 0 (
 echo [OK]    依赖安装完成
 
 REM ---------- 创建 .env 文件 ----------
+REM 生成 .env 时同步环境开关：APP_ENV=prod 应写入 production/DEBUG=False，
+REM 否则生产部署会生成 development/DEBUG=True 的配置，安全体检恒报失败。
+set "GEN_ENV_NAME=development"
+set "GEN_ENV_DEBUG=True"
+if /i "%APP_ENV%"=="prod" (
+    set "GEN_ENV_NAME=production"
+    set "GEN_ENV_DEBUG=False"
+)
+if /i "%APP_ENV%"=="production" (
+    set "GEN_ENV_NAME=production"
+    set "GEN_ENV_DEBUG=False"
+)
+if /i "%APP_ENV%"=="test" set "GEN_ENV_NAME=testing"
+
 if not exist "%PROJECT_DIR%.env" (
     echo [INFO]  创建 .env 配置文件（SQLite 模式）...
 
@@ -99,8 +113,8 @@ if not exist "%PROJECT_DIR%.env" (
         echo TITLE=CardedAI
         echo SECRET_KEY=%SECRET_KEY%
         echo TIME_ZONE=Asia/Shanghai
-        echo ENVIRONMENT=development
-        echo DEBUG=True
+        echo ENVIRONMENT=!GEN_ENV_NAME!
+        echo DEBUG=!GEN_ENV_DEBUG!
         echo.
         echo # JWT
         echo JWT_EXPIRATION_DELTA=86400
@@ -141,6 +155,9 @@ echo   数据库:   SQLite (%PROJECT_DIR%data\cardedai.db)
 echo ============================================
 echo.
 
-"!VENV_PYTHON!" main.py --env dev --port 9421
+REM 默认 dev（本机一键运行）；生产请先 set APP_ENV=prod 再执行本脚本，
+REM 同时把 .env 里的 ENVIRONMENT/DEBUG 改成 production/False。
+if "%APP_ENV%"=="" set APP_ENV=dev
+"!VENV_PYTHON!" main.py --env %APP_ENV% --port 9421
 
 pause

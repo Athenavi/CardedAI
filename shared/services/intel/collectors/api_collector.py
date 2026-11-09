@@ -14,6 +14,8 @@ except ImportError:
     httpx = None
 
 from shared.services.intel.collectors.base import BaseCollector, CollectedItemData
+from src.utils.security.safe_fetch import safe_request
+from src.utils.security.safe import assert_safe_outbound_url
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +77,10 @@ class APICollector(BaseCollector):
         page = 0
 
         try:
-            async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
+            # 起始 URL 做 SSRF 校验；每个分页跳转也重新校验
+            assert_safe_outbound_url(url)
+
+            async with httpx.AsyncClient(timeout=timeout, follow_redirects=False) as client:
                 current_url = url
                 current_params = dict(params)
 
@@ -85,9 +90,14 @@ class APICollector(BaseCollector):
                         await asyncio.sleep(1.0 / rate_limit)
 
                     if method == "GET":
-                        resp = await client.get(current_url, headers=headers, params=current_params)
+                        resp = await safe_request(
+                            client, "GET", current_url, headers=headers, params=current_params
+                        )
                     elif method == "POST":
-                        resp = await client.post(current_url, headers=headers, params=current_params, json=body)
+                        resp = await safe_request(
+                            client, "POST", current_url, headers=headers,
+                            params=current_params, json=body
+                        )
                     else:
                         logger.error(f"不支持的 HTTP 方法: {method}")
                         return []

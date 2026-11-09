@@ -53,6 +53,16 @@ if ($LASTEXITCODE -ne 0) { Write-Err "pip install failed"; exit 1 }
 Write-Ok "deps installed"
 
 # ==== 4. 创建 .env（SQLite）====
+# 生成 .env 时同步环境开关：APP_ENV=prod 应写入 production/DEBUG=False，
+# 否则生产部署会生成 development/DEBUG=True 的配置，安全体检恒报失败。
+$GenEnvName = "development"
+$GenEnvDebug = "True"
+if ($env:APP_ENV -in @("prod", "production")) {
+    $GenEnvName = "production"; $GenEnvDebug = "False"
+} elseif ($env:APP_ENV -in @("test", "testing")) {
+    $GenEnvName = "testing"
+}
+
 $EnvFile = Join-Path $ProjectDir ".env"
 if (-not (Test-Path $EnvFile)) {
     Write-Info "Creating .env (SQLite)..."
@@ -65,8 +75,8 @@ DOMAIN=http://localhost:9421
 TITLE=CardedAI
 SECRET_KEY=$SecretKey
 TIME_ZONE=Asia/Shanghai
-ENVIRONMENT=development
-DEBUG=True
+ENVIRONMENT=$GenEnvName
+DEBUG=$GenEnvDebug
 JWT_EXPIRATION_DELTA=86400
 REFRESH_TOKEN_EXPIRATION_DELTA=64800
 CACHE_TYPE=simple
@@ -102,4 +112,7 @@ Write-Host "  http://localhost:9421" -ForegroundColor Green
 Write-Host "  SQLite: $(Join-Path $ProjectDir 'data\cardedai.db')" -ForegroundColor Green
 Write-Host "============================================" -ForegroundColor Green
 Write-Host ""
-& $VenvPython main.py --env dev --port 9421
+# 默认 dev（本机一键运行）；生产请设置 $env:APP_ENV="prod" 后执行本脚本，
+# 同时把 .env 里的 ENVIRONMENT/DEBUG 改成 production/False。
+$AppEnv = if ($env:APP_ENV) { $env:APP_ENV } else { "dev" }
+& $VenvPython main.py --env $AppEnv --port 9421

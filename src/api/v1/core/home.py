@@ -14,8 +14,8 @@ from shared.models.article import Article
 from shared.models.category import Category
 from shared.models.user import User
 from src.api.v1.core.responses import ApiResponse
-from src.utils.database.main import get_async_session
 from src.unified_logger import default_logger as logger
+from src.utils.database.main import get_async_session
 from src.utils.menu_builder import get_default_menu
 
 router = APIRouter(tags=["home"])
@@ -138,19 +138,20 @@ async def get_home_config(db: AsyncSession = Depends(get_async_session)):
             'home_no_summary_msg',
         ]
 
-        # 简化查询 - 逐个获取配置项避免复杂批量查询
+        # 一次性批量查询（原先逐个 key 查询会产生 13 次数据库往返，
+        # 首页是最热的只读路径，串行查询会直接拉高 P99）
         config_dict = {}
-        for key in config_keys:
-            try:
-                query = select(SystemSettings).where(SystemSettings.setting_key == key)
-                result = await db.execute(query)
-                item = result.scalar_one_or_none()
-                if item:
-                    config_dict[key] = item.setting_value
-            except Exception as key_error:
-
-                logger.warning(f"获取配置项 {key} 失败：{str(key_error)}")
-                continue
+        try:
+            result = await db.execute(
+                select(SystemSettings).where(SystemSettings.setting_key.in_(config_keys))
+            )
+            config_dict = {
+                item.setting_key: item.setting_value
+                for item in result.scalars().all()
+                if item.setting_value is not None
+            }
+        except Exception as key_error:
+            logger.warning(f"批量获取首页配置失败，回退默认值：{str(key_error)}")
 
         # 获取站点名称
         site_name = config_dict.get('site_name')

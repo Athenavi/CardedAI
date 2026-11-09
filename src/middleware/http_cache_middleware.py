@@ -77,6 +77,11 @@ class HttpCacheMiddleware(BaseHTTPMiddleware):
         # 调用下一个处理程序获取响应
         response = await call_next(request)
 
+        # 流式响应（SSE、文件下载）不能聚合 body：聚合会破坏长连接，
+        # 也会让大文件整体读入内存
+        if self._is_streaming_response(response):
+            return self._add_private_cache_headers(response)
+
         # 对于 HEAD 请求，直接返回（不计算 ETag）
         if request.method == 'HEAD':
             return self._add_cache_headers(response, request, is_head=True)
@@ -115,6 +120,26 @@ class HttpCacheMiddleware(BaseHTTPMiddleware):
 
         return response
 
+    @staticmethod
+    def _is_streaming_response(response: Response) -> bool:
+        """判断响应是否不适合缓存聚合。"""
+        content_type = (response.headers.get('content-type') or '').lower()
+        if content_type.startswith('text/event-stream'):
+            return True
+        if 'range' in response.headers or response.status_code == 206:
+            return True
+        if 'content-disposition' in response.headers:
+            return True
+        # StreamingResponse/FileResponse 没有预先算好的 Content-Length
+        return 'content-length' not in response.headers and hasattr(response, 'body_iterator')
+
+    @staticmethod
+    def _add_private_cache_headers(response: Response) -> Response:
+        """流式/下载类响应统一标为不可共享缓存。"""
+        response.headers['Cache-Control'] = 'private, no-store'
+        response.headers.pop('ETag', None)
+        return response
+
     def _should_skip_cache(self, request: Request) -> bool:
         """检查是否应该跳过缓存"""
         # 检查请求方法
@@ -127,10 +152,15 @@ class HttpCacheMiddleware(BaseHTTPMiddleware):
             if path.startswith(skip_path):
                 return True
 
-        # 如果只缓存公开响应，检查是否有认证
+        # 分段请求（Range）绝不能整段缓存
+        if 'range' in request.headers:
+            return True
+
+        # 如果只缓存公开响应，检查是否有认证（Header 或 Cookie）
         if self.cache_public_only:
-            auth_header = request.headers.get('authorization')
-            if auth_header:
+            if request.headers.get('authorization'):
+                return True
+            if request.cookies:
                 return True
 
         # 检查查询参数中的 no-cache
@@ -284,8 +314,16 @@ class HttpCacheMiddleware(BaseHTTPMiddleware):
 
         # 添加 Cache-Control
         if 'cache-control' not in response.headers:
+            # 响应带有 Set-Cookie 或请求携带凭证时，绝不能被共享缓存
+            has_credentials = bool(
+                request.headers.get('authorization')
+                or request.cookies
+                or response.headers.get('set-cookie')
+            )
             # 根据响应状态码设置不同的缓存策略
-            if response.status_code == 200:
+            if has_credentials:
+                response.headers['Cache-Control'] = 'private, no-store'
+            elif response.status_code == 200:
                 response.headers['Cache-Control'] = f'public, max-age={self.default_cache_ttl}'
             elif response.status_code in [301, 302]:
                 # 重定向缓存较长时间

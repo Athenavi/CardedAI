@@ -17,13 +17,14 @@ try:
     from bs4 import BeautifulSoup
 except ImportError:
     BeautifulSoup = None
-
 try:
     from selectolax.parser import HTMLParser as SelectolaxParser
 except ImportError:
     SelectolaxParser = None
 
 from shared.services.intel.collectors.base import BaseCollector, CollectedItemData
+from src.utils.security.safe_fetch import safe_request
+from src.utils.security.safe import assert_safe_outbound_url
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +62,11 @@ class WebCollector(BaseCollector):
         headers = {"User-Agent": user_agent}
 
         try:
-            async with httpx.AsyncClient(timeout=timeout, follow_redirects=True, headers=headers) as client:
-                resp = await client.get(url)
+            # 起始页做 SSRF 校验，重定向每一跳由 safe_request 复检
+            assert_safe_outbound_url(url)
+
+            async with httpx.AsyncClient(timeout=timeout, follow_redirects=False, headers=headers) as client:
+                resp = await safe_request(client, "GET", url)
 
                 if resp.status_code != 200:
                     logger.warning(f"网页请求失败 ({resp.status_code}): {url}")

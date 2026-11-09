@@ -4,16 +4,35 @@
 import asyncio
 import json
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from shared.services.install.install_manager.installation_wizard import installation_wizard_service
 from shared.services.install.install_manager.migration_service import migration_service
 from src.api.v1.core.responses import ApiResponse
+from src.auth.auth_deps import _authenticate_user
 from src.unified_logger import default_logger as logger
+from src.utils.database.main import get_async_session
 
 router = APIRouter()
+
+
+async def require_superuser_when_installed(
+    request: Request,
+    db=Depends(get_async_session),
+) -> None:
+    """危险安装端点的守卫。
+
+    安装向导在系统尚未安装时必须匿名可用（此时还没有任何账户）；
+    系统一旦安装完成，这些端点只允许超级管理员调用。
+    """
+    if not installation_wizard_service.is_installed():
+        return
+
+    user = await _authenticate_user(request, db, required=True)
+    if not user.is_superuser:
+        raise HTTPException(status_code=403, detail="需要管理员权限")
 
 
 @router.get("/prerequisites",
@@ -609,10 +628,16 @@ async def confirm_database_and_migrate_api():
 @router.post("/reset",
              summary="重置安装状态",
              description="重置安装状态（仅用于开发/测试）",
-             response_description="返回重置结果")
+             response_description="返回重置结果",
+             dependencies=[Depends(require_superuser_when_installed)])
 async def reset_installation_api():
-    """重置安装状态"""
+    """重置安装状态（已安装时必须由超级管理员调用）"""
     try:
+        # 生产环境下彻底禁用重置，避免被用来把系统打回安装向导
+        import os
+        if os.environ.get('ENVIRONMENT', 'development').lower() == 'production':
+            return ApiResponse(success=False, error="生产环境不允许重置安装状态")
+
         result = installation_wizard_service.reset_installation()
 
         return ApiResponse(
@@ -627,11 +652,14 @@ async def reset_installation_api():
 @router.get("/migration/stream",
             summary="数据库迁移实时日志流",
             description="通过 SSE 实时推送 Alembic 迁移日志到前端",
-            response_description="SSE 流式响应")
+            response_description="SSE 流式响应",
+            dependencies=[Depends(require_superuser_when_installed)])
 async def stream_migration_logs():
     """
     Server-Sent Events (SSE) 端点，实时推送迁移日志
     参考 Django migrations 和 Flask-Migrate 的设计
+
+    系统安装完成后仅超级管理员可触发迁移。
     """
 
     async def event_generator():

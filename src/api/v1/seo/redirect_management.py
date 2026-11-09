@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, Query
 from shared.services.seo.redirect_manager import redirect_manager
 from src.api.v1.core.responses import ApiResponse
 from src.auth import jwt_required_dependency as jwt_required
+from src.auth.auth_deps import admin_required as admin_required_api
 
 router = APIRouter(tags=["redirects"])
 
@@ -42,7 +43,7 @@ async def create_redirect(
         match_type: str = Query('exact', description="匹配类型 (exact/wildcard/regex)"),
     enabled: bool = Query(True, description="是否启用"),
     note: str = Query("", description="备注"),
-    current_user=Depends(jwt_required)
+    current_user=Depends(admin_required_api)
 ):
     """创建重定向规则"""
     try:
@@ -78,7 +79,7 @@ async def update_redirect(
     redirect_type: int = Query(None, description="重定向类型"),
     enabled: bool = Query(None, description="是否启用"),
     note: str = Query(None, description="备注"),
-    current_user=Depends(jwt_required)
+    current_user=Depends(admin_required_api)
 ):
     """更新重定向规则"""
     try:
@@ -109,7 +110,7 @@ async def update_redirect(
 @router.delete("/{redirect_id}")
 async def delete_redirect(
     redirect_id: int,
-    current_user=Depends(jwt_required)
+    current_user=Depends(admin_required_api)
 ):
     """删除重定向规则"""
     try:
@@ -132,7 +133,7 @@ async def delete_redirect(
 @router.post("/bulk-import")
 async def bulk_import_redirects(
     redirects_data: list,
-    current_user=Depends(jwt_required)
+    current_user=Depends(admin_required_api)
 ):
     """批量导入重定向规则"""
     try:

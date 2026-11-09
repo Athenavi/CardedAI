@@ -10,11 +10,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 # SQLAlchemy 模型与服务（保持不变）
 from shared.models.user import User as UserModel
-from src.extensions import get_async_db_session as get_async_db
-from src.setting import settings
-
 # 统一使用 auth_deps 的认证依赖
 from src.auth.auth_deps import _get_token_from_request, _authenticate_user
+from src.extensions import get_async_db_session as get_async_db
+from src.setting import settings
 from src.utils.token_blacklist import get_token_blacklist
 
 
@@ -29,7 +28,7 @@ def create_jwt_token(
 ) -> str:
     """生成 JWT（委托给 auth_deps.create_access_token）"""
     from src.auth.auth_deps import create_access_token
-    return create_access_token(subject, lifetime=expires_delta)
+    return create_access_token(subject, lifetime=expires_delta, token_type=token_type)
 
 
 def decode_jwt_token(token: str) -> dict:

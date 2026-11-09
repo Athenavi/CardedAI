@@ -22,9 +22,10 @@ from shared.services.users.sms_verification_service import sms_verification_serv
 from shared.services.users.user_manager import create_user_account
 from src.api.v1.core.responses import ApiResponse
 from src.auth.auth_deps import jwt_required_dependency as jwt_required
-from src.extensions import get_async_db_session as get_async_db
+from src.extensions import get_async_db_session as get_async_db, rate_limit
 from src.setting import settings
 from src.unified_logger import default_logger as logger
+from src.utils.security.cookie_policy import cookie_samesite, cookie_secure
 
 router = APIRouter(tags=["auth"])
 
@@ -115,7 +116,7 @@ def create_jwt_token(
 ) -> str:
     """生成 JWT（委托给 auth_deps.create_access_token）"""
     from src.auth.auth_deps import create_access_token
-    return create_access_token(subject, lifetime=expires_delta)
+    return create_access_token(subject, lifetime=expires_delta, token_type=token_type)
 
 
 def decode_jwt_token(token: str) -> dict:
@@ -183,6 +184,7 @@ async def check_login_status(current_user=Depends(jwt_required)):
 # ---------------------------------------------------------------------------
 
 @router.post("/login", summary="用户登录")
+@rate_limit("5/minute")
 async def login_api(
         request: Request,
         db: AsyncSession = Depends(get_async_db),
@@ -389,9 +391,10 @@ async def login_api(
             # Authorization 头并刷新令牌，因此这里不能设为 HttpOnly（否则前端登录态失效）。
             # HttpOnly 化需要前端改为纯 cookie 认证流程，属独立的后续改造。
             httponly=False,
-            # 仅当“配置允许 JWT_COOKIE_SECURE + 实际走 https”时才加 Secure，避免本地 http 调试时 cookie 失效
-            secure=bool(getattr(settings, "JWT_COOKIE_SECURE", False)) and request.url.scheme == "https",
-            samesite="lax",
+            # Secure / SameSite 统一由 cookie_policy 解析：
+            # 之前这里硬编码 samesite="lax"，导致 JWT_COOKIE_SAMESITE 配置从未生效。
+            secure=cookie_secure(request),
+            samesite=cookie_samesite(),
             path="/",
             max_age=3600,
         )
@@ -400,7 +403,175 @@ async def login_api(
         logger.exception("Login failed for user")
 
 
+@router.post("/2fa/verify", summary="校验 2FA 验证码并签发令牌")
+@rate_limit("5/minute")
+async def verify_2fa_api(
+    request: Request,
+    db: AsyncSession = Depends(get_async_db),
+):
+    """使用登录阶段返回的 temp_token + TOTP/备用码完成二次验证。
+
+    验证通过后签发正式的 access/refresh token，并写入与密码登录一致的
+    会话记录、最后登录时间与审计日志。
+    """
+    try:
+        content_type = request.headers.get('content-type', '')
+        if 'application/json' in content_type:
+            body = await request.json()
+        else:
+            form_data = await request.form()
+            body = dict(form_data)
+
+        temp_token = body.get('temp_token') or body.get('tempToken')
+        code = str(body.get('code') or body.get('token') or '').strip()
+
+        if not temp_token or not code:
+            return ApiResponse(success=False, error="缺少 temp_token 或验证码")
+
+        # 1. 校验临时令牌：必须是 2fa_temp 类型，且未被撤销
+        try:
+            payload = decode_jwt_token(temp_token)
+        except HTTPException as e:
+            return ApiResponse(success=False, error=e.detail)
+
+        if payload.get('type') != '2fa_temp':
+            return ApiResponse(success=False, error="无效的临时令牌")
+
+        user_id_raw = payload.get('sub')
+        try:
+            user_id = int(user_id_raw)
+        except (TypeError, ValueError):
+            return ApiResponse(success=False, error="无效的临时令牌")
+
+        ip_address = request.client.host if request.client else "unknown"
+
+        result = await db.execute(select(UserModel).where(UserModel.id == user_id))
+        user = result.scalar_one_or_none()
+
+        if not user or not user.is_active:
+            return ApiResponse(success=False, error="用户不存在或已被禁用")
+        if not user.is_2fa_enabled:
+            return ApiResponse(success=False, error="该账户未启用 2FA")
+
+        is_locked, unlock_time = await login_security_service.check_account_locked_async(
+            user.username, db
+        )
+        if is_locked:
+            unlock_minutes = (unlock_time - datetime.now()).total_seconds() / 60
+            return ApiResponse(
+                success=False,
+                error=f"账户已被临时锁定，请在 {int(unlock_minutes)} 分钟后重试",
+                data={"locked": True, "unlock_at": unlock_time.isoformat()},
+            )
+
+        # 2. 验证 TOTP / 备用码
+        from shared.services.users.two_factor_auth import two_factor_auth
+
+        verified = False
+        method = None
+
+        if user.totp_secret and two_factor_auth.verify_totp(user.totp_secret, code):
+            verified = True
+            method = "totp"
+        elif user.backup_codes:
+            # 备用码是一次性的：命中后必须从存储中移除
+            stored = json.loads(user.backup_codes)
+            import hashlib
+            code_hash = hashlib.sha256(code.encode('utf-8')).hexdigest()
+            if code_hash in stored:
+                stored.remove(code_hash)
+                user.backup_codes = json.dumps(stored)
+                await db.commit()
+                verified = True
+                method = "backup_code"
+
+        if not verified:
+            await login_security_service.record_login_attempt_async(
+                username=user.username,
+                ip_address=ip_address,
+                is_success=False,
+                db=db,
+            )
+            return ApiResponse(success=False, error="验证码错误")
+
+        # 3. 签发正式令牌
+        access_token = create_jwt_token(subject=str(user.id), token_type="access")
+        refresh_token = create_jwt_token(subject=str(user.id), token_type="refresh")
+
+        try:
+            session_management_service.create_session(
+                user_id=user.id,
+                device_info={
+                    'user_agent': request.headers.get("User-Agent", "Unknown"),
+                    'browser': request.headers.get('sec-ch-ua', 'Unknown'),
+                    'platform': request.headers.get('sec-ch-ua-platform', 'Unknown'),
+                },
+                ip_address=ip_address,
+                user_agent=request.headers.get("User-Agent", "Unknown"),
+            )
+        except Exception as e:
+            logger.warning(f"[2FA Verify] 创建会话记录失败: {e}")
+
+        user.last_login = datetime.now(timezone.utc)
+        await db.commit()
+
+        await login_security_service.record_login_attempt_async(
+            username=user.username,
+            ip_address=ip_address,
+            is_success=True,
+            db=db,
+        )
+        await login_security_service.clear_failed_attempts_async(user.username, db)
+
+        try:
+            from shared.services.security.audit_log_service import audit_log_service, AuditLogAction
+            await audit_log_service.log_action(
+                db=db, user_id=user.id, user_name=user.username,
+                action=AuditLogAction.LOGIN, resource_type='auth',
+                description=f"用户通过 2FA 登录：{user.username}",
+                ip_address=request.client.host if request.client else None,
+                user_agent=request.headers.get('user-agent'),
+            )
+        except Exception as e:
+            logger.warning(f"[2FA Verify] 记录审计日志失败: {e}")
+
+        response_data = {
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "profile_picture": user.profile_picture or None,
+                "is_active": user.is_active,
+                "is_superuser": user.is_superuser,
+                "is_staff": user.is_staff,
+                "vip_level": getattr(user, "vip_level", 0),
+            },
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "method": method,
+        }
+
+        response = JSONResponse(
+            content=ApiResponse(success=True, data=response_data, message="2FA 验证通过").model_dump(mode='json')
+        )
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=False,
+            # Secure / SameSite 统一由 cookie_policy 解析，避免各处硬编码不一致
+            secure=cookie_secure(request),
+            samesite=cookie_samesite(),
+            path="/",
+            max_age=3600,
+        )
+        return response
+    except Exception:
+        logger.exception("[2FA Verify] 验证失败")
+        return ApiResponse(success=False, error="2FA 验证失败，请稍后重试")
+
+
 @router.post("/register", summary="用户注册")
+@rate_limit("3/minute")
 async def register_api(
         request: Request,
         db: AsyncSession = Depends(get_async_db),
@@ -659,27 +830,31 @@ async def logout_api(
         access_token_str = data.get("access_token")
         refresh_token_str = data.get("refresh_token")
 
-        # 辅助函数：将 token 加入黑名单
-        def _blacklist_token(token: str):
+        # 辅助函数：将 token 加入黑名单（异步写入 Redis + ORM 持久化）
+        async def _blacklist_token(token: str):
             try:
                 payload = jwt.decode(
                     token,
-                    settings.JWT_SECRET_KEY,
-                    algorithms=[settings.JWT_ALGORITHM],
+                    getattr(settings, "JWT_SECRET_KEY", settings.SECRET_KEY),
+                    algorithms=[getattr(settings, "JWT_ALGORITHM", "HS256")],
                     options={"verify_exp": False},  # 允许已过期的 token 也能被撤销
                 )
                 jti = payload.get("jti")
                 exp = payload.get("exp")
                 if jti and exp:
                     expires_at = datetime.fromtimestamp(exp, tz=timezone.utc)
-                    get_token_blacklist().add_to_blacklist(jti, expires_at)
-            except Exception:
-                pass
+                    await get_token_blacklist().add_to_blacklist_async(
+                        jti, expires_at, reason="logout"
+                    )
+                else:
+                    logger.warning("[Logout] token 缺少 jti/exp，无法撤销")
+            except Exception as e:
+                logger.warning(f"[Logout] 撤销 token 失败：{e}")
 
         if access_token_str:
-            _blacklist_token(access_token_str)
+            await _blacklist_token(access_token_str)
         if refresh_token_str:
-            _blacklist_token(refresh_token_str)
+            await _blacklist_token(refresh_token_str)
 
         # 记录审计日志
         try:
@@ -712,13 +887,16 @@ async def logout_api(
             content=ApiResponse(success=True, message="登出成功").model_dump(mode='json')
         )
         for cookie_name in ("access_token", "refresh_token"):
-            response.delete_cookie(key=cookie_name, path="/", samesite="lax")
+            response.delete_cookie(
+                key=cookie_name, path="/", samesite=cookie_samesite()
+            )
         return response
     except Exception:
         return ApiResponse(success=False, error="登出失败，请稍后重试")
 
 
 @router.post("/token/refresh", summary="刷新访问令牌")
+@rate_limit("30/minute")
 async def refresh_token_api(request: Request):
     """使用 refresh_token 获取新的 access_token（支持 refresh token 轮换）"""
     try:
@@ -737,11 +915,11 @@ async def refresh_token_api(request: Request):
         if not user_id:
             return ApiResponse(success=False, error="无效的 refresh token")
 
-        # 黑名单检查：检查 refresh token 的 JTI 是否在黑名单中
+        # 黑名单检查：检查 refresh token 的 JTI 是否在黑名单中（Redis → ORM）
         jti = payload.get("jti")
         exp = payload.get("exp")
         _tb = get_token_blacklist()
-        if jti and _tb.is_available and _tb.is_blacklisted(jti):
+        if jti and await _tb.is_blacklisted_async(jti):
             return ApiResponse(success=False, error="Token 已被撤销，请重新登录")
 
         # 生成新的 access token 和 refresh token（token 轮换）
@@ -750,9 +928,10 @@ async def refresh_token_api(request: Request):
 
         # 将旧的 refresh token 加入黑名单（token 轮换策略）
         if jti and exp:
-            get_token_blacklist().add_to_blacklist(
+            await _tb.add_to_blacklist_async(
                 jti,
-                datetime.fromtimestamp(exp, tz=timezone.utc)
+                datetime.fromtimestamp(exp, tz=timezone.utc),
+                reason="refresh_rotation",
             )
 
         return ApiResponse(

@@ -64,6 +64,14 @@ pip install -q -r requirements.txt
 ok "依赖安装完成"
 
 # ---------- 4. 创建 .env 文件（环境检测推荐 + SQLite 本地降级） ----------
+# 生成 .env 时同步环境开关：APP_ENV=prod 应写入 production/DEBUG=False，
+# 否则生产部署会生成 development/DEBUG=True 的配置，安全体检恒报失败。
+case "${APP_ENV:-dev}" in
+    prod|production) GEN_ENV_NAME=production;  GEN_ENV_DEBUG=False ;;
+    test|testing)    GEN_ENV_NAME=testing;     GEN_ENV_DEBUG=True  ;;
+    *)               GEN_ENV_NAME=development; GEN_ENV_DEBUG=True  ;;
+esac
+
 if [ ! -f "$PROJECT_DIR/.env" ]; then
     info "检测本机运行环境并生成推荐配置..."
 
@@ -88,8 +96,8 @@ DOMAIN=http://localhost:9421
 TITLE=CardedAI
 SECRET_KEY=$SECRET_KEY
 TIME_ZONE=Asia/Shanghai
-ENVIRONMENT=development
-DEBUG=True
+ENVIRONMENT=$GEN_ENV_NAME
+DEBUG=$GEN_ENV_DEBUG
 
 # JWT
 JWT_EXPIRATION_DELTA=86400
@@ -137,4 +145,6 @@ echo -e "${GREEN}============================================${NC}"
 echo ""
 
 # 启动 FastAPI 服务
-exec "$PYTHON" main.py --env dev --port 9421
+# 默认 dev（本机一键运行）；生产请用 APP_ENV=prod ./run.sh 覆盖，
+# 同时把 .env 里的 ENVIRONMENT/DEBUG 改成 production/False。
+exec "$PYTHON" main.py --env "${APP_ENV:-dev}" --port 9421

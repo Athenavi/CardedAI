@@ -25,7 +25,7 @@ def _load_logger_config():
 
             @staticmethod
             def get_logger(log_file: str = None, level=logging.INFO):
-                logger = logging.getlogger.error(f"fastblog.{log_file or 'app'}")
+                logger = logging.getLogger(f"fastblog.{log_file or 'app'}")
                 logger.setLevel(level)
                 if not logger.handlers:
                     # 控制台 handler
@@ -42,7 +42,11 @@ def _load_logger_config():
                         log_dir = os.path.dirname(log_file)
                         if log_dir:
                             os.makedirs(log_dir, exist_ok=True)
-                        fh = logging.FileHandler(log_file, encoding='utf-8')
+                        # 必须轮转：生产环境长期运行下无轮转的日志会写满磁盘
+                        from logging.handlers import RotatingFileHandler
+                        fh = RotatingFileHandler(
+                            log_file, maxBytes=10 * 1024 * 1024, backupCount=6, encoding='utf-8'
+                        )
                         fh.setLevel(level)
                         fh.setFormatter(fmt)
                         logger.addHandler(fh)

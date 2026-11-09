@@ -6,6 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.services.articles.analytics import create_analytics_service
+from src.auth.auth_deps import admin_required as admin_required_api
+from src.auth.auth_deps import jwt_required_dependency as jwt_required
 from src.utils.database.main import get_async_session
 
 router = APIRouter(tags=["analytics"])
@@ -14,7 +16,8 @@ router = APIRouter(tags=["analytics"])
 @router.get("/overview")
 async def get_overview_stats(
         days: int = Query(30, ge=1, le=365, description="统计天数"),
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
 ):
     """
     获取概览统计数据
@@ -41,7 +44,8 @@ async def get_overview_stats(
 @router.get("/article-views-trend")
 async def get_article_views_trend(
         days: int = Query(30, ge=1, le=365, description="统计天数"),
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
 ):
     """
     获取文章浏览量趋势
@@ -69,7 +73,8 @@ async def get_article_views_trend(
 async def get_popular_articles(
         limit: int = Query(10, ge=1, le=100, description="返回数量"),
         days: int = Query(7, ge=1, le=365, description="统计天数"),
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
 ):
     """
     获取热门文章
@@ -96,7 +101,8 @@ async def get_popular_articles(
 
 @router.get("/category-distribution")
 async def get_category_distribution(
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
 ):
     """
     获取分类分布
@@ -122,7 +128,8 @@ async def get_category_distribution(
 @router.get("/user-activity")
 async def get_user_activity(
         days: int = Query(30, ge=1, le=365, description="统计天数"),
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
 ):
     """
     获取用户活动统计
@@ -149,7 +156,8 @@ async def get_user_activity(
 @router.get("/content-performance")
 async def get_content_performance(
         days: int = Query(30, ge=1, le=365, description="统计天数"),
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
 ):
     """
     获取内容表现分析
@@ -176,7 +184,8 @@ async def get_content_performance(
 @router.get("/traffic-sources")
 async def get_traffic_sources(
         days: int = Query(30, ge=1, le=365, description="统计天数"),
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
 ):
     """
     获取流量来源分析
@@ -203,7 +212,8 @@ async def get_traffic_sources(
 @router.get("/device-stats")
 async def get_device_stats(
         days: int = Query(30, ge=1, le=365, description="统计天数"),
-        db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
 ):
     """
     获取设备统计
@@ -230,7 +240,8 @@ async def get_device_stats(
 @router.get("/tag-distribution")
 async def get_tag_distribution(
     limit: int = Query(15, ge=1, le=100, description="返回数量"),
-    db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
 ):
     """
     获取标签分布（Top N）
@@ -253,7 +264,8 @@ async def get_tag_distribution(
 async def get_search_keywords(
     limit: int = Query(10, ge=1, le=50, description="返回数量"),
     days: int = Query(30, ge=1, le=365, description="统计天数"),
-    db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
 ):
     """
     获取搜索热词
@@ -276,7 +288,8 @@ async def get_search_keywords(
 async def get_audit_activity(
     days: int = Query(30, ge=1, le=365, description="统计天数"),
     limit: int = Query(8, ge=1, le=50, description="动作类型数量"),
-    db: AsyncSession = Depends(get_async_session)
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(admin_required_api)
 ):
     """
     获取后台操作活跃度
@@ -296,7 +309,10 @@ async def get_audit_activity(
 
 
 @router.get("/media-stats")
-async def get_media_stats(db: AsyncSession = Depends(get_async_session)):
+async def get_media_stats(
+    db: AsyncSession = Depends(get_async_session),
+    current_user=Depends(jwt_required)
+):
     """
     获取媒体库统计
 

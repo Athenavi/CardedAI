@@ -7,7 +7,6 @@ AI 聊天代理 API — 通过 MCP 工具与 LLM 对话完成系统操作
 
 import json
 import logging
-import asyncio
 from typing import Any, AsyncGenerator, Dict, List, Optional
 
 import httpx
@@ -15,9 +14,10 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from src.auth import jwt_required_dependency as jwt_required
 from shared.models.user import User as UserModel
 from src.api.v1.core.responses import ApiResponse
+from src.auth import jwt_required_dependency as jwt_required
+from src.utils.security.safe import assert_safe_outbound_url_async
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,12 @@ async def _call_llm(messages, llm_endpoint, llm_key, model, tools, system_prompt
     if tools:
         payload["tools"] = tools
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
+    try:
+        await assert_safe_outbound_url_async(llm_endpoint)
+    except ValueError as e:
+        return {"success": False, "error": f"LLM 端点不可用: {e}"}
+
+    async with httpx.AsyncClient(timeout=120.0, follow_redirects=False) as client:
         resp = await client.post(
             f"{llm_endpoint.rstrip('/')}/chat/completions",
             json=payload,
@@ -118,7 +123,13 @@ async def _call_llm_stream(messages, llm_endpoint, llm_key, model, tools, system
     if tools:
         payload["tools"] = tools
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
+    try:
+        await assert_safe_outbound_url_async(llm_endpoint)
+    except ValueError as e:
+        yield json.dumps({"type": "error", "content": f"LLM 端点不可用: {e}"})
+        return
+
+    async with httpx.AsyncClient(timeout=120.0, follow_redirects=False) as client:
         async with client.stream(
             "POST",
             f"{llm_endpoint.rstrip('/')}/chat/completions",
@@ -172,7 +183,7 @@ async def _call_llm_stream(messages, llm_endpoint, llm_key, model, tools, system
                               "tool_calls": [v for v in sorted(tool_calls_buffer.values(), key=lambda x: x["id"])]})
 
 
-async def _mcp_chat_stream_events(req: ChatRequest) -> AsyncGenerator[str, None]:
+async def _mcp_chat_stream_events(req: ChatRequest, caller_id: int = None) -> AsyncGenerator[str, None]:
     """执行完整的 MCP 对话（含工具调用），以 SSE 事件流 yield。"""
     sys_prompt = req.system_prompt or (
         "你是一个 CardedAI 站点管理助手。你可以通过以下工具帮助用户管理站点。\n\n"
@@ -227,7 +238,7 @@ async def _mcp_chat_stream_events(req: ChatRequest) -> AsyncGenerator[str, None]
                 args = json.loads(tc["arguments"])
             except json.JSONDecodeError:
                 args = {}
-            exec_result = await _execute_mcp_tool(tc["name"], args)
+            exec_result = await _execute_mcp_tool(tc["name"], args, caller_id=caller_id)
             tool_results.append({"tool": tc["name"], "arguments": args, "result": exec_result})
             yield f"data: {json.dumps({'type': 'tool_result', 'tool': tc['name'], 'result': str(exec_result.get('data', ''))[:500]})}\n\n"
             messages.append({"role": "tool", "tool_call_id": tc["id"],
@@ -243,15 +254,18 @@ async def mcp_chat_stream(req: ChatRequest, current_user: UserModel = Depends(jw
     if not req.llm_endpoint:
         return ApiResponse(success=False, error="请提供 LLM 端点地址")
     return StreamingResponse(
-        _mcp_chat_stream_events(req),
+        _mcp_chat_stream_events(req, caller_id=getattr(current_user, "id", None)),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
 
-async def _execute_mcp_tool(tool_name: str, arguments: dict) -> dict:
+async def _execute_mcp_tool(tool_name: str, arguments: dict, caller_id: int = None) -> dict:
     mcp = _get_mcp_server()
-    result = await mcp._handle_tool_call({"name": tool_name, "arguments": arguments}, request_id="ai-chat")
+    # caller_id 由服务端注入，客户端无法伪造 user_id 越权操作他人数据
+    result = await mcp._handle_tool_call(
+        {"name": tool_name, "arguments": arguments}, request_id="ai-chat", caller_id=caller_id
+    )
     content = result.get("result", {}).get("content", [{}])[0].get("text", "")
     error = result.get("error", {}).get("message", "")
     if error:
@@ -315,7 +329,10 @@ async def mcp_chat(req: ChatRequest, current_user: UserModel = Depends(jwt_requi
                 break
 
             for tc in tool_calls:
-                exec_result = await _execute_mcp_tool(tc["function"]["name"], tc["function"]["arguments"])
+                exec_result = await _execute_mcp_tool(
+                    tc["function"]["name"], tc["function"]["arguments"],
+                    caller_id=getattr(current_user, "id", None),
+                )
                 tool_results.append({"tool": tc["function"]["name"], "arguments": tc["function"]["arguments"],
                                       "result": exec_result})
                 messages.append({"role": "tool", "tool_call_id": tc["id"],

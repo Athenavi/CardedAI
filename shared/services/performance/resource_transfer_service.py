@@ -13,7 +13,7 @@ import os
 import socket
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import unquote, urlparse
+from urllib.parse import unquote, urljoin, urlparse
 
 import httpx
 from sqlalchemy import select
@@ -281,21 +281,37 @@ class ResourceTransferService:
         total = 0
         content_type = "application/octet-stream"
 
+        # 关闭自动重定向：公网地址返回 3xx 指向内网时，自动跟随会绕过 SSRF 校验
         async with httpx.AsyncClient(
-            timeout=_DOWNLOAD_TIMEOUT, follow_redirects=True
+            timeout=_DOWNLOAD_TIMEOUT, follow_redirects=False
         ) as client:
-            async with client.stream("GET", url) as resp:
-                resp.raise_for_status()
-                header_type = resp.headers.get("content-type", "")
-                if header_type:
-                    content_type = header_type.split(";")[0].strip() or content_type
-                async for chunk in resp.aiter_bytes():
-                    total += len(chunk)
-                    if total > _MAX_DOWNLOAD_BYTES:
-                        raise ValueError(
-                            f"文件超过大小限制 ({_MAX_DOWNLOAD_BYTES // 1024 // 1024}MB)"
-                        )
-                    chunks.append(chunk)
+            current_url = url
+            for _ in range(4):
+                async with client.stream("GET", current_url) as resp:
+                    if resp.status_code in (301, 302, 303, 307, 308):
+                        location = resp.headers.get("location")
+                        if not location:
+                            raise ValueError("重定向缺少 Location 头")
+                        current_url = urljoin(current_url, location)
+                        # 每一跳都重新校验，防止跳转到内网地址
+                        self._validate_url(current_url)
+                        await self._assert_public_host(current_url)
+                        continue
+
+                    resp.raise_for_status()
+                    header_type = resp.headers.get("content-type", "")
+                    if header_type:
+                        content_type = header_type.split(";")[0].strip() or content_type
+                    async for chunk in resp.aiter_bytes():
+                        total += len(chunk)
+                        if total > _MAX_DOWNLOAD_BYTES:
+                            raise ValueError(
+                                f"文件超过大小限制 ({_MAX_DOWNLOAD_BYTES // 1024 // 1024}MB)"
+                            )
+                        chunks.append(chunk)
+                    break
+            else:
+                raise ValueError("重定向次数过多")
 
         content = b"".join(chunks)
         if not content:

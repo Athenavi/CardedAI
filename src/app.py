@@ -406,6 +406,15 @@ def register_middleware(app: FastAPI):
 
     # 速率限制已移除全局中间件，改为在特定路由上使用装饰器
 
+    # 安全响应头（nosniff / 点击劫持 / referrer / HSTS）
+    # 纯 ASGI 中间件，不引入 BaseHTTPMiddleware 的额外任务开销
+    try:
+        from src.middleware.security_headers import SecurityHeadersMiddleware
+        app.add_middleware(SecurityHeadersMiddleware)
+        logger.info("[Security Headers] 已添加")
+    except ImportError:
+        pass
+
     # API 版本响应头
     class APIVersionMiddleware(BaseHTTPMiddleware):
         async def dispatch(self, request, call_next):
@@ -563,17 +572,22 @@ def create_app(config=None):
     app.mount("/api/v2/static", StaticFiles(directory=static_dir), name="static")
 
     # 本地存储 - 使用统一前缀 /api/v2/assets/storage 避免与业务路由冲突
+    # 只暴露 objects/ thumbnails/ optimized/ 等公开媒体目录，且对 HTML/SVG
+    # 等可执行内容强制下载，避免 storage 内的缓存、统计、插件状态被公开读取。
     try:
         from src.setting import app_config
         local_storage = getattr(app_config, 'LOCAL_STORAGE_PATH', 'storage')
     except Exception:
         local_storage = 'storage'
     os.makedirs(local_storage, exist_ok=True)
-    app.mount("/api/v2/assets/storage", StaticFiles(directory=local_storage), name="local-storage")
 
+    from src.middleware.safe_static_files import MediaStaticFiles
+    app.mount("/api/v2/assets/storage", MediaStaticFiles(directory=local_storage), name="local-storage")
+
+    # objects/ 已在上面统一挂载中被放行，这里不再单独 mount，
+    # 否则同一前缀出现两个 Mount，后者永远不会命中。
     objects_dir = os.path.join(local_storage, 'objects')
     os.makedirs(objects_dir, exist_ok=True)
-    app.mount("/api/v2/assets/storage/objects", StaticFiles(directory=objects_dir), name="storage-objects")
 
     themes_dir = os.path.join(os.path.dirname(__file__), "..", "themes")
     if os.path.exists(themes_dir):
@@ -599,9 +613,13 @@ def create_app(config=None):
     return app
 
 
-# 全局 app 实例（供 uvicorn 直接使用）
+# 全局 app 实例（供 uvicorn 直接使用，例如 `uvicorn src.app:app`）
+# 按 ENVIRONMENT 选择配置：用 --env 启动时 main.py 会先把环境写入
+# os.environ，因此这里拿到的是真正的目标环境；不再固定 ProductionConfig。
 try:
-    app = create_app()
+    from src.setting import get_config_by_env
+
+    app = create_app(get_config_by_env(os.environ.get("ENVIRONMENT", "development")))
 except Exception as e:
     logger.error(f"[App Startup] 创建应用实例时出错: {e}", exc_info=True)
     import sys

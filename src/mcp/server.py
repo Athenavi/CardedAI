@@ -14,7 +14,7 @@ MCP (Model Context Protocol) Server 实现
 
 import json
 from datetime import datetime
-from typing import Dict, Any, List, Callable
+from typing import Dict, Any, List, Callable, Optional
 
 # 引入 FastBlog 核心依赖以实现真正的 AI 代理功能
 from sqlalchemy import select
@@ -264,12 +264,15 @@ class MCPServer:
             "handler": handler,
         }
 
-    async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def handle_request(self, request: Dict[str, Any],
+                             caller_id: Optional[int] = None) -> Dict[str, Any]:
         """
         处理 MCP 请求
 
         Args:
             request: MCP 请求对象
+            caller_id: 已认证调用者 ID；提供时会覆盖工具参数中的 user_id，
+                       防止客户端伪造身份
 
         Returns:
             MCP 响应对象
@@ -285,7 +288,7 @@ class MCPServer:
 
             # 工具调用
             elif method == "tools/call":
-                return await self._handle_tool_call(params, request_id)
+                return await self._handle_tool_call(params, request_id, caller_id)
 
             # 提示词请求
             elif method == "prompts/get":
@@ -335,13 +338,18 @@ class MCPServer:
         except Exception as e:
             return self._error_response(request_id, f"Failed to read resource: {str(e)}")
 
-    async def _handle_tool_call(self, params: Dict, request_id: Any) -> Dict:
+    async def _handle_tool_call(self, params: Dict, request_id: Any,
+                                caller_id: Optional[int] = None) -> Dict:
         """处理工具调用请求"""
         tool_name = params.get("name")
-        arguments = params.get("arguments", {})
+        arguments = dict(params.get("arguments") or {})
 
         if tool_name not in self.tools:
             return self._error_response(request_id, f"Tool not found: {tool_name}")
+
+        # 认证上下文优先：客户端不能通过参数伪造 user_id
+        if caller_id is not None:
+            arguments["user_id"] = caller_id
 
         tool = self.tools[tool_name]
         try:
@@ -583,6 +591,11 @@ class MCPServer:
             if not article:
                 raise ValueError(f"Article {article_id} not found")
 
+            # 归属校验：只允许修改自己的文章（user_id 由认证上下文注入）
+            caller_id = arguments.get("user_id")
+            if caller_id is not None and getattr(article, "user", None) not in (None, caller_id):
+                raise PermissionError("无权修改他人的文章")
+
             if "title" in arguments:
                 article.title = arguments["title"]
             if "status" in arguments:
@@ -615,6 +628,12 @@ class MCPServer:
             article = await db.get(Article, article_id)
             if not article:
                 raise ValueError(f"Article {article_id} not found")
+
+            # 归属校验：只允许删除自己的文章（user_id 由认证上下文注入）
+            caller_id = arguments.get("user_id")
+            if caller_id is not None and getattr(article, "user", None) not in (None, caller_id):
+                raise PermissionError("无权删除他人的文章")
+
             await db.delete(article)
             await db.commit()
             return {"success": True, "message": f"Article {article_id} deleted successfully", "article_id": article_id}

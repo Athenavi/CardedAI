@@ -20,6 +20,60 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from src.unified_logger import default_logger as logger
 
+
+def _build_rate_limiter():
+    """构建全局限流器。
+
+    默认只提供 key_func 与可选存储，不设置 default_limits：
+    全局限流会与 nginx 的 limit_req 叠加并误伤前端突发请求，
+    这里只给认证等敏感端点按路由限流（见 rate_limit 辅助函数）。
+    如需全局限流，设置环境变量 RATE_LIMIT_DEFAULT（如 "600/minute"）。
+    """
+    if Limiter is None:
+        return None
+
+    kwargs = {
+        "key_func": get_remote_address,
+        # 默认关闭：注入 X-RateLimit-* 头需要路由函数声明 response 参数，
+        # 否则 slowapi 会在运行时抛错。
+        "headers_enabled": os.getenv("RATE_LIMIT_HEADERS", "false").lower() == "true",
+        "enabled": os.getenv("RATE_LIMIT_ENABLED", "true").lower() != "false",
+    }
+
+    default_spec = (os.getenv("RATE_LIMIT_DEFAULT") or "").strip()
+    if default_spec:
+        kwargs["default_limits"] = [
+            part.strip() for part in default_spec.split(",") if part.strip()
+        ]
+
+    # 多进程/多实例部署时内存计数会漂移，可指向 Redis
+    storage_uri = (os.getenv("RATE_LIMIT_STORAGE_URI") or "").strip()
+    if storage_uri:
+        kwargs["storage_uri"] = storage_uri
+
+    try:
+        return Limiter(**kwargs)
+    except Exception as build_error:  # noqa: BLE001 - 限流不可用不应阻断启动
+        logger.error(f"Failed to build rate limiter: {build_error}")
+        return None
+
+
+# 全局限流器单例（slowapi 未安装时为 None）
+limiter = _build_rate_limiter()
+
+
+def rate_limit(spec: str):
+    """路由限流装饰器；slowapi 未安装时退化为空装饰器。
+
+    被装饰的路由函数必须声明 `request: Request` 参数（slowapi 依此取 key）。
+    """
+    if limiter is None:
+        def _noop(func):
+            return func
+
+        return _noop
+    return limiter.limit(spec)
+
 # 初始化 Sentry 错误追踪
 try:
     import sentry_sdk
@@ -450,11 +504,14 @@ def init_extensions(app):
 
     logger.info("Using unified database manager (created in lifespan event)")
 
-    # 限流中间件（slowapi 未安装时跳过）
+    # 限流（slowapi 未安装时跳过）
+    # 说明：限额由各路由上的 @rate_limit(...) 装饰器声明，这里只做实例注册
+    # 与 429 响应格式化，避免全局 default_limits 误伤前端突发请求。
     try:
-        if Limiter is not None:
-            app.state.limiter = Limiter(key_func=get_remote_address)
+        if limiter is not None:
+            app.state.limiter = limiter
             app.add_exception_handler(429, _rate_limit_exceeded_handler)
+            logger.info("[Rate Limit] 限流器已注册（按路由生效）")
         else:
             logger.warning("slowapi 未安装，限流已禁用")
     except Exception as e:

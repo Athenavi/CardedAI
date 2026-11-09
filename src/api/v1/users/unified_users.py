@@ -7,7 +7,6 @@
 - /{user_id}: 其他用户公开信息
 - 子路径用于特定功能（如 follow, block, settings 等）
 """
-import os
 # 导入用户关系和屏蔽服务
 from datetime import datetime
 
@@ -21,18 +20,20 @@ from shared.models.user import User
 from shared.services.users.user_manager import user_csv_service
 # 导入核心依赖
 from src.api.v1.core.responses import ApiResponse
-from src.api.v1.user_utils.user_entities import update_password, validate_password_async, check_user_conflict_async, change_username, db_save_bio, \
+from src.api.v1.user_utils.user_entities import update_password, validate_password_async, check_user_conflict_async, \
+    change_username, db_save_bio, \
     save_uploaded_avatar
 from src.auth.auth_deps import admin_required as admin_required_api, jwt_required_dependency as jwt_required, \
     get_current_active_user
 from src.extensions import cache
 from src.extensions import get_async_db_session as get_async_db
 from src.setting import app_config
+from src.unified_logger import default_logger as logger
+from src.utils.security.cookie_policy import cookie_samesite, cookie_secure
 from src.utils.security.forms import ChangePasswordForm
 from src.utils.security.ip_utils import get_client_ip
 from src.utils.security.safe import is_valid_iso_language_code
 from src.utils.send_email import request_email_change
-from src.unified_logger import default_logger as logger
 
 router = APIRouter(tags=["users"])
 
@@ -358,15 +359,16 @@ async def get_current_user_api(
 
         # 如果有新的访问令牌，将其设置在响应头中
         if new_access_token:
-            # 根据环境自动设置 Cookie 安全标志
-            is_https = str(app_config.domain).startswith('https://') or os.environ.get('DEBUG',
-                                                                                       'False').lower() == 'false'
+            # 统一使用 cookie_policy：原实现用 `DEBUG == 'false'` 反推 https，
+            # 语义错误（灰度/测试环境下会给出错误结果），且 samesite 硬编码。
+            # 另外此处曾设 httponly=True，会覆盖登录时 httponly=False 的同名 Cookie，
+            # 导致前端 document.cookie 读不到续期后的令牌，与其余下发点不一致。
             response.set_cookie(
                 key="access_token",
                 value=new_access_token,
-                httponly=True,
-                secure=is_https,  # 生产环境（HTTPS）设为 True
-                samesite="strict",
+                httponly=False,
+                secure=cookie_secure(request),
+                samesite=cookie_samesite(),
                 max_age=3600  # 1 小时
             )
 

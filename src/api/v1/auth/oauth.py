@@ -43,6 +43,7 @@ from src.auth.auth_deps import (
 from src.setting import settings
 from src.unified_logger import default_logger as logger
 from src.utils.database.main import get_async_session
+from src.utils.security.cookie_policy import cookie_samesite, cookie_secure
 
 router = APIRouter(tags=["oauth"])
 
@@ -426,9 +427,9 @@ async def oauth_callback(
         key="access_token",
         value=access_token,
         httponly=False,
-        # 仅当“配置允许 + 实际走 https”时才加 Secure，避免本地 http 调试时 cookie 失效
-        secure=bool(getattr(settings, "JWT_COOKIE_SECURE", False)) and request.url.scheme == "https",
-        samesite="lax",
+        # Secure / SameSite 统一由 cookie_policy 解析，避免各处硬编码不一致
+        secure=cookie_secure(request),
+        samesite=cookie_samesite(),
         max_age=ACCESS_COOKIE_MAX_AGE,
     )
     logger.info(f"[OAuth] {provider} login success: user_id={user.id}")

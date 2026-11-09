@@ -3,6 +3,7 @@
 支持 API 端点和页面路由，包含角色、权限、VIP 等检查
 """
 import datetime
+import uuid
 from typing import Optional
 
 import jwt
@@ -34,20 +35,56 @@ def _get_token_blacklist():
 
 
 # ---------- JWT 工具 ----------
+ACCESS_TOKEN_TYPE = "access"
+REFRESH_TOKEN_TYPE = "refresh"
+TEMP_2FA_TOKEN_TYPE = "2fa_temp"
+
+# 允许被当作访问凭证的类型。历史 token 没有 type 字段，按 access 处理以保持兼容。
+_ACCESS_TOKEN_TYPES = ("access", None)
+
+
+def _default_lifetime(token_type: str) -> datetime.timedelta:
+    """按 token 类型返回默认有效期（读取 setting 中已解析的配置）"""
+    if token_type == REFRESH_TOKEN_TYPE:
+        configured = getattr(settings, "JWT_REFRESH_TOKEN_EXPIRES", None)
+        if isinstance(configured, datetime.timedelta):
+            return configured
+        return datetime.timedelta(seconds=getattr(settings, "REFRESH_TOKEN_EXPIRATION_DELTA", 64800))
+    if token_type == TEMP_2FA_TOKEN_TYPE:
+        return datetime.timedelta(minutes=5)
+    configured = getattr(settings, "JWT_ACCESS_TOKEN_EXPIRES", None)
+    if isinstance(configured, datetime.timedelta):
+        return configured
+    return datetime.timedelta(seconds=getattr(settings, "JWT_EXPIRATION_DELTA", 7200))
+
+
 def create_access_token(
-    user_id: int,
+    user_id,
     lifetime: Optional[datetime.timedelta] = None,
+    token_type: str = ACCESS_TOKEN_TYPE,
 ) -> str:
     """
-    生成 JWT 访问令牌
+    生成 JWT。
+
+    Args:
+        user_id: 用户 ID（写入 sub）
+        lifetime: 自定义有效期，为空时按 token_type 取配置
+        token_type: access / refresh / 2fa_temp，写入 type claim
+
+    Notes:
+        jti 是令牌唯一标识，登出与刷新轮换依赖它做黑名单撤销；
+        type 用于区分访问凭证与刷新/临时凭证，避免越权使用。
     """
     if lifetime is None:
-        lifetime = datetime.timedelta(minutes=getattr(settings, "JWT_EXPIRATION_MINUTES", 60))
+        lifetime = _default_lifetime(token_type)
 
+    now = datetime.datetime.now(datetime.timezone.utc)
     payload = {
         "sub": str(user_id),
-        "iat": datetime.datetime.now(datetime.timezone.utc),
-        "exp": datetime.datetime.now(datetime.timezone.utc) + lifetime,
+        "iat": now,
+        "exp": now + lifetime,
+        "jti": uuid.uuid4().hex,
+        "type": token_type,
     }
     return jwt.encode(
         payload,
@@ -80,7 +117,7 @@ def verify_token(token: str) -> dict:
     jti = payload.get("jti")
     if jti:
         _tb = _get_token_blacklist()
-        if _tb.is_available and _tb.is_blacklisted(jti):
+        if _tb.is_blacklisted(jti):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token has been revoked",
@@ -156,11 +193,23 @@ async def _authenticate_user(
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user ID")
         return None
 
-    # 黑名单检查（惰性导入 token_blacklist，首次使用时才触发 Redis 连接）
+    # 只有 access 类型（以及历史无 type 字段的 token）才能作为访问凭证，
+    # 防止 refresh / 2fa_temp 被直接当作登录态使用。
+    token_type = payload.get("type")
+    if token_type not in _ACCESS_TOKEN_TYPES:
+        if required:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token type not allowed for authentication",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return None
+
+    # 黑名单检查（Redis 命中直接拒绝；Redis 不可用时回退到 ORM 持久化层）
     jti = payload.get("jti")
     if jti:
         _tb = _get_token_blacklist()
-        if _tb.is_available and _tb.is_blacklisted(jti):
+        if await _tb.is_blacklisted_async(jti):
             if required:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

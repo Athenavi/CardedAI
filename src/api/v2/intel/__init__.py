@@ -616,7 +616,7 @@ async def trigger_analysis(source_id: int, current_user=Depends(jwt_required)):
 
 
 @router.post("/analyze-pending", summary="分析所有待处理条目", response_model=ApiResponse)
-async def analyze_all_pending():
+async def analyze_all_pending(current_user=Depends(jwt_required)):
     """分析所有已清洗但未分析的采集条目"""
     from shared.services.intel.analysis_engine import analysis_engine
 
@@ -631,7 +631,7 @@ async def analyze_all_pending():
 # ==================== 统计概览 ====================
 
 @router.get("/stats", summary="情报引擎统计概览", response_model=ApiResponse)
-async def get_intel_stats():
+async def get_intel_stats(current_user=Depends(jwt_required)):
     """获取情报引擎的统计数据（用于仪表盘集成）"""
     from sqlalchemy import select, func
     from src.extensions import get_async_session_context

@@ -26,6 +26,28 @@ from src.utils.image.video_processor import video_processor
 
 from src.unified_logger import default_logger as logger
 
+# 后台任务引用集合，防止 asyncio.create_task 的返回值被垃圾回收
+_background_tasks = set()
+
+# 是否允许在 libmagic 不可用时回退到“按扩展名猜测”。
+# 默认关闭：扩展名由客户端控制，回退会让类型校验形同虚设。
+# 仅供缺少 libmagic 的本地开发环境显式开启，生产环境禁止。
+_ALLOW_EXTENSION_FALLBACK = os.environ.get(
+    'UPLOAD_ALLOW_EXTENSION_FALLBACK', ''
+).strip().lower() in ('1', 'true', 'yes', 'on')
+
+
+def _write_bytes(path: str, data: bytes) -> None:
+    """同步写文件（供 asyncio.to_thread 调用）"""
+    with open(path, 'wb') as handle:
+        handle.write(data)
+
+
+def _read_bytes(path: str) -> bytes:
+    """同步读文件（供 asyncio.to_thread 调用）"""
+    with open(path, 'rb') as handle:
+        return handle.read()
+
 
 class FileProcessor:
     """文件处理器，统一处理文件上传逻辑"""
@@ -65,30 +87,42 @@ class FileProcessor:
         return True, {"mime_type": mime_type, "file_size": file_size}
 
     def _get_mime_type(self, file_data: bytes, filename: str) -> str:
-        """获取文件的MIME类型"""
+        """获取文件的MIME类型
+
+        安全策略：以文件内容嗅探（libmagic）为准。libmagic 不可用或嗅探失败时
+        默认拒绝（返回空串，不会命中任何白名单），除非显式开启
+        UPLOAD_ALLOW_EXTENSION_FALLBACK —— 因为扩展名由客户端控制，
+        按扩展名放行等同于取消类型校验。
+        """
         try:
             if HAS_MAGIC and magic:
                 mime_type = magic.from_buffer(file_data, mime=True)
                 logger.debug(f"[DEBUG] Magic 检测到 MIME 类型: {mime_type} (文件: {filename})")
-                return mime_type
-            else:
-                logger.warning("[WARN] Magic 库不可用，使用扩展名推断")
-                raise Exception("Magic library not available")
+                return mime_type or ''
+
+            logger.error("[ERROR] Magic 库不可用，无法通过内容嗅探校验文件类型")
+            if not _ALLOW_EXTENSION_FALLBACK:
+                return ''
+            logger.warning("[WARN] 已开启扩展名回退（不安全的开发模式），使用扩展名推断")
         except Exception as e:
-            logger.warning(f"[WARN] Magic 库失败，使用扩展名推断: {e}")
-            # 如果magic库失败，使用扩展名推断
-            import mimetypes
-            _, ext = os.path.splitext(filename)
-            mime_type, _ = mimetypes.guess_type(f"dummy{ext}")
+            logger.error(f"[ERROR] Magic 库失败，无法校验文件类型: {e}")
+            if not _ALLOW_EXTENSION_FALLBACK:
+                return ''
+            logger.warning("[WARN] 已开启扩展名回退（不安全的开发模式），使用扩展名推断")
 
-            # 常见类型映射
-            if mime_type is None:
-                mime_type = self._guess_mime_from_extension(filename)
-                logger.debug(f"[DEBUG] 根据扩展名猜测 MIME 类型: {mime_type} (文件: {filename})")
+        # 仅在显式开启 UPLOAD_ALLOW_EXTENSION_FALLBACK 时才会走到这里
+        import mimetypes
+        _, ext = os.path.splitext(filename)
+        mime_type, _ = mimetypes.guess_type(f"dummy{ext}")
 
-            result = mime_type or 'application/octet-stream'
-            logger.info(f"[OK] 最终 MIME 类型: {result} (文件: {filename})")
-            return result
+        # 常见类型映射
+        if mime_type is None:
+            mime_type = self._guess_mime_from_extension(filename)
+            logger.debug(f"[DEBUG] 根据扩展名猜测 MIME 类型: {mime_type} (文件: {filename})")
+
+        result = mime_type or 'application/octet-stream'
+        logger.info(f"[OK] 最终 MIME 类型: {result} (文件: {filename})")
+        return result
 
     @staticmethod
     def _guess_mime_from_extension(filename: str) -> str:
@@ -261,9 +295,13 @@ class FileProcessor:
 
         # 如果是视频文件，异步处理视频（转码、生成缩略图等）
         if file_type == 'video':
-            asyncio.create_task(
+            # 必须持有任务引用：create_task 返回的对象若无人引用会被 GC 回收，
+            # 表现为视频缩略图偶发不生成。
+            task = asyncio.create_task(
                 self._process_video_after_upload(new_media, file_hash_record)
             )
+            _background_tasks.add(task)
+            task.add_done_callback(_background_tasks.discard)
 
         return new_media
 
@@ -287,19 +325,22 @@ class FileProcessor:
             # 创建临时目录用于处理
             with tempfile.TemporaryDirectory() as temp_dir:
                 # 下载文件到临时目录
+                # 视频可达数百 MB，读存储 + 落盘 + 调用 ffmpeg 都是阻塞操作，
+                # 必须移出事件循环，否则单次上传会让整个服务卡住数十秒。
                 local_video_path = os.path.join(temp_dir, media.filename)
-                file_data = s3_storage.read_file(file_path)
+                file_data = await asyncio.to_thread(s3_storage.read_file, file_path)
 
                 if not file_data:
                     logger.error(f"无法读取视频文件: {file_path}")
                     return
 
                 # 保存到本地临时文件
-                with open(local_video_path, 'wb') as f:
-                    f.write(file_data)
+                await asyncio.to_thread(_write_bytes, local_video_path, file_data)
 
                 # 1. 获取视频信息
-                video_info = video_processor.get_video_info(local_video_path)
+                video_info = await asyncio.to_thread(
+                    video_processor.get_video_info, local_video_path
+                )
                 if video_info:
                     logger.info(f"视频信息: {video_info}")
 
@@ -323,7 +364,8 @@ class FileProcessor:
                 thumbnail_filename = f"{Path(media.filename).stem}_thumb.jpg"
                 thumbnail_local_path = os.path.join(temp_dir, thumbnail_filename)
 
-                thumbnail_success = video_processor.create_thumbnail(
+                thumbnail_success = await asyncio.to_thread(
+                    video_processor.create_thumbnail,
                     video_path=local_video_path,
                     thumbnail_path=thumbnail_local_path,
                     time=1.0,  # 从第1秒提取
@@ -333,11 +375,11 @@ class FileProcessor:
 
                 if thumbnail_success and os.path.exists(thumbnail_local_path):
                     # 上传缩略图到存储
-                    with open(thumbnail_local_path, 'rb') as f:
-                        thumbnail_data = f.read()
+                    thumbnail_data = await asyncio.to_thread(_read_bytes, thumbnail_local_path)
 
                     thumbnail_hash = hashlib.sha256(thumbnail_data).hexdigest()
-                    thumbnail_storage_path = s3_storage.save_file(
+                    thumbnail_storage_path = await asyncio.to_thread(
+                        s3_storage.save_file,
                         thumbnail_hash,
                         thumbnail_data,
                         thumbnail_filename
